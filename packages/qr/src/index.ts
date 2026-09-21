@@ -28,8 +28,13 @@ export * from "./secrets/secret-policy";
 // 4. Domain Errors
 export * from "./errors/qr-errors";
 
-// 5. Resolver Projection
+// 5. Resolver Projection & Public Resolver Subsystem
 export * from "./resolver/projection";
+export * from "./resolver/types";
+export * from "./resolver/states";
+export * from "./resolver/resolve-public-qr";
+export * from "./resolver/telemetry";
+export * from "./resolver/validate-payload";
 
 // 6. Centralized Service Entitlements & Hard Gates
 export * from "./entitlement/service-entitlement";

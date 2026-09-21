@@ -39,3 +39,15 @@ export interface PublicResolverMeta {
     url?: string;
   };
 }
+
+import type { PublicEmergencyProfile } from "./projection";
+
+export interface PublicQrResolution {
+  publicId: string;
+  visibleCode?: string;
+  state: QrPublicResolverState;
+  replacedByPublicId?: string;
+  profile?: PublicEmergencyProfile;
+  meta: PublicResolverMeta;
+  error?: string;
+}

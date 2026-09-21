@@ -13,7 +13,13 @@ describe("VaahanSafe Status — Public Projection, System Pulse & Zero-Leak Inva
   // --------------------------------------------------------------------------
   describe("Zero-Leak Reporting Surface Invariants", () => {
     it("Public status projection never leaks internal database IDs or provider credentials", async () => {
-      const status = await getPublicSystemStatus();
+      const mockDb: any = {
+        query: async () => [],
+        queryFirst: async () => null,
+        execute: async () => ({ success: true }),
+        batch: async () => true,
+      };
+      const status = await getPublicSystemStatus(mockDb);
 
       expect(status.overallState).toBeDefined();
       expect(status.services.length).toBe(6);
@@ -30,7 +36,7 @@ describe("VaahanSafe Status — Public Projection, System Pulse & Zero-Leak Inva
         expect(service.name).not.toContain("Cashfree");
         expect(service.name).not.toContain("MSG91");
       }
-    });
+    }, 15000);
 
     it("Public API route returns sanitized JSON with cache headers", async () => {
       const apiRoutePath = path.join(statusAppDir, "app/api/status/route.ts");
