@@ -12,6 +12,13 @@ const candidateDirs = [
   path.join(__dirname, "out"),
   path.join(__dirname, "apps/web/out"),
   path.join(__dirname, "public"),
+  path.join(__dirname, "../../public_html"),
+  path.join(__dirname, "../../out"),
+  path.join(__dirname, "../../apps/web/out"),
+  path.join(__dirname, "../../public"),
+  path.join(__dirname, "../public_html"),
+  path.join(__dirname, "../out"),
+  path.join(__dirname, "../public"),
 ];
 
 let staticDir = candidateDirs.find((d) => fs.existsSync(path.join(d, "index.html"))) || candidateDirs[0];
