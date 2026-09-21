@@ -85,7 +85,18 @@ export function CameraViewfinder({
 
         {/* Subtle Scanning Beam (Disabled on prefers-reduced-motion) */}
         {isScanning && (
-          <div className="absolute inset-x-3 top-2 h-0.5 bg-gradient-to-r from-transparent via-[#CC785C] to-transparent shadow-[0_0_8px_#CC785C] animate-[scan_2.4s_ease-in-out_infinite] motion-reduce:hidden" />
+          <>
+            <style>{`
+              @keyframes vsBeamScan {
+                0%, 100% { transform: translateY(0); opacity: 0.3; }
+                50% { transform: translateY(220px); opacity: 0.95; }
+              }
+            `}</style>
+            <div
+              className="absolute inset-x-3 top-2 h-0.5 bg-gradient-to-r from-transparent via-[#CC785C] to-transparent shadow-[0_0_8px_#CC785C] motion-reduce:hidden"
+              style={{ animation: "vsBeamScan 2.4s ease-in-out infinite" }}
+            />
+          </>
         )}
 
         {/* Center Target Indicator (Subtle watermarked QR hint) */}

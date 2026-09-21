@@ -22,6 +22,16 @@ export function useCameraScanner({ onSuccess, active }: UseCameraScannerOptions)
   const animationFrameId = useRef<number | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const isLocked = useRef(false);
+  const isMountedRef = useRef(true);
+  const isStartingRef = useRef(false);
+  const lastDecodeTimeRef = useRef(0);
+  const isDecodingRef = useRef(false);
+
+  // Keep latest onSuccess callback in a ref to avoid recreating decode loop and restarting camera
+  const onSuccessRef = useRef(onSuccess);
+  useEffect(() => {
+    onSuccessRef.current = onSuccess;
+  }, [onSuccess]);
 
   // Stop every active media track cleanly
   const stopTracks = useCallback(() => {
@@ -42,6 +52,8 @@ export function useCameraScanner({ onSuccess, active }: UseCameraScannerOptions)
     if (videoRef.current) {
       videoRef.current.srcObject = null;
     }
+    isStartingRef.current = false;
+    isDecodingRef.current = false;
     setIsTorchOn(false);
     setIsTorchAvailable(false);
   }, []);
@@ -58,18 +70,20 @@ export function useCameraScanner({ onSuccess, active }: UseCameraScannerOptions)
         isLocked.current = true;
         setState("RESOLVING");
         stopTracks();
-        onSuccess(result.publicId);
+        if (onSuccessRef.current) {
+          onSuccessRef.current(result.publicId);
+        }
       } else {
         setState("INVALID_QR");
         // Resume scanning automatically after 2.2 seconds if camera is still live
         setTimeout(() => {
-          if (!isLocked.current && streamRef.current) {
+          if (!isLocked.current && streamRef.current && isMountedRef.current) {
             setState("SCANNING");
           }
         }, 2200);
       }
     },
-    [onSuccess, stopTracks]
+    [stopTracks]
   );
 
   // Frame processing loop using BarcodeDetector or in-memory canvas jsqr
@@ -96,12 +110,13 @@ export function useCameraScanner({ onSuccess, active }: UseCameraScannerOptions)
 
     if (!nativeDetector) {
       try {
-        // Dynamically load jsqr fallback on-demand
         const jsqrPkg = await import("jsqr");
         jsQRModule = jsqrPkg.default;
-      } catch (err) {
-        setErrorMessage("Failed to initialize QR decoder module.");
-        setState("ERROR");
+      } catch {
+        if (isMountedRef.current) {
+          setErrorMessage("Failed to initialize QR decoder module.");
+          setState("ERROR");
+        }
         return;
       }
     }
@@ -111,29 +126,36 @@ export function useCameraScanner({ onSuccess, active }: UseCameraScannerOptions)
     }
 
     const processFrame = async () => {
-      if (isLocked.current || !video || video.readyState < video.HAVE_CURRENT_DATA) {
-        if (!isLocked.current) {
-          animationFrameId.current = requestAnimationFrame(processFrame);
-        }
-        return;
-      }
+      if (isLocked.current || !video || !isMountedRef.current) return;
 
-      try {
-        if (nativeDetector) {
-          const barcodes = await nativeDetector.detect(video);
-          if (barcodes && barcodes.length > 0) {
-            const rawValue = barcodes[0].rawValue;
-            if (rawValue) {
-              handleDecodedString(rawValue);
-              return;
+      const now = performance.now();
+      // Throttle decode checks to ~10-12 per second (every 85ms) to guarantee silky 60fps video and eliminate frame drops
+      const shouldCheck =
+        !isDecodingRef.current &&
+        now - lastDecodeTimeRef.current >= 85 &&
+        video.readyState >= video.HAVE_CURRENT_DATA &&
+        video.videoWidth > 0 &&
+        video.videoHeight > 0;
+
+      if (shouldCheck) {
+        isDecodingRef.current = true;
+        lastDecodeTimeRef.current = now;
+
+        try {
+          if (nativeDetector) {
+            const barcodes = await nativeDetector.detect(video);
+            if (barcodes && barcodes.length > 0) {
+              const rawValue = barcodes[0].rawValue;
+              if (rawValue) {
+                handleDecodedString(rawValue);
+                return;
+              }
             }
-          }
-        } else if (jsQRModule && canvasRef.current) {
-          const canvas = canvasRef.current;
-          const width = video.videoWidth;
-          const height = video.videoHeight;
+          } else if (jsQRModule && canvasRef.current) {
+            const canvas = canvasRef.current;
+            const width = video.videoWidth;
+            const height = video.videoHeight;
 
-          if (width > 0 && height > 0) {
             canvas.width = width;
             canvas.height = height;
             const ctx = canvas.getContext("2d", { willReadFrequently: true });
@@ -149,12 +171,14 @@ export function useCameraScanner({ onSuccess, active }: UseCameraScannerOptions)
               }
             }
           }
+        } catch {
+          // Drop bad frame and continue
+        } finally {
+          isDecodingRef.current = false;
         }
-      } catch {
-        // Drop bad frame and continue
       }
 
-      if (!isLocked.current) {
+      if (!isLocked.current && isMountedRef.current) {
         animationFrameId.current = requestAnimationFrame(processFrame);
       }
     };
@@ -162,8 +186,10 @@ export function useCameraScanner({ onSuccess, active }: UseCameraScannerOptions)
     animationFrameId.current = requestAnimationFrame(processFrame);
   }, [handleDecodedString]);
 
-  // Start Camera Stream
+  // Start Camera Stream with cancellation guard
   const startScanner = useCallback(async () => {
+    if (isStartingRef.current) return;
+    isStartingRef.current = true;
     isLocked.current = false;
     setErrorMessage(null);
     stopTracks();
@@ -175,6 +201,7 @@ export function useCameraScanner({ onSuccess, active }: UseCameraScannerOptions)
     ) {
       setState("UNSUPPORTED");
       setErrorMessage("Camera access is not supported by this browser.");
+      isStartingRef.current = false;
       return;
     }
 
@@ -185,7 +212,9 @@ export function useCameraScanner({ onSuccess, active }: UseCameraScannerOptions)
       try {
         const devices = await navigator.mediaDevices.enumerateDevices();
         const videoInputs = devices.filter((d) => d.kind === "videoinput");
-        setHasMultipleCameras(videoInputs.length > 1);
+        if (isMountedRef.current) {
+          setHasMultipleCameras(videoInputs.length > 1);
+        }
       } catch {
         // Enumeration error ignored
       }
@@ -200,6 +229,14 @@ export function useCameraScanner({ onSuccess, active }: UseCameraScannerOptions)
       };
 
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
+
+      // Guard: if aborted or unmounted while permission dialog was active
+      if (!isMountedRef.current || !active) {
+        stream.getTracks().forEach((t) => t.stop());
+        isStartingRef.current = false;
+        return;
+      }
+
       streamRef.current = stream;
 
       // Inspect torch capability
@@ -209,19 +246,32 @@ export function useCameraScanner({ onSuccess, active }: UseCameraScannerOptions)
           typeof videoTrack.getCapabilities === "function"
             ? videoTrack.getCapabilities()
             : null;
-        if (capabilities && "torch" in capabilities) {
+        if (capabilities && "torch" in capabilities && isMountedRef.current) {
           setIsTorchAvailable(true);
         }
       }
 
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play();
-        setState("SCANNING");
-        startDecodeLoop();
+      const video = videoRef.current;
+      if (video) {
+        video.srcObject = stream;
+        video.setAttribute("playsinline", "true");
+        video.setAttribute("muted", "true");
+        video.muted = true;
+        try {
+          await video.play();
+        } catch (err: any) {
+          if (err.name !== "AbortError") {
+            console.warn("[CameraScanner] Video play error:", err);
+          }
+        }
+        if (isMountedRef.current) {
+          setState("SCANNING");
+          startDecodeLoop();
+        }
       }
     } catch (err: any) {
       stopTracks();
+      if (!isMountedRef.current) return;
       const name = err?.name || "";
       if (name === "NotAllowedError" || name === "PermissionDeniedError") {
         setState("PERMISSION_DENIED");
@@ -233,8 +283,10 @@ export function useCameraScanner({ onSuccess, active }: UseCameraScannerOptions)
           err?.message || "Could not start camera stream. Please try again."
         );
       }
+    } finally {
+      isStartingRef.current = false;
     }
-  }, [facingMode, startDecodeLoop, stopTracks]);
+  }, [active, facingMode, startDecodeLoop, stopTracks]);
 
   // Toggle Torch (Flashlight)
   const toggleTorch = useCallback(async () => {
@@ -324,8 +376,10 @@ export function useCameraScanner({ onSuccess, active }: UseCameraScannerOptions)
     [handleDecodedString]
   );
 
-  // Lifecycle control based on active prop
+  // Lifecycle control: strictly depends ONLY on active status and facingMode
   useEffect(() => {
+    isMountedRef.current = true;
+
     if (active) {
       startScanner();
     } else {
@@ -335,12 +389,13 @@ export function useCameraScanner({ onSuccess, active }: UseCameraScannerOptions)
     }
 
     return () => {
+      isMountedRef.current = false;
       stopTracks();
       isLocked.current = false;
     };
-  }, [active, facingMode, startScanner, stopTracks]);
+  }, [active, facingMode]); // Deliberately omit unstable function references
 
-  // Visibility change listener: Stop tracks when tab is hidden
+  // Visibility change listener: Stop tracks when tab is hidden, resume when visible
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === "hidden") {
@@ -350,11 +405,19 @@ export function useCameraScanner({ onSuccess, active }: UseCameraScannerOptions)
       }
     };
 
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
+    if (typeof document !== "undefined") {
+      document.addEventListener("visibilitychange", handleVisibilityChange);
+      return () => {
+        document.removeEventListener("visibilitychange", handleVisibilityChange);
+      };
+    }
   }, [active, startScanner, stopTracks]);
+
+  // Retry scanner manually
+  const retryScan = useCallback(() => {
+    isLocked.current = false;
+    startScanner();
+  }, [startScanner]);
 
   return {
     state,
@@ -366,12 +429,7 @@ export function useCameraScanner({ onSuccess, active }: UseCameraScannerOptions)
     hasMultipleCameras,
     toggleTorch,
     switchCamera,
-    startScanner,
-    stopScanner: stopTracks,
     scanFile,
-    retryScan: () => {
-      isLocked.current = false;
-      setState("SCANNING");
-    },
+    retryScan,
   };
 }

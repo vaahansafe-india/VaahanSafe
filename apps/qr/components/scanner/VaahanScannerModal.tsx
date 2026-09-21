@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { VaahanIcon } from "@vaahansafe/icons";
-import { VaahanSafeMark } from "@vaahansafe/ui/brand";
+import { VaahanSafeLogo } from "@vaahansafe/ui/brand";
 import { useCameraScanner } from "./useCameraScanner";
 import { CameraViewfinder } from "./CameraViewfinder";
 import { ScannerStateOverlay } from "./ScannerStateOverlay";
@@ -19,6 +19,14 @@ export function VaahanScannerModal({ isOpen, onClose }: VaahanScannerModalProps)
   const [showManualEntry, setShowManualEntry] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
+  const handleSuccess = useCallback(
+    (publicId: string) => {
+      onClose();
+      router.push(`/${publicId}`);
+    },
+    [onClose, router]
+  );
+
   const {
     state,
     errorMessage,
@@ -33,10 +41,7 @@ export function VaahanScannerModal({ isOpen, onClose }: VaahanScannerModalProps)
     retryScan,
   } = useCameraScanner({
     active: isOpen && !showManualEntry,
-    onSuccess: (publicId) => {
-      onClose();
-      router.push(`/${publicId}`);
-    },
+    onSuccess: handleSuccess,
   });
 
   if (!isOpen) return null;
@@ -64,15 +69,7 @@ export function VaahanScannerModal({ isOpen, onClose }: VaahanScannerModalProps)
         {/* 1. Scanner Top Navigation Bar */}
         <header className="relative z-30 flex items-center justify-between px-4 py-3 bg-[#181715]/80 backdrop-blur-md border-b border-white/10 text-white select-none">
           <div className="flex items-center gap-2">
-            <VaahanSafeMark size={22} variant="brand" />
-            <div className="flex items-baseline gap-1.5">
-              <span className="font-serif text-sm font-semibold tracking-tight text-white">
-                VAAHANSAFE
-              </span>
-              <span className="font-mono text-[10px] text-white/60 uppercase tracking-widest">
-                / SCAN
-              </span>
-            </div>
+            <VaahanSafeLogo size="sm" variant="brand" theme="dark" showTagline={false} />
           </div>
 
           <div className="flex items-center gap-2">
