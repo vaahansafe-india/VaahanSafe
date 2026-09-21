@@ -110,7 +110,7 @@ export function BuyQrExperience({ data }: BuyQrExperienceProps) {
               </div>
             ) : (
               <p className="mt-2 text-xs text-muted-foreground">
-                You haven't registered any vehicles yet. You can order the kit now and link it to your vehicle when it arrives.
+                You haven&apos;t registered any vehicles yet. You can order the kit now and link it to your vehicle when it arrives.
               </p>
             )}
           </div>

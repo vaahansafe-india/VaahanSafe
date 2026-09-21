@@ -35,7 +35,7 @@ export function NotificationUnreadEmpty({ onViewInbox }: { onViewInbox: () => vo
       </h3>
 
       <p className="mt-1 max-w-sm text-xs text-muted-foreground">
-        You've caught up with all active alerts and updates.
+        You&apos;ve caught up with all active alerts and updates.
       </p>
 
       <button

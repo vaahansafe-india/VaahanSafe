@@ -27,7 +27,7 @@ export function CurrentQrIdentity({
           No QR Sticker Linked Yet
         </h3>
         <p className="mt-1 max-w-md mx-auto text-xs text-muted-foreground">
-          Link a physical VaahanSafe safety sticker or activate a retail pack to anchor your vehicle's identity.
+          Link a physical VaahanSafe safety sticker or activate a retail pack to anchor your vehicle&apos;s identity.
         </p>
         <div className="mt-5 flex justify-center gap-3">
           <Link

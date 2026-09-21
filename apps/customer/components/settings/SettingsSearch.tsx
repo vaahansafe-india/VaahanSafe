@@ -188,7 +188,7 @@ export function SettingsSearch({ onSelectCategory, className = "" }: SettingsSea
             </div>
           ) : (
             <div className="py-4 text-center text-xs text-muted-foreground">
-              No matching settings found for "{query}".
+              No matching settings found for &quot;{query}&quot;.
             </div>
           )}
         </div>

@@ -22,7 +22,7 @@
     "build": "npx turbo run build --filter=@vaahansafe/web && node tooling/scripts/prepare-hostinger.mjs",
     "build:all": "npx turbo run build",
     "build:web": "npx turbo run build --filter=@vaahansafe/web && node tooling/scripts/prepare-hostinger.mjs",
-    "build:app": "npx turbo run build --filter=@vaahansafe/customer",
+    "build:app": "npx turbo run build --filter=@vaahansafe/customer && node tooling/scripts/prepare-customer.mjs",
     "build:activate": "npx turbo run build --filter=@vaahansafe/activate",
     "build:qr": "npx turbo run build --filter=@vaahansafe/qr",
     "build:admin": "npx turbo run build --filter=@vaahansafe/admin",

@@ -212,7 +212,7 @@ export function ChangeMobileDialog({
             </div>
 
             <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span>Didn't receive code?</span>
+              <span>Didn&apos;t receive code?</span>
               <button
                 type="button"
                 onClick={() => setStep("ENTER_PHONE")}

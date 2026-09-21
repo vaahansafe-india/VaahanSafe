@@ -80,7 +80,7 @@ export function SafetyPrivacySettings({ data }: SafetyPrivacySettingsProps) {
               </span>
             </div>
             <p className="text-[11px] text-muted-foreground leading-relaxed max-w-xl">
-              By default, your private home address and email are never exposed. You explicitly choose which safety details appear on your vehicle's public QR page.
+              By default, your private home address and email are never exposed. You explicitly choose which safety details appear on your vehicle&apos;s public QR page.
             </p>
           </div>
 
@@ -111,7 +111,7 @@ export function SafetyPrivacySettings({ data }: SafetyPrivacySettingsProps) {
                 </span>
               ) : (
                 <span className="text-muted-foreground">
-                  PRIVATE &bull; Masked as "Verified Owner" to protect identity
+                  PRIVATE &bull; Masked as &quot;Verified Owner&quot; to protect identity
                 </span>
               )
             }
