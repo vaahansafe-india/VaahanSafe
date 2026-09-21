@@ -19,7 +19,9 @@ let target = targetArg || process.env.APP_NAME;
 if (!target) {
   if (cwd.includes("app.vaahansafe.com") || __dirname.includes("app.vaahansafe.com")) {
     target = "customer";
-  } else if (cwd.includes("vaahansafe.com") && !cwd.includes("app.vaahansafe.com")) {
+  } else if (cwd.includes("qr.vaahansafe.com") || __dirname.includes("qr.vaahansafe.com")) {
+    target = "qr";
+  } else if (cwd.includes("vaahansafe.com") && !cwd.includes("app.vaahansafe.com") && !cwd.includes("qr.vaahansafe.com")) {
     target = "web";
   } else {
     target = "all";
@@ -42,6 +44,9 @@ try {
     console.log("[build-hostinger] Building Web Static Portal (@vaahansafe/web)...");
     run("npx turbo run build --filter=@vaahansafe/web");
     run("node tooling/scripts/prepare-hostinger.mjs");
+  } else if (target === "qr") {
+    console.log("[build-hostinger] Building QR Resolver Runtime (@vaahansafe/qr)...");
+    run("npx turbo run build --filter=@vaahansafe/qr");
   } else {
     console.log("[build-hostinger] Building both @vaahansafe/web and @vaahansafe/customer sequentially...");
     run("npx turbo run build --filter=@vaahansafe/web");
