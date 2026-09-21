@@ -1,7 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: "standalone",
-  distDir: process.env.VAAHANSAFE_NEXT_DIST_DIR || "../../.next",
+  output: "export",
+  images: {
+    unoptimized: true,
+  },
   transpilePackages: [
     "@vaahansafe/ui",
     "@vaahansafe/icons",

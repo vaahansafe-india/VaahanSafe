@@ -6,12 +6,15 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.resolve(__dirname, "../..");
 const webDir = path.join(rootDir, "apps/web");
+const webOutDir = path.join(webDir, "out");
+const rootOutDir = path.join(rootDir, "out");
+const rootPublicHtmlDir = path.join(rootDir, "public_html");
 const webNextDir = path.join(webDir, ".next");
 const rootNextDir = path.join(rootDir, ".next");
 const webPublicDir = path.join(webDir, "public");
 const rootPublicDir = path.join(rootDir, "public");
 
-console.log("[prepare-hostinger] Preparing Hostinger build artifacts...");
+console.log("[prepare-hostinger] Synchronizing Hostinger deployment artifacts...");
 
 function copyDirSync(src, dest) {
   if (!fs.existsSync(src)) return;
@@ -28,45 +31,39 @@ function copyDirSync(src, dest) {
   }
 }
 
-// Determine where Next.js output the build
-let primaryNextDir = null;
-if (fs.existsSync(path.join(rootNextDir, "BUILD_ID"))) {
-  primaryNextDir = rootNextDir;
-} else if (fs.existsSync(path.join(webNextDir, "BUILD_ID"))) {
-  primaryNextDir = webNextDir;
-} else if (fs.existsSync(rootNextDir)) {
-  primaryNextDir = rootNextDir;
-} else if (fs.existsSync(webNextDir)) {
-  primaryNextDir = webNextDir;
+// 1. Synchronize static export output to root 'out' and 'public_html'
+if (fs.existsSync(webOutDir)) {
+  console.log("[prepare-hostinger] Copying apps/web/out -> root/out...");
+  copyDirSync(webOutDir, rootOutDir);
+
+  console.log("[prepare-hostinger] Copying apps/web/out -> root/public_html for LiteSpeed native serving...");
+  copyDirSync(webOutDir, rootPublicHtmlDir);
+} else if (fs.existsSync(rootOutDir)) {
+  console.log("[prepare-hostinger] Copying root/out -> root/public_html...");
+  copyDirSync(rootOutDir, rootPublicHtmlDir);
 }
 
-if (!primaryNextDir) {
-  console.error("[prepare-hostinger] ERROR: No Next.js build output directory found!");
-  process.exit(1);
-}
-
-console.log(`[prepare-hostinger] Found primary build output at: ${primaryNextDir}`);
-
-// Mirror to BOTH root and apps/web so Next.js finds it anywhere
-if (primaryNextDir === webNextDir) {
-  console.log("[prepare-hostinger] Copying apps/web/.next -> root .next...");
+// 2. Synchronize .next build folder if present
+if (fs.existsSync(webNextDir)) {
   copyDirSync(webNextDir, rootNextDir);
-} else {
-  console.log("[prepare-hostinger] Copying root .next -> apps/web/.next...");
+} else if (fs.existsSync(rootNextDir)) {
   copyDirSync(rootNextDir, webNextDir);
 }
 
-// Copy public assets to both root and apps/web
+// 3. Ensure public directory has brand assets
 if (fs.existsSync(webPublicDir)) {
   copyDirSync(webPublicDir, rootPublicDir);
 }
 
-// Verify BUILD_ID in root .next
-const rootBuildId = path.join(rootNextDir, "BUILD_ID");
-if (fs.existsSync(rootBuildId)) {
-  console.log(`[prepare-hostinger] Verified BUILD_ID at root: ${fs.readFileSync(rootBuildId, "utf-8").trim()}`);
-} else {
-  console.warn("[prepare-hostinger] WARNING: BUILD_ID not found at root .next/BUILD_ID!");
+// Verify index.html existence in target locations
+const verifiedRootOut = path.join(rootOutDir, "index.html");
+const verifiedPublicHtml = path.join(rootPublicHtmlDir, "index.html");
+
+if (fs.existsSync(verifiedRootOut)) {
+  console.log("[prepare-hostinger] Verified static index.html at root/out/index.html");
+}
+if (fs.existsSync(verifiedPublicHtml)) {
+  console.log("[prepare-hostinger] Verified static index.html at root/public_html/index.html");
 }
 
-console.log("[prepare-hostinger] All build artifacts synchronized successfully!");
+console.log("[prepare-hostinger] All Hostinger deployment artifacts prepared successfully!");

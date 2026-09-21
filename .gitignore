@@ -10,6 +10,7 @@ coverage/
 .next/
 .next-brand-qa/
 out/
+public_html/
 
 # Turborepo
 .turbo/
