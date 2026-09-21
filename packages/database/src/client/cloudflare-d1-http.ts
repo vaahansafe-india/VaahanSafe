@@ -69,7 +69,7 @@ export class CloudflareD1HttpClient implements DatabaseClient {
     this.databaseId =
       options.databaseId ||
       process.env.CLOUDFLARE_D1_DATABASE_ID ||
-      "788a90e8-afb6-474f-a8c6-8c638ae0f721";
+      "ed46249f-2967-4cd4-8807-75e1421d1754";
 
     this.token =
       options.token ||
@@ -173,16 +173,40 @@ export class CloudflareD1HttpClient implements DatabaseClient {
         if (res.ok) {
           const data = (await res.json()) as {
             success: boolean;
+            errors?: Array<{ message: string; code: number }>;
             result?: Array<{ results: any[]; meta: any; success: boolean }>;
           };
 
           if (data.success && data.result && data.result.length > 0) {
             return data.result[0]!;
           }
+
+          if (data.errors && data.errors.length > 0) {
+            console.error("[CloudflareD1Http] D1 query errors:", data.errors);
+            if (process.env.VERCEL || process.env.NODE_ENV === "production") {
+              throw new Error(`D1 query error: ${data.errors[0]?.message}`);
+            }
+          }
+        } else {
+          const errText = await res.text();
+          console.error(`[CloudflareD1Http] D1 API HTTP ${res.status}:`, errText);
+          if (process.env.VERCEL || process.env.NODE_ENV === "production") {
+            throw new Error(`D1 API query failed (HTTP ${res.status}): ${errText}`);
+          }
         }
-      } catch {
-        // Fall through to wrangler execution
+      } catch (err: unknown) {
+        if (process.env.VERCEL || process.env.NODE_ENV === "production") {
+          throw normalizeDatabaseError(err);
+        }
+        // Fall through to wrangler execution locally
       }
+    }
+
+    // In serverless / production environments (like Vercel), wrangler CLI is unavailable
+    if (process.env.VERCEL || process.env.NODE_ENV === "production") {
+      throw new Error(
+        "Cloudflare D1 credentials missing in production. Ensure CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, and CLOUDFLARE_D1_DATABASE_ID are set in environment variables."
+      );
     }
 
     // Authoritative execution via Cloudflare Wrangler runner
