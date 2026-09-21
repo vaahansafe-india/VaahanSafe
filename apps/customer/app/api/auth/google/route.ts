@@ -199,16 +199,8 @@ export async function GET(req: Request) {
       });
       const cookieHeader = serializeSessionCookie(rawToken);
 
-      // Forward to phone verification if unverified, otherwise to customer dashboard
-      const isPhoneRequired =
-        googleResult.user.onboardingState === "PHONE_REQUIRED" || !googleResult.user.phone;
-      const targetUrl = new URL(
-        isPhoneRequired ? "/onboarding/phone" : "/dashboard",
-        customerBase
-      );
-      if (isPhoneRequired) {
-        targetUrl.searchParams.set("returnUrl", "/dashboard");
-      }
+      // Forward directly to customer dashboard upon Google sign-in
+      const targetUrl = new URL("/dashboard", customerBase);
 
       const response = NextResponse.redirect(targetUrl);
       response.headers.set("Set-Cookie", cookieHeader);

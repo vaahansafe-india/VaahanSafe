@@ -218,6 +218,17 @@ export function AuthCard({
                   onClearError={() => setErrorMessage(null)}
                   showDivider={mode !== "onboarding"}
                 />
+
+                {mode === "onboarding" && (
+                  <div className="pt-1 text-center">
+                    <a
+                      href={returnUrl && returnUrl !== "/" ? returnUrl : "/dashboard"}
+                      className="inline-flex items-center gap-1.5 font-mono text-[11px] text-muted-foreground underline decoration-dotted underline-offset-4 transition-colors hover:text-foreground"
+                    >
+                      Skip for now and continue to Dashboard →
+                    </a>
+                  </div>
+                )}
               </div>
             ) : (
               <OtpVerificationForm
