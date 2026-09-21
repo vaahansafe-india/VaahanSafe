@@ -8,8 +8,10 @@ const rootDir = path.resolve(__dirname, "../..");
 const webDir = path.join(rootDir, "apps/web");
 const webNextDir = path.join(webDir, ".next");
 const rootNextDir = path.join(rootDir, ".next");
+const webPublicDir = path.join(webDir, "public");
+const rootPublicDir = path.join(rootDir, "public");
 
-console.log("[prepare-hostinger] Preparing Hostinger standalone server layout...");
+console.log("[prepare-hostinger] Preparing Hostinger build artifacts...");
 
 function copyDirSync(src, dest) {
   if (!fs.existsSync(src)) return;
@@ -26,73 +28,45 @@ function copyDirSync(src, dest) {
   }
 }
 
-// 1. Check if apps/web/.next exists
-if (!fs.existsSync(webNextDir)) {
-  console.error("[prepare-hostinger] ERROR: apps/web/.next does not exist!");
+// Determine where Next.js output the build
+let primaryNextDir = null;
+if (fs.existsSync(path.join(rootNextDir, "BUILD_ID"))) {
+  primaryNextDir = rootNextDir;
+} else if (fs.existsSync(path.join(webNextDir, "BUILD_ID"))) {
+  primaryNextDir = webNextDir;
+} else if (fs.existsSync(rootNextDir)) {
+  primaryNextDir = rootNextDir;
+} else if (fs.existsSync(webNextDir)) {
+  primaryNextDir = webNextDir;
+}
+
+if (!primaryNextDir) {
+  console.error("[prepare-hostinger] ERROR: No Next.js build output directory found!");
   process.exit(1);
 }
 
-const webStandaloneDir = path.join(webNextDir, "standalone");
-const nestedServerJs = path.join(webStandaloneDir, "apps/web/server.js");
-const rootStandaloneDir = path.join(rootNextDir, "standalone");
+console.log(`[prepare-hostinger] Found primary build output at: ${primaryNextDir}`);
 
-// 2. Ensure public and static assets are copied to standalone folder
-const webPublicDir = path.join(webDir, "public");
-const webStaticDir = path.join(webNextDir, "static");
-
-// Copy static to apps/web/.next/standalone/apps/web/.next/static
-if (fs.existsSync(webStaticDir)) {
-  copyDirSync(webStaticDir, path.join(webStandaloneDir, "apps/web/.next/static"));
-  copyDirSync(webStaticDir, path.join(webStandaloneDir, ".next/static"));
+// Mirror to BOTH root and apps/web so Next.js finds it anywhere
+if (primaryNextDir === webNextDir) {
+  console.log("[prepare-hostinger] Copying apps/web/.next -> root .next...");
+  copyDirSync(webNextDir, rootNextDir);
+} else {
+  console.log("[prepare-hostinger] Copying root .next -> apps/web/.next...");
+  copyDirSync(rootNextDir, webNextDir);
 }
 
-// Copy public to apps/web/.next/standalone/apps/web/public
+// Copy public assets to both root and apps/web
 if (fs.existsSync(webPublicDir)) {
-  copyDirSync(webPublicDir, path.join(webStandaloneDir, "apps/web/public"));
-  copyDirSync(webPublicDir, path.join(webStandaloneDir, "public"));
+  copyDirSync(webPublicDir, rootPublicDir);
 }
 
-// Ensure server.js exists at webStandaloneDir root
-if (fs.existsSync(nestedServerJs)) {
-  fs.copyFileSync(nestedServerJs, path.join(webStandaloneDir, "server.js"));
+// Verify BUILD_ID in root .next
+const rootBuildId = path.join(rootNextDir, "BUILD_ID");
+if (fs.existsSync(rootBuildId)) {
+  console.log(`[prepare-hostinger] Verified BUILD_ID at root: ${fs.readFileSync(rootBuildId, "utf-8").trim()}`);
+} else {
+  console.warn("[prepare-hostinger] WARNING: BUILD_ID not found at root .next/BUILD_ID!");
 }
 
-// 3. Mirror the entire .next folder to monorepo root .next
-console.log("[prepare-hostinger] Mirroring apps/web/.next to root .next...");
-copyDirSync(webNextDir, rootNextDir);
-
-// Copy public to root public for next start
-if (fs.existsSync(webPublicDir)) {
-  copyDirSync(webPublicDir, path.join(rootDir, "public"));
-}
-
-// Ensure server.js exists at rootNextDir/standalone/server.js
-if (fs.existsSync(nestedServerJs)) {
-  fs.mkdirSync(rootStandaloneDir, { recursive: true });
-  fs.copyFileSync(nestedServerJs, path.join(rootStandaloneDir, "server.js"));
-  
-  // Also create a fallback root server.js entrypoint
-  const rootServerJs = path.join(rootDir, "server.js");
-  const serverProxyCode = `// Hostinger root server runner
-const path = require("path");
-const fs = require("fs");
-
-const candidatePaths = [
-  path.join(__dirname, ".next/standalone/apps/web/server.js"),
-  path.join(__dirname, ".next/standalone/server.js"),
-  path.join(__dirname, "apps/web/.next/standalone/apps/web/server.js"),
-  path.join(__dirname, "apps/web/.next/standalone/server.js"),
-];
-
-for (const target of candidatePaths) {
-  if (fs.existsSync(target)) {
-    process.chdir(path.dirname(target));
-    require(target);
-    break;
-  }
-}
-`;
-  fs.writeFileSync(rootServerJs, serverProxyCode, "utf-8");
-}
-
-console.log("[prepare-hostinger] Standalone server prepared successfully at all target locations!");
+console.log("[prepare-hostinger] All build artifacts synchronized successfully!");

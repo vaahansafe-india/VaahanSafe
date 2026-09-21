@@ -12,9 +12,10 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
+    ".next-brand-qa/types/**/*.ts",
     ".next/types/**/*.ts",
     "next-env.d.ts",
-    ".next-brand-qa/types/**/*.ts"
+    "../../.next/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"
