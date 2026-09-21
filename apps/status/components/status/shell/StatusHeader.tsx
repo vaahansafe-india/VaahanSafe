@@ -14,10 +14,12 @@ interface StatusHeaderProps {
 }
 
 export function StatusHeader({ statusLabel, isDegradedOrOutage }: StatusHeaderProps) {
-  const webUrl =
+  const rawWebUrl =
     typeof getWebUrl === "function"
       ? getWebUrl()
-      : process.env.NEXT_PUBLIC_WEB_URL || "https://vaahansafe.com";
+      : process.env.NEXT_PUBLIC_WEB_URL || "https://www.vaahansafe.com";
+  const webUrl =
+    rawWebUrl === "https://vaahansafe.com" ? "https://www.vaahansafe.com" : rawWebUrl;
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
