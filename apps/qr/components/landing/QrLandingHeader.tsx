@@ -87,12 +87,12 @@ export function QrLandingHeader() {
             </SheetTrigger>
             <SheetContent side="right" className="w-[85vw] max-w-sm p-6 bg-background flex flex-col justify-between">
               <div className="space-y-6">
-                {/* Official Brand Logo inside Mobile Drawer */}
-                <div className="flex items-center justify-between pb-4 border-b border-border/80">
+                {/* Official Brand Logo inside Mobile Drawer - pr-12 reserves clear space for top-right close icon */}
+                <div className="flex items-center pb-4 pr-12 border-b border-border/80 min-h-[44px]">
                   <VaahanSafeLogo size="sm" variant="brand" showTagline={false} />
-                  <ThemeToggle />
                 </div>
 
+                {/* Navigation Links */}
                 <div className="space-y-1">
                   <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground block px-2 pb-1">
                     Navigation
@@ -110,7 +110,22 @@ export function QrLandingHeader() {
                   ))}
                 </div>
 
-                <div className="pt-2">
+                {/* Dedicated Appearance / Theme Switcher Card (eliminates collision with sheet close button) */}
+                <div className="flex items-center justify-between p-3 rounded-xl bg-muted/40 border border-border/60">
+                  <div className="flex items-center gap-2.5">
+                    <div className="size-7 rounded-lg bg-background border border-border/80 flex items-center justify-center text-muted-foreground">
+                      <VaahanIcon name="sun" size={14} />
+                    </div>
+                    <div>
+                      <span className="text-xs font-medium text-foreground block">Appearance</span>
+                      <span className="text-[10px] font-mono text-muted-foreground uppercase">Theme Mode</span>
+                    </div>
+                  </div>
+                  <ThemeToggle />
+                </div>
+
+                {/* CTA Action */}
+                <div className="pt-1">
                   <a
                     href={activateUrl}
                     target="_blank"
@@ -123,6 +138,7 @@ export function QrLandingHeader() {
                 </div>
               </div>
 
+              {/* Drawer Footer */}
               <div className="pt-6 border-t border-border/60 space-y-2 text-xs text-muted-foreground font-mono">
                 <a
                   href={webUrl}
