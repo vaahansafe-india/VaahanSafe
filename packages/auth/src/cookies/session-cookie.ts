@@ -75,9 +75,11 @@ export function serializeAdminSessionCookie(
  */
 export function serializeClearSessionCookie(
   cookieName: string = CUSTOMER_SESSION_COOKIE_NAME,
-  options: { path?: string; domain?: string } = {}
+  options: { path?: string; domain?: string; secure?: boolean } = {}
 ): string {
   const path = options.path || "/";
+  const isProductionHttps = process.env.NODE_ENV !== "development";
+  const secure = options.secure ?? isProductionHttps;
   const parts = [
     `${cookieName}=`,
     `Path=${path}`,
@@ -86,6 +88,10 @@ export function serializeClearSessionCookie(
     "SameSite=Lax",
     "HttpOnly",
   ];
+
+  if (secure) {
+    parts.push("Secure");
+  }
 
   if (options.domain) {
     parts.push(`Domain=${options.domain}`);

@@ -1,31 +1,66 @@
 import { NextResponse } from "next/server";
-import { serializeClearSessionCookie, CUSTOMER_SESSION_COOKIE_NAME } from "@vaahansafe/auth";
+import {
+  serializeClearSessionCookie,
+  CUSTOMER_SESSION_COOKIE_NAME,
+  parseSessionCookie,
+  hashSessionToken,
+} from "@vaahansafe/auth";
+import { getSessionRepository } from "@vaahansafe/database";
 
-export async function POST(req: Request) {
+async function performLogout(req: Request) {
+  // 1. Invalidate session record in Cloudflare D1
+  try {
+    const cookieHeader = req.headers.get("cookie");
+    const rawToken = parseSessionCookie(cookieHeader, CUSTOMER_SESSION_COOKIE_NAME);
+    if (rawToken) {
+      const tokenHash = await hashSessionToken(rawToken);
+      const sessionRepo = getSessionRepository();
+      await sessionRepo.revokeSession(tokenHash, "USER_LOGOUT");
+    }
+  } catch (err) {
+    console.error("[VaahanSafe Logout] Failed to revoke session in D1:", err);
+  }
+
+  // 2. Resolve authoritative base URL behind reverse proxies and Vercel Edge
+  const url = new URL(req.url);
+  const host = req.headers.get("x-forwarded-host") || req.headers.get("host") || url.host;
+  const proto = req.headers.get("x-forwarded-proto") || (host.includes("localhost") ? "http" : "https");
+  const loginUrl = new URL("/login", `${proto}://${host}`);
+
+  // 3. Serialize compliant RFC 6265 expired cookie with Secure attribute
+  const isProduction = process.env.NODE_ENV !== "development";
   const clearCookieHeader = serializeClearSessionCookie(CUSTOMER_SESSION_COOKIE_NAME, {
     path: "/",
+    secure: isProduction,
   });
 
-  return new NextResponse(
-    JSON.stringify({ success: true, message: "Logged out successfully" }),
-    {
-      status: 200,
-      headers: {
-        "Content-Type": "application/json",
-        "Set-Cookie": clearCookieHeader,
-      },
-    }
-  );
+  // 4. Return JSON for programmatic callers, or 303 See Other redirect for browser forms
+  const acceptsJson =
+    req.headers.get("accept")?.includes("application/json") &&
+    !req.headers.get("content-type")?.includes("application/x-www-form-urlencoded");
+
+  const response = acceptsJson
+    ? NextResponse.json({ success: true, redirect: loginUrl.toString() }, { status: 200 })
+    : NextResponse.redirect(loginUrl, { status: 303 });
+
+  // 5. Apply cookie clearing to headers and Next.js response cookies
+  response.headers.set("Set-Cookie", clearCookieHeader);
+  response.cookies.set(CUSTOMER_SESSION_COOKIE_NAME, "", {
+    path: "/",
+    maxAge: 0,
+    expires: new Date(0),
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: "lax",
+  });
+
+  return response;
+}
+
+export async function POST(req: Request) {
+  return performLogout(req);
 }
 
 export async function GET(req: Request) {
-  const clearCookieHeader = serializeClearSessionCookie(CUSTOMER_SESSION_COOKIE_NAME, {
-    path: "/",
-  });
-
-  return NextResponse.redirect(new URL("/login", req.url), {
-    headers: {
-      "Set-Cookie": clearCookieHeader,
-    },
-  });
+  return performLogout(req);
 }

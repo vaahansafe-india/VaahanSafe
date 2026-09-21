@@ -175,11 +175,22 @@ export function NavUser({ user }: NavUserProps) {
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator className="bg-border" />
-            <DropdownMenuItem asChild className="focus:bg-destructive/10 focus:text-destructive text-destructive cursor-pointer">
-              <form action="/api/auth/logout" method="POST" className="w-full">
+            <DropdownMenuItem
+              onSelect={(e) => {
+                const form = document.getElementById("nav-user-logout-form") as HTMLFormElement;
+                if (form) {
+                  form.submit();
+                }
+              }}
+              className="focus:bg-destructive/10 focus:text-destructive text-destructive cursor-pointer"
+            >
+              <form id="nav-user-logout-form" action="/api/auth/logout" method="POST" className="w-full">
                 <button
                   type="submit"
                   className="flex w-full items-center gap-2 py-0.5 text-xs font-medium"
+                  onClick={(e) => {
+                    e.currentTarget.form?.submit();
+                  }}
                 >
                   <LogOut className="size-3.5" />
                   <span>Sign out</span>
