@@ -21,6 +21,24 @@ export function AuthCard({ returnUrl = "/" }: AuthCardProps) {
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
   const [googleLoading, setGoogleLoading] = React.useState(false);
 
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const err = params.get("error");
+      if (err) {
+        if (err === "google_cancelled") {
+          setErrorMessage("Google sign-in was cancelled. Please try again.");
+        } else if (err === "token_exchange_failed") {
+          setErrorMessage("We couldn't verify your Google account. Please try again.");
+        } else if (err === "identity_missing") {
+          setErrorMessage("Your Google account did not return an email. Please try again.");
+        } else if (err === "auth_failed") {
+          setErrorMessage("Authentication service unavailable. Please check your network or try again.");
+        }
+      }
+    }
+  }, []);
+
   // Send Mobile OTP Handler
   const handleSendOtp = async (phone: string) => {
     setState("sending-otp");

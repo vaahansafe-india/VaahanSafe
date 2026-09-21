@@ -19,10 +19,16 @@ import {
 import { sendWelcomeEmail } from "@vaahansafe/notifications";
 
 export async function GET(req: Request) {
-  const { searchParams, origin } = new URL(req.url);
-  const code = searchParams.get("code");
-  const error = searchParams.get("error");
-  const customerBase = origin || DOMAINS.customer || "http://localhost:3001";
+  const url = new URL(req.url);
+  const code = url.searchParams.get("code");
+  const error = url.searchParams.get("error");
+
+  // Determine authoritative origin behind Vercel or Cloudflare proxies
+  const host = req.headers.get("x-forwarded-host") || req.headers.get("host") || url.host;
+  const proto = req.headers.get("x-forwarded-proto") || (host.includes("localhost") ? "http" : "https");
+  const customerBase = host
+    ? `${proto}://${host}`
+    : (process.env.NEXT_PUBLIC_APP_URL || DOMAINS.customer || "https://app.vaahansafe.com");
   const redirectUri = `${customerBase}/api/auth/google`;
 
   const clientId = process.env.GOOGLE_CLIENT_ID;
@@ -30,7 +36,7 @@ export async function GET(req: Request) {
 
   // If user cancelled on Google consent screen or an error occurred
   if (error) {
-    return NextResponse.redirect(new URL("/login?error=google_cancelled", customerBase));
+    return NextResponse.redirect(new URL(`/login?error=${encodeURIComponent(error)}`, customerBase));
   }
 
   // If callback with authorization code
@@ -101,111 +107,118 @@ export async function GET(req: Request) {
       );
     }
 
-    // Connect to real Cloudflare D1 Repositories
-    const userRepo = getUserRepository();
-    const identityRepo = getAuthIdentityRepository();
-    const sessionRepo = getSessionRepository();
-    const notifRepos = getNotificationRepositories();
+    try {
+      // Connect to real Cloudflare D1 Repositories
+      const userRepo = getUserRepository();
+      const identityRepo = getAuthIdentityRepository();
+      const sessionRepo = getSessionRepository();
+      const notifRepos = getNotificationRepositories();
 
-    // Execute Authoritative Google Entry State Machine
-    const googleResult = await handleGoogleEntry(profile, userRepo, identityRepo);
+      // Execute Authoritative Google Entry State Machine
+      const googleResult = await handleGoogleEntry(profile, userRepo, identityRepo);
 
-    // If first-time user login: dispatch welcome email and record in Cloudflare D1
-    if (googleResult.isNewUser) {
-      try {
-        const welcomeResult = await sendWelcomeEmail({
-          to: profile.email,
-          name: profile.name,
-          phone: undefined,
-          phoneVerified: false,
-          authProvider: "GOOGLE",
-          appUrl: customerBase,
-          isFirstLogin: true,
-        });
-
-        const intentId = `notif_int_${crypto.randomUUID().replace(/-/g, "").slice(0, 16)}`;
-        const now = new Date().toISOString();
-
-        // 1. Authoritative Notification Intent in Cloudflare D1
-        await notifRepos.intents.save({
-          id: intentId,
-          eventType: "ACCOUNT_WELCOME" as any,
-          recipientUserId: googleResult.user.id,
-          category: "ACCOUNT",
-          priority: "NORMAL",
-          templateKey: "WELCOME_V1",
-          templateVersion: 1,
-          payload: {
-            email: profile.email,
+      // If first-time user login: dispatch welcome email and record in Cloudflare D1
+      if (googleResult.isNewUser) {
+        try {
+          const welcomeResult = await sendWelcomeEmail({
+            to: profile.email,
             name: profile.name,
+            phone: undefined,
             phoneVerified: false,
             authProvider: "GOOGLE",
-          },
-          sourceType: "AUTH_REGISTRATION",
-          sourceId: googleResult.user.id,
-          dedupeKey: `welcome_${googleResult.user.id}`,
-          status: "PROCESSED",
-          createdAt: now,
-          dispatchedAt: now,
-        });
+            appUrl: customerBase,
+            isFirstLogin: true,
+          });
 
-        // 2. Canonical In-App Notification in Cloudflare D1
-        const notifId = `notif_${crypto.randomUUID().replace(/-/g, "").slice(0, 16)}`;
-        await notifRepos.notifications.save({
-          id: notifId,
-          userId: googleResult.user.id,
-          intentId,
-          eventType: "ACCOUNT_WELCOME" as any,
-          category: "ACCOUNT",
-          priority: "NORMAL",
-          title: "Welcome to VaahanSafe",
-          bodySafe: "Action required: Verify your mobile number to link vehicle safety identities and emergency alerts.",
-          actionType: "VIEW_SECURITY",
-          actionTarget: "/onboarding/phone",
-          createdAt: now,
-        });
+          const intentId = `notif_int_${crypto.randomUUID().replace(/-/g, "").slice(0, 16)}`;
+          const now = new Date().toISOString();
 
-        // 3. Notification Delivery Record in Cloudflare D1
-        const deliveryId = `del_${crypto.randomUUID().replace(/-/g, "").slice(0, 16)}`;
-        await notifRepos.deliveries.save({
-          id: deliveryId,
-          intentId,
-          notificationId: notifId,
-          channel: "EMAIL",
-          provider: "EMAIL_PROVIDER" as any,
-          status: welcomeResult.success ? "DELIVERED" : "FAILED_RETRYABLE",
-          providerMessageId: welcomeResult.messageId || undefined,
-          attemptCount: 1,
-          createdAt: now,
-          updatedAt: now,
-          deliveredAt: welcomeResult.success ? now : undefined,
-        });
-      } catch (emailErr) {
-        console.error("[VaahanSafe] Error sending first-login welcome email:", emailErr);
+          // 1. Authoritative Notification Intent in Cloudflare D1
+          await notifRepos.intents.save({
+            id: intentId,
+            eventType: "ACCOUNT_WELCOME" as any,
+            recipientUserId: googleResult.user.id,
+            category: "ACCOUNT",
+            priority: "NORMAL",
+            templateKey: "WELCOME_V1",
+            templateVersion: 1,
+            payload: {
+              email: profile.email,
+              name: profile.name,
+              phoneVerified: false,
+              authProvider: "GOOGLE",
+            },
+            sourceType: "AUTH_REGISTRATION",
+            sourceId: googleResult.user.id,
+            dedupeKey: `welcome_${googleResult.user.id}`,
+            status: "PROCESSED",
+            createdAt: now,
+            dispatchedAt: now,
+          });
+
+          // 2. Canonical In-App Notification in Cloudflare D1
+          const notifId = `notif_${crypto.randomUUID().replace(/-/g, "").slice(0, 16)}`;
+          await notifRepos.notifications.save({
+            id: notifId,
+            userId: googleResult.user.id,
+            intentId,
+            eventType: "ACCOUNT_WELCOME" as any,
+            category: "ACCOUNT",
+            priority: "NORMAL",
+            title: "Welcome to VaahanSafe",
+            bodySafe: "Action required: Verify your mobile number to link vehicle safety identities and emergency alerts.",
+            actionType: "VIEW_SECURITY",
+            actionTarget: "/onboarding/phone",
+            createdAt: now,
+          });
+
+          // 3. Notification Delivery Record in Cloudflare D1
+          const deliveryId = `del_${crypto.randomUUID().replace(/-/g, "").slice(0, 16)}`;
+          await notifRepos.deliveries.save({
+            id: deliveryId,
+            intentId,
+            notificationId: notifId,
+            channel: "EMAIL",
+            provider: "EMAIL_PROVIDER" as any,
+            status: welcomeResult.success ? "DELIVERED" : "FAILED_RETRYABLE",
+            providerMessageId: welcomeResult.messageId || undefined,
+            attemptCount: 1,
+            createdAt: now,
+            updatedAt: now,
+            deliveredAt: welcomeResult.success ? now : undefined,
+          });
+        } catch (emailErr) {
+          console.error("[VaahanSafe] Error sending first-login welcome email:", emailErr);
+        }
       }
+
+      // Issue Secure Session Token in Cloudflare D1
+      const { rawToken } = await issueSession(googleResult.user.id, sessionRepo, {
+        userAgent: req.headers.get("user-agent") || undefined,
+        ipAddress: req.headers.get("cf-connecting-ip") || req.headers.get("x-forwarded-for") || undefined,
+      });
+      const cookieHeader = serializeSessionCookie(rawToken);
+
+      // Forward to phone verification if unverified, otherwise to customer dashboard
+      const isPhoneRequired =
+        googleResult.user.onboardingState === "PHONE_REQUIRED" || !googleResult.user.phone;
+      const targetUrl = new URL(
+        isPhoneRequired ? "/onboarding/phone" : "/dashboard",
+        customerBase
+      );
+      if (isPhoneRequired) {
+        targetUrl.searchParams.set("returnUrl", "/dashboard");
+      }
+
+      const response = NextResponse.redirect(targetUrl);
+      response.headers.set("Set-Cookie", cookieHeader);
+      return response;
+    } catch (d1Err) {
+      console.error("[VaahanSafe Google Auth] D1 database / session error:", d1Err);
+      return NextResponse.redirect(
+        new URL("/login?error=auth_failed", customerBase)
+      );
     }
-
-    // Issue Secure Session Token in Cloudflare D1
-    const { rawToken } = await issueSession(googleResult.user.id, sessionRepo, {
-      userAgent: req.headers.get("user-agent") || undefined,
-      ipAddress: req.headers.get("cf-connecting-ip") || req.headers.get("x-forwarded-for") || undefined,
-    });
-    const cookieHeader = serializeSessionCookie(rawToken);
-
-    // Forward to phone verification if unverified, otherwise to customer dashboard
-    const isPhoneRequired =
-      googleResult.user.onboardingState === "PHONE_REQUIRED" || !googleResult.user.phone;
-    const targetUrl = new URL(
-      isPhoneRequired ? "/onboarding/phone" : "/dashboard",
-      customerBase
-    );
-    if (isPhoneRequired) {
-      targetUrl.searchParams.set("returnUrl", "/dashboard");
-    }
-
-    const response = NextResponse.redirect(targetUrl);
-    response.headers.set("Set-Cookie", cookieHeader);
-    return response;
   }
 
   // Google OAuth Initiation
