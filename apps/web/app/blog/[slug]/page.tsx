@@ -104,7 +104,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
         {/* Lead Intro Callout */}
         <div className="rounded-2xl border-l-4 border-[#cc785c] bg-card/60 p-5 sm:p-6 text-base sm:text-lg leading-relaxed text-foreground font-serif italic shadow-2xs">
-          "{post.intro}"
+          &ldquo;{post.intro}&rdquo;
         </div>
 
         {/* Main Article Body */}

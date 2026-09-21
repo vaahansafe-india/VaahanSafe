@@ -218,7 +218,7 @@ export function BlogIndexClient({ initialPosts, featuredPost }: BlogIndexClientP
               No matching field notes found
             </div>
             <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-              We couldn't find any guides matching "{searchQuery}". Try searching for keywords like "CMVR", "highway", "VoIP", or "decal".
+              We couldn&apos;t find any guides matching &ldquo;{searchQuery}&rdquo;. Try searching for keywords like &ldquo;CMVR&rdquo;, &ldquo;highway&rdquo;, &ldquo;VoIP&rdquo;, or &ldquo;decal&rdquo;.
             </p>
           </div>
         ) : (
