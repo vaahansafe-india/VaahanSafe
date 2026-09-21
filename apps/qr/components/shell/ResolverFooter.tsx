@@ -1,4 +1,5 @@
 import React from "react";
+import { VaahanSafeMark } from "@vaahansafe/ui/brand";
 import { getStatusUrl, getWebUrl } from "@vaahansafe/config";
 
 export function ResolverFooter() {
@@ -16,8 +17,11 @@ export function ResolverFooter() {
         </p>
       </div>
 
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-2.5 text-[11px] text-muted-foreground font-mono">
-        <span>&copy; {new Date().getFullYear()} VaahanSafe</span>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 text-[11px] text-muted-foreground font-mono">
+        <div className="flex items-center gap-1.5">
+          <VaahanSafeMark size={14} variant="brand" />
+          <span>&copy; {new Date().getFullYear()} VaahanSafe</span>
+        </div>
         <div className="flex items-center gap-3">
           <a
             href={`${webUrl}/privacy`}

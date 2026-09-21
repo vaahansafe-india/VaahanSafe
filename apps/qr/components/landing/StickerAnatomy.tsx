@@ -1,5 +1,6 @@
 import React from "react";
 import { VaahanIcon } from "@vaahansafe/icons";
+import { VaahanSafeMark } from "@vaahansafe/ui/brand";
 import { Badge } from "@vaahansafe/ui/components";
 
 export function StickerAnatomy() {
@@ -59,9 +60,7 @@ export function StickerAnatomy() {
               {/* 03: Top Emblem & Brand */}
               <div className="flex items-center justify-between pb-3 border-b border-[#E6DFD8]">
                 <div className="flex items-center gap-2">
-                  <div className="size-6 rounded-md bg-[#CC785C]/15 text-[#CC785C] flex items-center justify-center border border-[#CC785C]/30">
-                    <VaahanIcon name="shield" size={13} />
-                  </div>
+                  <VaahanSafeMark size={18} variant="brand" />
                   <span className="font-serif text-xs font-bold text-[#141413]">
                     VAAHANSAFE
                   </span>

@@ -3,9 +3,9 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { VaahanIcon } from "@vaahansafe/icons";
-import { VaahanSafeMark } from "@vaahansafe/ui/brand";
+import { VaahanSafeLogo } from "@vaahansafe/ui/brand";
 import { ThemeToggle } from "@vaahansafe/ui/theme";
-import { Badge, Sheet, SheetTrigger, SheetContent, SheetClose } from "@vaahansafe/ui/components";
+import { Sheet, SheetTrigger, SheetContent } from "@vaahansafe/ui/components";
 import { getActivateUrl, getWebUrl } from "@vaahansafe/config";
 
 export function QrLandingHeader() {
@@ -23,18 +23,14 @@ export function QrLandingHeader() {
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border/80 bg-background/95 backdrop-blur-md transition-all">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        {/* Left: Canonical Brand Mark & Surface Identity */}
-        <Link href="/" className="flex items-center gap-2.5 group">
-          <VaahanSafeMark size={26} />
-          <div className="flex items-baseline gap-1.5">
-            <span className="font-serif text-base font-semibold tracking-tight text-foreground">
-              VAAHANSAFE
-            </span>
-            <span className="font-mono text-xs text-muted-foreground uppercase tracking-widest">
-              / QR
-            </span>
-          </div>
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
+        {/* Left: Canonical Official Brand Logo */}
+        <Link
+          href="/"
+          className="inline-flex items-center min-w-0 shrink transition-opacity hover:opacity-90 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary/40 rounded-lg py-1 px-1 -ml-1"
+          aria-label="VaahanSafe Home"
+        >
+          <VaahanSafeLogo size="sm" variant="brand" showTagline={false} />
         </Link>
 
         {/* Desktop Navigation */}
@@ -67,13 +63,13 @@ export function QrLandingHeader() {
           </a>
         </nav>
 
-        {/* Mobile Navigation Trigger (shadcn Sheet) */}
-        <div className="flex items-center gap-2 md:hidden">
+        {/* Mobile Navigation Trigger */}
+        <div className="flex items-center gap-2 md:hidden shrink-0">
           <a
             href={activateUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex h-8 items-center gap-1 rounded-md bg-primary/10 text-primary px-2.5 text-xs font-semibold hover:bg-primary/20 transition-colors"
+            className="inline-flex h-8 items-center gap-1 rounded-md bg-primary/10 text-primary px-2.5 text-xs font-semibold hover:bg-primary/20 transition-colors whitespace-nowrap"
           >
             <span>Activate</span>
             <VaahanIcon name="arrow-right" size={11} />
@@ -83,26 +79,17 @@ export function QrLandingHeader() {
             <SheetTrigger asChild>
               <button
                 type="button"
-                className="size-9 rounded-lg border border-border flex items-center justify-center text-foreground hover:bg-muted/60 transition-colors"
+                className="size-9 rounded-lg border border-border flex items-center justify-center text-foreground hover:bg-muted/60 transition-colors shrink-0"
                 aria-label="Open navigation menu"
               >
                 <VaahanIcon name="menu" size={18} />
               </button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[80vw] max-w-sm p-6 bg-background flex flex-col justify-between">
+            <SheetContent side="right" className="w-[85vw] max-w-sm p-6 bg-background flex flex-col justify-between">
               <div className="space-y-6">
+                {/* Official Brand Logo inside Mobile Drawer */}
                 <div className="flex items-center justify-between pb-4 border-b border-border/80">
-                  <div className="flex items-center gap-2.5">
-                    <VaahanSafeMark size={24} />
-                    <div>
-                      <span className="font-serif text-sm font-semibold tracking-tight text-foreground block">
-                        VAAHANSAFE
-                      </span>
-                      <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider block">
-                        Public QR System
-                      </span>
-                    </div>
-                  </div>
+                  <VaahanSafeLogo size="sm" variant="brand" showTagline={false} />
                   <ThemeToggle />
                 </div>
 

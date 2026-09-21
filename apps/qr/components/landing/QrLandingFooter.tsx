@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { VaahanIcon } from "@vaahansafe/icons";
+import { VaahanSafeLogo } from "@vaahansafe/ui/brand";
 import { getActivateUrl, getStatusUrl, getWebUrl } from "@vaahansafe/config";
 
 export function QrLandingFooter() {
@@ -13,21 +13,15 @@ export function QrLandingFooter() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-10">
         {/* Top Section */}
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 pb-8 border-b border-[#FAF9F5]/10">
-          <div className="flex items-center gap-2.5">
-            <div className="size-8 rounded-lg bg-[#CC785C]/20 text-[#CC785C] flex items-center justify-center border border-[#CC785C]/30">
-              <VaahanIcon name="shield" size={18} />
-            </div>
-            <div className="flex items-baseline gap-2">
-              <span className="font-serif text-base font-semibold tracking-tight text-[#FAF9F5]">
-                VAAHANSAFE
-              </span>
-              <span className="font-mono text-xs text-[#FAF9F5]/60 uppercase tracking-widest">
-                / QR SYSTEM
-              </span>
-            </div>
-          </div>
+          <Link
+            href="/"
+            className="inline-flex items-center transition-opacity hover:opacity-90 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary/40 rounded-lg"
+            aria-label="VaahanSafe Home"
+          >
+            <VaahanSafeLogo size="sm" variant="brand" theme="dark" showTagline={false} />
+          </Link>
 
-          <div className="flex flex-wrap items-center gap-6 text-xs font-mono text-[#FAF9F5]/70">
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2.5 text-xs font-mono text-[#FAF9F5]/70">
             <a
               href={webUrl}
               target="_blank"
@@ -81,7 +75,7 @@ export function QrLandingFooter() {
         </div>
 
         {/* Bottom Copyright & Notice */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] font-mono text-[#FAF9F5]/50">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-[11px] font-mono text-[#FAF9F5]/50">
           <span>&copy; {new Date().getFullYear()} VaahanSafe India. Built for Indian roads.</span>
           <span className="text-[#CC785C]">Automotive Safety Identity Architecture</span>
         </div>
