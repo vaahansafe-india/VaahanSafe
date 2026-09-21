@@ -47,8 +47,11 @@ export default function StatusRootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="overflow-x-clip" suppressHydrationWarning>
-      <body className="min-h-screen overflow-x-clip bg-[#faf9f5] font-sans antialiased text-[#141413] dark:bg-[#181715] dark:text-[#faf9f5]">
+    <html lang="en" suppressHydrationWarning>
+      <body
+        className="min-h-screen overflow-x-clip bg-[#faf9f5] font-sans antialiased text-[#141413] dark:bg-[#181715] dark:text-[#faf9f5]"
+        suppressHydrationWarning
+      >
         <ThemeProvider>
           <NetworkStatusProvider>
             {children}

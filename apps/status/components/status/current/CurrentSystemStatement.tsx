@@ -31,7 +31,7 @@ export function CurrentSystemStatement({
             SYSTEM STATUS &bull; {config.label.toUpperCase()}
           </span>
         </div>
-        <div className="text-[9px] sm:text-[10px] tracking-normal sm:tracking-wider">
+        <div suppressHydrationWarning className="text-[9px] sm:text-[10px] tracking-normal sm:tracking-wider">
           LAST CONFIRMED {generatedAtFormatted}
         </div>
       </div>

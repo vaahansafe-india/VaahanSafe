@@ -28,7 +28,7 @@ export function IncidentHistory({ incidents }: IncidentHistoryProps) {
       </div>
 
       <div className="space-y-4">
-        <div className="font-mono text-[11px] uppercase tracking-wider text-[#141413] dark:text-[#faf9f5] font-semibold">
+        <div suppressHydrationWarning className="font-mono text-[11px] uppercase tracking-wider text-[#141413] dark:text-[#faf9f5] font-semibold">
           {currentMonth.toUpperCase()}
         </div>
 

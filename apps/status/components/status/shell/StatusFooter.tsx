@@ -49,7 +49,7 @@ export function StatusFooter() {
 
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-t border-[#e6dfd8] pt-6 dark:border-[#2e2b27]">
           <div className="space-y-1 font-mono text-[9px] uppercase tracking-wider text-[#8e8b82] dark:text-[#77736d]">
-            <div>&copy; {new Date().getFullYear()} VAAHANSAFE TECHNOLOGIES PRIVATE LIMITED. ALL RIGHTS RESERVED.</div>
+            <div suppressHydrationWarning>&copy; {new Date().getFullYear()} VAAHANSAFE TECHNOLOGIES PRIVATE LIMITED. ALL RIGHTS RESERVED.</div>
             <div>INDEPENDENT REPORTING RUNTIME &bull; IST TIMEZONE ENFORCED</div>
           </div>
 

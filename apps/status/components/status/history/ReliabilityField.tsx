@@ -70,7 +70,7 @@ export function ReliabilityField({ services }: ReliabilityFieldProps) {
               <span className="font-serif text-sm font-normal text-[#141413] dark:text-[#faf9f5]">
                 {service.name}
               </span>
-              <span className="text-[#8e8b82] text-[9px]">
+              <span suppressHydrationWarning className="text-[#8e8b82] text-[9px]">
                 {startFormatted.toUpperCase()} &mdash; {endFormatted.toUpperCase()}
               </span>
             </div>
