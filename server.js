@@ -1,7 +1,28 @@
-// Hostinger & LiteSpeed High-Performance Static Server for VaahanSafe (Zero-Dependency)
+// Hostinger & LiteSpeed High-Performance Server for VaahanSafe
 const http = require("http");
 const fs = require("fs");
 const path = require("path");
+
+// 1. Check if running as customer SSR application on Hostinger
+const customerStandaloneCandidates = [
+  path.join(__dirname, ".next/standalone/apps/customer/server.js"),
+  path.join(__dirname, "apps/customer/.next/standalone/apps/customer/server.js"),
+  path.join(__dirname, "apps/customer/server.js"),
+];
+
+const foundCustomerServer = customerStandaloneCandidates.find((p) => fs.existsSync(p));
+const isCustomerApp =
+  process.env.APP_NAME === "customer" ||
+  process.env.NEXT_PUBLIC_APP_URL?.includes("app.vaahansafe.com") ||
+  (!fs.existsSync(path.join(__dirname, "public_html/index.html")) &&
+   !fs.existsSync(path.join(__dirname, "out/index.html")) &&
+   Boolean(foundCustomerServer));
+
+if (isCustomerApp && foundCustomerServer) {
+  console.log(`[server.js] Launching VaahanSafe Customer App from: ${foundCustomerServer}`);
+  require(foundCustomerServer);
+  return;
+}
 
 const PORT = parseInt(process.env.PORT, 10) || 3000;
 const HOSTNAME = process.env.HOSTNAME || "0.0.0.0";
