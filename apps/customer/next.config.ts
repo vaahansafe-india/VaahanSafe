@@ -1,9 +1,15 @@
 import type { NextConfig } from "next";
 import path from "node:path";
 
+const isVercel = Boolean(process.env.VERCEL);
+
 const nextConfig: NextConfig = {
-  output: "standalone",
-  outputFileTracingRoot: path.join(__dirname, "../../"),
+  ...(isVercel
+    ? {}
+    : {
+        output: "standalone",
+        outputFileTracingRoot: path.join(__dirname, "../../"),
+      }),
   eslint: {
     ignoreDuringBuilds: true,
   },
