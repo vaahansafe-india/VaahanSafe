@@ -2,44 +2,109 @@
 const http = require("http");
 const fs = require("fs");
 const path = require("path");
+const Module = require("module");
 
-// Auto-register vendor_modules & node_modules across Hostinger versions
-const candidateModuleDirs = [
-  path.join(__dirname, "vendor_modules"),
-  path.join(__dirname, "node_modules"),
-  path.join(__dirname, "../vendor_modules"),
-  path.join(__dirname, "../node_modules"),
-  path.join(__dirname, "../../vendor_modules"),
-  path.join(__dirname, "../../node_modules"),
-  path.join(__dirname, ".next/standalone/vendor_modules"),
-  path.join(__dirname, ".next/standalone/node_modules"),
-  path.join(__dirname, "../.next/standalone/vendor_modules"),
-  path.join(__dirname, "../.next/standalone/node_modules"),
-  path.join(__dirname, "apps/customer/.next/standalone/vendor_modules"),
-  path.join(__dirname, "apps/customer/.next/standalone/node_modules"),
-  path.join(__dirname, "../apps/customer/.next/standalone/vendor_modules"),
-  path.join(__dirname, "../apps/customer/.next/standalone/node_modules"),
-];
+// --- VAAHANSAFE HOSTINGER SELF-HEALING MODULE RESOLVER ---
+;(function () {
+  const candidateDirs = [
+    path.join(__dirname, "vendor_modules"),
+    path.join(__dirname, "node_modules"),
+    path.join(__dirname, ".next/standalone/vendor_modules"),
+    path.join(__dirname, ".next/standalone/node_modules"),
+    path.join(__dirname, "apps/customer/.next/standalone/vendor_modules"),
+    path.join(__dirname, "apps/customer/.next/standalone/node_modules"),
+    path.join(__dirname, "apps/customer/vendor_modules"),
+    path.join(__dirname, "apps/customer/node_modules"),
+    path.join(__dirname, "../vendor_modules"),
+    path.join(__dirname, "../node_modules"),
+    path.join(__dirname, "../../vendor_modules"),
+    path.join(__dirname, "../../node_modules"),
+    path.join(__dirname, "../../../vendor_modules"),
+    path.join(__dirname, "../../../node_modules"),
+    path.join(__dirname, "../.next/standalone/vendor_modules"),
+    path.join(__dirname, "../.next/standalone/node_modules"),
+    path.join(__dirname, "../apps/customer/.next/standalone/vendor_modules"),
+    path.join(__dirname, "../apps/customer/.next/standalone/node_modules"),
+    path.join(__dirname, "../apps/customer/vendor_modules"),
+    path.join(__dirname, "../apps/customer/node_modules"),
+  ];
 
-for (const p of candidateModuleDirs) {
-  if (fs.existsSync(p) && !module.paths.includes(p)) {
-    module.paths.unshift(p);
+  const knownModuleDirs = candidateDirs.filter((p) => {
+    try {
+      return fs.existsSync(p);
+    } catch (_) {
+      return false;
+    }
+  });
+
+  // 1. Global Hook: Module._nodeModulePaths
+  // Node calls this for EVERY required file in the entire process to determine where to find packages.
+  // We inject all discovered vendor_modules directories so nested requires like 'react' inside react-dom resolve.
+  if (!Module.__vs_nodeModulePathsHooked) {
+    Module.__vs_nodeModulePathsHooked = true;
+    const origNodeModulePaths = Module._nodeModulePaths;
+    Module._nodeModulePaths = function (from) {
+      const paths = origNodeModulePaths.call(this, from);
+      const extra = [...knownModuleDirs];
+      for (const p of paths) {
+        if (!extra.includes(p)) extra.push(p);
+        const vendor = p.replace(/([/\\])node_modules$/, "$1vendor_modules");
+        if (vendor !== p && !extra.includes(vendor)) extra.push(vendor);
+      }
+      return extra;
+    };
   }
-}
-try {
-  require("module").Module._initPaths();
-} catch (_) {}
+
+  // 2. Global Hook: Module._resolveFilename
+  // Catch any residual MODULE_NOT_FOUND errors and search candidate vendor directories.
+  if (!Module.__vs_resolveFilenameHooked) {
+    Module.__vs_resolveFilenameHooked = true;
+    const origResolveFilename = Module._resolveFilename;
+    Module._resolveFilename = function (request, parent, isMain, options) {
+      try {
+        return origResolveFilename.call(this, request, parent, isMain, options);
+      } catch (err) {
+        if (err.code === "MODULE_NOT_FOUND" && !request.startsWith(".")) {
+          for (const dir of knownModuleDirs) {
+            const candidate = path.join(dir, request);
+            try {
+              return origResolveFilename.call(this, candidate, parent, isMain, options);
+            } catch (_) {}
+          }
+        }
+        throw err;
+      }
+    };
+  }
+
+  for (const p of knownModuleDirs) {
+    if (!module.paths.includes(p)) {
+      module.paths.unshift(p);
+    }
+  }
+
+  try {
+    Module._initPaths();
+  } catch (_) {}
+})();
+// --- END VAAHANSAFE HOSTINGER SELF-HEALING MODULE RESOLVER ---
+
+const PORT = parseInt(process.env.PORT, 10) || 3000;
+const HOSTNAME = process.env.HOSTNAME || "0.0.0.0";
 
 // 1. Check if running as customer SSR application on Hostinger
 const customerStandaloneCandidates = [
   path.join(__dirname, ".next/standalone/apps/customer/server.js"),
   path.join(__dirname, "apps/customer/.next/standalone/apps/customer/server.js"),
+  path.join(__dirname, ".next/standalone/server.js"),
+  path.join(__dirname, "apps/customer/.next/standalone/server.js"),
   path.join(__dirname, "../.next/standalone/apps/customer/server.js"),
   path.join(__dirname, "../apps/customer/.next/standalone/apps/customer/server.js"),
+  path.join(__dirname, "../.next/standalone/server.js"),
   path.join(__dirname, "apps/customer/server.js"),
-];
+].filter((p) => p !== __filename && fs.existsSync(p));
 
-const foundCustomerServer = customerStandaloneCandidates.find((p) => fs.existsSync(p));
+const foundCustomerServer = customerStandaloneCandidates[0];
 const isCustomerApp =
   process.env.APP_NAME === "customer" ||
   process.env.NEXT_PUBLIC_APP_URL?.includes("app.vaahansafe.com") ||
@@ -47,14 +112,32 @@ const isCustomerApp =
    !fs.existsSync(path.join(__dirname, "out/index.html")) &&
    Boolean(foundCustomerServer));
 
-if (isCustomerApp && foundCustomerServer) {
-  console.log(`[server.js] Launching VaahanSafe Customer App from: ${foundCustomerServer}`);
-  require(foundCustomerServer);
+if (isCustomerApp) {
+  if (foundCustomerServer) {
+    console.log(`[server.js] Launching VaahanSafe Customer App from: ${foundCustomerServer}`);
+    require(foundCustomerServer);
+    return;
+  }
+
+  console.log(`[server.js] Starting Customer App directly with Next.js...`);
+  const next = require("next");
+  const customerDir = fs.existsSync(path.join(__dirname, "apps/customer"))
+    ? path.join(__dirname, "apps/customer")
+    : __dirname;
+  const app = next({ dev: false, dir: customerDir });
+  const handle = app.getRequestHandler();
+
+  app.prepare().then(() => {
+    http.createServer((req, res) => handle(req, res)).listen(PORT, HOSTNAME, () => {
+      console.log(`[server.js] VaahanSafe Customer App running on http://${HOSTNAME}:${PORT}`);
+    });
+  }).catch((err) => {
+    console.error("[server.js] Failed to start Customer App:", err);
+    process.exit(1);
+  });
   return;
 }
 
-const PORT = parseInt(process.env.PORT, 10) || 3000;
-const HOSTNAME = process.env.HOSTNAME || "0.0.0.0";
 
 // Candidate static asset directories in order of preference
 const candidateDirs = [
