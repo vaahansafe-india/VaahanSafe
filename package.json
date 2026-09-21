@@ -43,6 +43,9 @@
     "clean": "turbo run clean && rimraf node_modules .turbo"
   },
   "dependencies": {
+    "next": "^15.1.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
     "turbo": "^2.10.13",
     "typescript": "^5.7.3"
   },
