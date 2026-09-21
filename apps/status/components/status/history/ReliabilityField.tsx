@@ -64,20 +64,20 @@ export function ReliabilityField({ services }: ReliabilityFieldProps) {
       {/* Services Temporal Rails */}
       <div className="space-y-6">
         {services.map((service) => (
-          <div key={service.slug} className="space-y-2">
+          <div key={service.slug} className="space-y-2 min-w-0">
             {/* Service Title & Temporal Header */}
             <div className="flex items-baseline justify-between font-mono text-[10px] uppercase tracking-wider">
-              <span className="font-serif text-sm font-normal text-[#141413] dark:text-[#faf9f5]">
+              <span className="font-serif text-sm font-normal text-[#141413] dark:text-[#faf9f5] truncate">
                 {service.name}
               </span>
-              <span suppressHydrationWarning className="text-[#8e8b82] text-[9px]">
+              <span suppressHydrationWarning className="text-[#8e8b82] text-[9px] shrink-0">
                 {startFormatted.toUpperCase()} &mdash; {endFormatted.toUpperCase()}
               </span>
             </div>
 
             {/* Factual Day Nodes Grid Rail */}
             <div
-              className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto py-1"
+              className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto py-1 max-w-full"
               role="group"
               aria-label={`30-day reliability rail for ${service.name}`}
             >

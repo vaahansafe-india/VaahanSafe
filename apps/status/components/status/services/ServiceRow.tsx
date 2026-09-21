@@ -23,42 +23,39 @@ export function ServiceRow({ service, index, onSelect }: ServiceRowProps) {
           onSelect(service);
         }
       }}
-      className="group flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 py-4 sm:py-5 hover:bg-[#f5f0e8]/50 dark:hover:bg-[#1f1e1b]/50 px-2 sm:px-3 rounded-xl transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#cc785c]"
+      className="group flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-6 px-4 sm:px-6 py-4 sm:py-5 hover:bg-[#f5f0e8]/70 dark:hover:bg-[#201f1c]/70 transition-colors cursor-pointer focus-visible:outline-none focus-visible:bg-[#f5f0e8] dark:focus-visible:bg-[#201f1c]"
     >
       {/* Left: Index + Name & Description */}
       <div className="flex items-start gap-3 sm:gap-4 min-w-0 flex-1">
-        <span className="font-mono text-xs text-[#8e8b82] dark:text-[#77736d] pt-0.5 shrink-0">
+        <span className="font-mono text-xs text-[#8e8b82] dark:text-[#77736d] pt-0.5 shrink-0 select-none">
           {formattedIndex}
         </span>
         <div className="min-w-0 flex-1 space-y-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="font-serif text-base sm:text-lg text-[#141413] dark:text-[#faf9f5] group-hover:text-[#cc785c] transition-colors truncate">
+            <h3 className="font-serif text-base sm:text-lg text-[#141413] dark:text-[#faf9f5] group-hover:text-[#cc785c] transition-colors">
               {service.name}
             </h3>
             <span className="inline-flex items-center font-mono text-[8px] uppercase tracking-wider text-[#8e8b82] border border-[#e6dfd8] px-1.5 py-0.5 rounded dark:border-[#2e2b27] shrink-0">
               {service.journeyStage}
             </span>
           </div>
-          <p className="font-sans text-xs text-[#6c6a64] dark:text-[#a09d96] leading-relaxed line-clamp-2 md:line-clamp-none break-words max-w-2xl">
+          <p className="font-sans text-xs text-[#6c6a64] dark:text-[#a09d96] leading-relaxed break-words">
             {service.description}
           </p>
         </div>
       </div>
 
       {/* Right: Live Latency + Status Badge */}
-      <div className="flex items-center justify-between md:justify-end gap-2.5 sm:gap-4 shrink-0 pl-7 md:pl-0">
-        {/* Hairline connector on large desktop only */}
-        <span className="hidden xl:block h-px w-10 lg:w-14 bg-[#e6dfd8] dark:bg-[#2e2b27] shrink-0" />
-
+      <div className="flex items-center justify-between sm:justify-end gap-2.5 sm:gap-4 shrink-0 pl-7 sm:pl-0">
         {/* Live Latency Telemetry */}
         {service.latencyMs && (
-          <span className="inline-flex items-center gap-1.5 font-mono text-[9px] sm:text-[10px] text-[#8e8b82] dark:text-[#77736d] bg-[#faf9f5] dark:bg-[#181715] px-2 py-0.5 rounded border border-[#e6dfd8] dark:border-[#2e2b27] shrink-0">
+          <span className="inline-flex items-center gap-1.5 font-mono text-[9px] sm:text-[10px] text-[#8e8b82] dark:text-[#77736d] bg-[#f5f0e8] dark:bg-[#1f1e1b] px-2 py-0.5 rounded border border-[#e6dfd8] dark:border-[#2e2b27] shrink-0">
             <span className="h-1.5 w-1.5 rounded-full bg-[#5db872]" />
             <span>{service.latencyMs}ms</span>
           </span>
         )}
 
-        <div className="flex items-center gap-2 shrink-0 bg-[#faf9f5]/80 dark:bg-[#181715]/80 md:bg-transparent md:dark:bg-transparent px-2.5 py-1 md:p-0 rounded-lg md:rounded-none border border-[#e6dfd8] dark:border-[#2e2b27] md:border-0">
+        <div className="inline-flex items-center gap-2 shrink-0 bg-[#f5f0e8]/80 dark:bg-[#1f1e1b]/80 sm:bg-transparent sm:dark:bg-transparent px-2.5 py-1 sm:p-0 rounded-lg sm:rounded-none border border-[#e6dfd8] dark:border-[#2e2b27] sm:border-0">
           <span
             className="h-2 w-2 rounded-full shrink-0"
             style={{ backgroundColor: config.dotColor }}

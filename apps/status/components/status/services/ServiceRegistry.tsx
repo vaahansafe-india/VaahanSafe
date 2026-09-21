@@ -26,7 +26,7 @@ export function ServiceRegistry({ services }: ServiceRegistryProps) {
         </span>
       </div>
 
-      <div className="divide-y divide-[#e6dfd8] dark:divide-[#2e2b27] border-t border-[#e6dfd8] dark:border-[#2e2b27]">
+      <div className="w-full rounded-2xl border border-[#e6dfd8] dark:border-[#2e2b27] bg-[#faf9f5] dark:bg-[#181715] overflow-hidden divide-y divide-[#e6dfd8] dark:divide-[#2e2b27] shadow-xs">
         {services.map((service, index) => (
           <ServiceRow
             key={service.slug}

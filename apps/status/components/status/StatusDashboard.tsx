@@ -61,8 +61,8 @@ export function StatusDashboard({ initialStatus }: StatusDashboardProps) {
       />
 
       {/* 2. Main Content Canvas */}
-      <main id="main-content" className="flex-1 w-full py-6 sm:py-12">
-        <div className="mx-auto max-w-[1240px] px-3 sm:px-6 lg:px-8 space-y-10 sm:space-y-16">
+      <main id="main-content" className="flex-1 w-full max-w-full overflow-x-hidden py-6 sm:py-12">
+        <div className="mx-auto max-w-[1240px] w-full min-w-0 px-3 sm:px-6 lg:px-8 space-y-10 sm:space-y-16">
           {/* Top Operational Statement */}
           <CurrentSystemStatement
             overallState={overallState}
