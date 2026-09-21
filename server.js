@@ -3,10 +3,39 @@ const http = require("http");
 const fs = require("fs");
 const path = require("path");
 
+// Auto-register vendor_modules & node_modules across Hostinger versions
+const candidateModuleDirs = [
+  path.join(__dirname, "vendor_modules"),
+  path.join(__dirname, "node_modules"),
+  path.join(__dirname, "../vendor_modules"),
+  path.join(__dirname, "../node_modules"),
+  path.join(__dirname, "../../vendor_modules"),
+  path.join(__dirname, "../../node_modules"),
+  path.join(__dirname, ".next/standalone/vendor_modules"),
+  path.join(__dirname, ".next/standalone/node_modules"),
+  path.join(__dirname, "../.next/standalone/vendor_modules"),
+  path.join(__dirname, "../.next/standalone/node_modules"),
+  path.join(__dirname, "apps/customer/.next/standalone/vendor_modules"),
+  path.join(__dirname, "apps/customer/.next/standalone/node_modules"),
+  path.join(__dirname, "../apps/customer/.next/standalone/vendor_modules"),
+  path.join(__dirname, "../apps/customer/.next/standalone/node_modules"),
+];
+
+for (const p of candidateModuleDirs) {
+  if (fs.existsSync(p) && !module.paths.includes(p)) {
+    module.paths.unshift(p);
+  }
+}
+try {
+  require("module").Module._initPaths();
+} catch (_) {}
+
 // 1. Check if running as customer SSR application on Hostinger
 const customerStandaloneCandidates = [
   path.join(__dirname, ".next/standalone/apps/customer/server.js"),
   path.join(__dirname, "apps/customer/.next/standalone/apps/customer/server.js"),
+  path.join(__dirname, "../.next/standalone/apps/customer/server.js"),
+  path.join(__dirname, "../apps/customer/.next/standalone/apps/customer/server.js"),
   path.join(__dirname, "apps/customer/server.js"),
 ];
 
