@@ -1,0 +1,2415 @@
+.section {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  border-bottom: 1px solid var(--color-hairline);
+  padding: 90px 24px 80px;
+  --story-muted: var(--color-muted);
+  --story-line: var(--color-hairline);
+  --story-sheet: var(--color-surface-soft);
+}
+.how {
+  background: var(--color-surface-soft);
+}
+:global(.dark) .section {
+  background: var(--color-surface-dark);
+  color: var(--color-canvas);
+  border-color: var(--color-body);
+  --story-muted: #a1a1aa;
+  --story-line: #27272a;
+  --story-sheet: #18181b;
+}
+.container {
+  max-width: 1120px;
+  margin: 0 auto;
+}
+.header {
+  max-width: 700px;
+  margin: 0 auto;
+  text-align: center;
+}
+.index {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+.point {
+  display: inline-block;
+  flex: 0 0 6px;
+  width: 6px;
+  height: 6px;
+  background: var(--color-primary);
+  border-radius: 1px;
+}
+.label {
+  font-family: "Geist Mono", "JetBrains Mono", monospace;
+  font-size: 10px;
+  line-height: 1.6;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.index,
+.stage > .label,
+.demoScan figcaption {
+  color: var(--story-muted, var(--color-muted));
+}
+.heading {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: clamp(38px, 4.4vw, 60px);
+  font-weight: 500;
+  letter-spacing: -0.035em;
+  line-height: 1.06;
+  text-wrap: balance;
+}
+.intro {
+  max-width: 570px;
+  margin: 22px auto 0;
+  font-size: 16px;
+  line-height: 1.8;
+  color: var(--story-muted);
+}
+/* ==================================================================
+   SHARED IDENTITY PRIMITIVES
+   ================================================================== */
+
+.rail {
+  display: block;
+  height: 1px;
+  background: var(--story-line, var(--color-hairline, #e4e4e7));
+}
+
+.signal {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #2d9d78;
+}
+
+.signalPoint {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #2d9d78;
+}
+
+.signalText {
+  color: inherit;
+}
+
+.scanFrame {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.scanCorners {
+  fill: currentColor;
+}
+
+.demoScan {
+  margin: 0;
+  text-align: center;
+  width: 100%;
+}
+
+.demoSvg {
+  width: 150px;
+  margin: 0 auto 16px;
+  color: var(--color-ink, #09090b);
+}
+
+:global(.dark) .demoSvg {
+  color: var(--color-canvas, #fafafa);
+}
+
+.demoQr {
+  fill: currentColor;
+}
+
+.sweep {
+  animation: journey-scan 480ms linear 650ms both;
+  fill: #cc785c;
+}
+
+@keyframes journey-scan {
+  0% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  10%,
+  90% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sweep {
+    animation: none;
+    opacity: 0;
+  }
+}
+
+/* ==================================================================
+   SAFETY PROJECTION CARD PRIMITIVES
+   ================================================================== */
+
+.boundary {
+  position: relative;
+  width: 100%;
+  max-width: 320px;
+  margin-top: 10px;
+  padding: 16px 18px;
+  background: #ffffff;
+  border: 1px solid #e4e4e7;
+  border-left: 2px solid #cc785c;
+  border-radius: 4px 14px 14px 4px;
+  box-shadow: 0 4px 20px rgb(20 20 19 / 0.04);
+}
+
+:global(.dark) .boundary {
+  background: #18181b;
+  border-color: #27272a;
+  border-left-color: #cc785c;
+  box-shadow: none;
+}
+
+.projectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e4e4e7;
+}
+
+:global(.dark) .projectionHeader {
+  border-bottom-color: #27272a;
+}
+
+.projectionBrand {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.projectionBrandMark {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #cc785c;
+}
+
+.projectionBrandPoint {
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #cc785c;
+}
+
+.projectionDemo {
+  margin-left: 4px;
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #a1a1aa;
+}
+
+.projectionIdentity {
+  padding-top: 12px;
+}
+
+.projectionIndex {
+  margin-bottom: 6px;
+}
+
+.profileVehicle {
+  margin: 4px 0 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: #252523;
+  letter-spacing: -0.01em;
+}
+
+:global(.dark) .profileVehicle {
+  color: #f4f4f5;
+}
+
+.profileIdentityCode {
+  margin-top: 4px;
+}
+
+.profileCode {
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 8px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  color: #cc785c;
+  margin: 2px 0 0;
+}
+
+.projectionSection {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid #e4e4e7;
+}
+
+:global(.dark) .projectionSection {
+  border-top-color: #27272a;
+}
+
+.projectionSectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #a1a1aa;
+}
+
+.profileRows {
+  margin: 8px 0 0;
+}
+
+.projectionRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  border-top: 1px solid rgb(20 20 19 / 0.04);
+}
+
+:global(.dark) .projectionRow {
+  border-top-color: rgb(255 255 255 / 0.05);
+}
+
+.projectionRow:first-child {
+  border-top: none;
+}
+
+.projectionRowLabel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 6px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #71717a;
+}
+
+:global(.dark) .projectionRowLabel {
+  color: #aaa59d;
+}
+
+.projectionRowIcon {
+  display: flex;
+  align-items: center;
+  color: #cc785c;
+}
+
+.projectionRowValue {
+  margin: 0;
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 6px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #52525b;
+  text-align: right;
+}
+
+:global(.dark) .projectionRowValue {
+  color: #f4f4f5;
+}
+
+.projectionFooter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid #e4e4e7;
+}
+
+:global(.dark) .projectionFooter {
+  border-top-color: #27272a;
+}
+
+.projectionFooterIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: rgb(204 120 92 / 0.1);
+  color: #cc785c;
+  flex-shrink: 0;
+}
+
+.projectionFooterTitle {
+  display: block;
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 6px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #52525b;
+}
+
+:global(.dark) .projectionFooterTitle {
+  color: #f4f4f5;
+}
+
+.projectionFooterDescription {
+  display: block;
+  font-size: 7px;
+  line-height: 1.4;
+  color: #a1a1aa;
+}
+
+/* ========================================================================== */
+/* WHAT IS VAAHANSAFE                                                         */
+/* ========================================================================== */
+
+.whatSection {
+  --font-mono: var(--font-code, "JetBrains Mono", "Geist Mono", monospace);
+  --font-serif: var(--font-display, "Cormorant Garamond", Georgia, serif);
+
+  position: relative;
+  overflow: hidden;
+
+  background: var(--color-canvas);
+}
+
+/* ========================================================================== */
+/* IDENTITY STORY                                                             */
+/* ========================================================================== */
+
+.identityStory {
+  position: relative;
+
+  display: grid;
+  grid-template-columns:
+    minmax(0, 0.92fr)
+    74px
+    minmax(300px, 1.16fr)
+    74px
+    minmax(0, 0.92fr);
+
+  align-items: stretch;
+
+  margin-top: clamp(64px, 8vw, 100px);
+}
+
+/* ========================================================================== */
+/* COMMON STAGE                                                               */
+/* ========================================================================== */
+
+.identityStoryStage {
+  position: relative;
+
+  min-width: 0;
+}
+
+.vehicleStage {
+  position: relative;
+}
+
+.projectionStage {
+  position: relative;
+}
+
+.stageMeta {
+  display: flex;
+  align-items: center;
+
+  gap: 9px;
+
+  padding-bottom: 13px;
+
+  border-bottom: 1px solid #e4e4e7;
+}
+
+.stageIndex {
+  font-family: var(--font-mono);
+  font-size: 6px;
+
+  letter-spacing: 0.15em;
+
+  color: #aaa59d;
+}
+
+.stageNarrative {
+  margin-top: 24px;
+}
+
+.stageTitle {
+  max-width: 280px;
+
+  margin: 0;
+
+  font-family: var(--font-serif);
+  font-size: clamp(1.4rem, 2vw, 1.75rem);
+  font-weight: 400;
+
+  line-height: 1.08;
+
+  letter-spacing: -0.025em;
+
+  color: #252523;
+}
+
+.stageCopy {
+  max-width: 300px;
+
+  margin: 12px 0 0;
+
+  font-size: 11px;
+  line-height: 1.75;
+
+  color: #71717a;
+}
+
+/* ========================================================================== */
+/* VEHICLE                                                                    */
+/* ========================================================================== */
+
+.vehicleScene {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 270px;
+
+  margin-top: 18px;
+
+  overflow: hidden;
+}
+
+.vehicleRegistrationRing {
+  position: absolute;
+
+  width: 230px;
+  height: 230px;
+
+  border: 1px solid rgb(20 20 19 / 0.035);
+  border-radius: 50%;
+}
+
+.vehicleRegistrationRing::after {
+  content: "";
+
+  position: absolute;
+
+  inset: 31px;
+
+  border: 1px solid rgb(204 120 92 / 0.055);
+  border-radius: inherit;
+}
+
+.vehicleFigure {
+  position: relative;
+  z-index: 2;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #52525b;
+}
+
+.vehicleFigure svg {
+  opacity: 0.75;
+}
+
+.vehicleIdentityPoint {
+  position: absolute;
+
+  right: 9%;
+  top: 49%;
+}
+
+.vehicleQrMarker {
+  position: absolute;
+
+  right: 13%;
+  top: 33%;
+
+  display: flex;
+  align-items: center;
+
+  gap: 6px;
+
+  font-family: var(--font-mono);
+  font-size: 5px;
+
+  letter-spacing: 0.15em;
+
+  color: #cc785c;
+}
+
+.vehicleQrMarker > span:first-child {
+  width: 22px;
+  height: 1px;
+
+  background: rgb(204 120 92 / 0.3);
+}
+
+.vehicleCoordinate {
+  position: absolute;
+
+  left: 8px;
+  bottom: 18px;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 4px;
+
+  font-family: var(--font-mono);
+  font-size: 5px;
+
+  letter-spacing: 0.14em;
+
+  color: #b0aaa2;
+}
+
+/* ========================================================================== */
+/* STORY CONNECTOR                                                            */
+/* ========================================================================== */
+
+.storyConnector {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 8px;
+
+  min-width: 0;
+
+  padding-top: 36px;
+}
+
+.storyConnectorLine {
+  width: 1px;
+  height: 42px;
+
+  background: #e4e4e7;
+}
+
+.storyConnectorNode {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  gap: 5px;
+
+  font-family: var(--font-mono);
+  font-size: 5px;
+
+  color: #aaa59d;
+}
+
+.storyConnectorLabel {
+  font-family: var(--font-mono);
+  font-size: 5px;
+
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+
+  color: #a1a1aa;
+}
+
+.storyConnectorArrow {
+  color: #cc785c;
+
+  font-family: var(--font-mono);
+  font-size: 9px;
+}
+
+/* ========================================================================== */
+/* CENTRAL IDENTITY ANCHOR                                                    */
+/* ========================================================================== */
+
+.identityAnchor {
+  position: relative;
+  isolation: isolate;
+
+  overflow: hidden;
+
+  min-height: 430px;
+
+  border-radius: 18px;
+
+  background: #09090b;
+
+  color: #fafafa;
+
+  box-shadow: 0 28px 70px rgb(20 20 19 / 0.1);
+}
+
+.anchorGeometry {
+  position: absolute;
+  z-index: -1;
+
+  inset: 0;
+
+  overflow: hidden;
+
+  pointer-events: none;
+}
+
+.anchorOrbitLarge,
+.anchorOrbitSmall {
+  position: absolute;
+
+  border-radius: 50%;
+}
+
+.anchorOrbitLarge {
+  width: 330px;
+  height: 330px;
+
+  right: -160px;
+  top: -140px;
+
+  border: 1px solid rgb(204 120 92 / 0.07);
+}
+
+.anchorOrbitSmall {
+  width: 220px;
+  height: 220px;
+
+  left: -110px;
+  bottom: -100px;
+
+  border: 1px solid rgb(255 255 255 / 0.035);
+}
+
+.anchorAxisHorizontal {
+  position: absolute;
+
+  left: 8%;
+  right: 8%;
+  top: 50%;
+
+  height: 1px;
+
+  background: rgb(255 255 255 / 0.025);
+}
+
+.anchorAxisVertical {
+  position: absolute;
+
+  top: 12%;
+  bottom: 12%;
+  left: 50%;
+
+  width: 1px;
+
+  background: rgb(255 255 255 / 0.025);
+}
+
+.anchorCoordinate {
+  position: absolute;
+
+  right: 16px;
+  bottom: 14px;
+
+  font-family: var(--font-mono);
+  font-size: 5px;
+
+  letter-spacing: 0.16em;
+
+  color: #71717a;
+}
+
+/* ========================================================================== */
+/* ANCHOR HEADER                                                              */
+/* ========================================================================== */
+
+.anchorHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  padding: 16px 18px;
+
+  border-bottom: 1px solid rgb(255 255 255 / 0.07);
+}
+
+.anchorHeaderLeft {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+}
+
+.anchorIndex {
+  font-family: var(--font-mono);
+  font-size: 6px;
+
+  color: #71717a;
+}
+
+.anchorDemo {
+  font-family: var(--font-mono);
+  font-size: 5px;
+
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+
+  color: #71717a;
+}
+
+/* ========================================================================== */
+/* ANCHOR CORE                                                                */
+/* ========================================================================== */
+
+.anchorCore {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  padding: 38px 24px 30px;
+
+  text-align: center;
+}
+
+.anchorMarkStage {
+  position: relative;
+
+  display: flex;
+
+  width: 142px;
+  height: 142px;
+
+  align-items: center;
+  justify-content: center;
+}
+
+.anchorMarkRing {
+  position: absolute;
+
+  inset: 0;
+
+  border: 1px solid rgb(255 255 255 / 0.055);
+  border-radius: 50%;
+}
+
+.anchorMarkRing::after {
+  content: "";
+
+  position: absolute;
+
+  inset: 18px;
+
+  border: 1px solid rgb(204 120 92 / 0.075);
+  border-radius: inherit;
+}
+
+.anchorMark {
+  position: relative;
+  z-index: 2;
+}
+
+.anchorMarkPoint {
+  position: absolute;
+  z-index: 3;
+
+  right: 4px;
+  top: 50%;
+
+  transform: translateY(-50%);
+}
+
+.anchorIdentity {
+  margin-top: 20px;
+}
+
+.microLabel {
+  font-family: var(--font-mono);
+  font-size: 6px;
+
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+
+  color: #71717a;
+}
+
+.anchorCode {
+  margin: 8px 0 0;
+
+  font-family: var(--font-mono);
+  font-size: 17px;
+  font-weight: 500;
+
+  letter-spacing: 0.14em;
+
+  color: #cc785c;
+}
+
+.anchorStatus {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  margin-top: 14px;
+}
+
+.anchorStatus > span:last-child {
+  font-family: var(--font-mono);
+  font-size: 5px;
+
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+
+  color: #71717a;
+}
+
+/* ========================================================================== */
+/* ANCHOR RELATIONSHIP                                                        */
+/* ========================================================================== */
+
+.anchorRelationship {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+
+  border-top: 1px solid rgb(255 255 255 / 0.07);
+}
+
+.identityRelation {
+  min-width: 0;
+
+  padding: 14px 10px;
+
+  text-align: center;
+}
+
+.identityRelation + .identityRelation {
+  border-left: 1px solid rgb(255 255 255 / 0.07);
+}
+
+.identityRelation span {
+  font-family: var(--font-mono);
+  font-size: 5px;
+
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+
+  color: #71717a;
+}
+
+.identityRelation p {
+  margin: 4px 0 0;
+
+  overflow: hidden;
+
+  font-size: 7px;
+
+  color: #aaa69f;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ========================================================================== */
+/* SAFETY PROJECTION                                                          */
+/* ========================================================================== */
+
+.projectionScene {
+  position: relative;
+
+  min-height: 270px;
+
+  margin-top: 18px;
+}
+
+.projectionCoordinate {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 12px;
+
+  margin-bottom: 10px;
+
+  font-family: var(--font-mono);
+  font-size: 5px;
+
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+
+  color: #aaa59d;
+}
+
+/* ========================================================================== */
+/* IDENTITY EQUATION                                                          */
+/* ========================================================================== */
+
+.identityEquation {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr)
+    90px
+    minmax(0, 1fr)
+    90px
+    minmax(0, 1fr);
+
+  align-items: center;
+
+  max-width: 850px;
+
+  margin: clamp(58px, 7vw, 86px) auto 0;
+
+  padding: 17px 20px;
+
+  border-top: 1px solid #e4e4e7;
+  border-bottom: 1px solid #e4e4e7;
+}
+
+.equationState {
+  display: grid;
+  grid-template-columns: 18px 5px minmax(0, 1fr);
+  align-items: center;
+
+  gap: 8px;
+}
+
+.equationIndex {
+  font-family: var(--font-mono);
+  font-size: 5px;
+
+  color: #aaa59d;
+}
+
+.equationPoint {
+  width: 4px;
+  height: 4px;
+
+  border-radius: 50%;
+
+  background: #a1a1aa;
+}
+
+.equationStateActive .equationPoint {
+  background: #cc785c;
+}
+
+.equationLabel {
+  display: block;
+
+  font-family: var(--font-mono);
+  font-size: 5px;
+
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+
+  color: #a1a1aa;
+}
+
+.equationState p {
+  margin: 3px 0 0;
+
+  font-size: 8px;
+  font-weight: 500;
+
+  color: #52525b;
+}
+
+.equationStateActive p {
+  color: #cc785c;
+}
+
+.equationConnector {
+  display: flex;
+  align-items: center;
+
+  gap: 6px;
+}
+
+.equationConnector span {
+  flex: 1;
+
+  height: 1px;
+
+  background: #e4e4e7;
+}
+
+.equationConnector i {
+  color: #cc785c;
+
+  font-family: var(--font-mono);
+  font-size: 7px;
+  font-style: normal;
+}
+
+/* ========================================================================== */
+/* CLOSING                                                                    */
+/* ========================================================================== */
+
+.whatClosing {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 16px;
+
+  margin-top: 46px;
+
+  text-align: center;
+}
+
+.whatClosingRail {
+  width: 42px;
+  height: 1px;
+
+  background: #e4e4e7;
+}
+
+.whatClosing p {
+  margin: 0;
+
+  font-family: var(--font-serif);
+  font-size: clamp(1.2rem, 2vw, 1.55rem);
+  font-weight: 400;
+
+  letter-spacing: -0.02em;
+
+  color: #71717a;
+}
+
+.whatClosing p span {
+  color: #252523;
+}
+
+.whatClosingPoint {
+  width: 5px;
+  height: 5px;
+
+  border-radius: 50%;
+
+  background: #cc785c;
+}
+
+/* ========================================================================== */
+/* TABLET                                                                     */
+/* ========================================================================== */
+
+@media (max-width: 1023px) {
+  .identityStory {
+    grid-template-columns: 1fr;
+    gap: 0;
+
+    max-width: 680px;
+
+    margin-inline: auto;
+  }
+
+  .identityStoryStage {
+    padding-block: 28px;
+  }
+
+  .storyConnector {
+    flex-direction: row;
+
+    min-height: 60px;
+
+    padding: 0;
+  }
+
+  .storyConnectorLine {
+    width: auto;
+    height: 1px;
+
+    flex: 1;
+  }
+
+  .storyConnectorArrow {
+    transform: rotate(90deg);
+  }
+
+  .identityAnchor {
+    min-height: auto;
+
+    padding-block: 0;
+  }
+
+  .stageNarrative {
+    max-width: 500px;
+  }
+
+  .projectionScene {
+    max-width: 520px;
+  }
+}
+
+/* ========================================================================== */
+/* MOBILE                                                                     */
+/* ========================================================================== */
+
+@media (max-width: 640px) {
+  .identityStory {
+    margin-top: 52px;
+  }
+
+  .vehicleScene {
+    min-height: 220px;
+  }
+
+  .vehicleRegistrationRing {
+    width: 190px;
+    height: 190px;
+  }
+
+  .vehicleFigure svg {
+    width: 116px;
+    height: 116px;
+  }
+
+  .vehicleCoordinate {
+    display: none;
+  }
+
+  .anchorHeader {
+    padding: 14px;
+  }
+
+  .anchorDemo {
+    display: none;
+  }
+
+  .anchorCore {
+    padding: 30px 18px 25px;
+  }
+
+  .anchorMarkStage {
+    width: 124px;
+    height: 124px;
+  }
+
+  .anchorRelationship {
+    grid-template-columns: 1fr;
+  }
+
+  .identityRelation {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 15px;
+
+    padding: 11px 14px;
+
+    text-align: left;
+  }
+
+  .identityRelation + .identityRelation {
+    border-top: 1px solid rgb(255 255 255 / 0.07);
+    border-left: 0;
+  }
+
+  .identityRelation p {
+    margin: 0;
+  }
+
+  .identityEquation {
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 8px;
+
+    margin-top: 48px;
+
+    padding-inline: 10px;
+  }
+
+  .equationConnector {
+    display: none;
+  }
+
+  .equationState {
+    display: block;
+
+    text-align: center;
+  }
+
+  .equationIndex,
+  .equationPoint {
+    display: none;
+  }
+
+  .equationState p {
+    margin-top: 5px;
+  }
+
+  .whatClosing {
+    margin-top: 38px;
+  }
+
+  .whatClosingRail {
+    display: none;
+  }
+
+  .whatClosing p {
+    max-width: 330px;
+
+    font-size: 20px;
+    line-height: 1.2;
+  }
+}
+
+/* ========================================================================== */
+/* DARK                                                                       */
+/* ========================================================================== */
+
+:global(.dark) .whatSection {
+  background: #09090b;
+}
+
+:global(.dark) .stageMeta,
+:global(.dark) .identityEquation {
+  border-color: #27272a;
+}
+
+:global(.dark) .stageTitle,
+:global(.dark) .whatClosing p span,
+:global(.dark) .equationState p {
+  color: #f4f4f5;
+}
+
+:global(.dark) .stageCopy,
+:global(.dark) .whatClosing p {
+  color: #a1a1aa;
+}
+
+:global(.dark) .vehicleFigure {
+  color: #e4e4e7;
+}
+
+:global(.dark) .vehicleRegistrationRing {
+  border-color: rgb(250 249 245 / 0.035);
+}
+
+:global(.dark) .equationConnector span,
+:global(.dark) .whatClosingRail {
+  background: #27272a;
+}
+
+
+/* ==================================================================
+   VAHANSAFE — HOW IT WORKS / IDENTITY JOURNEY
+   ================================================================== */
+
+.howJourney {
+  position: relative;
+  isolation: isolate;
+
+  overflow: hidden;
+
+  padding-block: 6rem;
+
+  background: var(--color-canvas);
+
+  border-bottom: 1px solid #e4e4e7;
+}
+
+/* ==================================================================
+   ATMOSPHERE
+   ================================================================== */
+
+.journeyAtmosphere {
+  position: absolute;
+  inset: 0;
+
+  z-index: -1;
+
+  overflow: hidden;
+
+  pointer-events: none;
+}
+
+.journeyOrbitLarge,
+.journeyOrbitSmall {
+  position: absolute;
+
+  display: block;
+
+  border-radius: 9999px;
+}
+
+.journeyOrbitLarge {
+  width: 46rem;
+  height: 46rem;
+
+  left: -23rem;
+  top: 8rem;
+
+  border: 1px solid rgb(20 20 19 / 0.025);
+}
+
+.journeyOrbitSmall {
+  width: 34rem;
+  height: 34rem;
+
+  right: -17rem;
+  bottom: 4rem;
+
+  border: 1px solid rgb(204 120 92 / 0.04);
+}
+
+.journeyCoordinate {
+  position: absolute;
+
+  display: none;
+
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 7px;
+  font-weight: 500;
+
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+
+  color: rgb(108 106 100 / 0.32);
+}
+
+.journeyCoordinateLeft {
+  left: 2.5%;
+  top: 50%;
+
+  transform: rotate(-90%);
+}
+
+.journeyCoordinateRight {
+  right: 2.5%;
+  top: 50%;
+
+  transform: rotate(90deg);
+}
+
+.journeyAmbientPoint {
+  position: absolute;
+
+  width: 5px;
+  height: 5px;
+
+  border-radius: 9999px;
+}
+
+.journeyAmbientPointOne {
+  left: 8%;
+  top: 33%;
+
+  background: rgb(204 120 92 / 0.35);
+}
+
+.journeyAmbientPointTwo {
+  right: 9%;
+  bottom: 24%;
+
+  background: rgb(93 184 166 / 0.3);
+}
+
+/* ==================================================================
+   HEADER
+   ================================================================== */
+
+.journeyHeader {
+  display: grid;
+  gap: 2.5rem;
+}
+
+.journeyHeaderMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.journeyMeta {
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 7px;
+
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+
+  color: #a1a1aa;
+}
+
+.journeyHeaderContent {
+  display: grid;
+  gap: 2rem;
+}
+
+.journeyHeading {
+  margin: 0;
+
+  max-width: 720px;
+
+  font-family: var(--font-display, "Cormorant Garamond", serif);
+  font-size: clamp(2.8rem, 8vw, 4.6rem);
+  font-weight: 400;
+
+  line-height: 0.98;
+  letter-spacing: -0.045em;
+
+  color: var(--color-ink);
+}
+
+.journeyHeading span {
+  color: #cc785c;
+}
+
+.journeyIntroBlock {
+  max-width: 520px;
+}
+
+.journeyIntro {
+  margin: 0;
+
+  font-size: 0.9rem;
+  line-height: 1.8;
+
+  color: #71717a;
+}
+
+.journeySequence {
+  display: flex;
+  align-items: center;
+
+  gap: 0.65rem;
+
+  margin-top: 1.5rem;
+
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 7px;
+
+  letter-spacing: 0.17em;
+
+  color: #a1a1aa;
+}
+
+.journeySequence i {
+  display: block;
+
+  width: 1.8rem;
+  height: 1px;
+
+  background: rgb(204 120 92 / 0.32);
+}
+
+/* ==================================================================
+   JOURNEY
+   ================================================================== */
+
+.journeyStage {
+  position: relative;
+
+  margin-top: 4rem;
+}
+
+.journeyGrid {
+  display: grid;
+  gap: 0;
+}
+
+.journeyStep {
+  position: relative;
+
+  padding-block: 2rem;
+
+  border-bottom: 1px solid #e4e4e7;
+}
+
+.journeyStepMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 1rem;
+}
+
+.journeyNumber {
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 7px;
+
+  letter-spacing: 0.15em;
+
+  color: #b0aaa2;
+}
+
+.journeyStepIdentity {
+  display: flex;
+  align-items: center;
+
+  gap: 0.5rem;
+}
+
+.journeyStepCopy {
+  margin-top: 2rem;
+}
+
+.journeyMicro {
+  margin: 0;
+
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 7px;
+
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+
+  color: #cc785c;
+}
+
+.journeyStageTitle {
+  margin: 0.8rem 0 0;
+
+  max-width: 320px;
+
+  font-family: var(--font-display, "Cormorant Garamond", serif);
+  font-size: 1.75rem;
+  font-weight: 400;
+
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+
+  color: #252523;
+}
+
+.journeyStageCopy {
+  margin: 0.9rem 0 0;
+
+  max-width: 330px;
+
+  font-size: 0.72rem;
+  line-height: 1.75;
+
+  color: #71717a;
+}
+
+.journeyVisual {
+  margin-top: 2rem;
+}
+
+/* ==================================================================
+   DESKTOP RAIL
+   ================================================================== */
+
+.journeyRail {
+  display: none;
+}
+
+/* ==================================================================
+   PLACEMENT ARTIFACT
+   ================================================================== */
+
+.placementArtifact {
+  position: relative;
+
+  min-height: 270px;
+
+  overflow: hidden;
+
+  border: 1px solid #e4e4e7;
+  border-radius: 16px;
+
+  background: #f4f4f5;
+}
+
+.placementField {
+  position: absolute;
+  inset: 0;
+
+  overflow: hidden;
+
+  pointer-events: none;
+}
+
+.placementContour {
+  position: absolute;
+
+  width: 250px;
+  height: 250px;
+
+  left: -90px;
+  bottom: -120px;
+
+  border: 1px solid rgb(20 20 19 / 0.035);
+  border-radius: 9999px;
+}
+
+.placementLine {
+  position: absolute;
+
+  left: 0;
+  right: 0;
+  top: 54%;
+
+  height: 1px;
+
+  background: rgb(20 20 19 / 0.04);
+}
+
+.placementMark {
+  position: absolute;
+
+  left: 50%;
+  top: 46%;
+
+  transform: translate(-50%, -50%);
+}
+
+.placementMarkInner {
+  display: flex;
+
+  width: 116px;
+  height: 116px;
+
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid #e4e4e7;
+  border-radius: 16px;
+
+  background: var(--color-canvas);
+
+  box-shadow: 0 18px 50px rgb(20 20 19 / 0.06);
+}
+
+.placementTarget {
+  position: absolute;
+
+  right: -5px;
+  top: -5px;
+
+  width: 12px;
+  height: 12px;
+
+  border: 3px solid #f4f4f5;
+  border-radius: 9999px;
+
+  background: #cc785c;
+}
+
+.placementInfo {
+  position: absolute;
+
+  left: 1rem;
+  right: 1rem;
+  bottom: 1rem;
+
+  display: flex;
+  align-items: center;
+
+  gap: 0.8rem;
+}
+
+.placementIndex {
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 7px;
+
+  color: #b0aaa2;
+}
+
+.placementInfo p {
+  margin: 0;
+
+  font-size: 9px;
+  font-weight: 500;
+
+  color: #52525b;
+}
+
+.placementInfo div span {
+  display: block;
+
+  margin-top: 2px;
+
+  font-size: 7px;
+
+  color: #a1a1aa;
+}
+
+.placementStatus {
+  position: absolute;
+
+  left: 1rem;
+  top: 1rem;
+
+  display: flex;
+  align-items: center;
+
+  gap: 0.45rem;
+}
+
+/* ==================================================================
+   SCAN ARTIFACT
+   ================================================================== */
+
+.scanArtifact {
+  position: relative;
+
+  min-height: 270px;
+
+  overflow: hidden;
+
+  padding: 1rem;
+
+  border: 1px solid rgb(255 255 255 / 0.07);
+  border-radius: 16px;
+
+  background: #09090b;
+
+  color: #fafafa;
+}
+
+.scanTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 1rem;
+}
+
+.scanTop > span:first-child {
+  display: flex;
+  align-items: center;
+
+  gap: 0.45rem;
+}
+
+.scanDemoLabel {
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 7px;
+
+  letter-spacing: 0.15em;
+
+  color: #71717a;
+}
+
+.scanObject {
+  position: relative;
+
+  display: flex;
+
+  min-height: 180px;
+
+  align-items: center;
+  justify-content: center;
+}
+
+.scanOrbit {
+  position: absolute;
+
+  width: 170px;
+  height: 170px;
+
+  border: 1px solid rgb(204 120 92 / 0.08);
+  border-radius: 9999px;
+}
+
+.scanResolve {
+  display: flex;
+  align-items: center;
+
+  gap: 0.6rem;
+
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 7px;
+
+  letter-spacing: 0.12em;
+
+  color: #71717a;
+}
+
+.scanResolveLine {
+  flex: 1;
+
+  height: 1px;
+
+  background: rgb(204 120 92 / 0.2);
+}
+
+.scanResolveNode {
+  display: flex;
+
+  width: 26px;
+  height: 26px;
+
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid rgb(204 120 92 / 0.15);
+  border-radius: 9999px;
+
+  color: #cc785c;
+}
+
+/* ==================================================================
+   CONNECTION ARTIFACT
+   ================================================================== */
+
+.connectionArtifact {
+  position: relative;
+
+  min-height: 270px;
+
+  padding: 1rem;
+
+  overflow: hidden;
+
+  border: 1px solid #e4e4e7;
+  border-radius: 16px;
+
+  background: #e4e4e7;
+}
+
+.connectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 1rem;
+
+  color: #cc785c;
+}
+
+.connectionHeader > span {
+  display: flex;
+  align-items: center;
+
+  gap: 0.45rem;
+}
+
+.connectionArtifact :global(.boundary) {
+  margin-top: 1.25rem;
+}
+
+.connectionAction {
+  display: flex;
+  align-items: center;
+
+  gap: 0.75rem;
+
+  margin-top: 1rem;
+
+  padding-top: 1rem;
+
+  border-top: 1px solid #e4e4e7;
+}
+
+.connectionActionIcon {
+  display: flex;
+
+  width: 32px;
+  height: 32px;
+
+  flex: 0 0 auto;
+
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid rgb(204 120 92 / 0.14);
+  border-radius: 8px;
+
+  background: rgb(204 120 92 / 0.05);
+
+  color: #cc785c;
+}
+
+.connectionAction span {
+  display: block;
+
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 6px;
+
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+
+  color: #a1a1aa;
+}
+
+.connectionAction p {
+  margin: 2px 0 0;
+
+  font-size: 8px;
+
+  color: #52525b;
+}
+
+/* ==================================================================
+   MOBILE CONNECTOR
+   ================================================================== */
+
+.mobileJourneyConnector {
+  position: relative;
+
+  display: flex;
+  flex-direction: column;
+
+  height: 86px;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 0.4rem;
+}
+
+.mobileConnectorLine {
+  position: absolute;
+
+  top: 0;
+  bottom: 0;
+  left: 50%;
+
+  width: 1px;
+
+  background: #e4e4e7;
+}
+
+.mobileConnectorNode {
+  position: relative;
+
+  z-index: 1;
+
+  display: flex;
+
+  width: 28px;
+  height: 28px;
+
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid #e4e4e7;
+  border-radius: 9999px;
+
+  background: var(--color-canvas);
+
+  color: #cc785c;
+
+  transform: rotate(90deg);
+}
+
+.mobileConnectorLabel {
+  position: relative;
+  z-index: 1;
+
+  margin-top: 0.3rem;
+
+  padding-inline: 0.4rem;
+
+  background: var(--color-canvas);
+
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 6px;
+
+  letter-spacing: 0.14em;
+
+  color: #a1a1aa;
+}
+
+/* ==================================================================
+   TRANSFORMATION STRIP
+   ================================================================== */
+
+.transformationStrip {
+  display: grid;
+
+  margin-top: 3rem;
+
+  border-top: 1px solid #e4e4e7;
+  border-bottom: 1px solid #e4e4e7;
+}
+
+.transformationState {
+  display: grid;
+
+  grid-template-columns: 24px 34px minmax(0, 1fr);
+
+  align-items: center;
+
+  gap: 0.8rem;
+
+  padding-block: 1rem;
+}
+
+.transformationNumber {
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 7px;
+
+  color: #b0aaa2;
+}
+
+.transformationIcon {
+  display: flex;
+
+  width: 32px;
+  height: 32px;
+
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid #e4e4e7;
+  border-radius: 8px;
+
+  color: #a1a1aa;
+}
+
+.transformationIconAccent {
+  border-color: rgb(204 120 92 / 0.15);
+
+  background: rgb(204 120 92 / 0.05);
+
+  color: #cc785c;
+}
+
+.transformationState p {
+  margin: 0;
+
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 7px;
+
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+
+  color: #a1a1aa;
+}
+
+.transformationState div:last-child span {
+  display: block;
+
+  margin-top: 3px;
+
+  font-size: 9px;
+
+  color: #52525b;
+}
+
+.transformationConnector {
+  display: none;
+}
+
+/* ==================================================================
+   CLOSING
+   ================================================================== */
+
+.journeyClosing {
+  display: flex;
+  flex-direction: column;
+
+  gap: 2rem;
+
+  margin-top: 4rem;
+  padding-top: 2rem;
+
+  border-top: 1px solid #e4e4e7;
+}
+
+.journeyClosingStatement {
+  margin: 0.75rem 0 0;
+
+  max-width: 720px;
+
+  font-family: var(--font-display, "Cormorant Garamond", serif);
+  font-size: clamp(1.55rem, 5vw, 2rem);
+  font-weight: 400;
+
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+
+  color: #252523;
+}
+
+.journeyClosingStatement span {
+  color: #cc785c;
+}
+
+.journeyClosingMeta {
+  display: flex;
+  align-items: center;
+
+  gap: 0.7rem;
+}
+
+.journeyClosingMeta span {
+  display: block;
+
+  width: 2rem;
+  height: 1px;
+
+  background: rgb(204 120 92 / 0.35);
+}
+
+.journeyClosingMeta p {
+  margin: 0;
+
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 6px;
+
+  letter-spacing: 0.16em;
+
+  color: #a1a1aa;
+}
+
+/* ==================================================================
+   TABLET
+   ================================================================== */
+
+@media (min-width: 768px) {
+  .howJourney {
+    padding-block: 7rem;
+  }
+
+  .journeyHeaderContent {
+    grid-template-columns: minmax(0, 1.25fr) minmax(260px, 0.75fr);
+
+    align-items: end;
+
+    gap: 4rem;
+  }
+
+  .transformationStrip {
+    grid-template-columns:
+      minmax(0, 1fr)
+      56px
+      minmax(0, 1fr)
+      56px
+      minmax(0, 1fr);
+
+    align-items: center;
+  }
+
+  .transformationConnector {
+    display: flex;
+    align-items: center;
+
+    gap: 0.35rem;
+
+    color: #cc785c;
+  }
+
+  .transformationConnector span {
+    display: block;
+
+    flex: 1;
+
+    height: 1px;
+
+    background: rgb(204 120 92 / 0.2);
+  }
+}
+
+/* ==================================================================
+   DESKTOP
+   ================================================================== */
+
+@media (min-width: 1024px) {
+  .howJourney {
+    padding-block: 9rem;
+  }
+
+  .journeyCoordinate {
+    display: block;
+  }
+
+  .journeyStage {
+    margin-top: 6rem;
+  }
+
+  .journeyGrid {
+    position: relative;
+
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+
+    gap: 3rem;
+  }
+
+  .journeyStep {
+    padding-top: 3rem;
+
+    border-top: 0;
+  }
+
+  .journeyStepPrimary {
+    transform: translateY(-1.25rem);
+  }
+
+  .journeyRail {
+    position: absolute;
+
+    left: 0;
+    right: 0;
+    top: 0;
+
+    z-index: 2;
+
+    display: block;
+
+    height: 1px;
+  }
+
+  .journey > .journeyRail {
+    top: 155px;
+    left: 15%;
+    right: 15%;
+  }
+
+  .journeyRailBase {
+    position: absolute;
+
+    inset: 0;
+
+    background: #e4e4e7;
+  }
+
+  .journeyRailPoint {
+    position: absolute;
+
+    top: 50%;
+
+    width: 8px;
+    height: 8px;
+
+    border: 2px solid #ffffff;
+    border-radius: 9999px;
+
+    background: #cc785c;
+
+    transform: translate(-50%, -50%);
+  }
+
+  .journeyRailPointOne {
+    left: 16.666%;
+  }
+
+  .journeyRailPointTwo {
+    left: 50%;
+  }
+
+  .journeyRailPointThree {
+    left: 83.333%;
+  }
+
+  .mobileJourneyConnector {
+    display: none;
+  }
+
+  .journeyClosing {
+    flex-direction: row;
+
+    align-items: flex-end;
+    justify-content: space-between;
+
+    gap: 4rem;
+
+    margin-top: 5rem;
+  }
+
+  .journeyVisual {
+    margin-top: 2.5rem;
+  }
+
+  .placementArtifact,
+  .scanArtifact,
+  .connectionArtifact {
+    min-height: 310px;
+  }
+}
+
+/* ==================================================================
+   DARK MODE
+   ================================================================== */
+
+:global(.dark) .howJourney {
+  background: #09090b;
+
+  border-color: #27272a;
+}
+
+:global(.dark) .journeyHeading,
+:global(.dark) .journeyStageTitle,
+:global(.dark) .journeyClosingStatement {
+  color: #fafafa;
+}
+
+:global(.dark) .journeyIntro,
+:global(.dark) .journeyStageCopy {
+  color: #a1a1aa;
+}
+
+:global(.dark) .journeyStep,
+:global(.dark) .transformationStrip,
+:global(.dark) .journeyClosing {
+  border-color: rgb(255 255 255 / 0.07);
+}
+
+:global(.dark) .placementArtifact,
+:global(.dark) .connectionArtifact {
+  border-color: rgb(255 255 255 / 0.07);
+
+  background: #18181b;
+}
+
+:global(.dark) .placementMarkInner {
+  border-color: rgb(255 255 255 / 0.08);
+
+  background: #09090b;
+}
+
+:global(.dark) .placementTarget {
+  border-color: #27272a;
+}
+
+:global(.dark) .placementInfo p,
+:global(.dark) .connectionAction p,
+:global(.dark) .transformationState div:last-child span {
+  color: #e4e4e7;
+}
+
+:global(.dark) .mobileConnectorLine,
+:global(.dark) .journeyRailBase {
+  background: rgb(255 255 255 / 0.07);
+}
+
+:global(.dark) .mobileConnectorNode {
+  border-color: rgb(255 255 255 / 0.08);
+
+  background: #09090b;
+}
+
+:global(.dark) .mobileConnectorLabel {
+  background: #09090b;
+}
+
+:global(.dark) .journeyRailPoint {
+  border-color: #27272a;
+}
+
+:global(.dark) .transformationIcon {
+  border-color: rgb(255 255 255 / 0.07);
+}
+
+/* ==================================================================
+   REDUCED MOTION
+   ================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .journeyStepPrimary {
+    transform: none;
+  }
+}

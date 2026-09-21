@@ -1,0 +1,48 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "vaahansafe-web",
+  "main": ".worker-next/index.mjs",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+
+  // =========================================================================
+  // LEAST-PRIVILEGE BINDINGS — PUBLIC WEB & MARKETING
+  // Read-only static delivery with optional public brand assets.
+  // =========================================================================
+
+  // Development Environment (Default)
+  "r2_buckets": [
+    {
+      "binding": "PUBLIC_STORAGE",
+      "bucket_name": "vaahansafe-dev-public"
+    }
+  ],
+
+  // Multi-Environment Overrides
+  "env": {
+    "development": {
+      "r2_buckets": [
+        {
+          "binding": "PUBLIC_STORAGE",
+          "bucket_name": "vaahansafe-dev-public"
+        }
+      ]
+    },
+    "staging": {
+      "r2_buckets": [
+        {
+          "binding": "PUBLIC_STORAGE",
+          "bucket_name": "vaahansafe-staging-public"
+        }
+      ]
+    },
+    "production": {
+      "r2_buckets": [
+        {
+          "binding": "PUBLIC_STORAGE",
+          "bucket_name": "vaahansafe-prod-public"
+        }
+      ]
+    }
+  }
+}

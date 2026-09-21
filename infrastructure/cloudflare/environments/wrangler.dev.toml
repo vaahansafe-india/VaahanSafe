@@ -1,0 +1,37 @@
+name = "vaahansafe-edge-dev"
+main = "apps/web/.worker-next/index.mjs"
+compatibility_date = "2026-09-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Cloudflare D1 Database Binding
+[[d1_databases]]
+binding = "DB"
+database_name = "vaahansafe-dev-db"
+database_id = "788a90e8-afb6-474f-a8c6-8c638ae0f721"
+migrations_dir = "../../../database/migrations"
+
+# Cloudflare R2 Object Storage Bindings
+[[r2_buckets]]
+binding = "PUBLIC_STORAGE"
+bucket_name = "vaahansafe-dev-public"
+
+[[r2_buckets]]
+binding = "PRIVATE_STORAGE"
+bucket_name = "vaahansafe-dev-private"
+
+[[r2_buckets]]
+binding = "EXPORT_STORAGE"
+bucket_name = "vaahansafe-dev-exports"
+
+# Cloudflare Queues
+[[queues.producers]]
+binding = "NOTIFICATION_QUEUE"
+queue = "vaahansafe-dev-notifications"
+
+[[queues.producers]]
+binding = "ANALYTICS_QUEUE"
+queue = "vaahansafe-dev-analytics-events"
+
+[[queues.producers]]
+binding = "COMMERCE_QUEUE"
+queue = "vaahansafe-dev-commerce-events"

@@ -1,0 +1,7 @@
+{
+  "extends": "@vaahansafe/typescript-config/node-library.json",
+  "compilerOptions": {
+    "baseUrl": "."
+  },
+  "include": ["src"]
+}

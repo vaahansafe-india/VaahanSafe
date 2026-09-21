@@ -1,0 +1,2150 @@
+/* ========================================================================== */
+/* VAHANSAFE IDENTITY HERO                                                    */
+/* ========================================================================== */
+
+.hero {
+  --font-serif: var(--font-display, "Cormorant Garamond", Georgia, serif);
+  --font-mono: var(--font-code, "JetBrains Mono", "Geist Mono", monospace);
+
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+
+  min-height: calc(100svh - 64px);
+
+  border-bottom: 1px solid var(--color-hairline, #e4e4e7);
+  background: var(--color-canvas);
+
+  color: var(--color-ink);
+}
+
+/* -------------------------------------------------------------------------- */
+/* MAIN CONTENT                                                               */
+/* -------------------------------------------------------------------------- */
+
+.content {
+  position: relative;
+  z-index: 2;
+
+  width: min(100% - 40px, 1240px);
+  margin-inline: auto;
+
+  padding-top: clamp(3.5rem, 6vw, 5.5rem);
+  padding-bottom: clamp(3.5rem, 6vw, 5.5rem);
+
+  text-align: center;
+}
+
+/* -------------------------------------------------------------------------- */
+/* INTRO                                                                      */
+/* -------------------------------------------------------------------------- */
+
+.intro {
+  position: relative;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  margin-inline: auto;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 10px;
+
+  margin: 0;
+
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 500;
+
+  line-height: 1;
+
+  letter-spacing: 0.21em;
+  text-transform: uppercase;
+
+  color: #71717a;
+}
+
+.eyebrowRail {
+  display: block;
+
+  width: 28px;
+  height: 1px;
+
+  background: rgba(204, 120, 92, 0.34);
+}
+
+.eyebrowIndex {
+  color: #aaa59d;
+}
+
+/* -------------------------------------------------------------------------- */
+/* HEADLINE                                                                   */
+/* -------------------------------------------------------------------------- */
+
+.headline {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  max-width: 1040px;
+
+  margin: clamp(1.25rem, 2.2vw, 1.85rem) auto 0;
+
+  font-family: var(--font-serif);
+  font-size: clamp(2.75rem, 5.5vw, 5.25rem);
+  font-weight: 400;
+
+  line-height: 0.95;
+
+  letter-spacing: -0.045em;
+
+  text-wrap: balance;
+}
+
+.headlinePrimary,
+.headlineAccent {
+  display: block;
+}
+
+.headlinePrimary {
+  color: var(--color-ink);
+}
+
+.headlineAccent {
+  position: relative;
+
+  margin-top: 0.08em;
+
+  color: #cc785c;
+}
+
+/*
+ * Tiny identity underline — deliberately not a generic decorative underline.
+ */
+.headlineAccent::after {
+  content: "";
+
+  position: absolute;
+  left: 50%;
+  bottom: -18px;
+
+  width: clamp(52px, 7vw, 88px);
+  height: 1px;
+
+  transform: translateX(-50%);
+
+  background: rgba(204, 120, 92, 0.38);
+}
+
+/* -------------------------------------------------------------------------- */
+/* DESCRIPTION                                                                */
+/* -------------------------------------------------------------------------- */
+
+.description {
+  max-width: 600px;
+
+  margin: clamp(1.25rem, 2vw, 1.75rem) auto 0;
+
+  font-size: clamp(0.9rem, 1.2vw, 1.02rem);
+  font-weight: 400;
+
+  line-height: 1.75;
+
+  color: #71717a;
+
+  text-wrap: pretty;
+}
+
+/* -------------------------------------------------------------------------- */
+/* ACTIONS                                                                    */
+/* -------------------------------------------------------------------------- */
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  flex-wrap: nowrap;
+
+  gap: 14px;
+
+  margin-top: 24px;
+}
+
+.primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+
+  min-height: 46px;
+
+  padding-inline: 22px;
+
+  gap: 10px;
+
+  border-radius: 8px;
+
+  background: #cc785c;
+  color: #fff;
+
+  box-shadow: none;
+
+  font-size: 12px;
+  font-weight: 500;
+
+  transition:
+    background-color 180ms ease,
+    transform 180ms ease;
+}
+
+.primary:hover {
+  background: #a9583e;
+}
+
+.primary svg {
+  flex-shrink: 0;
+  transition: transform 180ms ease;
+}
+
+.primary:hover svg {
+  transform: translateX(2px);
+}
+
+.secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+
+  min-height: 46px;
+
+  gap: 9px;
+
+  padding-inline: 18px;
+
+  border: 1px solid #e4e4e7;
+  border-radius: 8px;
+
+  background: rgba(250, 249, 245, 0.6);
+
+  color: #52525b;
+
+  font-size: 12px;
+  font-weight: 500;
+
+  text-decoration: none;
+
+  transition:
+    border-color 180ms ease,
+    background-color 180ms ease,
+    color 180ms ease;
+}
+
+.secondary:hover {
+  border-color: rgba(204, 120, 92, 0.3);
+  background: rgba(204, 120, 92, 0.04);
+
+  color: #a9583e;
+}
+
+.secondary svg {
+  flex-shrink: 0;
+  transition: transform 180ms ease;
+}
+
+.secondary:hover svg {
+  transform: translateX(2px);
+}
+
+/* -------------------------------------------------------------------------- */
+/* RETAIL ROUTE                                                               */
+/* -------------------------------------------------------------------------- */
+
+.retailRoute {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 8px;
+
+  margin-top: 17px;
+
+  font-size: 10px;
+
+  color: #a1a1aa;
+}
+
+.retailRoutePoint {
+  width: 4px;
+  height: 4px;
+
+  border-radius: 999px;
+
+  background: #cc785c;
+}
+
+.retailRouteLabel {
+  color: #a1a1aa;
+}
+
+.retailRouteLink {
+  display: inline-flex;
+  align-items: center;
+
+  gap: 5px;
+
+  color: #71717a;
+
+  font-weight: 500;
+
+  text-decoration: none;
+
+  transition: color 160ms ease;
+}
+
+.retailRouteLink:hover {
+  color: #a9583e;
+}
+
+.retailRouteLink svg {
+  transition: transform 160ms ease;
+}
+
+.retailRouteLink:hover svg {
+  transform: translateX(2px);
+}
+
+/* -------------------------------------------------------------------------- */
+/* IDENTITY TRANSITION                                                        */
+/* -------------------------------------------------------------------------- */
+
+.identityTransition {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 10px;
+
+  max-width: 780px;
+
+  margin: clamp(3.5rem, 7vw, 5.75rem) auto 0;
+
+  color: #a1a1aa;
+}
+
+.transitionLine {
+  flex: 1;
+
+  height: 1px;
+
+  background: #e4e4e7;
+}
+
+.transitionNode {
+  display: flex;
+  align-items: center;
+}
+
+.transitionLabel {
+  font-family: var(--font-mono);
+
+  font-size: 6px;
+
+  line-height: 1;
+
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+
+  white-space: nowrap;
+}
+
+.transitionArrow {
+  color: rgba(204, 120, 92, 0.65);
+
+  font-size: 9px;
+}
+
+/* -------------------------------------------------------------------------- */
+/* ARTIFACT STAGE                                                             */
+/* -------------------------------------------------------------------------- */
+
+.artifactStage {
+  position: relative;
+
+  max-width: 760px;
+
+  margin: 24px auto 0;
+
+  padding: clamp(2rem, 5vw, 4.5rem) clamp(0rem, 3vw, 2rem);
+}
+
+/*
+ * Registration ring around the product object.
+ */
+.artifactStage::before {
+  content: "";
+
+  position: absolute;
+
+  width: min(94vw, 700px);
+  aspect-ratio: 1;
+
+  left: 50%;
+  top: 50%;
+
+  border: 1px solid rgba(20, 20, 19, 0.035);
+  border-radius: 50%;
+
+  transform: translate(-50%, -50%);
+
+  pointer-events: none;
+}
+
+.artifactStage::after {
+  content: "";
+
+  position: absolute;
+
+  width: min(78vw, 540px);
+  aspect-ratio: 1;
+
+  left: 50%;
+  top: 50%;
+
+  border: 1px solid rgba(204, 120, 92, 0.045);
+  border-radius: 50%;
+
+  transform: translate(-50%, -50%);
+
+  pointer-events: none;
+}
+
+.artifactCoordinate {
+  position: relative;
+  z-index: 2;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  max-width: 620px;
+
+  margin: 0 auto 12px;
+
+  font-family: var(--font-mono);
+
+  font-size: 6px;
+
+  line-height: 1;
+
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+
+  color: #aaa59d;
+}
+
+.artifactRail {
+  position: absolute;
+
+  left: -32px;
+  top: 50%;
+
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  transform: rotate(-90deg) translateX(-50%);
+  transform-origin: left center;
+
+  font-family: var(--font-mono);
+
+  font-size: 6px;
+
+  line-height: 1;
+
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+
+  color: #aaa59d;
+}
+
+.artifactRailPoint {
+  width: 4px;
+  height: 4px;
+
+  border-radius: 50%;
+
+  background: #cc785c;
+}
+
+.artifactRailLine {
+  width: 25px;
+  height: 1px;
+
+  background: rgba(204, 120, 92, 0.35);
+}
+
+/* ========================================================================== */
+/* HERO IDENTITY PLAQUE                                                       */
+/* ========================================================================== */
+
+.plaque {
+  --plaque-border: rgb(255 255 255 / 0.075);
+  --plaque-border-soft: rgb(255 255 255 / 0.05);
+  --plaque-muted: #a1a1aa;
+  --plaque-muted-soft: #5f5c57;
+  --plaque-ink: #fafafa;
+
+  position: relative;
+  isolation: isolate;
+
+  width: 100%;
+  max-width: 720px;
+
+  margin-inline: auto;
+
+  overflow: hidden;
+
+  border: 1px solid var(--plaque-border);
+  border-radius: 20px;
+
+  background: #09090b;
+
+  color: var(--plaque-ink);
+
+  text-align: left;
+
+  box-shadow:
+    0 30px 80px rgb(20 20 19 / 0.12),
+    0 4px 12px rgb(20 20 19 / 0.05);
+}
+
+:global(.dark) .plaque {
+  background: #18181b;
+  border-color: rgb(255 255 255 / 0.08);
+}
+
+/* ========================================================================== */
+/* AMBIENT GEOMETRY                                                           */
+/* ========================================================================== */
+
+.plaqueGeometry {
+  position: absolute;
+  z-index: -1;
+
+  inset: 0;
+
+  overflow: hidden;
+
+  pointer-events: none;
+}
+
+.plaqueOrbitLarge,
+.plaqueOrbitSmall {
+  position: absolute;
+
+  display: block;
+
+  border-radius: 9999px;
+}
+
+.plaqueOrbitLarge {
+  width: 360px;
+  height: 360px;
+
+  right: -160px;
+  top: -190px;
+
+  border: 1px solid rgb(204 120 92 / 0.07);
+}
+
+.plaqueOrbitSmall {
+  width: 240px;
+  height: 240px;
+
+  left: -120px;
+  bottom: -130px;
+
+  border: 1px solid rgb(255 255 255 / 0.035);
+}
+
+.plaqueGeometryPoint {
+  position: absolute;
+
+  display: block;
+
+  width: 4px;
+  height: 4px;
+
+  border-radius: 9999px;
+}
+
+.plaqueGeometryPointCoral {
+  right: 14%;
+  top: 24%;
+
+  background: rgb(204 120 92 / 0.7);
+}
+
+.plaqueGeometryPointTeal {
+  left: 10%;
+  bottom: 21%;
+
+  background: rgb(93 184 166 / 0.6);
+}
+
+.plaqueRegistrationLine {
+  position: absolute;
+
+  right: 9%;
+  bottom: 14%;
+
+  width: 70px;
+  height: 1px;
+
+  background: rgb(255 255 255 / 0.045);
+}
+
+/* ========================================================================== */
+/* HEADER                                                                     */
+/* ========================================================================== */
+
+.plaqueHeader {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 24px;
+
+  min-height: 62px;
+
+  padding: 14px 18px;
+
+  border-bottom: 1px solid var(--plaque-border);
+}
+
+.plaqueBrand {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+}
+
+.plaqueBrandRail {
+  display: block;
+
+  width: 24px;
+  height: 1px;
+
+  background: rgb(204 120 92 / 0.32);
+}
+
+.plaqueType {
+  font-family: var(--font-mono);
+  font-size: 6px;
+
+  line-height: 1;
+
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+
+  color: var(--plaque-muted);
+}
+
+.demoState {
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+
+  font-family: var(--font-mono);
+  font-size: 6px;
+
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+
+  color: var(--plaque-muted);
+}
+
+/* ========================================================================== */
+/* BODY                                                                       */
+/* ========================================================================== */
+
+.plaqueBody {
+  position: relative;
+
+  display: grid;
+  grid-template-columns:
+    minmax(180px, 0.82fr)
+    minmax(230px, 1.18fr)
+    minmax(120px, 0.58fr);
+
+  min-height: 300px;
+}
+
+/* ========================================================================== */
+/* SCAN ZONE                                                                  */
+/* ========================================================================== */
+
+.scanZone {
+  position: relative;
+
+  display: flex;
+  flex-direction: column;
+
+  min-width: 0;
+
+  padding: 20px;
+
+  border-right: 1px solid var(--plaque-border);
+}
+
+.scanZoneMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 10px;
+
+  font-family: var(--font-mono);
+  font-size: 6px;
+
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+
+  color: var(--plaque-muted-soft);
+}
+
+.scanObject {
+  position: relative;
+
+  display: flex;
+
+  width: 148px;
+  height: 148px;
+
+  align-items: center;
+  justify-content: center;
+
+  margin: auto;
+}
+
+.scanRegistrationRing {
+  position: absolute;
+
+  inset: 5px;
+
+  border: 1px solid rgb(255 255 255 / 0.045);
+  border-radius: 50%;
+}
+
+.scanRegistrationRing::after {
+  content: "";
+
+  position: absolute;
+
+  inset: 17px;
+
+  border: 1px solid rgb(204 120 92 / 0.065);
+  border-radius: inherit;
+}
+
+.scanSvg {
+  position: relative;
+  z-index: 2;
+
+  display: block;
+
+  width: 112px;
+  height: 112px;
+}
+
+.scanFrame {
+  opacity: 0.95;
+}
+
+.demoQr {
+  transform-origin: center;
+
+  opacity: 1;
+
+  animation: plaqueQrResolve 4.2s ease-out 350ms 1 both;
+}
+
+.recognizedVehicle {
+  transform-origin: center;
+
+  opacity: 0;
+
+  animation: plaqueVehicleResolve 4.2s ease-out 350ms 1 both;
+}
+
+.scanSweep {
+  opacity: 0;
+
+  animation: plaqueScanSweep 4.2s ease-out 350ms 1 both;
+}
+
+.scanTarget {
+  position: absolute;
+  z-index: 3;
+
+  right: 9px;
+  top: 50%;
+
+  width: 8px;
+  height: 8px;
+
+  border: 2px solid #09090b;
+  border-radius: 9999px;
+
+  background: #cc785c;
+
+  transform: translateY(-50%);
+}
+
+.scanCoordinate {
+  position: absolute;
+
+  left: 50%;
+  bottom: 1px;
+
+  transform: translateX(-50%);
+
+  font-family: var(--font-mono);
+  font-size: 5px;
+
+  letter-spacing: 0.18em;
+
+  color: #71717a;
+}
+
+.scanState {
+  display: flex;
+  align-items: center;
+
+  gap: 6px;
+
+  min-height: 24px;
+
+  font-family: var(--font-mono);
+  font-size: 5px;
+
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+
+  color: var(--plaque-muted);
+}
+
+.scanStatePoint {
+  width: 4px;
+  height: 4px;
+
+  border-radius: 50%;
+
+  background: #cc785c;
+}
+
+.scanStateArrow {
+  color: #71717a;
+}
+
+.scanState strong {
+  color: #5db8a6;
+
+  font-weight: 500;
+}
+
+/* ========================================================================== */
+/* IDENTITY DETAILS                                                           */
+/* ========================================================================== */
+
+.identityDetails {
+  min-width: 0;
+
+  padding: 26px 24px;
+}
+
+.identityMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 20px;
+}
+
+.microLabel,
+.identityMetaIndex {
+  font-family: var(--font-mono);
+  font-size: 6px;
+
+  line-height: 1;
+
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+
+  color: var(--plaque-muted);
+}
+
+.identityMetaIndex {
+  color: #71717a;
+}
+
+.visibleCode {
+  margin: 12px 0 0;
+
+  font-family: var(--font-mono);
+  font-size: clamp(1.1rem, 2.4vw, 1.5rem);
+  font-weight: 500;
+
+  line-height: 1;
+
+  letter-spacing: 0.13em;
+
+  color: #cc785c;
+}
+
+.identityDivider {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  margin-block: 24px 20px;
+}
+
+.identityDivider > span:first-child {
+  display: block;
+
+  flex: 1;
+
+  height: 1px;
+
+  background: var(--plaque-border);
+}
+
+.identityFacts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+
+  gap: 16px;
+}
+
+.identityFact {
+  min-width: 0;
+}
+
+.identityFact p {
+  margin: 7px 0 0;
+
+  overflow: hidden;
+
+  font-size: 9px;
+  font-weight: 500;
+
+  line-height: 1.35;
+
+  color: #e4e4e7;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.projectionRoute {
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr) auto;
+  align-items: center;
+
+  gap: 9px;
+
+  margin-top: 26px;
+  padding-top: 18px;
+
+  border-top: 1px solid var(--plaque-border);
+}
+
+.projectionRouteIcon {
+  display: flex;
+
+  width: 26px;
+  height: 26px;
+
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid rgb(93 184 166 / 0.12);
+  border-radius: 7px;
+
+  background: rgb(93 184 166 / 0.035);
+}
+
+.projectionRoute p {
+  margin: 4px 0 0;
+
+  font-size: 8px;
+
+  color: #b7b3ac;
+}
+
+.projectionArrow {
+  color: #5db8a6;
+
+  font-size: 10px;
+}
+
+/* ========================================================================== */
+/* STATUS ZONE                                                                */
+/* ========================================================================== */
+
+.statusZone {
+  display: flex;
+  flex-direction: column;
+
+  min-width: 0;
+
+  padding: 20px 16px;
+
+  border-left: 1px solid var(--plaque-border);
+}
+
+.statusZoneTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 8px;
+}
+
+.statusIndex {
+  font-family: var(--font-mono);
+  font-size: 6px;
+
+  color: #71717a;
+}
+
+.statusSeal {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+
+  gap: 7px;
+
+  margin-top: 40px;
+}
+
+.statusDescription {
+  font-family: var(--font-mono);
+  font-size: 5px;
+
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+
+  color: var(--plaque-muted-soft);
+}
+
+.statusConnection {
+  display: flex;
+  align-items: center;
+
+  gap: 5px;
+
+  margin-block: auto;
+}
+
+.statusConnection > span {
+  flex: 1;
+
+  height: 1px;
+
+  background: rgb(93 184 166 / 0.1);
+}
+
+.statusConnection > div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.statusDestination {
+  padding-top: 14px;
+
+  border-top: 1px solid var(--plaque-border);
+}
+
+.statusDestination p {
+  margin: 5px 0 0;
+
+  font-size: 8px;
+  font-weight: 500;
+
+  color: #e4e4e7;
+}
+
+/* ========================================================================== */
+/* RELATIONSHIP RAIL                                                          */
+/* ========================================================================== */
+
+.plaqueRelationship {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr)
+    50px
+    minmax(0, 1fr)
+    50px
+    minmax(0, 1fr);
+
+  align-items: center;
+
+  padding: 14px 18px;
+
+  border-top: 1px solid var(--plaque-border);
+  border-bottom: 1px solid var(--plaque-border);
+
+  background: rgb(255 255 255 / 0.012);
+}
+
+.relationshipState {
+  display: grid;
+  grid-template-columns: 18px 5px minmax(0, 1fr);
+  align-items: center;
+
+  gap: 7px;
+}
+
+.relationshipNumber {
+  font-family: var(--font-mono);
+  font-size: 5px;
+
+  color: #71717a;
+}
+
+.relationshipPoint {
+  width: 4px;
+  height: 4px;
+
+  border-radius: 50%;
+
+  background: #71717a;
+}
+
+.relationshipPointAccent {
+  background: #cc785c;
+}
+
+.relationshipState div span {
+  display: block;
+
+  font-family: var(--font-mono);
+  font-size: 5px;
+
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+
+  color: #71717a;
+}
+
+.relationshipState div p {
+  margin: 3px 0 0;
+
+  overflow: hidden;
+
+  font-size: 7px;
+
+  color: #aaa69f;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.relationshipConnector {
+  display: flex;
+  align-items: center;
+
+  gap: 4px;
+}
+
+.relationshipConnector span {
+  flex: 1;
+
+  height: 1px;
+
+  background: rgb(204 120 92 / 0.12);
+}
+
+.relationshipConnector i {
+  color: rgb(204 120 92 / 0.55);
+
+  font-family: var(--font-mono);
+  font-size: 7px;
+  font-style: normal;
+}
+
+/* ========================================================================== */
+/* FOOTER                                                                     */
+/* ========================================================================== */
+
+.plaqueFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  min-height: 48px;
+
+  padding: 12px 18px;
+}
+
+.plaqueFooterStatement {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  font-family: var(--font-mono);
+  font-size: 6px;
+
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+
+  color: var(--plaque-muted);
+}
+
+.plaqueFooterStatement strong {
+  color: #cc785c;
+
+  font-weight: 500;
+}
+
+.plaqueFooterPoint {
+  width: 4px;
+  height: 4px;
+
+  flex: 0 0 auto;
+
+  border-radius: 50%;
+
+  background: #cc785c;
+}
+
+.plaqueFooterIndex {
+  flex: 0 0 auto;
+
+  font-family: var(--font-mono);
+  font-size: 5px;
+
+  letter-spacing: 0.15em;
+
+  color: #71717a;
+}
+
+/* ========================================================================== */
+/* ONE-PASS SCAN MOTION                                                       */
+/* ========================================================================== */
+
+@keyframes plaqueScanSweep {
+  0%,
+  10% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+
+  18% {
+    opacity: 0.85;
+  }
+
+  52% {
+    opacity: 0.85;
+    transform: translateY(15px);
+  }
+
+  62%,
+  100% {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+}
+
+@keyframes plaqueQrResolve {
+  0%,
+  48% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  62% {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+}
+
+@keyframes plaqueVehicleResolve {
+  0%,
+  50% {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+
+  66%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* ARTIFACT CAPTION                                                           */
+/* -------------------------------------------------------------------------- */
+
+.artifactCaption {
+  position: relative;
+  z-index: 2;
+
+  display: grid;
+  grid-template-columns: minmax(30px, 1fr) auto minmax(30px, 1fr);
+  align-items: center;
+
+  gap: 14px;
+
+  max-width: 580px;
+
+  margin: 20px auto 0;
+}
+
+.artifactCaption > span {
+  height: 1px;
+
+  background: #e4e4e7;
+}
+
+.artifactCaption p {
+  margin: 0;
+
+  font-family: var(--font-mono);
+
+  font-size: 6px;
+
+  line-height: 1;
+
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+
+  color: #a1a1aa;
+
+  white-space: nowrap;
+}
+
+.artifactCaption strong {
+  color: #cc785c;
+
+  font-weight: 500;
+}
+
+/* -------------------------------------------------------------------------- */
+/* CLOSING                                                                    */
+/* -------------------------------------------------------------------------- */
+
+.closing {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 12px;
+
+  max-width: 680px;
+
+  margin: clamp(1rem, 3vw, 2rem) auto 0;
+}
+
+.closingIndex {
+  font-family: var(--font-mono);
+
+  font-size: 6px;
+
+  letter-spacing: 0.16em;
+
+  color: #b0aaa2;
+}
+
+.closing p {
+  margin: 0;
+
+  font-family: var(--font-serif);
+
+  font-size: clamp(1.05rem, 2vw, 1.3rem);
+  font-weight: 400;
+
+  line-height: 1.25;
+
+  letter-spacing: -0.018em;
+
+  color: #71717a;
+}
+
+.closing p span {
+  color: #52525b;
+}
+
+.closingPoint {
+  width: 4px;
+  height: 4px;
+
+  border-radius: 50%;
+
+  background: #cc785c;
+}
+
+/* ========================================================================== */
+/* FIELD                                                                      */
+/* ========================================================================== */
+
+.field {
+  position: absolute;
+  z-index: 0;
+
+  inset: 0;
+
+  overflow: hidden;
+
+  pointer-events: none;
+}
+
+.fieldSvg {
+  width: 100%;
+  height: 100%;
+
+  color: var(--color-ink);
+}
+
+.fieldHairlines {
+  opacity: 0.045;
+}
+
+.fieldFragments {
+  opacity: 0.055;
+}
+
+.fieldCoordinates {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  opacity: 0.18;
+
+  color: #a1a1aa;
+}
+
+.registrationTarget {
+  opacity: 0.035;
+}
+
+.connectionGeometry {
+  opacity: 0.04;
+}
+
+.registrationNotches {
+  opacity: 0.06;
+}
+
+.vehicleContour {
+  opacity: 0.025;
+}
+
+.fieldPoints {
+  color: #cc785c;
+
+  opacity: 0.48;
+}
+
+.fieldMetaLeft,
+.fieldMetaRight {
+  position: absolute;
+  top: 50%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 6px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #a1a1aa;
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.fieldMetaLeft {
+  left: 24px;
+  transform: rotate(-90deg) translateX(-50%);
+  transform-origin: left center;
+}
+
+.fieldMetaRight {
+  right: 24px;
+  transform: rotate(90deg) translateX(50%);
+  transform-origin: right center;
+}
+
+.metaLine {
+  width: 20px;
+  height: 1px;
+  background: rgba(204, 120, 92, 0.35);
+}
+
+@media (max-width: 1200px) {
+  .fieldMetaLeft,
+  .fieldMetaRight {
+    display: none;
+  }
+}
+
+/* ========================================================================== */
+/* RESPONSIVE — TABLET                                                        */
+/* ========================================================================== */
+
+@media (max-width: 1023px) {
+  .content {
+    width: min(100% - 40px, 900px);
+  }
+
+  .artifactRail {
+    display: none;
+  }
+
+  .fieldCoordinates {
+    opacity: 0.16;
+  }
+
+  .vehicleContour {
+    opacity: 0.02;
+  }
+}
+
+@media (max-width: 820px) {
+  .plaque {
+    max-width: 620px;
+  }
+
+  .plaqueBody {
+    grid-template-columns: minmax(165px, 0.85fr) minmax(220px, 1.15fr);
+  }
+
+  .statusZone {
+    grid-column: 1 / -1;
+
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+
+    gap: 18px;
+
+    padding: 14px 18px;
+
+    border-top: 1px solid var(--plaque-border);
+    border-left: 0;
+  }
+
+  .statusZoneTop {
+    justify-content: flex-start;
+
+    gap: 8px;
+  }
+
+  .statusSeal {
+    flex-direction: row;
+    align-items: center;
+
+    margin-top: 0;
+  }
+
+  .statusConnection {
+    display: none;
+  }
+
+  .statusDestination {
+    padding-top: 0;
+
+    border-top: 0;
+
+    text-align: right;
+  }
+}
+
+/* ========================================================================== */
+/* RESPONSIVE — MOBILE                                                        */
+/* ========================================================================== */
+
+@media (max-width: 767px) {
+  .hero {
+    min-height: auto;
+  }
+
+  .content {
+    width: min(100% - 32px, 560px);
+
+    padding-top: 72px;
+    padding-bottom: 72px;
+  }
+
+  .eyebrow {
+    font-size: 7px;
+
+    letter-spacing: 0.18em;
+  }
+
+  .eyebrowRail,
+  .eyebrowIndex {
+    display: none;
+  }
+
+  .headline {
+    margin-top: 24px;
+
+    font-size: clamp(2.8rem, 13vw, 4.25rem);
+
+    line-height: 0.94;
+
+    letter-spacing: -0.045em;
+  }
+
+  .headlineAccent {
+    margin-top: 0.12em;
+  }
+
+  .headlineAccent::after {
+    bottom: -13px;
+
+    width: 46px;
+  }
+
+  .description {
+    max-width: 440px;
+
+    margin-top: 36px;
+
+    font-size: 14px;
+    line-height: 1.75;
+  }
+
+  .actions {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: nowrap;
+
+    width: 100%;
+    max-width: 440px;
+
+    margin-inline: auto;
+    margin-top: 22px;
+    gap: 10px;
+  }
+
+  .primary,
+  .secondary {
+    flex: 1 1 0;
+    width: auto;
+    min-width: 0;
+    height: 44px;
+    min-height: 44px;
+    padding-inline: clamp(10px, 2.5vw, 16px);
+    font-size: clamp(11px, 2.7vw, 12px);
+    white-space: nowrap;
+    text-align: center;
+    justify-content: center;
+  }
+
+  .retailRoute {
+    flex-wrap: wrap;
+
+    row-gap: 5px;
+
+    margin-top: 18px;
+  }
+
+  .identityTransition {
+    gap: 7px;
+
+    margin-top: 54px;
+  }
+
+  .transitionLine {
+    display: none;
+  }
+
+  .transitionLabel {
+    font-size: 5px;
+
+    letter-spacing: 0.11em;
+  }
+
+  .transitionArrow {
+    font-size: 7px;
+  }
+
+  .artifactStage {
+    margin-top: 12px;
+
+    padding-top: 34px;
+    padding-bottom: 30px;
+  }
+
+  .artifactStage::before {
+    width: 120vw;
+  }
+
+  .artifactStage::after {
+    width: 90vw;
+  }
+
+  .artifactCoordinate {
+    padding-inline: 4px;
+
+    font-size: 5px;
+  }
+
+  .artifactCaption {
+    gap: 8px;
+
+    margin-top: 16px;
+  }
+
+  .artifactCaption p {
+    font-size: 5px;
+
+    letter-spacing: 0.08em;
+
+    white-space: normal;
+  }
+
+  .closing {
+    margin-top: 8px;
+  }
+
+  .closingIndex,
+  .closingPoint {
+    display: none;
+  }
+
+  .closing p {
+    max-width: 300px;
+
+    font-size: 17px;
+
+    line-height: 1.3;
+  }
+
+  /*
+   * Mobile should not inherit desktop's large decorative geometry.
+   */
+  .fieldSvg {
+    width: 145%;
+    margin-left: -22.5%;
+  }
+
+  .fieldCoordinates {
+    display: none;
+  }
+
+  .fieldFragments {
+    opacity: 0.035;
+  }
+
+  .vehicleContour {
+    opacity: 0.018;
+  }
+}
+
+@media (max-width: 640px) {
+  .plaque {
+    max-width: 440px;
+
+    border-radius: 16px;
+  }
+
+  .plaqueHeader {
+    min-height: 56px;
+
+    padding: 13px 14px;
+  }
+
+  .plaqueBrandRail,
+  .plaqueType {
+    display: none;
+  }
+
+  .demoState {
+    font-size: 5px;
+  }
+
+  .plaqueBody {
+    display: block;
+
+    min-height: 0;
+  }
+
+  .scanZone {
+    padding: 16px;
+
+    border-right: 0;
+    border-bottom: 1px solid var(--plaque-border);
+  }
+
+  .scanObject {
+    width: 138px;
+    height: 138px;
+
+    margin-block: 14px;
+  }
+
+  .scanSvg {
+    width: 104px;
+    height: 104px;
+  }
+
+  .scanState {
+    justify-content: center;
+  }
+
+  .identityDetails {
+    padding: 22px 18px;
+  }
+
+  .visibleCode {
+    font-size: 1.2rem;
+  }
+
+  .identityFacts {
+    gap: 12px;
+  }
+
+  .statusZone {
+    grid-column: auto;
+
+    grid-template-columns: 1fr auto;
+
+    padding: 14px 18px;
+  }
+
+  .statusZoneTop {
+    display: none;
+  }
+
+  .statusSeal {
+    justify-self: start;
+  }
+
+  .statusDestination {
+    justify-self: end;
+  }
+
+  .plaqueRelationship {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+
+    gap: 8px;
+
+    padding: 12px 14px;
+  }
+
+  .relationshipConnector {
+    display: none;
+  }
+
+  .relationshipState {
+    display: block;
+
+    text-align: center;
+  }
+
+  .relationshipNumber,
+  .relationshipPoint {
+    display: none;
+  }
+
+  .relationshipState div span {
+    font-size: 4.5px;
+  }
+
+  .relationshipState div p {
+    margin-top: 4px;
+
+    font-size: 6px;
+  }
+
+  .plaqueFooter {
+    padding: 12px 14px;
+  }
+
+  .plaqueFooterStatement {
+    font-size: 5px;
+  }
+
+  .plaqueFooterIndex {
+    display: none;
+  }
+
+  .plaqueOrbitLarge {
+    width: 280px;
+    height: 280px;
+  }
+
+  .plaqueOrbitSmall {
+    width: 190px;
+    height: 190px;
+  }
+}
+
+/* ========================================================================== */
+/* SMALL MOBILE                                                               */
+/* ========================================================================== */
+
+@media (max-width: 390px) {
+  .content {
+    width: min(100% - 28px, 360px);
+
+    padding-top: 64px;
+  }
+
+  .headline {
+    font-size: clamp(2.55rem, 13.5vw, 3.25rem);
+  }
+
+  .description {
+    font-size: 13px;
+  }
+
+  .actions {
+    gap: 8px;
+    margin-top: 20px;
+  }
+
+  .primary,
+  .secondary {
+    height: 42px;
+    min-height: 42px;
+    padding-inline: 8px;
+    font-size: 10.5px;
+    gap: 5px;
+  }
+
+  .primary svg,
+  .secondary svg {
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+  }
+
+  .transitionLabel {
+    font-size: 4.5px;
+  }
+
+  .artifactCoordinate {
+    display: none;
+  }
+}
+
+/* ========================================================================== */
+/* WIDE SCREENS                                                               */
+/* ========================================================================== */
+
+@media (min-width: 1440px) {
+  .content {
+    padding-top: 9rem;
+  }
+}
+
+@media (min-width: 1600px) {
+  .content {
+    width: min(100% - 80px, 1320px);
+  }
+
+  .headline {
+    max-width: 1160px;
+  }
+}
+
+/* ========================================================================== */
+/* ACCESSIBILITY                                                              */
+/* ========================================================================== */
+
+.primary:focus-visible,
+.secondary:focus-visible,
+.retailRouteLink:focus-visible {
+  outline: 2px solid rgba(204, 120, 92, 0.55);
+  outline-offset: 4px;
+}
+
+/* Motion must never be required to understand the hero. */
+
+@media (prefers-reduced-motion: reduce) {
+  .primary,
+  .primary svg,
+  .secondary,
+  .secondary svg,
+  .retailRouteLink,
+  .retailRouteLink svg {
+    transition: none;
+  }
+
+  .primary:hover svg,
+  .secondary:hover svg,
+  .retailRouteLink:hover svg {
+    transform: none;
+  }
+
+  .scanSweep {
+    display: none;
+  }
+
+  .demoQr {
+    animation: none;
+
+    opacity: 0;
+  }
+
+  .recognizedVehicle {
+    animation: none;
+
+    opacity: 1;
+  }
+}
+
+/* ========================================================================== */
+/* DARK                                                                       */
+/* ========================================================================== */
+
+:global(.dark) .hero {
+  border-color: #27272a;
+  background: #09090b;
+
+  color: #fafafa;
+}
+
+:global(.dark) .headlinePrimary {
+  color: #fafafa;
+}
+
+:global(.dark) .description {
+  color: #a1a1aa;
+}
+
+:global(.dark) .eyebrow {
+  color: #a1a1aa;
+}
+
+:global(.dark) .eyebrowIndex {
+  color: #71717a;
+}
+
+:global(.dark) .secondary {
+  border-color: #3f3f46;
+
+  background: rgba(39, 39, 42, 0.5);
+
+  color: #fafafa;
+}
+
+:global(.dark) .secondary:hover {
+  border-color: rgba(204, 120, 92, 0.3);
+
+  background: #18181b;
+
+  color: #cc785c;
+}
+
+:global(.dark) .retailRoute {
+  color: #71717a;
+}
+
+:global(.dark) .retailRouteLabel {
+  color: #71717a;
+}
+
+:global(.dark) .retailRouteLink {
+  color: #a1a1aa;
+}
+
+:global(.dark) .transitionLine,
+:global(.dark) .artifactCaption > span {
+  background: #27272a;
+}
+
+:global(.dark) .transitionLabel,
+:global(.dark) .artifactCaption p {
+  color: #71717a;
+}
+
+:global(.dark) .artifactStage::before {
+  border-color: rgba(250, 249, 245, 0.025);
+}
+
+:global(.dark) .artifactStage::after {
+  border-color: rgba(204, 120, 92, 0.055);
+}
+
+:global(.dark) .artifactCoordinate,
+:global(.dark) .artifactRail {
+  color: #71717a;
+}
+
+:global(.dark) .closing p {
+  color: #a1a1aa;
+}
+
+:global(.dark) .closing p span {
+  color: #e4e4e7;
+}
+
+:global(.dark) .closingIndex {
+  color: #71717a;
+}
+
+:global(.dark) .fieldSvg {
+  color: #fafafa;
+}
+
+:global(.dark) .fieldHairlines {
+  opacity: 0.035;
+}
+
+:global(.dark) .fieldFragments {
+  opacity: 0.035;
+}
+
+:global(.dark) .fieldCoordinates {
+  color: #a1a1aa;
+
+  opacity: 0.16;
+}
+
+:global(.dark) .registrationTarget {
+  opacity: 0.025;
+}
+
+:global(.dark) .connectionGeometry {
+  opacity: 0.03;
+}
+
+:global(.dark) .registrationNotches {
+  opacity: 0.04;
+}
+
+:global(.dark) .vehicleContour {
+  opacity: 0.018;
+}

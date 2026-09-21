@@ -1,0 +1,89 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "vaahansafe-qr",
+  "main": ".worker-next/index.mjs",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+
+  // =========================================================================
+  // LEAST-PRIVILEGE BINDINGS — QR EMERGENCY RESOLVER
+  // INVARIANT 08: QR surface does NOT bind payment or messaging secrets.
+  // INVARIANT 11: Minimal critical path (Edge -> Worker -> D1 -> Public Projection).
+  // =========================================================================
+
+  // Development Environment (Default)
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "vaahansafe-dev-db",
+      "database_id": "788a90e8-afb6-474f-a8c6-8c638ae0f721",
+      "migrations_dir": "../../infrastructure/cloudflare/d1/migrations"
+    }
+  ],
+  "queues": {
+    "producers": [
+      {
+        "binding": "ANALYTICS_QUEUE",
+        "queue": "vaahansafe-dev-analytics-events"
+      }
+    ]
+  },
+
+  // Multi-Environment Overrides
+  "env": {
+    "development": {
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "vaahansafe-dev-db",
+          "database_id": "788a90e8-afb6-474f-a8c6-8c638ae0f721",
+          "migrations_dir": "../../infrastructure/cloudflare/d1/migrations"
+        }
+      ],
+      "queues": {
+        "producers": [
+          {
+            "binding": "ANALYTICS_QUEUE",
+            "queue": "vaahansafe-dev-analytics-events"
+          }
+        ]
+      }
+    },
+    "staging": {
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "vaahansafe-staging-db",
+          "database_id": "6a95cf9f-9a96-4931-9531-370b467a940d",
+          "migrations_dir": "../../infrastructure/cloudflare/d1/migrations"
+        }
+      ],
+      "queues": {
+        "producers": [
+          {
+            "binding": "ANALYTICS_QUEUE",
+            "queue": "vaahansafe-staging-analytics-events"
+          }
+        ]
+      }
+    },
+    "production": {
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "vaahansafe-prod-db",
+          "database_id": "ed46249f-2967-4cd4-8807-75e1421d1754",
+          "migrations_dir": "../../infrastructure/cloudflare/d1/migrations"
+        }
+      ],
+      "queues": {
+        "producers": [
+          {
+            "binding": "ANALYTICS_QUEUE",
+            "queue": "vaahansafe-prod-analytics-events"
+          }
+        ]
+      }
+    }
+  }
+}

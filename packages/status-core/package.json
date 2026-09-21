@@ -1,0 +1,23 @@
+{
+  "name": "@vaahansafe/status-core",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Public system reliability, System Pulse journey topology, and incident evaluation engine for VaahanSafe",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@vaahansafe/database": "*",
+    "@vaahansafe/types": "*"
+  },
+  "devDependencies": {
+    "@vaahansafe/typescript-config": "*",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "echo linting status-core"
+  }
+}

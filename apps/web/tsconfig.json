@@ -1,0 +1,22 @@
+{
+  "extends": "@vaahansafe/typescript-config/nextjs.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "./*"
+      ]
+    },
+    "noEmit": true
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "next-env.d.ts",
+    ".next-brand-qa/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

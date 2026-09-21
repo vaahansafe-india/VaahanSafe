@@ -1,0 +1,29 @@
+# ==============================================================================
+# VAAHANSAFE CLOUDFLARE LOCAL WORKER SECRETS TEMPLATE (.dev.vars.example)
+#
+# INVARIANT 05: Secret values must NEVER exist in source control.
+# Copy this file to .dev.vars for local Wrangler emulation (npx wrangler dev).
+# .dev.vars is strictly gitignored.
+# ==============================================================================
+
+# Session & Authentication
+SESSION_SECRET=local_dev_session_secret_at_least_32_chars_long
+GOOGLE_CLIENT_ID=placeholder_google_oauth_client_id
+GOOGLE_CLIENT_SECRET=placeholder_google_oauth_client_secret
+
+# Bot Protection (Cloudflare official testing secret: always passes)
+TURNSTILE_SECRET_KEY=1x0000000000000000000000000000000AA
+
+# Payments Gateway (Cashfree Sandbox)
+CASHFREE_CLIENT_ID=placeholder_cashfree_sandbox_client_id
+CASHFREE_CLIENT_SECRET=placeholder_cashfree_sandbox_client_secret
+CASHFREE_WEBHOOK_SECRET=placeholder_cashfree_sandbox_webhook_secret
+
+# Messaging & Alerts (MSG91 Test Configuration)
+MSG91_AUTH_KEY=placeholder_msg91_sandbox_auth_key
+MSG91_OTP_TEMPLATE_ID=placeholder_msg91_otp_template_id
+MSG91_SENDER_ID=VHNSTG
+
+# Transactional Email (Sandbox / Mock)
+EMAIL_PROVIDER_API_KEY=placeholder_email_sandbox_key
+EMAIL_FROM_ADDRESS=support@vaahansafe.com

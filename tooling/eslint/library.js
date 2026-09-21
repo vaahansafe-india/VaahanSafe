@@ -1,0 +1,13 @@
+/** @type {import('eslint').Linter.Config} */
+module.exports = {
+  extends: ["eslint:recommended"],
+  env: {
+    browser: true,
+    node: true,
+    es2022: true,
+  },
+  rules: {
+    "no-unused-vars": ["warn", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
+  },
+  ignorePatterns: ["node_modules/", "dist/", ".next/", ".turbo/"],
+};

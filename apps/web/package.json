@@ -1,0 +1,34 @@
+{
+  "name": "@vaahansafe/web",
+  "version": "1.0.0",
+  "private": true,
+  "description": "VaahanSafe public website and product portal (vaahansafe.com)",
+  "scripts": {
+    "dev": "next dev -p 3000",
+    "build": "next build",
+    "start": "next start -p 3000",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@vaahansafe/config": "*",
+    "@vaahansafe/content": "*",
+    "@vaahansafe/icons": "*",
+    "@vaahansafe/types": "*",
+    "@vaahansafe/ui": "*",
+    "next": "^15.1.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.4",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vaahansafe/eslint-config": "*",
+    "@vaahansafe/typescript-config": "*",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.5.2",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.7.3"
+  }
+}

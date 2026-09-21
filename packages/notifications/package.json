@@ -1,0 +1,25 @@
+{
+  "name": "@vaahansafe/notifications",
+  "version": "1.0.0",
+  "private": true,
+  "description": "MSG91 (OTP + WhatsApp), Email, and In-App notification services for VaahanSafe",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@vaahansafe/types": "*",
+    "nodemailer": "^10.0.10",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/nodemailer": "^8.0.2",
+    "@vaahansafe/typescript-config": "*",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "echo linting notifications"
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "name": "vaahansafe",
+  "version": "1.0.0",
+  "private": true,
+  "packageManager": "npm@11.16.0",
+  "description": "VaahanSafe — QR-based vehicle safety and emergency identification platform monorepo",
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "tooling/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev --parallel",
+    "dev:web": "turbo run dev --filter=@vaahansafe/web",
+    "dev:app": "turbo run dev --filter=@vaahansafe/customer",
+    "dev:activate": "turbo run dev --filter=@vaahansafe/activate",
+    "dev:qr": "turbo run dev --filter=@vaahansafe/qr",
+    "dev:admin": "turbo run dev --filter=@vaahansafe/admin",
+    "dev:api": "turbo run dev --filter=@vaahansafe/api",
+    "dev:blog": "turbo run dev --filter=@vaahansafe/blog",
+    "dev:status": "turbo run dev --filter=@vaahansafe/status",
+    "build": "turbo run build",
+    "build:web": "turbo run build --filter=@vaahansafe/web",
+    "build:app": "turbo run build --filter=@vaahansafe/customer",
+    "build:activate": "turbo run build --filter=@vaahansafe/activate",
+    "build:qr": "turbo run build --filter=@vaahansafe/qr",
+    "build:admin": "turbo run build --filter=@vaahansafe/admin",
+    "build:api": "turbo run build --filter=@vaahansafe/api",
+    "build:blog": "turbo run build --filter=@vaahansafe/blog",
+    "build:status": "turbo run build --filter=@vaahansafe/status",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "vitest run",
+    "brand:assets": "node tooling/scripts/generate-brand-assets.mjs",
+    "db:check": "npx tsx tooling/scripts/db-check.ts",
+    "db:migrate:local": "node infrastructure/cloudflare/scripts/deploy-migrations.js dev",
+    "db:migrate:remote": "node infrastructure/cloudflare/scripts/deploy-migrations.js prod --remote",
+    "db:seed:dev": "npx tsx tooling/scripts/db-check.ts",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,css}\"",
+    "clean": "turbo run clean && rimraf node_modules .turbo"
+  },
+  "devDependencies": {
+    "eslint": "^9.20.0",
+    "eslint-config-next": "15.1.0",
+    "prettier": "^3.5.0",
+    "rimraf": "^6.0.1",
+    "turbo": "^2.10.13",
+    "typescript": "^5.7.3",
+    "vitest": "^3.0.5",
+    "wrangler": "^4.134.0"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  }
+}

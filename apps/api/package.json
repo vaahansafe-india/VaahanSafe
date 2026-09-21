@@ -1,0 +1,36 @@
+{
+  "name": "@vaahansafe/api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Central VaahanSafe backend API surface (api.vaahansafe.com)",
+  "scripts": {
+    "dev": "next dev -p 3005",
+    "build": "next build",
+    "start": "next start -p 3005",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@vaahansafe/auth": "*",
+    "@vaahansafe/config": "*",
+    "@vaahansafe/database": "*",
+    "@vaahansafe/observability": "*",
+    "@vaahansafe/payments": "*",
+    "@vaahansafe/qr-core": "*",
+    "@vaahansafe/security": "*",
+    "@vaahansafe/storage": "*",
+    "@vaahansafe/types": "*",
+    "@vaahansafe/validation": "*",
+    "next": "^15.1.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.4",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vaahansafe/eslint-config": "*",
+    "@vaahansafe/typescript-config": "*",
+    "typescript": "^5.7.3"
+  }
+}

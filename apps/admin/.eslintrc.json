@@ -1,0 +1,3 @@
+{
+  "extends": ["@vaahansafe/eslint-config/next"]
+}

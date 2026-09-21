@@ -1,0 +1,344 @@
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Geist:wght@400;500;600;700&display=swap");
+@import "../brand/brand-motion.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* --------------------------------------------------------
+       01. VAAHANSAFE MODERN ZINC EDITORIAL TOKENS
+       -------------------------------------------------------- */
+    --color-primary: #cc785c;
+    --color-primary-active: #a9583e;
+    --color-primary-disabled: #e4e4e7;
+    --color-ink: #09090b;
+    --color-body: #27272a;
+    --color-body-strong: #18181b;
+    --color-muted: #71717a;
+    --color-muted-soft: #a1a1aa;
+    --color-hairline: #e4e4e7;
+    --color-hairline-soft: #f4f4f5;
+    --color-canvas: #ffffff;
+    --color-surface-soft: #f4f4f5;
+    --color-surface-card: #ffffff;
+    --color-surface-cream-strong: #e4e4e7;
+    --color-surface-dark: #09090b;
+    --color-surface-dark-elevated: #18181b;
+    --color-surface-dark-soft: #27272a;
+    --color-accent-teal: #5db8a6;
+    --color-accent-amber: #e8a55a;
+    --brand-success: #5db872;
+    --brand-50: #f4f4f5;
+    --brand-100: #e4e4e7;
+    --brand-200: #d4d4d8;
+    --brand-300: #a1a1aa;
+    --brand-400: #71717a;
+    --brand-500: #52525b;
+    --brand-600: #cc785c;
+    --brand-700: #b3654a;
+    --brand-800: #a9583e;
+    --brand-900: #66372a;
+    --brand-950: #48271f;
+
+    /* --------------------------------------------------------
+       02. LIGHT THEME SHADCN / SYSTEM CSS VARIABLE MAPPING (ZINC)
+       -------------------------------------------------------- */
+    --background: 0 0% 100%; /* #ffffff (clean white canvas) */
+    --foreground: 240 10% 3.9%; /* #09090b (zinc-950) */
+
+    --card: 0 0% 100%; /* #ffffff */
+    --card-foreground: 240 10% 3.9%; /* #09090b */
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+
+    --primary: 15 50% 58%; /* #cc785c (warm coral brand accent) */
+    --primary-foreground: 0 0% 100%; /* #ffffff */
+
+    --secondary: 240 4.8% 95.9%; /* #f4f4f5 (zinc-100) */
+    --secondary-foreground: 240 5.9% 10%; /* #18181b (zinc-900) */
+
+    --muted: 240 4.8% 95.9%; /* #f4f4f5 (zinc-100) */
+    --muted-foreground: 240 3.8% 46.1%; /* #71717a (zinc-500) */
+
+    --accent: 240 4.8% 95.9%; /* #f4f4f5 */
+    --accent-foreground: 240 5.9% 10%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 240 5.9% 90%; /* #e4e4e7 (zinc-200) */
+    --border-strong: 240 4.9% 83.9%; /* #d4d4d8 (zinc-300) */
+    --input: 240 5.9% 90%; /* #e4e4e7 */
+    --ring: 15 50% 58%; /* #cc785c */
+
+    /* Surfaces */
+    --surface: 0 0% 100%;
+    --surface-soft: 240 4.8% 95.9%; /* #f4f4f5 */
+    --surface-muted: 240 5.9% 90%; /* #e4e4e7 */
+    --surface-elevated: 0 0% 100%;
+    --hairline: 240 5.9% 90%; /* #e4e4e7 */
+    --hairline-strong: 240 4.9% 83.9%; /* #d4d4d8 */
+
+    /* Sidebar Variables (Light Zinc) */
+    --sidebar-background: 0 0% 98%; /* #fafafa (zinc-50) */
+    --sidebar-foreground: 240 5.3% 26.1%; /* #3f3f46 (zinc-700) */
+    --sidebar-primary: 15 50% 58%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 4.8% 95.9%; /* #f4f4f5 (zinc-100) */
+    --sidebar-accent-foreground: 240 5.9% 10%; /* #18181b */
+    --sidebar-border: 240 5.9% 90%; /* #e4e4e7 (zinc-200) */
+    --sidebar-ring: 15 50% 58%;
+
+    /* Dark product surface references */
+    --surface-dark: 240 10% 3.9%; /* #09090b (zinc-950) */
+    --surface-dark-elevated: 240 5.9% 10%; /* #18181b (zinc-900) */
+    --hairline-strong: 240 4.9% 83.9%; /* #d4d4d8 */
+
+    /* Signature & Protected Emergency */
+    --signature: 15 50% 58%; /* coral identity accent */
+    --signature-soft: 25 45% 94%;
+
+    --emergency: 0 54% 52%; /* #c64545 */
+    --emergency-hover: 0 49% 44%;
+    --emergency-soft: 353 82% 96%; /* #FDEBED */
+    --on-emergency: 0 0% 100%;
+
+    /* Semantics */
+    --success: 135 39% 54%; /* #5db872 */
+    --success-foreground: 0 0% 100%;
+    --success-soft: 150 50% 94%; /* #E8F8F0 */
+
+    --warning: 43 80% 46%; /* #d4a017 */
+    --warning-foreground: 0 0% 100%;
+    --warning-soft: 40 100% 94%; /* #FFF4DE */
+
+    --danger: 0 54% 52%; /* #c64545 */
+    --danger-foreground: 0 0% 100%;
+    --danger-soft: 349 81% 96%; /* #FDECEF */
+
+    --info: 214 100% 57%; /* #2684FF */
+    --info-foreground: 0 0% 100%;
+    --info-soft: 214 100% 96%; /* #EAF3FF */
+
+    /* Radii */
+    --radius-xs: 4px;
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --radius-xxl: 20px;
+    --radius-xxxl: 24px;
+    --radius-pill: 9999px;
+    --radius: 0.5rem; /* 8px default */
+
+    /* Shadows */
+    --shadow-xs: 0 1px 2px rgba(7, 18, 17, 0.04);
+    --shadow-sm:
+      0 1px 2px rgba(7, 18, 17, 0.04), 0 4px 12px rgba(7, 18, 17, 0.035);
+    --shadow-md:
+      0 2px 4px rgba(7, 18, 17, 0.04), 0 12px 28px rgba(7, 18, 17, 0.06);
+    --shadow-lg:
+      0 4px 8px rgba(7, 18, 17, 0.04), 0 20px 48px rgba(7, 18, 17, 0.08);
+    --shadow-focus: 0 0 0 3px rgba(204, 120, 92, 0.18);
+
+    /* Motion */
+    --motion-instant: 80ms;
+    --motion-fast: 140ms;
+    --motion-normal: 200ms;
+    --motion-slow: 320ms;
+    --motion-reveal: 480ms;
+    --easing-standard: cubic-bezier(0.2, 0, 0, 1);
+    --easing-enter: cubic-bezier(0.16, 1, 0.3, 1);
+    --easing-exit: cubic-bezier(0.4, 0, 1, 1);
+
+    /* --------------------------------------------------------
+       05. SCROLLBAR SYSTEM TOKENS (LIGHT THEME)
+       -------------------------------------------------------- */
+    --scrollbar-track: transparent;
+    --scrollbar-thumb: #d4d4d8;
+    --scrollbar-thumb-hover: #cc785c;
+    --scrollbar-thumb-active: #a9583e;
+  }
+
+  /* --------------------------------------------------------
+     06. DARK THEME SHADCN / SYSTEM CSS VARIABLE MAPPING (ZINC)
+     -------------------------------------------------------- */
+  .dark {
+    --background: 240 10% 3.9%; /* #09090b (zinc-950) */
+    --foreground: 0 0% 98%; /* #fafafa (zinc-50) */
+
+    --card: 240 5.9% 10%; /* #18181b (zinc-900) */
+    --card-foreground: 0 0% 98%; /* #fafafa */
+
+    --popover: 240 5.9% 10%; /* #18181b */
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 15 50% 58%; /* #cc785c (warm coral accent) */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 240 3.7% 15.9%; /* #27272a (zinc-800) */
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 240 3.7% 15.9%; /* #27272a (zinc-800) */
+    --muted-foreground: 240 5% 64.9%; /* #a1a1aa (zinc-400) */
+
+    --accent: 240 3.7% 15.9%; /* #27272a (zinc-800) */
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 240 3.7% 15.9%; /* #27272a (zinc-800) */
+    --border-strong: 240 5.2% 33.9%; /* #3f3f46 (zinc-700) */
+    --input: 240 3.7% 15.9%; /* #27272a (zinc-800) */
+    --ring: 15 50% 58%;
+
+    /* Surfaces */
+    --surface: 240 10% 3.9%; /* #09090b (zinc-950) */
+    --surface-soft: 240 5.9% 10%; /* #18181b (zinc-900) */
+    --surface-muted: 240 3.7% 15.9%; /* #27272a (zinc-800) */
+    --surface-elevated: 240 5.9% 10%; /* #18181b (zinc-900) */
+    --hairline: 240 3.7% 15.9%; /* #27272a (zinc-800) */
+    --hairline-strong: 240 5.2% 33.9%; /* #3f3f46 (zinc-700) */
+
+    /* Sidebar Variables (Dark Zinc) */
+    --sidebar-background: 240 10% 3.9%; /* #09090b (zinc-950) */
+    --sidebar-foreground: 240 4.8% 95.9%; /* #f4f4f5 (zinc-100) */
+    --sidebar-primary: 15 50% 58%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%; /* #27272a (zinc-800) */
+    --sidebar-accent-foreground: 0 0% 98%; /* #fafafa */
+    --sidebar-border: 240 3.7% 15.9%; /* #27272a (zinc-800) */
+    --sidebar-ring: 15 50% 58%;
+
+    /* Signature & Emergency */
+    --signature: 15 50% 58%; /* #cc785c (warm coral) */
+    --signature-soft: 15 30% 18%;
+
+    --emergency: 0 54% 52%; /* #c64545 */
+    --emergency-hover: 0 54% 45%;
+    --emergency-soft: 0 30% 15%;
+    --on-emergency: 0 0% 100%;
+
+    /* Semantics */
+    --success: 135 37% 54%; /* #5db872 */
+    --success-foreground: 0 0% 100%;
+    --success-soft: 135 30% 15%;
+
+    --warning: 43 80% 46%; /* #d4a017 */
+    --warning-foreground: 0 0% 100%;
+    --warning-soft: 43 30% 15%;
+
+    --danger: 0 54% 52%; /* #c64545 */
+    --danger-foreground: 0 0% 100%;
+    --danger-soft: 0 30% 15%;
+
+    --info: 172 38% 54%; /* #5db8a6 (accent-teal) */
+    --info-foreground: 0 0% 100%;
+    --info-soft: 172 30% 15%;
+
+    /* Dark Shadows */
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.4), 0 12px 28px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.5), 0 20px 48px rgba(0, 0, 0, 0.6);
+    --shadow-focus: 0 0 0 3px rgba(204, 120, 92, 0.25);
+
+    /* --------------------------------------------------------
+       DARK SCROLLBAR SYSTEM TOKENS
+       -------------------------------------------------------- */
+    --scrollbar-track: transparent;
+    --scrollbar-thumb: #3f3f46;
+    --scrollbar-thumb-hover: #cc785c;
+    --scrollbar-thumb-active: #a9583e;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family:
+      "Geist",
+      "Inter",
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      Roboto,
+      sans-serif;
+    font-feature-settings:
+      "rlig" 1,
+      "calt" 1;
+  }
+  code,
+  kbd,
+  samp,
+  pre {
+    font-family:
+      "Geist Mono", "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  }
+
+  /* ==================================================================
+     07. BESPOKE SCROLLBAR SYSTEM (WEBKIT & MODERN STANDARD)
+     ================================================================== */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+  }
+
+  /* WebKit & Chromium custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--scrollbar-track);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--scrollbar-thumb);
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    transition: background-color 150ms cubic-bezier(0.2, 0, 0, 1);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: var(--scrollbar-thumb-hover);
+  }
+
+  ::-webkit-scrollbar-thumb:active {
+    background-color: var(--scrollbar-thumb-active);
+  }
+
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+}
+
+@layer utilities {
+  /* Hide scrollbar utility */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Compact / thin scrollbar utility for trays, dropdowns & code blocks */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    border-width: 1px;
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "name": "@vaahansafe/admin",
+  "version": "1.0.0",
+  "private": true,
+  "description": "VaahanSafe operations and administration console (admin.vaahansafe.com)",
+  "scripts": {
+    "dev": "next dev -p 3004",
+    "build": "next build",
+    "start": "next start -p 3004",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@vaahansafe/auth": "*",
+    "@vaahansafe/config": "*",
+    "@vaahansafe/icons": "*",
+    "@vaahansafe/observability": "*",
+    "@vaahansafe/types": "*",
+    "@vaahansafe/ui": "*",
+    "@vaahansafe/validation": "*",
+    "next": "^15.1.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.4",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vaahansafe/eslint-config": "*",
+    "@vaahansafe/typescript-config": "*",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.5.2",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.7.3"
+  }
+}

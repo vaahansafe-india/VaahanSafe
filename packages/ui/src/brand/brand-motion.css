@@ -1,0 +1,407 @@
+/* Brand components work with any app stylesheet importing this shared file. */
+:root {
+  --vs-enter: cubic-bezier(0.16, 1, 0.3, 1);
+  --vs-reveal: 1800ms;
+  --vs-wordmark: 320ms;
+  --vs-loader: 1600ms;
+}
+.vs-mark {
+  display: inline-block;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+.vs-logo {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+}
+.vs-logo-stacked {
+  flex-direction: column;
+  text-align: center;
+}
+.vs-logo-link {
+  display: inline-flex;
+  border-radius: 6px;
+}
+.vs-logo-link:focus-visible {
+  outline: 2px solid var(--color-primary, #cc785c);
+  outline-offset: 4px;
+}
+.vs-wordmark-wrap {
+  display: inline-flex;
+  flex-direction: column;
+}
+.vs-wordmark {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-weight: 600;
+  letter-spacing: -0.045em;
+  line-height: 1;
+  white-space: nowrap;
+}
+.vs-tagline {
+  font-family: "Geist", "Inter", sans-serif;
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin-top: 6px;
+}
+.vs-app-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+/* Six stages over 1.8s; controlled convergence, never overshoot. */
+.vs-reveal [data-brand-part],
+.vs-identity-point {
+  transform-origin: 16px 16px;
+}
+.vs-reveal [data-brand-part="frame"] {
+  animation: vs-frame var(--vs-reveal) var(--vs-enter) both;
+}
+.vs-reveal [data-brand-part="identity"] {
+  animation: vs-identity var(--vs-reveal) var(--vs-enter) both;
+}
+.vs-reveal [data-brand-part="data"] {
+  animation: vs-data var(--vs-reveal) var(--vs-enter) both;
+}
+.vs-reveal [data-brand-part="vehicle"] {
+  animation: vs-vehicle var(--vs-reveal) var(--vs-enter) both;
+}
+.vs-identity-point {
+  animation: vs-point var(--vs-reveal) linear both;
+}
+.vs-reveal-sweep {
+  animation: vs-reveal-scan var(--vs-reveal) linear both;
+}
+.vs-wordmark-enter {
+  animation: vs-wordmark var(--vs-wordmark) var(--vs-enter) var(--vs-reveal)
+    both;
+}
+@keyframes vs-point {
+  0% {
+    opacity: 1;
+    transform: scale(0.5);
+  }
+  10% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  28%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes vs-frame {
+  0%,
+  10% {
+    opacity: 0;
+    transform: scale(0.35);
+  }
+  28% {
+    opacity: 1;
+    transform: scale(0.97);
+  }
+  85% {
+    transform: scale(0.97);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes vs-identity {
+  0%,
+  28% {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.6);
+  }
+  45%,
+  62% {
+    opacity: 1;
+    transform: translateY(-6px) scale(1);
+  }
+  83%,
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes vs-data {
+  0%,
+  34% {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.6);
+  }
+  48%,
+  62% {
+    opacity: 1;
+    transform: translateY(-6px) scale(1);
+  }
+  83%,
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes vs-vehicle {
+  0%,
+  65% {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  85%,
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes vs-reveal-scan {
+  0%,
+  46% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  49% {
+    opacity: 0.8;
+    transform: translateY(0);
+  }
+  64% {
+    opacity: 0.8;
+    transform: translateY(16px);
+  }
+  67%,
+  100% {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+@keyframes vs-wordmark {
+  from {
+    opacity: 0;
+    transform: translateX(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.vs-scanner {
+  background: var(--color-surface-dark, #09090b);
+  color: var(--color-canvas, #fafafa);
+  border: 1px solid var(--color-surface-dark-elevated, #27272a);
+  border-radius: 20px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.vs-scanner-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.vs-demo-label {
+  color: #a1a1aa;
+  font-size: 9px;
+}
+.vs-scanner-field {
+  width: 100%;
+  aspect-ratio: 1;
+}
+.vs-scanner-frame {
+  opacity: 1;
+  transition: opacity var(--motion-normal, 200ms);
+}
+.vs-scanner-result {
+  display: none;
+}
+.vs-scanner-status {
+  min-height: 44px;
+  font-size: 12px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+}
+.vs-scanner-detail {
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+.vs-scanner[data-state="idle"] .vs-scanner-frame {
+  opacity: 0.25;
+}
+.vs-scanner[data-state="detecting"] .vs-scanner-frame {
+  animation: vs-detect var(--motion-slow, 320ms) var(--vs-enter) both;
+}
+.vs-scanner[data-state="resolving"] .vs-scanner-result,
+.vs-scanner[data-state="identified"] .vs-scanner-result {
+  display: inline;
+}
+.vs-scanner[data-state="resolving"] .vs-scanner-qr {
+  animation: vs-qr-align var(--motion-reveal, 480ms) var(--vs-enter) both;
+  transform-origin: 16px 16px;
+}
+.vs-scanner[data-state="resolving"] .vs-scanner-result {
+  animation: vs-result var(--motion-reveal, 480ms) var(--vs-enter) both;
+  transform-origin: 16px 16px;
+}
+.vs-scanner[data-state="identified"] .vs-scanner-qr {
+  display: none;
+}
+.vs-scanner[data-state="identified"] .vs-scanner-frame {
+  display: none;
+}
+.vs-scanner[data-state="identified"] .vs-scanner-status {
+  color: var(--brand-success, #5db872);
+}
+.vs-scanner[data-state="error"] .vs-scanner-qr {
+  opacity: 0.12;
+}
+.vs-scanner[data-state="error"] .vs-scanner-status {
+  color: #efb8b8;
+}
+.vs-scanner-sweep {
+  animation: vs-scan 480ms linear both;
+}
+@keyframes vs-detect {
+  from {
+    opacity: 0.25;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes vs-scan {
+  0% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  10% {
+    opacity: 0.8;
+  }
+  90% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+@keyframes vs-qr-align {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(6px) scale(0.5);
+  }
+}
+@keyframes vs-result {
+  0%,
+  25% {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.vs-loader {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.vs-loader-label {
+  font-size: 12px;
+}
+.vs-micro-loader,
+.vs-identity-pulse {
+  display: inline-flex;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+.vs-loader-module {
+  animation: vs-module var(--vs-loader) var(--vs-enter) infinite;
+  animation-delay: calc(var(--vs-module) * 140ms);
+  transform-origin: center;
+}
+.vs-loader-core {
+  animation: vs-core var(--vs-loader) var(--vs-enter) infinite;
+}
+@keyframes vs-module {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  35%,
+  65% {
+    opacity: 1;
+  }
+}
+@keyframes vs-core {
+  0%,
+  20%,
+  100% {
+    opacity: 0.3;
+  }
+  50%,
+  75% {
+    opacity: 1;
+  }
+}
+.vs-identity-pulse:not([data-state="idle"]) .vs-pulse-cells {
+  animation: vs-cells var(--vs-loader) var(--vs-enter) infinite;
+  transform-origin: 8px 8px;
+}
+@keyframes vs-cells {
+  0%,
+  100% {
+    opacity: 0.65;
+    transform: scale(0.9);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Explicit preview and OS preference use the same final, meaningful states. */
+[data-reduced-motion="true"] *,
+[data-reduced-motion="true"] {
+  animation: none !important;
+  transition: none !important;
+}
+[data-reduced-motion="true"] .vs-scanner-sweep,
+[data-reduced-motion="true"][data-state="resolving"] .vs-scanner-qr {
+  display: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .vs-reveal *,
+  .vs-animated-logo *,
+  .vs-scanner *,
+  .vs-loader *,
+  .vs-micro-loader *,
+  .vs-identity-pulse * {
+    animation: none !important;
+    transition: none !important;
+  }
+  .vs-identity-point,
+  .vs-reveal-sweep,
+  .vs-scanner-sweep,
+  .vs-scanner[data-state="resolving"] .vs-scanner-qr {
+    display: none;
+  }
+}
