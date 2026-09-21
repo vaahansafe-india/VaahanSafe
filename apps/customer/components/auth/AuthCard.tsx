@@ -12,9 +12,17 @@ export type AuthState = "sign-in" | "sending-otp" | "verify-otp" | "verifying" |
 
 interface AuthCardProps {
   returnUrl?: string;
+  mode?: "login" | "onboarding";
+  userEmail?: string;
+  userName?: string;
 }
 
-export function AuthCard({ returnUrl = "/" }: AuthCardProps) {
+export function AuthCard({
+  returnUrl = "/",
+  mode = "login",
+  userEmail,
+  userName,
+}: AuthCardProps) {
   const [state, setState] = React.useState<AuthState>("sign-in");
   const [phoneNumber, setPhoneNumber] = React.useState("");
   const [maskedPhone, setMaskedPhone] = React.useState("");
@@ -146,7 +154,29 @@ export function AuthCard({ returnUrl = "/" }: AuthCardProps) {
       <AuthBrand
         view={state === "sending-otp" ? "sign-in" : state}
         maskedPhone={maskedPhone}
+        mode={mode}
       />
+
+      {/* 01.1 Google Account Connected indicator in onboarding mode */}
+      {mode === "onboarding" && (
+        <div className="mt-4 flex items-center justify-between rounded-xl border border-[#5db872]/25 bg-[#5db872]/10 px-3.5 py-2.5">
+          <div className="flex items-center gap-2 text-xs">
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#5db872] opacity-75"></span>
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-[#5db872]"></span>
+            </span>
+            <span className="font-mono text-[11px] font-medium text-foreground">
+              {userEmail ? `Google: ${userEmail}` : "Google Account Connected"}
+            </span>
+          </div>
+          <a
+            href="/api/auth/logout"
+            className="font-mono text-[10px] text-muted-foreground underline transition-colors hover:text-foreground"
+          >
+            Switch
+          </a>
+        </div>
+      )}
 
       {/* 02. Success Confirmation View */}
       {state === "authenticated" ? (
@@ -171,19 +201,22 @@ export function AuthCard({ returnUrl = "/" }: AuthCardProps) {
           <div className="mt-4 sm:mt-5">
             {state === "sign-in" || state === "sending-otp" ? (
               <div className="space-y-4">
-                <GoogleSignInButton
-                  isLoading={isGoogleLoading}
-                  onClick={() => {
-                    setGoogleLoading(true);
-                    window.location.href = "/api/auth/google";
-                  }}
-                />
+                {mode !== "onboarding" && (
+                  <GoogleSignInButton
+                    isLoading={isGoogleLoading}
+                    onClick={() => {
+                      setGoogleLoading(true);
+                      window.location.href = "/api/auth/google";
+                    }}
+                  />
+                )}
 
                 <MobileSignInForm
                   isLoading={isMobileSending}
                   onSubmitMobile={handleSendOtp}
                   errorMessage={errorMessage}
                   onClearError={() => setErrorMessage(null)}
+                  showDivider={mode !== "onboarding"}
                 />
               </div>
             ) : (

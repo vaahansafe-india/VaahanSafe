@@ -5,6 +5,9 @@ import { AuthLegalNotice } from "./AuthLegalNotice";
 
 interface AuthShellProps {
   returnUrl?: string;
+  mode?: "login" | "onboarding";
+  userEmail?: string;
+  userName?: string;
 }
 
 /**
@@ -20,7 +23,12 @@ interface AuthShellProps {
  * - Subtle background identity field (aria-hidden="true")
  * - Outside-card minimalist footer
  */
-export function AuthShell({ returnUrl }: AuthShellProps) {
+export function AuthShell({
+  returnUrl,
+  mode = "login",
+  userEmail,
+  userName,
+}: AuthShellProps) {
   return (
     <main
       id="main-content"
@@ -37,7 +45,12 @@ export function AuthShell({ returnUrl }: AuthShellProps) {
 
       {/* 02. Visually Centered & Scrollable Login Card */}
       <div className="relative z-10 my-auto flex w-full flex-col items-center justify-center">
-        <AuthCard returnUrl={returnUrl} />
+        <AuthCard
+          returnUrl={returnUrl}
+          mode={mode}
+          userEmail={userEmail}
+          userName={userName}
+        />
 
         {/* 03. Restrained Outside-Card Footer */}
         <AuthLegalNotice type="outside-card" />

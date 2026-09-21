@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import * as React from "react";
+import { redirect } from "next/navigation";
+import { getAuthenticatedCustomer } from "../../../lib/session";
 import { AuthShell } from "../../../components/auth/AuthShell";
 
 export const metadata: Metadata = {
@@ -17,5 +19,19 @@ export default async function OnboardingPhonePage({
   searchParams?: Promise<{ returnUrl?: string }>;
 }) {
   const params = await searchParams;
-  return <AuthShell returnUrl={params?.returnUrl || "/dashboard"} />;
+  const auth = await getAuthenticatedCustomer();
+
+  // If user already has a verified phone, proceed to destination
+  if (auth?.user?.phone) {
+    redirect(params?.returnUrl || "/dashboard");
+  }
+
+  return (
+    <AuthShell
+      returnUrl={params?.returnUrl || "/dashboard"}
+      mode="onboarding"
+      userEmail={auth?.user?.email}
+      userName={auth?.user?.name}
+    />
+  );
 }

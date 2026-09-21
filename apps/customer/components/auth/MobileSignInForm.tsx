@@ -8,6 +8,7 @@ interface MobileSignInFormProps {
   onSubmitMobile: (phone: string) => Promise<void>;
   errorMessage?: string | null;
   onClearError?: () => void;
+  showDivider?: boolean;
 }
 
 export function MobileSignInForm({
@@ -15,6 +16,7 @@ export function MobileSignInForm({
   onSubmitMobile,
   errorMessage,
   onClearError,
+  showDivider = true,
 }: MobileSignInFormProps) {
   const [phoneNumber, setPhoneNumber] = React.useState("");
   const [localError, setLocalError] = React.useState<string | null>(null);
@@ -56,16 +58,18 @@ export function MobileSignInForm({
   return (
     <form onSubmit={handleSubmit} noValidate className="w-full">
       {/* 01. Restrained Divider */}
-      <div className="relative my-3 sm:my-3.5 flex items-center justify-center">
-        <div className="absolute inset-0 flex items-center" aria-hidden="true">
-          <div className="w-full border-t border-border" />
+      {showDivider && (
+        <div className="relative my-3 sm:my-3.5 flex items-center justify-center">
+          <div className="absolute inset-0 flex items-center" aria-hidden="true">
+            <div className="w-full border-t border-border" />
+          </div>
+          <div className="relative bg-card px-3">
+            <span className="font-mono text-[9px] uppercase tracking-[0.24em] text-muted-foreground">
+              Or
+            </span>
+          </div>
         </div>
-        <div className="relative bg-card px-3">
-          <span className="font-mono text-[9px] uppercase tracking-[0.24em] text-muted-foreground">
-            Or
-          </span>
-        </div>
-      </div>
+      )}
 
       {/* 02. Field Label */}
       <div className="mb-1.5 flex items-center justify-between">
