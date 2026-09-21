@@ -50,11 +50,11 @@ export function StatusHeader({ statusLabel, isDegradedOrOutage }: StatusHeaderPr
           >
             {/* Professional Brand Mark Emblem with Status Pulse Badge */}
             <div className="relative flex items-center justify-center shrink-0">
-              <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-lg bg-[#141413] shadow-sm ring-1 ring-[#e6dfd8] dark:ring-[#2e2b27] dark:bg-[#201f1c] transition-transform group-hover:scale-105">
+              <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-lg bg-white border border-[#e6dfd8] text-[#141413] shadow-xs dark:bg-[#201f1c] dark:border-[#2e2b27] dark:text-[#faf9f5] dark:shadow-none transition-all group-hover:scale-105">
                 <VaahanSafeMark size={18} variant="brand" aria-hidden="true" />
               </div>
               <span
-                className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full ring-2 ring-[#faf9f5] dark:ring-[#181715] ${
+                className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full ring-2 ring-white dark:ring-[#181715] ${
                   isDegradedOrOutage
                     ? "bg-[#c64545] animate-pulse"
                     : "bg-[#5db872]"
