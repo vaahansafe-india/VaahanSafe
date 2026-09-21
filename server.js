@@ -94,27 +94,31 @@ const HOSTNAME = process.env.HOSTNAME || "0.0.0.0";
 
 // 1. Check if running as customer SSR application on Hostinger
 const customerStandaloneCandidates = [
+  path.join(__dirname, "standalone/apps/customer/server.js"),
   path.join(__dirname, ".next/standalone/apps/customer/server.js"),
   path.join(__dirname, "apps/customer/.next/standalone/apps/customer/server.js"),
+  path.join(__dirname, "apps/customer/server.js"),
+  path.join(__dirname, "standalone/server.js"),
   path.join(__dirname, ".next/standalone/server.js"),
   path.join(__dirname, "apps/customer/.next/standalone/server.js"),
+  path.join(__dirname, "../standalone/apps/customer/server.js"),
   path.join(__dirname, "../.next/standalone/apps/customer/server.js"),
   path.join(__dirname, "../apps/customer/.next/standalone/apps/customer/server.js"),
   path.join(__dirname, "../.next/standalone/server.js"),
-  path.join(__dirname, "apps/customer/server.js"),
 ].filter((p) => p !== __filename && fs.existsSync(p));
 
 const foundCustomerServer = customerStandaloneCandidates[0];
 const isCustomerApp =
   process.env.APP_NAME === "customer" ||
   process.env.NEXT_PUBLIC_APP_URL?.includes("app.vaahansafe.com") ||
-  (!fs.existsSync(path.join(__dirname, "public_html/index.html")) &&
-   !fs.existsSync(path.join(__dirname, "out/index.html")) &&
-   Boolean(foundCustomerServer));
+  __dirname.includes("app.vaahansafe.com") ||
+  process.cwd().includes("app.vaahansafe.com") ||
+  (Boolean(foundCustomerServer) && !process.env.APP_NAME?.includes("web"));
 
 if (isCustomerApp) {
   if (foundCustomerServer) {
     console.log(`[server.js] Launching VaahanSafe Customer App from: ${foundCustomerServer}`);
+    process.chdir(path.dirname(foundCustomerServer));
     require(foundCustomerServer);
     return;
   }
