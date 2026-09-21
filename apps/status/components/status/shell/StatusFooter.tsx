@@ -1,6 +1,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { getWebUrl } from "@vaahansafe/config";
+import { StatusThemeSegmented } from "./StatusThemeSegmented";
 
 export function StatusFooter() {
   const webUrl = getWebUrl();
@@ -43,9 +44,15 @@ export function StatusFooter() {
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-t border-[#e6dfd8] pt-6 dark:border-[#2e2b27] font-mono text-[9px] uppercase tracking-wider text-[#8e8b82] dark:text-[#77736d]">
-          <div>&copy; {new Date().getFullYear()} VAAHANSAFE TECHNOLOGIES PRIVATE LIMITED. ALL RIGHTS RESERVED.</div>
-          <div>INDEPENDENT REPORTING RUNTIME &bull; IST TIMEZONE ENFORCED</div>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-t border-[#e6dfd8] pt-6 dark:border-[#2e2b27]">
+          <div className="space-y-1 font-mono text-[9px] uppercase tracking-wider text-[#8e8b82] dark:text-[#77736d]">
+            <div>&copy; {new Date().getFullYear()} VAAHANSAFE TECHNOLOGIES PRIVATE LIMITED. ALL RIGHTS RESERVED.</div>
+            <div>INDEPENDENT REPORTING RUNTIME &bull; IST TIMEZONE ENFORCED</div>
+          </div>
+
+          <div>
+            <StatusThemeSegmented />
+          </div>
         </div>
       </div>
     </footer>
