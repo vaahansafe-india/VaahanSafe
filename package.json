@@ -41,7 +41,8 @@
     "clean": "turbo run clean && rimraf node_modules .turbo"
   },
   "dependencies": {
-    "turbo": "^2.10.13"
+    "turbo": "^2.10.13",
+    "typescript": "^5.7.3"
   },
   "devDependencies": {
     "eslint": "^9.20.0",
