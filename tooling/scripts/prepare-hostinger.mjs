@@ -61,6 +61,11 @@ if (fs.existsSync(nestedServerJs)) {
 console.log("[prepare-hostinger] Mirroring apps/web/.next to root .next...");
 copyDirSync(webNextDir, rootNextDir);
 
+// Copy public to root public for next start
+if (fs.existsSync(webPublicDir)) {
+  copyDirSync(webPublicDir, path.join(rootDir, "public"));
+}
+
 // Ensure server.js exists at rootNextDir/standalone/server.js
 if (fs.existsSync(nestedServerJs)) {
   fs.mkdirSync(rootStandaloneDir, { recursive: true });
