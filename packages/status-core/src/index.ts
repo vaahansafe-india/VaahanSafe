@@ -5,4 +5,3 @@ export * from "./domain/maintenance";
 export * from "./dto/public-status";
 export * from "./services/aggregate-status";
 export * from "./repositories/status.repository";
-export * from "./queries/get-public-system-status";

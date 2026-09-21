@@ -19,30 +19,32 @@ export function CurrentSystemStatement({
   const isHealthy = overallState === "OPERATIONAL";
 
   return (
-    <section aria-labelledby="current-condition-heading" className="w-full space-y-6 pt-6 pb-4">
+    <section aria-labelledby="current-condition-heading" className="w-full space-y-4 sm:space-y-6 pt-4 sm:pt-6 pb-2 sm:pb-4">
       {/* Eyebrow / Timestamp Record */}
-      <div className="flex flex-wrap items-center justify-between gap-3 font-mono text-[10px] uppercase tracking-[0.24em] text-[#8e8b82] dark:text-[#77736d]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-4 font-mono text-[10px] sm:text-[11px] uppercase tracking-wider sm:tracking-[0.24em] text-[#8e8b82] dark:text-[#77736d]">
         <div className="flex items-center gap-2">
           <span
-            className="h-2 w-2 rounded-full"
+            className="h-2 w-2 rounded-full shrink-0"
             style={{ backgroundColor: config.dotColor }}
           />
           <span className="font-semibold text-[#141413] dark:text-[#faf9f5]">
             SYSTEM STATUS &bull; {config.label.toUpperCase()}
           </span>
         </div>
-        <div>LAST CONFIRMED {generatedAtFormatted}</div>
+        <div className="text-[9px] sm:text-[10px] tracking-normal sm:tracking-wider">
+          LAST CONFIRMED {generatedAtFormatted}
+        </div>
       </div>
 
       {/* Main Headline Statement in Cormorant Garamond Serif */}
-      <div className="space-y-3 max-w-4xl">
+      <div className="space-y-2.5 sm:space-y-3 max-w-4xl">
         <h1
           id="current-condition-heading"
-          className="font-serif text-3xl sm:text-5xl lg:text-[3.6rem] font-normal leading-[1.08] tracking-tight text-[#141413] dark:text-[#faf9f5]"
+          className="font-serif text-2xl sm:text-4xl lg:text-[3.6rem] font-normal leading-[1.15] sm:leading-[1.08] tracking-tight text-[#141413] dark:text-[#faf9f5]"
         >
           {headline}
         </h1>
-        <p className="max-w-2xl font-sans text-sm sm:text-base leading-relaxed text-[#6c6a64] dark:text-[#a09d96]">
+        <p className="max-w-2xl font-sans text-xs sm:text-base leading-relaxed text-[#6c6a64] dark:text-[#a09d96]">
           {description}
         </p>
       </div>

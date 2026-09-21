@@ -16,7 +16,17 @@ export const metadata: Metadata = {
 };
 
 export default async function HistoryPage() {
-  const repo = new StatusRepository();
+  let db;
+  try {
+    const dbModule = await import("@vaahansafe/database");
+    if (typeof dbModule.getAuthoritativeDatabaseClient === "function") {
+      db = dbModule.getAuthoritativeDatabaseClient();
+    }
+  } catch {
+    // Graceful fallback
+  }
+
+  const repo = new StatusRepository(db);
   const [services, incidents] = await Promise.all([
     repo.getPublicServices(),
     repo.getIncidentHistory(50),

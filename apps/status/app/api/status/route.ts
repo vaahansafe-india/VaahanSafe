@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getPublicSystemStatus } from "@vaahansafe/status-core";
+import { getPublicSystemStatus } from "@vaahansafe/status-core/server";
 
 export async function GET() {
   try {

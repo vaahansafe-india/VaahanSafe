@@ -4,7 +4,10 @@ import { getWebUrl } from "@vaahansafe/config";
 import { StatusThemeSegmented } from "./StatusThemeSegmented";
 
 export function StatusFooter() {
-  const webUrl = getWebUrl();
+  const webUrl =
+    typeof getWebUrl === "function"
+      ? getWebUrl()
+      : process.env.NEXT_PUBLIC_WEB_URL || "https://vaahansafe.com";
 
   return (
     <footer className="w-full border-t border-[#e6dfd8] bg-[#f5f0e8]/50 py-12 dark:border-[#2e2b27] dark:bg-[#1f1e1b]/50 transition-colors">

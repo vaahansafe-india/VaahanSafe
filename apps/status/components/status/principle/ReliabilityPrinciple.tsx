@@ -4,7 +4,7 @@ export function ReliabilityPrinciple() {
   return (
     <section
       aria-label="VaahanSafe Reliability Principle"
-      className="w-full rounded-3xl bg-[#141413] text-[#faf9f5] p-8 sm:p-12 lg:p-16 my-8 space-y-10 antialiased"
+      className="w-full rounded-3xl bg-[#141413] text-[#faf9f5] p-5 sm:p-10 lg:p-16 my-6 sm:my-8 space-y-8 sm:space-y-10 antialiased"
     >
       <div className="space-y-4 max-w-3xl">
         <div className="flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.24em] text-[#cc785c] font-semibold">

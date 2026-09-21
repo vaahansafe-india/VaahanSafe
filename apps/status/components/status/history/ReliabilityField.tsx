@@ -114,15 +114,15 @@ export function ReliabilityField({ services }: ReliabilityFieldProps) {
       {activeTooltip && (
         <aside
           role="status"
-          className="rounded-xl border border-[#e6dfd8] bg-[#f5f0e8]/80 p-3.5 font-mono text-[10px] text-[#141413] dark:border-[#2e2b27] dark:bg-[#1f1e1b]/80 dark:text-[#faf9f5] flex items-center justify-between animate-in fade-in duration-200"
+          className="rounded-xl border border-[#e6dfd8] bg-[#f5f0e8]/80 p-3.5 font-mono text-[10px] text-[#141413] dark:border-[#2e2b27] dark:bg-[#1f1e1b]/80 dark:text-[#faf9f5] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 animate-in fade-in duration-200"
         >
           <div className="flex items-center gap-3">
-            <span className="h-2 w-2 rounded-full bg-[#5db872]" />
+            <span className="h-2 w-2 rounded-full bg-[#5db872] shrink-0" />
             <span>
               <strong>{activeTooltip.serviceName}</strong> &bull; {activeTooltip.day.date}
             </span>
           </div>
-          <span className="uppercase text-[#5db872] font-semibold">
+          <span className="uppercase text-[#5db872] font-semibold text-[9px] sm:text-[10px]">
             OPERATIONAL &bull; NO INCIDENTS RECORDED
           </span>
         </aside>

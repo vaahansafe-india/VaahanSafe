@@ -1,4 +1,9 @@
-import type { DatabaseClient } from "@vaahansafe/database";
+export interface DatabaseClient {
+  query<T = unknown>(sql: string, params?: unknown[]): Promise<T[]>;
+  queryFirst<T = unknown>(sql: string, params?: unknown[]): Promise<T | null>;
+  execute?(sql: string, params?: unknown[]): Promise<{ success: boolean; rowsAffected?: number }>;
+  batch?(operations: Array<{ sql: string; params?: unknown[] }>): Promise<boolean>;
+}
 import type {
   PublicStatusServiceDto,
   PublicIncidentDto,

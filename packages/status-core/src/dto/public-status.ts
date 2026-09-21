@@ -11,6 +11,10 @@ export interface PublicStatusServiceDto {
   journeyStage: JourneyStage;
   state: ServiceState;
   displayOrder: number;
+  latencyMs?: number;
+  lastProbeAt?: string;
+  targetUrl?: string;
+  probeStatus?: string;
 }
 
 export interface PublicIncidentUpdateDto {

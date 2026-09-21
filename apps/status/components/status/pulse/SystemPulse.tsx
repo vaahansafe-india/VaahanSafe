@@ -28,19 +28,19 @@ export function SystemPulse({
   return (
     <section
       aria-label="System Pulse Customer Journey Topology"
-      className="w-full rounded-2xl border border-[#e6dfd8] bg-[#f5f0e8]/40 p-6 sm:p-8 dark:border-[#2e2b27] dark:bg-[#1f1e1b]/40 transition-colors"
+      className="w-full rounded-2xl border border-[#e6dfd8] bg-[#f5f0e8]/40 p-4 sm:p-6 lg:p-8 dark:border-[#2e2b27] dark:bg-[#1f1e1b]/40 transition-colors"
     >
       {/* Topology Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#e6dfd8] pb-5 dark:border-[#2e2b27]">
-        <div className="space-y-1">
-          <div className="font-mono text-[9px] uppercase tracking-[0.24em] text-[#cc785c] font-semibold">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 border-b border-[#e6dfd8] pb-4 sm:pb-5 dark:border-[#2e2b27]">
+        <div className="space-y-0.5 sm:space-y-1">
+          <div className="font-mono text-[9px] uppercase tracking-[0.2em] sm:tracking-[0.24em] text-[#cc785c] font-semibold">
             SYSTEM PULSE &bull; THE CUSTOMER SERVICE JOURNEY
           </div>
           <div className="font-sans text-xs text-[#6c6a64] dark:text-[#a09d96]">
             Every public capability is mapped across the actual vehicle owner and bystander interaction sequence.
           </div>
         </div>
-        <div className="font-mono text-[9px] uppercase tracking-wider text-[#8e8b82] dark:text-[#77736d]">
+        <div className="font-mono text-[9px] uppercase tracking-wider text-[#8e8b82] dark:text-[#77736d] shrink-0">
           6 OPERATIONAL STAGES
         </div>
       </div>
@@ -123,10 +123,15 @@ export function SystemPulse({
                     {j.label}
                   </div>
                   <div
-                    className="font-mono text-[9px] uppercase tracking-wider font-semibold"
+                    className="flex items-center justify-center gap-1 font-mono text-[9px] uppercase tracking-wider font-semibold"
                     style={{ color: config.textColor }}
                   >
-                    {config.label}
+                    <span>{config.label}</span>
+                    {service?.latencyMs && (
+                      <span className="font-normal text-[#8e8b82] dark:text-[#77736d]">
+                        &bull; {service.latencyMs}ms
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -183,17 +188,24 @@ export function SystemPulse({
               </div>
 
               {/* Stage Content */}
-              <div className="flex-1 space-y-0.5 pb-2">
+              <div className="flex-1 space-y-0.5 pb-2 min-w-0">
                 <div className="flex items-baseline justify-between gap-2">
-                  <span className="font-mono text-[9px] font-semibold uppercase tracking-[0.2em] text-[#8e8b82]">
+                  <span className="font-mono text-[9px] font-semibold uppercase tracking-[0.16em] text-[#8e8b82] truncate">
                     {j.stage} &bull; {j.label}
                   </span>
-                  <span
-                    className="font-mono text-[9px] uppercase tracking-wider font-semibold"
-                    style={{ color: config.textColor }}
-                  >
-                    {config.label}
-                  </span>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    {service?.latencyMs && (
+                      <span className="font-mono text-[9px] text-[#8e8b82] dark:text-[#77736d]">
+                        {service.latencyMs}ms
+                      </span>
+                    )}
+                    <span
+                      className="font-mono text-[9px] uppercase tracking-wider font-semibold"
+                      style={{ color: config.textColor }}
+                    >
+                      {config.label}
+                    </span>
+                  </div>
                 </div>
                 <div className="font-serif text-sm text-[#141413] dark:text-[#faf9f5]">
                   {service?.name || j.defaultServiceName}

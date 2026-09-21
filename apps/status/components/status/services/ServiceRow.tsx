@@ -45,12 +45,21 @@ export function ServiceRow({ service, index, onSelect }: ServiceRowProps) {
         </div>
       </div>
 
-      {/* Right: Hairline connector + Status Badge */}
-      <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 shrink-0 pl-7 sm:pl-0">
-        <span className="hidden md:block h-px w-16 bg-[#e6dfd8] dark:bg-[#2e2b27]" />
+      {/* Right: Hairline connector + Live Latency + Status Badge */}
+      <div className="flex items-center justify-between sm:justify-end gap-2.5 sm:gap-4 shrink-0 pl-7 sm:pl-0">
+        <span className="hidden md:block h-px w-10 lg:w-14 bg-[#e6dfd8] dark:bg-[#2e2b27]" />
+
+        {/* Live Latency Telemetry */}
+        {service.latencyMs && (
+          <span className="inline-flex items-center gap-1.5 font-mono text-[9px] sm:text-[10px] text-[#8e8b82] dark:text-[#77736d] bg-[#faf9f5] dark:bg-[#181715] px-2 py-0.5 rounded border border-[#e6dfd8] dark:border-[#2e2b27]">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#5db872]" />
+            <span>{service.latencyMs}ms</span>
+          </span>
+        )}
+
         <div className="flex items-center gap-2">
           <span
-            className="h-2 w-2 rounded-full"
+            className="h-2 w-2 rounded-full shrink-0"
             style={{ backgroundColor: config.dotColor }}
           />
           <span
