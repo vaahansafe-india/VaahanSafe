@@ -97,8 +97,8 @@ export function useCameraScanner({ onSuccess, active }: UseCameraScannerOptions)
     if (!nativeDetector) {
       try {
         // Dynamically load jsqr fallback on-demand
-        const module = await import("jsqr");
-        jsQRModule = module.default;
+        const jsqrPkg = await import("jsqr");
+        jsQRModule = jsqrPkg.default;
       } catch (err) {
         setErrorMessage("Failed to initialize QR decoder module.");
         setState("ERROR");
