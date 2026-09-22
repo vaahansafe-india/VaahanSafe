@@ -267,7 +267,7 @@ export const POLICY_SECTIONS: readonly PolicySection[] = [
         ],
         bulletPoints: [
           "Telecommunications and SMS Providers: To deliver one-time verification passcodes, emergency alerts, and vehicle notification relays (e.g., MSG91 or equivalent certified telecom partners).",
-          "Payment Processing Partners: To process payment transactions in compliance with Reserve Bank of India (RBI) tokenization guidelines (e.g., Cashfree Payments).",
+          "Payment Processing Partners: To process payment transactions in compliance with Reserve Bank of India (RBI) tokenization guidelines (e.g., Razorpay / authorized payment partners).",
           "Cloud & Content Delivery Infrastructure: To host edge resolver instances and distributed databases with high uptime and low latency across India (e.g., Cloudflare Inc.).",
           "Courier & Logistics Partners: To deliver physical reflective QR sticker packages to your designated shipping destination.",
         ],

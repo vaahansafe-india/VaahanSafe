@@ -8,3 +8,5 @@ export * from "./identity/public-id";
 export * from "./lifecycle/public-state";
 export * from "./resolver/types";
 export * from "./resolver/states";
+export * from "./rendering/qr-encoder";
+

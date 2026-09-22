@@ -21,6 +21,10 @@ import {
   D1NotificationPreferenceRepository,
 } from "../repositories/notification.repository";
 import { D1JournalRepository } from "../repositories/journal.repository";
+import { D1QrRepository } from "../repositories/qr.repository";
+import { D1QrActivationSecretRepository } from "../repositories/qr-activation-secret.repository";
+import { D1QrActivationAttemptRepository } from "../repositories/qr-activation-attempt.repository";
+import { D1QrActivationChallengeRepository } from "../repositories/qr-activation-challenge.repository";
 
 let defaultDatabaseClient: DatabaseClient | null = null;
 
@@ -93,3 +97,20 @@ export function getNotificationPreferenceRepository(client?: DatabaseClient): D1
 export function getJournalRepository(client?: DatabaseClient): D1JournalRepository {
   return new D1JournalRepository(client || getAuthoritativeDatabaseClient());
 }
+
+export function getQrRepository(client?: DatabaseClient): D1QrRepository {
+  return new D1QrRepository(client || getAuthoritativeDatabaseClient());
+}
+
+export function getQrActivationSecretRepository(client?: DatabaseClient): D1QrActivationSecretRepository {
+  return new D1QrActivationSecretRepository(client || getAuthoritativeDatabaseClient());
+}
+
+export function getQrActivationAttemptRepository(client?: DatabaseClient): D1QrActivationAttemptRepository {
+  return new D1QrActivationAttemptRepository(client || getAuthoritativeDatabaseClient());
+}
+
+export function getQrActivationChallengeRepository(client?: DatabaseClient): D1QrActivationChallengeRepository {
+  return new D1QrActivationChallengeRepository(client || getAuthoritativeDatabaseClient());
+}
+

@@ -36,7 +36,7 @@ export function PaymentsHeader({
           Payments
         </h1>
         <p className="text-xs sm:text-sm text-muted-foreground max-w-xl leading-relaxed">
-          Review payments connected to your VaahanSafe orders and services. All transactions are verified through server-validated Cashfree webhook signatures.
+          Review payments connected to your VaahanSafe orders and services. All transactions are verified through server-validated payment webhook signatures.
         </p>
       </div>
 

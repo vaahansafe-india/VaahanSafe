@@ -142,7 +142,7 @@ export function PaymentDetailsSheet({
             <div>
               <span className="text-[10px] block">Gateway Payment ID</span>
               <span className="text-foreground truncate block" title={payment.providerPaymentId || ""}>
-                {payment.providerPaymentId || "Cashfree Validated"}
+                {payment.providerPaymentId || "Gateway Validated"}
               </span>
             </div>
             <div>

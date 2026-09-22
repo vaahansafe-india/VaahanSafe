@@ -71,6 +71,7 @@ export interface VerificationMilestone {
 export interface PaymentRecordItem {
   id: string;
   paymentReference: string; // Truncated/customer-safe reference
+  provider?: string;
   providerPaymentId: string | null;
   providerOrderId: string | null;
   orderId: string;

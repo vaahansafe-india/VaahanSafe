@@ -155,7 +155,7 @@ export function ProductEcosystem() {
                   Subscriptions & Plans
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Entitlement renewals, multi-year plans, and Cashfree-backed auto-invoicing.
+                  Entitlement renewals, multi-year plans, and automated invoicing.
                 </p>
               </div>
 

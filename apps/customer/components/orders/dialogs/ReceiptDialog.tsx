@@ -60,7 +60,7 @@ export function ReceiptDialog({ order, isOpen, onClose }: ReceiptDialogProps) {
             <div className="text-right">
               <span className="text-[10px] uppercase text-muted-foreground block">Gateway Ref</span>
               <span className="text-foreground truncate block max-w-[140px]" title={order.paymentRef || ""}>
-                {order.paymentRef || "Cashfree Verified"}
+                {order.paymentRef || "Gateway Verified"}
               </span>
             </div>
           </div>

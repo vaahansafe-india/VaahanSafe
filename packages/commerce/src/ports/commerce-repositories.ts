@@ -15,7 +15,7 @@ import { PaymentStatus } from "../payments/payment-status";
 export interface PaymentRecord {
   id: string;
   orderId: string;
-  provider: "CASHFREE" | "INTERNAL" | "MANUAL";
+  provider: "RAZORPAY" | "CASHFREE" | "INTERNAL" | "MANUAL";
   providerOrderId?: string;
   providerPaymentId?: string;
   status: PaymentStatus;

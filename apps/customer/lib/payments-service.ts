@@ -145,7 +145,7 @@ function buildVerificationTimeline(
     {
       stage: "PAYMENT_INITIATED",
       label: "Payment Initiated",
-      description: `Gateway session created with ${p.provider || "Cashfree"}`,
+      description: `Gateway session created with ${p.provider || "Razorpay"}`,
       timestamp: p.created_at,
       status: "COMPLETED",
     },
@@ -156,14 +156,14 @@ function buildVerificationTimeline(
       {
         stage: "PROVIDER_PROCESSING",
         label: "Gateway Authorization",
-        description: `Authorization confirmed (Ref: ${p.provider_payment_id || "Cashfree"})`,
+        description: `Authorization confirmed (Ref: ${p.provider_payment_id || "Razorpay"})`,
         timestamp: p.confirmed_at || p.updated_at,
         status: "COMPLETED",
       },
       {
         stage: "SERVER_VERIFIED",
         label: "Server Verified",
-        description: "Authoritative Cashfree webhook signature validated by VaahanSafe",
+        description: `Authoritative ${p.provider || "Razorpay"} webhook signature validated by VaahanSafe`,
         timestamp: p.confirmed_at || p.updated_at,
         status: "COMPLETED",
       },
@@ -187,7 +187,7 @@ function buildVerificationTimeline(
       {
         stage: "SERVER_VERIFIED",
         label: "Server Verification",
-        description: "Awaiting signed webhook event from Cashfree",
+        description: `Awaiting signed webhook event from ${p.provider || "Razorpay"}`,
         timestamp: null,
         status: "PENDING",
       },
@@ -312,12 +312,13 @@ export async function getCustomerPayments(userId: string): Promise<PaymentsPageD
 
     // Safe customer reference: mask internal database ID, expose safe provider or order reference
     const paymentRef = p.provider_payment_id
-      ? `CF-${p.provider_payment_id.slice(-6).toUpperCase()}`
+      ? `${p.provider === "RAZORPAY" ? "RZP" : "PAY"}-${p.provider_payment_id.slice(-6).toUpperCase()}`
       : `PAY-${p.id.slice(-6).toUpperCase()}`;
 
     return {
       id: p.id,
       paymentReference: paymentRef,
+      provider: p.provider,
       providerPaymentId: p.provider_payment_id,
       providerOrderId: p.provider_order_id,
       orderId: p.order_id,
@@ -460,7 +461,7 @@ export async function getCustomerPayments(userId: string): Promise<PaymentsPageD
         orderNumber: p.orderNumber,
         type: "PENDING_VERIFICATION",
         title: "Payment Confirmation Pending",
-        description: `Order ${p.orderNumber} is awaiting authoritative confirmation from Cashfree.`,
+        description: `Order ${p.orderNumber} is awaiting authoritative confirmation from ${p.provider || "Razorpay"}.`,
         actionLabel: "Check Status",
         actionType: "REFRESH",
       });

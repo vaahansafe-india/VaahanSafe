@@ -1,78 +1,177 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthoritativeDatabaseClient } from "@vaahansafe/database";
 import {
+  verifyRazorpayWebhookSignature,
+  type RazorpayWebhookPayload,
   verifyCashfreeSignature,
   type CashfreeWebhookPayload,
 } from "@vaahansafe/payments";
 import { grantAuthoritativeEntitlements } from "@vaahansafe/qr-core";
 
+/**
+ * Universal Payments Webhook Endpoint for Central API (apps/api).
+ *
+ * Supports Razorpay (Primary) and Cashfree (Legacy Audit) webhook events.
+ *
+ * INVARIANTS:
+ * - Direct raw request body cryptographic signature validation.
+ * - Strict database-backed idempotency using payment_webhook_events(provider, provider_event_id).
+ * - Authoritative fulfillment and entitlement granting upon verified capture.
+ */
 export async function POST(req: NextRequest) {
   try {
     const rawBody = await req.text();
-    const signature = req.headers.get("x-webhook-signature") || "";
-    const timestamp = req.headers.get("x-webhook-timestamp") || "";
-    const secretKey =
-      process.env.CASHFREE_CLIENT_SECRET || process.env.CASHFREE_SECRET;
-
-    // 1. Authoritative Signature Verification (Rule 06)
-    const isValid = await verifyCashfreeSignature(rawBody, signature, timestamp, secretKey);
-    if (!isValid) {
-      console.warn("[CashfreeWebhook API] Rejected invalid webhook signature");
-      return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
-    }
-
-    // 2. Parse Raw Payload
-    let payload: CashfreeWebhookPayload;
-    try {
-      payload = JSON.parse(rawBody) as CashfreeWebhookPayload;
-    } catch {
-      return NextResponse.json({ error: "Malformed payload" }, { status: 400 });
-    }
-
-    const orderId = payload.data?.order?.order_id;
-    const paymentId = payload.data?.payment?.cf_payment_id;
-    const paymentStatus = payload.data?.payment?.payment_status;
-    const eventType = payload.type;
-    const providerEventId = paymentId
-      ? `${paymentId}_${eventType}`
-      : `${orderId}_${payload.event_time}_${eventType}`;
-
-    if (!orderId) {
-      return NextResponse.json({ error: "Missing order_id" }, { status: 400 });
-    }
+    const razorpaySignature = req.headers.get("x-razorpay-signature");
+    const cashfreeSignature = req.headers.get("x-webhook-signature");
+    const cashfreeTimestamp = req.headers.get("x-webhook-timestamp") || "";
 
     const db = getAuthoritativeDatabaseClient();
+    const now = new Date().toISOString();
 
-    // 3. Database-backed Idempotency Check (Rule 07)
+    let provider: "RAZORPAY" | "CASHFREE" = "RAZORPAY";
+    let orderId: string | undefined;
+    let paymentId: string | undefined;
+    let paymentStatus: string | undefined;
+    let eventType: string = "";
+    let providerEventId: string = "";
+
+    // -------------------------------------------------------------
+    // 1. Razorpay Webhook Verification
+    // -------------------------------------------------------------
+    if (razorpaySignature) {
+      provider = "RAZORPAY";
+      const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
+      const isValid = await verifyRazorpayWebhookSignature(rawBody, razorpaySignature, webhookSecret);
+      if (!isValid) {
+        console.warn("[PaymentsWebhook API] Rejected invalid Razorpay webhook signature");
+        return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+      }
+
+      let payload: RazorpayWebhookPayload;
+      try {
+        payload = JSON.parse(rawBody) as RazorpayWebhookPayload;
+      } catch {
+        return NextResponse.json({ error: "Malformed payload" }, { status: 400 });
+      }
+
+      eventType = payload.event;
+      const paymentEntity = payload.payload?.payment?.entity;
+      const orderEntity = payload.payload?.order?.entity;
+
+      paymentId = paymentEntity?.id;
+      paymentStatus = paymentEntity?.status;
+      orderId =
+        orderEntity?.receipt ||
+        paymentEntity?.notes?.vaahansafe_order_ref ||
+        paymentEntity?.notes?.order_id ||
+        orderEntity?.id;
+
+      providerEventId = paymentId
+        ? `${paymentId}_${eventType}`
+        : `${orderEntity?.id || payload.account_id}_${payload.created_at}_${eventType}`;
+    }
+    // -------------------------------------------------------------
+    // 2. Legacy Cashfree Webhook Verification
+    // -------------------------------------------------------------
+    else if (cashfreeSignature) {
+      provider = "CASHFREE";
+      const secretKey = process.env.CASHFREE_CLIENT_SECRET || process.env.CASHFREE_SECRET;
+      const isValid = await verifyCashfreeSignature(rawBody, cashfreeSignature, cashfreeTimestamp, secretKey);
+      if (!isValid) {
+        console.warn("[PaymentsWebhook API] Rejected invalid Cashfree webhook signature");
+        return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+      }
+
+      let payload: CashfreeWebhookPayload;
+      try {
+        payload = JSON.parse(rawBody) as CashfreeWebhookPayload;
+      } catch {
+        return NextResponse.json({ error: "Malformed payload" }, { status: 400 });
+      }
+
+      orderId = payload.data?.order?.order_id;
+      paymentId = payload.data?.payment?.cf_payment_id;
+      paymentStatus = payload.data?.payment?.payment_status;
+      eventType = payload.type;
+      providerEventId = paymentId
+        ? `${paymentId}_${eventType}`
+        : `${orderId}_${payload.event_time}_${eventType}`;
+    } else {
+      return NextResponse.json({ error: "Unrecognized payment provider signature headers" }, { status: 400 });
+    }
+
+    if (!orderId && !paymentId) {
+      return NextResponse.json({ error: "Missing order reference" }, { status: 400 });
+    }
+
+    // -------------------------------------------------------------
+    // 3. Database-backed Idempotency Check
+    // -------------------------------------------------------------
     const eventRecordId = `pwe_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     try {
       await db.execute(
         `INSERT INTO payment_webhook_events (
            id, provider, provider_event_id, event_type, provider_order_id, provider_payment_id,
            processing_status, received_at, processed_at
-         ) VALUES (?, 'CASHFREE', ?, ?, ?, ?, 'RECEIVED', datetime('now'), datetime('now'))`,
-        [eventRecordId, providerEventId, eventType, orderId, paymentId || null]
+         ) VALUES (?, ?, ?, ?, ?, ?, 'RECEIVED', datetime('now'), datetime('now'))`,
+        [eventRecordId, provider, providerEventId, eventType, orderId || null, paymentId || null]
       );
     } catch {
-      // If duplicate constraint hit, acknowledge idempotently without duplicate side-effects
+      // Duplicate delivery acknowledged safely
       return NextResponse.json({ status: "already_processed" }, { status: 200 });
     }
 
-    // 4. Authoritative Order Lookup & State Machine Transition
-    const orders = await db.query<{
+    // -------------------------------------------------------------
+    // 4. Authoritative Order Lookup
+    // -------------------------------------------------------------
+    let order: {
       id: string;
       user_id: string;
       vehicle_id: string | null;
       status: string;
       total_minor: number;
-    }>(
-      `SELECT id, user_id, vehicle_id, status, total_minor
-       FROM orders
-       WHERE id = ? OR order_number = ?
-       LIMIT 1`,
-      [orderId, orderId]
-    );
-    const order = orders[0];
+    } | null = null;
+
+    if (orderId) {
+      const orders = await db.query<{
+        id: string;
+        user_id: string;
+        vehicle_id: string | null;
+        status: string;
+        total_minor: number;
+      }>(
+        `SELECT id, user_id, vehicle_id, status, total_minor
+         FROM orders
+         WHERE id = ? OR order_number = ?
+         LIMIT 1`,
+        [orderId, orderId]
+      );
+      order = orders[0] || null;
+    }
+
+    // Fallback: search via payments table by provider_payment_id or provider_order_id
+    if (!order && (paymentId || orderId)) {
+      const payments = await db.query<{ order_id: string }>(
+        `SELECT order_id FROM payments WHERE provider_payment_id = ? OR provider_order_id = ? LIMIT 1`,
+        [paymentId || "", orderId || ""]
+      );
+      if (payments[0]) {
+        const orders = await db.query<{
+          id: string;
+          user_id: string;
+          vehicle_id: string | null;
+          status: string;
+          total_minor: number;
+        }>(
+          `SELECT id, user_id, vehicle_id, status, total_minor
+           FROM orders
+           WHERE id = ?
+           LIMIT 1`,
+          [payments[0].order_id]
+        );
+        order = orders[0] || null;
+      }
+    }
 
     if (!order) {
       await db.execute(
@@ -82,15 +181,30 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
-    const now = new Date().toISOString();
+    // -------------------------------------------------------------
+    // 5. State Machine Transition & Authoritative Fulfillment
+    // -------------------------------------------------------------
+    const isSuccess =
+      eventType === "payment.captured" ||
+      eventType === "order.paid" ||
+      eventType === "PAYMENT_SUCCESS_WEBHOOK" ||
+      paymentStatus === "captured" ||
+      paymentStatus === "SUCCESS";
 
-    if (eventType === "PAYMENT_SUCCESS_WEBHOOK" || paymentStatus === "SUCCESS") {
+    const isFailure =
+      eventType === "payment.failed" ||
+      eventType === "PAYMENT_FAILED_WEBHOOK" ||
+      paymentStatus === "failed" ||
+      paymentStatus === "FAILED" ||
+      paymentStatus === "USER_DROPPED";
+
+    if (isSuccess) {
       // Mark Payment Succeeded
       await db.execute(
         `UPDATE payments
          SET status = 'SUCCESS',
-             provider_payment_id = ?,
-             confirmed_at = ?,
+             provider_payment_id = COALESCE(?, provider_payment_id),
+             confirmed_at = COALESCE(confirmed_at, ?),
              updated_at = ?
          WHERE order_id = ?`,
         [paymentId ? String(paymentId) : null, now, now, order.id]
@@ -100,7 +214,7 @@ export async function POST(req: NextRequest) {
       await db.execute(
         `UPDATE orders
          SET status = 'PAID',
-             paid_at = ?,
+             paid_at = COALESCE(paid_at, ?),
              updated_at = ?
          WHERE id = ?`,
         [now, now, order.id]
@@ -158,7 +272,7 @@ export async function POST(req: NextRequest) {
         `UPDATE payment_webhook_events SET processing_status = 'PROCESSED' WHERE id = ?`,
         [eventRecordId]
       );
-    } else if (paymentStatus === "FAILED" || paymentStatus === "USER_DROPPED") {
+    } else if (isFailure) {
       await db.execute(
         `UPDATE payments SET status = 'FAILED', updated_at = ? WHERE order_id = ?`,
         [now, order.id]
@@ -177,7 +291,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ received: true });
   } catch (err) {
-    console.error("[CashfreeWebhook API] Internal error processing webhook:", err);
+    console.error("[PaymentsWebhook API] Internal error processing webhook:", err);
     return NextResponse.json({ error: "Internal processing error" }, { status: 500 });
   }
 }

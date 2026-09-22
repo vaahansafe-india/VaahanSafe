@@ -2,7 +2,7 @@
   "name": "@vaahansafe/payments",
   "version": "1.0.0",
   "private": true,
-  "description": "Cashfree payment provider contracts and webhook verification for VaahanSafe",
+  "description": "Razorpay and multi-provider payment gateway integration & webhook verification for VaahanSafe",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "exports": {

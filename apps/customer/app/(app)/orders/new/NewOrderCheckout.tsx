@@ -11,20 +11,16 @@ import {
   Lock,
   Sparkles,
   MapPin,
-  Building,
-  Plus,
   AlertCircle,
   Car,
 } from "lucide-react";
-import { createOrderAndCashfreeSession } from "./actions";
+import { createOrderAndPaymentSession } from "./actions";
 
 declare global {
   interface Window {
-    Cashfree?: (config: { mode: "sandbox" | "production" }) => {
-      checkout: (options: {
-        paymentSessionId: string;
-        redirectTarget?: "_self" | "_blank" | "_top";
-      }) => Promise<unknown>;
+    Razorpay?: new (options: Record<string, unknown>) => {
+      open: () => void;
+      close: () => void;
     };
   }
 }
@@ -112,37 +108,78 @@ export function NewOrderCheckout({
             postalCode,
           };
 
-      const res = await createOrderAndCashfreeSession(
+      const res = await createOrderAndPaymentSession(
         product.code,
         vehicle?.id || null,
         addressInput
       );
 
-      if (!res.success || !res.paymentSessionId) {
+      if (!res.success || !res.orderId) {
         setErrorMessage(res.error || "Unable to initiate payment session. Please try again.");
         setIsSubmitting(false);
         return;
       }
 
-      // Check if Cashfree SDK is available
-      if (typeof window.Cashfree === "function") {
-        const cashfree = window.Cashfree({
-          mode: res.cashfreeMode || "sandbox",
+      // Check if Razorpay Standard Checkout SDK is available
+      if (typeof window.Razorpay === "function" && res.razorpay) {
+        const rzp = new window.Razorpay({
+          key: res.razorpay.keyId,
+          amount: res.razorpay.amount,
+          currency: res.razorpay.currency || "INR",
+          name: res.razorpay.name || "VaahanSafe",
+          description: res.razorpay.description || "VaahanSafe QR Safety Kit",
+          order_id: res.razorpay.orderId,
+          prefill: res.razorpay.prefill,
+          theme: {
+            color: "#CC785C",
+          },
+          handler: async (response: {
+            razorpay_payment_id: string;
+            razorpay_order_id: string;
+            razorpay_signature: string;
+          }) => {
+            try {
+              setIsSubmitting(true);
+              // Authoritative server-side verification of Razorpay checkout callback
+              const verifyRes = await fetch("/api/payments/verify", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  orderId: res.orderId,
+                  razorpayPaymentId: response.razorpay_payment_id,
+                  razorpayOrderId: response.razorpay_order_id,
+                  razorpaySignature: response.razorpay_signature,
+                }),
+              });
+
+              const verifyData = await verifyRes.json();
+              if (verifyData.success) {
+                window.location.href = `/orders/checkout-status?order_id=${res.orderId}`;
+              } else {
+                setErrorMessage(verifyData.error || "Payment verification pending. Reconciling transaction...");
+                window.location.href = `/orders/checkout-status?order_id=${res.orderId}`;
+              }
+            } catch {
+              window.location.href = `/orders/checkout-status?order_id=${res.orderId}`;
+            }
+          },
+          modal: {
+            ondismiss: () => {
+              setIsSubmitting(false);
+              setErrorMessage("Payment Not Completed — Your order has not been marked as paid.");
+            },
+          },
         });
 
-        // Launch authoritative Cashfree hosted checkout
-        await cashfree.checkout({
-          paymentSessionId: res.paymentSessionId,
-          redirectTarget: "_self",
-        });
+        rzp.open();
       } else {
-        // Fallback redirection to status check if script failed to load
+        // Fallback redirection to status check if script failed to load or in non-browser testing
         window.location.href = `/orders/checkout-status?order_id=${res.orderId}`;
       }
     } catch (err: any) {
       console.error("Payment initiation error:", err);
       setErrorMessage(
-        "A connection issue occurred while loading Cashfree checkout. Please try again."
+        "A connection issue occurred while opening secure checkout. Please try again."
       );
       setIsSubmitting(false);
     }
@@ -150,10 +187,10 @@ export function NewOrderCheckout({
 
   return (
     <>
-      {/* Cashfree v3 Production & Sandbox SDK */}
+      {/* Razorpay Standard Checkout SDK */}
       <Script
-        src="https://sdk.cashfree.com/js/v3/cashfree.js"
-        strategy="afterInteractive"
+        src="https://checkout.razorpay.com/v1/checkout.js"
+        strategy="lazyOnload"
       />
 
       <div className="space-y-8 pb-16">
@@ -176,14 +213,14 @@ export function NewOrderCheckout({
               Delivery & Payment
             </h1>
             <p className="mt-1.5 max-w-2xl text-sm text-muted-foreground">
-              Provide your delivery address to dispatch your genuine UV-laminated QR kit. Payments are securely processed via Cashfree.
+              Provide your delivery address to dispatch your genuine UV-laminated QR kit. Payments are securely processed via Razorpay.
             </p>
           </div>
 
           <div className="flex items-center gap-2 rounded-xl border border-border bg-card px-3.5 py-2 font-mono text-xs">
             <Lock className="size-3.5 text-emerald-500" />
-            <span className="text-muted-foreground">Cashfree Gateway:</span>
-            <span className="font-bold text-foreground">256-Bit SSL</span>
+            <span className="text-muted-foreground">Secure Gateway:</span>
+            <span className="font-bold text-foreground">Razorpay 256-Bit SSL</span>
           </div>
         </div>
 
@@ -399,7 +436,7 @@ export function NewOrderCheckout({
             </div>
           </div>
 
-          {/* Right 5 Columns: Order Summary & Cashfree Payment Gate */}
+          {/* Right 5 Columns: Order Summary & Razorpay Payment Gate */}
           <div className="lg:col-span-5 space-y-6">
             <div className="sticky top-6 rounded-2xl border border-border bg-card p-5 sm:p-6 shadow-sm space-y-6">
               <div className="flex items-center justify-between pb-4 border-b border-border">
@@ -482,13 +519,13 @@ export function NewOrderCheckout({
                 className="flex w-full h-12 items-center justify-center gap-2 rounded-xl bg-[#cc785c] font-mono text-xs font-semibold uppercase tracking-wider text-white transition-all hover:bg-[#b5654b] shadow-xs disabled:opacity-50"
               >
                 <Sparkles className="size-4" />
-                <span>{isSubmitting ? "Opening Cashfree Gateway..." : `Pay ${product.priceFormatted} with Cashfree`}</span>
+                <span>{isSubmitting ? "Preparing Secure Payment..." : `Pay ${product.priceFormatted} Securely`}</span>
               </button>
 
               <div className="space-y-2 text-center">
                 <div className="font-mono text-[10px] text-muted-foreground flex items-center justify-center gap-1.5">
                   <ShieldCheck className="size-3.5 text-emerald-600" />
-                  <span>Powered by Cashfree Payments &bull; UPI, Cards, Netbanking</span>
+                  <span>Secured by Razorpay &bull; UPI, Cards, NetBanking, Wallets</span>
                 </div>
                 <p className="text-[10px] text-muted-foreground/80">
                   By confirming, you agree to the VaahanSafe Hardware Fulfillment & Safety Terms.

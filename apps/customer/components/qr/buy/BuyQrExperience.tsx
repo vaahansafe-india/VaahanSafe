@@ -234,7 +234,7 @@ export function BuyQrExperience({ data }: BuyQrExperienceProps) {
               </button>
 
               <div className="mt-3 text-center font-mono text-[10px] text-muted-foreground">
-                Secured by Cashfree &bull; GST Invoice Provided
+                Secured by Razorpay &bull; GST Invoice Provided
               </div>
             </div>
           </div>

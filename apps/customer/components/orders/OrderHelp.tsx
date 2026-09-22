@@ -18,7 +18,7 @@ export function OrderHelp({ onTrackSelected }: OrderHelpProps) {
     },
     {
       title: "Payment Reconciliation",
-      description: "Cashfree verification or billing questions",
+      description: "Gateway verification or billing questions",
       icon: "receipt" as const,
       href: "/help",
     },

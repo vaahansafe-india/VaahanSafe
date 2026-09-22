@@ -42,7 +42,7 @@ export function RetryPaymentAlert({
             Retry Incomplete Payment?
           </AlertDialogTitle>
           <AlertDialogDescription className="text-xs text-muted-foreground leading-relaxed">
-            A new, authoritative Cashfree payment session will be initialized for this order. Existing unconfirmed attempts will be safely superseded.
+            A new, authoritative secure payment session will be initialized for this order. Existing unconfirmed attempts will be safely superseded.
           </AlertDialogDescription>
         </AlertDialogHeader>
 

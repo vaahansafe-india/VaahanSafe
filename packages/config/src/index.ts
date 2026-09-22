@@ -45,7 +45,8 @@ export const APP_NAMES = {
 
 export const FEATURE_FLAGS = {
   enableTurnstile: false,
-  enableCashfreeSandbox: true,
+  enableRazorpayTestMode: true,
+  enableCashfreeSandbox: false,
   enableWhatsappAlerts: false,
 } as const;
 
@@ -68,6 +69,11 @@ export const serverEnvSchema = z.object({
   SESSION_SECRET: z.string().min(16).optional(),
   MSG91_AUTH_KEY: z.string().optional(),
   MSG91_OTP_TEMPLATE_ID: z.string().optional(),
+  PAYMENT_PROVIDER: z.enum(["razorpay", "cashfree"]).default("razorpay"),
+  RAZORPAY_MODE: z.enum(["test", "live"]).default("test"),
+  RAZORPAY_KEY_ID: z.string().optional(),
+  RAZORPAY_KEY_SECRET: z.string().optional(),
+  RAZORPAY_WEBHOOK_SECRET: z.string().optional(),
   CASHFREE_CLIENT_ID: z.string().optional(),
   CASHFREE_CLIENT_SECRET: z.string().optional(),
   GOOGLE_CLIENT_ID: z.string().optional(),

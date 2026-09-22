@@ -21,7 +21,9 @@ if (!target) {
     target = "customer";
   } else if (cwd.includes("qr.vaahansafe.com") || __dirname.includes("qr.vaahansafe.com")) {
     target = "qr";
-  } else if (cwd.includes("vaahansafe.com") && !cwd.includes("app.vaahansafe.com") && !cwd.includes("qr.vaahansafe.com")) {
+  } else if (cwd.includes("activate.vaahansafe.com") || __dirname.includes("activate.vaahansafe.com")) {
+    target = "activate";
+  } else if (cwd.includes("vaahansafe.com") && !cwd.includes("app.vaahansafe.com") && !cwd.includes("qr.vaahansafe.com") && !cwd.includes("activate.vaahansafe.com")) {
     target = "web";
   } else {
     target = "all";
@@ -47,6 +49,9 @@ try {
   } else if (target === "qr") {
     console.log("[build-hostinger] Building QR Resolver Runtime (@vaahansafe/qr)...");
     run("npx turbo run build --filter=@vaahansafe/qr");
+  } else if (target === "activate") {
+    console.log("[build-hostinger] Building Retail Activation Runtime (@vaahansafe/activate)...");
+    run("npx turbo run build --filter=@vaahansafe/activate");
   } else {
     console.log("[build-hostinger] Building both @vaahansafe/web and @vaahansafe/customer sequentially...");
     run("npx turbo run build --filter=@vaahansafe/web");

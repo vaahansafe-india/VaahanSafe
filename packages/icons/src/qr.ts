@@ -1,16 +1,21 @@
 import {
   QrCodeIcon,
+  QrCodeScanIcon,
   BarCode01Icon,
   BarcodeScanIcon,
   PrinterIcon,
+  Camera01Icon,
 } from "@hugeicons/core-free-icons";
 
 export const qrIcons = {
   qr: QrCodeIcon,
   "qr-code": QrCodeIcon,
-  "qr-scan": BarcodeScanIcon,
+  "qr-scan": QrCodeScanIcon,
+  scan: QrCodeScanIcon,
+  scanner: QrCodeScanIcon,
+  camera: Camera01Icon,
   barcode: BarCode01Icon,
-  scanner: BarcodeScanIcon,
+  "barcode-scan": BarcodeScanIcon,
   print: PrinterIcon,
 } as const;
 

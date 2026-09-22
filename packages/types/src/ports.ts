@@ -2,7 +2,7 @@
  * VaahanSafe Provider-Independent Ports & Contracts
  *
  * Establishes explicit boundaries between Application/Domain logic and
- * Infrastructure Adapters (D1, R2, Queues, Cashfree, MSG91, Email).
+ * Infrastructure Adapters (D1, R2, Queues, Razorpay, MSG91, Email).
  *
  * INVARIANT: Domain and application use cases depend ONLY on these interfaces.
  * Never import provider SDKs directly into business logic.
@@ -23,6 +23,7 @@ import type {
   Subscription,
   PaymentStatus,
   MedicalProfile,
+  QrActivationChallenge,
 } from "./index";
 import type {
   UserId,
@@ -126,6 +127,20 @@ export interface QrActivationAttemptRepository {
     ipHash?: string;
   }): Promise<void>;
   countRecentAttempts(qrId: string, windowSeconds?: number): Promise<number>;
+}
+
+export interface QrActivationChallengeRepository {
+  createChallenge(params: {
+    id?: string;
+    qrId: string;
+    publicId: string;
+    tokenHash: string;
+    expiresAt: string;
+    userId?: string | null;
+  }): Promise<QrActivationChallenge>;
+  findByTokenHash(tokenHash: string): Promise<QrActivationChallenge | null>;
+  attachUser(id: string, userId: string): Promise<boolean>;
+  consumeChallenge(id: string): Promise<boolean>;
 }
 
 export interface EmergencyProfileRepository {
@@ -313,11 +328,29 @@ export interface PaymentOrderInput {
   notifyUrl: string;
 }
 
+export interface RazorpayCheckoutOptions {
+  keyId: string;
+  orderId: string;
+  amount: number;
+  currency: string;
+  name: string;
+  description: string;
+  prefill?: {
+    name?: string;
+    email?: string;
+    contact?: string;
+  };
+  theme?: {
+    color: string;
+  };
+}
+
 export interface PaymentOrderSession {
   gatewayOrderId: string;
   orderId: string;
-  paymentSessionId: string;
+  paymentSessionId?: string;
   gatewayStatus: string;
+  checkoutOptions?: RazorpayCheckoutOptions;
 }
 
 export interface WebhookVerificationResult {

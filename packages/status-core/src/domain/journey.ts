@@ -37,7 +37,7 @@ export const JOURNEY_STAGES: readonly JourneyStageMeta[] = [
     label: "Payments",
     serviceSlug: "payments",
     defaultServiceName: "Purchase & Payments",
-    description: "Authoritative order processing, Cashfree gateway checkout, and fulfillment tracking.",
+    description: "Authoritative order processing, Razorpay gateway checkout, and fulfillment tracking.",
     customerAction: "Owners purchase kits, replace damaged stickers, or renew plans.",
   },
   {

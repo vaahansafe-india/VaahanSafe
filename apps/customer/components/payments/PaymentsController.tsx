@@ -160,7 +160,7 @@ export function PaymentsController({ initialData }: PaymentsControllerProps) {
   const handleAttentionAction = async (item: PaymentAttentionItem) => {
     if (item.actionType === "REFRESH") {
       toast.promise(refreshPaymentStatusAction(item.paymentId), {
-        loading: "Verifying gateway status with Cashfree...",
+        loading: "Verifying gateway status with payment provider...",
         success: (res) => {
           if (res.success) {
             router.refresh();

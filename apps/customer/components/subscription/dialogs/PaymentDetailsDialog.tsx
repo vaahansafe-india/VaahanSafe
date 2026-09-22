@@ -46,7 +46,7 @@ export function PaymentDetailsDialog({
         <DialogHeader className="space-y-1 text-left border-b border-border pb-3">
           <div className="flex items-center gap-2">
             <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#cc785c]">
-              Cashfree Settlement Receipt
+              Payment Settlement Receipt
             </span>
             <span className="h-1 w-1 rounded-full bg-border" />
             <span className="font-mono text-[10px] text-muted-foreground">
@@ -90,7 +90,7 @@ export function PaymentDetailsDialog({
             <div className="flex justify-between p-3">
               <span className="text-muted-foreground">Settlement Gateway</span>
               <span className="font-mono text-foreground">
-                Cashfree PG (Signed Webhook Verified)
+                Razorpay PG (Signed Webhook Verified)
               </span>
             </div>
             <div className="flex justify-between p-3">

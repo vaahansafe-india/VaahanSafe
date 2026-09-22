@@ -31,7 +31,7 @@ vaahansafe/
 │   ├── qr/              # @vaahansafe/qr-core — QR lifecycle state machine & resolver contracts
 │   ├── commerce/        # @vaahansafe/commerce — Cart, product catalog & checkout contracts
 │   ├── subscriptions/   # @vaahansafe/subscriptions — Subscription lifecycle & renewal plans
-│   ├── payments/        # @vaahansafe/payments — Cashfree payment integration & webhook verifiers
+│   ├── payments/        # @vaahansafe/payments — Razorpay payment integration & webhook verifiers
 │   ├── notifications/   # @vaahansafe/notifications — MSG91 OTP/WhatsApp & transactional email
 │   ├── storage/         # @vaahansafe/storage — Cloudflare R2 object storage abstractions
 │   ├── shipping/        # @vaahansafe/shipping — Courier partners & QR sticker fulfillment

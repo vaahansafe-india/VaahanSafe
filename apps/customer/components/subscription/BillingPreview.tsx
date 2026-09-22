@@ -40,7 +40,7 @@ export function BillingPreview({ records, onViewRecord }: BillingPreviewProps) {
             </span>
             <span className="h-1 w-1 rounded-full bg-border" />
             <span className="font-mono text-xs text-muted-foreground">
-              Cashfree Verified
+              Gateway Verified
             </span>
           </div>
           <h3 className="font-serif text-xl sm:text-2xl font-medium tracking-tight text-foreground">
@@ -113,7 +113,7 @@ export function BillingPreview({ records, onViewRecord }: BillingPreviewProps) {
               </span>
               <div className="font-mono text-xs font-bold text-foreground flex items-center gap-1.5 pt-1">
                 <VaahanIcon name="shield" size={14} className="text-[#5db8a6] shrink-0" />
-                <span>Authoritative Cashfree Settlement</span>
+                <span>Authoritative Gateway Settlement</span>
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed pt-1">
                 Payments are verified via cryptographic server webhooks. No credit card or banking details are stored on VaahanSafe servers.

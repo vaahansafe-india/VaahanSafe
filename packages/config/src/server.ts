@@ -17,7 +17,14 @@ export const serverConfigSchema = z.object({
   MSG91_OTP_TEMPLATE_ID: z.string().optional(),
   MSG91_SENDER_ID: z.string().optional(),
 
-  // Cashfree Payment Gateway
+  // Payment Provider Configuration
+  PAYMENT_PROVIDER: z.enum(["razorpay", "cashfree"]).default("razorpay"),
+  RAZORPAY_MODE: z.enum(["test", "live"]).default("test"),
+  RAZORPAY_KEY_ID: z.string().optional(),
+  RAZORPAY_KEY_SECRET: z.string().optional(),
+  RAZORPAY_WEBHOOK_SECRET: z.string().optional(),
+
+  // Legacy Cashfree Payment Gateway (Retained for historical audit)
   CASHFREE_CLIENT_ID: z.string().optional(),
   CASHFREE_CLIENT_SECRET: z.string().optional(),
   CASHFREE_WEBHOOK_SECRET: z.string().optional(),

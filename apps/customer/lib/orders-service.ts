@@ -295,7 +295,7 @@ export async function getCustomerOrders(userId: string): Promise<OrdersPageData>
           : "current",
         timestamp: order.paid_at || payment?.confirmed_at || undefined,
         description: isPaid
-          ? "Authoritative Cashfree transaction verified"
+          ? `Authoritative ${payment?.provider || "gateway"} transaction verified`
           : "Awaiting payment verification",
       },
       {
@@ -376,7 +376,7 @@ export async function getCustomerOrders(userId: string): Promise<OrdersPageData>
       orderNumber: order.order_number,
       status: order.status,
       paymentStatus,
-      paymentProvider: payment?.provider || "CASHFREE",
+      paymentProvider: payment?.provider || "RAZORPAY",
       paymentRef: payment?.provider_payment_id || payment?.provider_order_id || null,
       subtotalMinor: order.subtotal_minor,
       shippingMinor: order.shipping_minor,

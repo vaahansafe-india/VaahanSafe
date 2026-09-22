@@ -3,17 +3,15 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getAuthenticatedCustomer } from "@/lib/session";
 import { getAuthoritativeDatabaseClient } from "@vaahansafe/database";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@vaahansafe/ui/components";
-import { Badge } from "@vaahansafe/ui/components";
-import { Button } from "@vaahansafe/ui/components";
+import { Card, Badge } from "@vaahansafe/ui/components";
 import { CheckCircle2, Clock, XCircle, ArrowRight, RefreshCw, ShieldCheck } from "lucide-react";
 
-import { getCashfreePaymentGateway } from "@vaahansafe/payments";
+import { getPaymentGateway } from "@vaahansafe/payments";
 import { fulfillPaidOnlineOrder } from "@vaahansafe/qr-core";
 
 export const metadata: Metadata = {
   title: "Payment Verification — VaahanSafe",
-  description: "Authoritative server verification of Cashfree transaction status.",
+  description: "Authoritative server verification of transaction status.",
 };
 
 interface CheckoutStatusPageProps {
@@ -58,16 +56,33 @@ export default async function CheckoutStatusPage({ searchParams }: CheckoutStatu
     redirect("/orders");
   }
 
-  // Authoritative Gateway Verification: If still pending, reconcile directly with Cashfree REST API
+  // Authoritative Gateway Verification: If still pending, reconcile directly with Payment Gateway
   if (order.status === "PENDING_PAYMENT" || order.status === "DRAFT") {
     try {
-      const gateway = getCashfreePaymentGateway();
-      const cfStatus = await gateway.fetchPaymentStatus(order.id);
-      if (cfStatus.status === "SUCCESS") {
+      const payments = await db.query<{
+        id: string;
+        provider_order_id: string | null;
+        provider_payment_id: string | null;
+      }>(
+        `SELECT id, provider_order_id, provider_payment_id
+         FROM payments
+         WHERE order_id = ?
+         ORDER BY attempt_number DESC
+         LIMIT 1`,
+        [order.id]
+      );
+
+      const payment = payments[0];
+      const lookupOrderId = payment?.provider_order_id || order.id;
+
+      const gateway = getPaymentGateway();
+      const statusRes = await gateway.fetchPaymentStatus(lookupOrderId);
+
+      if (statusRes.status === "SUCCESS") {
         const now = new Date().toISOString();
         await db.execute(
-          `UPDATE payments SET status = 'SUCCESS', provider_payment_id = ?, confirmed_at = ?, updated_at = ? WHERE order_id = ?`,
-          [cfStatus.gatewayPaymentId || null, now, now, order.id]
+          `UPDATE payments SET status = 'SUCCESS', provider_payment_id = COALESCE(?, provider_payment_id), confirmed_at = ?, updated_at = ? WHERE order_id = ?`,
+          [statusRes.gatewayPaymentId || null, now, now, order.id]
         );
         await db.execute(
           `UPDATE orders SET status = 'PAID', paid_at = ?, updated_at = ? WHERE id = ?`,
@@ -78,7 +93,7 @@ export default async function CheckoutStatusPage({ searchParams }: CheckoutStatu
         order.paid_at = now;
       }
     } catch (err) {
-      console.warn("[CheckoutStatusPage] Server Cashfree verification error:", err);
+      console.warn("[CheckoutStatusPage] Server payment verification error:", err);
     }
   }
 
@@ -128,14 +143,14 @@ export default async function CheckoutStatusPage({ searchParams }: CheckoutStatu
               ? "Payment Authoritatively Confirmed"
               : isFailed
               ? "Payment Incomplete or Cancelled"
-              : "Verifying Payment with Cashfree"}
+              : "Verifying Secure Payment"}
           </h1>
           <p className="mt-2 text-xs sm:text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
             {isPaid
-              ? "Your payment was cryptographically confirmed via Cashfree's signed webhook. Your hardware order has been registered and digital entitlements have been unlocked."
+              ? "Your payment was cryptographically confirmed. Your hardware order has been registered and digital entitlements have been unlocked."
               : isFailed
-              ? "We could not confirm payment for this transaction. If amount was debited, your gateway will automatically refund it within 3-5 business days."
-              : "We are awaiting final confirmation from the Cashfree payment gateway. This screen automatically refreshes when the verified webhook arrives."}
+              ? "We could not confirm payment for this transaction. If an amount was debited, your bank will automatically refund it within 3-5 business days."
+              : "We are awaiting final confirmation from the secure payment gateway. This screen automatically refreshes when verification completes."}
           </p>
         </div>
 
@@ -153,7 +168,7 @@ export default async function CheckoutStatusPage({ searchParams }: CheckoutStatu
           </div>
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground">Backend Status:</span>
-            <Badge variant={isPaid ? "success" : isFailed ? "destructive" : "outline"}>
+            <Badge variant={isPaid ? "default" : isFailed ? "destructive" : "outline"}>
               {order.status}
             </Badge>
           </div>

@@ -14,6 +14,7 @@ export * from "./repositories/emergency.repository";
 export * from "./repositories/qr.repository";
 export * from "./repositories/qr-activation-secret.repository";
 export * from "./repositories/qr-activation-attempt.repository";
+export * from "./repositories/qr-activation-challenge.repository";
 export * from "./repositories/media-asset.repository";
 export * from "./repositories/commerce.repository";
 export * from "./repositories/subscription.repository";

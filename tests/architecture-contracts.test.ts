@@ -18,7 +18,7 @@ import {
   ObjectStorage,
 } from "@vaahansafe/types";
 import { MockObjectStorage } from "@vaahansafe/storage";
-import { CashfreePaymentAdapter } from "@vaahansafe/payments";
+import { RazorpayPaymentAdapter, CashfreePaymentAdapter } from "@vaahansafe/payments";
 
 describe("Architecture Contracts & Domain Primitives (@vaahansafe/types)", () => {
   describe("Branded Identifier Value Objects", () => {
@@ -100,7 +100,28 @@ describe("Architecture Contracts & Domain Primitives (@vaahansafe/types)", () =>
   });
 
   describe("Payment Gateway Port & Authority (INVARIANT 08)", () => {
-    it("CashfreePaymentAdapter implements PaymentGateway port", async () => {
+    it("RazorpayPaymentAdapter implements PaymentGateway port", async () => {
+      const gateway: PaymentGateway = new RazorpayPaymentAdapter({
+        keyId: "rzp_mock_placeholder_id",
+        keySecret: "rzp_mock_placeholder_secret",
+        mode: "test",
+      });
+
+      const session = await gateway.createPaymentOrder({
+        orderId: "ord_101",
+        amountPaise: 149900,
+        customerId: "cust_1",
+        customerPhone: "9876543210",
+        returnUrl: "https://app.vaahansafe.com/orders/return",
+        notifyUrl: "https://api.vaahansafe.com/webhooks/razorpay",
+      });
+
+      expect(session.orderId).toBe("ord_101");
+      expect(session.gatewayStatus).toBe("PENDING");
+      expect(session.checkoutOptions?.keyId).toBe("rzp_mock_placeholder_id");
+    });
+
+    it("CashfreePaymentAdapter implements PaymentGateway port (historical audit)", async () => {
       const gateway: PaymentGateway = new CashfreePaymentAdapter("test_id", "test_secret", "TEST");
 
       const session = await gateway.createPaymentOrder({

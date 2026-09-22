@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { cn } from "@vaahansafe/ui/lib/utils";
-import { generateScannableQrMatrix } from "@vaahansafe/qr-core";
+import { generateScannableQrMatrix } from "@vaahansafe/qr-core/client";
 
 interface QrFrameProps {
   publicId?: string;

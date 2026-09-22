@@ -19,11 +19,8 @@ export function middleware(request: NextRequest) {
 
   const sessionToken = request.cookies.get(CUSTOMER_SESSION_COOKIE_NAME)?.value;
 
-  // If visiting /login while already having an active session, forward to app home
+  // The login route is always accessible; validity is verified authoritatively by the page
   if (pathname === "/login") {
-    if (sessionToken) {
-      return NextResponse.redirect(new URL("/", request.url));
-    }
     return NextResponse.next();
   }
 

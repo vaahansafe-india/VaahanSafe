@@ -2,7 +2,7 @@
 
 import { getAuthenticatedCustomer } from "@/lib/session";
 import { getAuthoritativeDatabaseClient } from "@vaahansafe/database";
-import { getCashfreePaymentGateway } from "@vaahansafe/payments";
+import { getPaymentGateway } from "@vaahansafe/payments";
 
 export interface CheckoutAddressInput {
   addressId?: string;
@@ -18,13 +18,38 @@ export interface CheckoutAddressInput {
 
 export interface CreateOrderCheckoutResult {
   success: boolean;
-  paymentSessionId?: string;
   orderId?: string;
-  cashfreeMode?: "sandbox" | "production";
+  orderNumber?: string;
+  razorpay?: {
+    keyId: string;
+    orderId: string;
+    amount: number;
+    currency: string;
+    name: string;
+    description: string;
+    prefill?: {
+      name?: string;
+      email?: string;
+      contact?: string;
+    };
+    theme?: {
+      color: string;
+    };
+  };
+  paymentSessionId?: string;
   error?: string;
 }
 
-export async function createOrderAndCashfreeSession(
+/**
+ * Creates an authoritative internal order, calculates prices server-side,
+ * initiates a provider order with Razorpay, and returns safe checkout metadata.
+ *
+ * INVARIANTS:
+ * - Server determines the authoritative price; client amounts are never trusted.
+ * - Razorpay order is linked to internal VaahanSafe order via receipt/notes.
+ * - Key Secret NEVER reaches the browser.
+ */
+export async function createOrderAndPaymentSession(
   productCode: string,
   vehicleId: string | null,
   addressInput: CheckoutAddressInput
@@ -37,7 +62,7 @@ export async function createOrderAndCashfreeSession(
 
     const db = getAuthoritativeDatabaseClient();
 
-    // 1. Authoritative Product & Pricing Resolution (Rule 08: Server-Authoritative Pricing)
+    // 1. Authoritative Product & Pricing Resolution (Server-Authoritative Pricing)
     const products = await db.query<{
       id: string;
       code: string;
@@ -187,9 +212,9 @@ export async function createOrderAndCashfreeSession(
       ]
     );
 
-    // 7. Request Authoritative Payment Order from Cashfree PG
+    // 7. Request Authoritative Payment Order from Payment Gateway
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3001";
-    const gateway = getCashfreePaymentGateway();
+    const gateway = getPaymentGateway();
 
     const paymentSession = await gateway.createPaymentOrder({
       orderId,
@@ -200,41 +225,46 @@ export async function createOrderAndCashfreeSession(
       customerName: recipientName,
       customerEmail: auth.user.email || undefined,
       returnUrl: `${appUrl}/orders/checkout-status?order_id=${orderId}`,
-      notifyUrl: `${appUrl}/api/webhooks/cashfree`,
+      notifyUrl: `${appUrl}/api/webhooks/razorpay`,
     });
 
     // 8. Record Initial Payment Attempt in D1 Payments
     const paymentId = `pay_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`;
+    const provider = (process.env.PAYMENT_PROVIDER || "RAZORPAY").toUpperCase();
+
     await db.execute(
       `INSERT INTO payments (
          id, order_id, provider, provider_order_id, status,
          amount_minor, currency, attempt_number, created_at, updated_at
        ) VALUES (
-         ?, ?, 'CASHFREE', ?, 'PENDING',
+         ?, ?, ?, ?, 'PENDING',
          ?, ?, 1, datetime('now'), datetime('now')
        )`,
       [
         paymentId,
         orderId,
+        provider,
         paymentSession.gatewayOrderId,
         product.price_minor,
         product.currency || "INR",
       ]
     );
 
-    const cashfreeMode = process.env.CASHFREE_ENV === "PROD" ? "production" : "sandbox";
-
     return {
       success: true,
-      paymentSessionId: paymentSession.paymentSessionId,
       orderId,
-      cashfreeMode,
+      orderNumber,
+      razorpay: paymentSession.checkoutOptions,
+      paymentSessionId: paymentSession.paymentSessionId || paymentSession.gatewayOrderId,
     };
   } catch (err: any) {
-    console.error("[createOrderAndCashfreeSession] Error:", err);
+    console.error("[createOrderAndPaymentSession] Error:", err);
     return {
       success: false,
       error: "We couldn't initiate secure payment. Please try again in a few moments.",
     };
   }
 }
+
+// Backward-compatible alias
+export const createOrderAndCashfreeSession = createOrderAndPaymentSession;

@@ -1190,7 +1190,7 @@ export default function DesignSystemPage() {
             <section className="space-y-4">
               <div>
                 <h2 className="text-xl font-semibold tracking-tight text-foreground">
-                  28. Authoritative Payment States (Cashfree)
+                  28. Authoritative Payment States (Razorpay)
                 </h2>
                 <p className="text-sm text-muted-foreground">
                   Never mark a payment successful on frontend redirect alone.

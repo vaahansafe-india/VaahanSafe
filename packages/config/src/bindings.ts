@@ -42,7 +42,13 @@ export const SURFACE_BINDINGS_MATRIX: Record<SurfaceId, SurfaceResourcePermissio
     notificationQueue: false,
     analyticsQueue: false,
     commerceQueue: true,
-    allowedSecrets: ["SESSION_SECRET", "GOOGLE_CLIENT_SECRET"],
+    allowedSecrets: [
+      "SESSION_SECRET",
+      "GOOGLE_CLIENT_SECRET",
+      "RAZORPAY_KEY_ID",
+      "RAZORPAY_KEY_SECRET",
+      "RAZORPAY_WEBHOOK_SECRET",
+    ],
     rationale: "Customer portal. Manages vehicles and orders; initiates commerce jobs asynchronously.",
   },
   activate: {
@@ -92,6 +98,9 @@ export const SURFACE_BINDINGS_MATRIX: Record<SurfaceId, SurfaceResourcePermissio
     commerceQueue: true,
     allowedSecrets: [
       "SESSION_SECRET",
+      "RAZORPAY_KEY_ID",
+      "RAZORPAY_KEY_SECRET",
+      "RAZORPAY_WEBHOOK_SECRET",
       "CASHFREE_CLIENT_ID",
       "CASHFREE_CLIENT_SECRET",
       "CASHFREE_WEBHOOK_SECRET",

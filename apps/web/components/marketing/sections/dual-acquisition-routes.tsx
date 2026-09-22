@@ -94,7 +94,7 @@ export function DualAcquisitionRoutes() {
               </li>
               <li className="relative">
                 <span className="absolute -left-[21px] top-0.5 h-2 w-2 rounded-full bg-[#22D3A7]" />
-                <span className="text-foreground font-semibold">2. Order & Payment:</span> Checkout via secure Cashfree gateway.
+                <span className="text-foreground font-semibold">2. Order & Payment:</span> Checkout via secure Razorpay payment gateway.
               </li>
               <li className="relative">
                 <span className="absolute -left-[21px] top-0.5 h-2 w-2 rounded-full bg-[#22D3A7]" />

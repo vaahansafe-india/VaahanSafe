@@ -84,7 +84,11 @@ export function FinancialDocument({ data, className = "" }: FinancialDocumentPro
         <div>
           <span className="text-[10px] uppercase text-[#6C6A64] dark:text-[#a1a1aa] block print:text-neutral-600">Gateway Provider</span>
           <span className="font-semibold text-[#141413] dark:text-[#f4f4f5] print:text-black">
-            {data.gatewayReference ? `Cashfree (${data.gatewayReference.slice(-6)})` : "Cashfree"}
+            {data.gatewayReference
+              ? data.gatewayReference.startsWith("pay_") || data.gatewayReference.startsWith("order_")
+                ? `Razorpay (${data.gatewayReference.slice(-6)})`
+                : `Gateway (${data.gatewayReference.slice(-6)})`
+              : "Razorpay"}
           </span>
         </div>
       </div>

@@ -476,7 +476,7 @@ export async function getSubscriptionServiceOverview(
         timestamp: op.confirmed_at,
         eventType: "HARDWARE_ORDER_PAID",
         title: "Payment Confirmed",
-        description: `Authoritatively confirmed Cashfree order ${op.order_number} for ₹${(op.total_minor / 100).toFixed(0)}.`,
+        description: `Authoritatively confirmed order ${op.order_number} for ₹${(op.total_minor / 100).toFixed(0)}.`,
         badgeLabel: "Paid",
         severity: "SUCCESS",
       });

@@ -28,12 +28,15 @@ import {
   Globe02Icon,
   PaintBoardIcon,
   Logout01Icon,
+  Edit02Icon,
 } from "@hugeicons/core-free-icons";
 
 export const navigationIcons = {
   home: Home01Icon,
   menu: Menu01Icon,
   close: Cancel01Icon,
+  edit: Edit02Icon,
+  pen: Edit02Icon,
   "chevron-down": ArrowDown01Icon,
   "chevron-up": ArrowUp01Icon,
   "chevron-left": ArrowLeft01Icon,

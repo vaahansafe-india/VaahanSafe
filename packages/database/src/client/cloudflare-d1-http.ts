@@ -6,12 +6,12 @@
  * INVARIANT: Never uses mock databases or local SQLite fallback.
  */
 
-import fs from "fs";
-import path from "path";
-import { execSync } from "child_process";
+import fs from "node:fs";
+import path from "node:path";
+import { execSync } from "node:child_process";
 import { DatabaseClient, normalizeDatabaseError } from "./d1";
 
-import dns from "dns";
+import dns from "node:dns";
 if (typeof dns !== "undefined" && typeof dns.setDefaultResultOrder === "function") {
   dns.setDefaultResultOrder("ipv4first");
 }
@@ -64,18 +64,39 @@ export class CloudflareD1HttpClient implements DatabaseClient {
     this.accountId =
       options.accountId ||
       process.env.CLOUDFLARE_ACCOUNT_ID ||
+      this.extractFromRootEnv("CLOUDFLARE_ACCOUNT_ID") ||
       "980cb7ee6eaacd3746d51f46bd62217a";
 
     this.databaseId =
       options.databaseId ||
       process.env.CLOUDFLARE_D1_DATABASE_ID ||
+      this.extractFromRootEnv("CLOUDFLARE_D1_DATABASE_ID") ||
       "ed46249f-2967-4cd4-8807-75e1421d1754";
 
     this.token =
       options.token ||
       process.env.CLOUDFLARE_API_TOKEN ||
+      this.extractFromRootEnv("CLOUDFLARE_API_TOKEN") ||
       this.extractTokenFromWrangler() ||
       "";
+  }
+
+  private extractFromRootEnv(key: string): string | null {
+    try {
+      const repoRoot = findRepoRoot();
+      const envPath = path.join(repoRoot, ".env");
+      if (fs.existsSync(envPath)) {
+        const content = fs.readFileSync(envPath, "utf8");
+        const regex = new RegExp(`(?:^|\\r?\\n)${key}\\s*=\\s*["']?([^"'\\r\\n]+)["']?`);
+        const match = content.match(regex);
+        if (match && match[1]) {
+          return match[1].trim();
+        }
+      }
+    } catch {
+      // Ignored
+    }
+    return null;
   }
 
   private extractTokenFromWrangler(): string | null {
@@ -99,6 +120,15 @@ export class CloudflareD1HttpClient implements DatabaseClient {
       for (const p of candidates) {
         if (p && fs.existsSync(p)) {
           const content = fs.readFileSync(p, "utf8");
+          // Check expiration to avoid using an expired token that produces HTTP 401
+          const expMatch = content.match(/expiration_time\s*=\s*"([^"]+)"/);
+          if (expMatch && expMatch[1]) {
+            const expTime = new Date(expMatch[1]).getTime();
+            if (!isNaN(expTime) && Date.now() > expTime) {
+              continue; // Token is expired
+            }
+          }
+
           const match = content.match(/oauth_token\s*=\s*"([^"]+)"/);
           if (match && match[1]) {
             return match[1];
@@ -239,8 +269,33 @@ export class CloudflareD1HttpClient implements DatabaseClient {
   async batch(
     operations: Array<{ sql: string; params?: unknown[] }>
   ): Promise<boolean> {
-    for (const op of operations) {
-      await this.execute(op.sql, op.params || []);
+    if (operations.length === 0) return true;
+    const currentToken = this.token || this.extractTokenFromWrangler();
+    if (!currentToken || currentToken.startsWith("simulated")) {
+      throw new Error("Cloudflare D1 batch requires a configured API token.");
+    }
+
+    const url = `https://api.cloudflare.com/client/v4/accounts/${this.accountId}/d1/database/${this.databaseId}/query`;
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${currentToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        batch: operations.map((op) => ({ sql: op.sql, params: op.params || [] })),
+      }),
+      signal: AbortSignal.timeout(15000),
+    });
+    if (!response.ok) {
+      throw new Error(`Cloudflare D1 batch failed (HTTP ${response.status}).`);
+    }
+    const data = (await response.json()) as {
+      success?: boolean;
+      result?: Array<{ success?: boolean }>;
+    };
+    if (!data.success || data.result?.length !== operations.length || data.result.some((item) => !item.success)) {
+      throw new Error("Cloudflare D1 batch failed.");
     }
     return true;
   }

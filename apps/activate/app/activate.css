@@ -1,0 +1,46 @@
+:root {
+  --activation-success: #5db872;
+  --activation-grid-line: rgba(20, 20, 19, 0.1);
+  --activation-grid-muted: rgba(108, 106, 100, 0.11);
+  --activation-registration: rgba(142, 139, 130, 0.18);
+}
+
+.dark {
+  --activation-success: #5db872;
+  --activation-grid-line: rgba(250, 249, 245, 0.1);
+  --activation-grid-muted: rgba(160, 157, 150, 0.12);
+  --activation-registration: rgba(160, 157, 150, 0.16);
+}
+
+@keyframes activationRail {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+
+  35% {
+    opacity: 1;
+  }
+
+  70% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateX(200%);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+  }
+
+  .activation-motion {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
+  }
+}

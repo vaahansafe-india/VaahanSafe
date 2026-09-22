@@ -21,7 +21,7 @@ export interface Subscription {
   currentPeriodStart?: string;
   currentPeriodEnd?: string;
   cancelAtPeriodEnd: boolean;
-  provider: "INTERNAL" | "CASHFREE";
+  provider: "INTERNAL" | "RAZORPAY" | "CASHFREE";
   providerSubscriptionId?: string;
   createdAt: string;
   updatedAt: string;
@@ -36,7 +36,7 @@ export interface CreateSubscriptionParams {
   currentPeriodStart?: string;
   currentPeriodEnd?: string;
   cancelAtPeriodEnd?: boolean;
-  provider?: "INTERNAL" | "CASHFREE";
+  provider?: "INTERNAL" | "RAZORPAY" | "CASHFREE";
   providerSubscriptionId?: string;
   createdAt?: string;
   updatedAt?: string;

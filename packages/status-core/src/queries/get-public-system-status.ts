@@ -131,7 +131,7 @@ export async function getPublicSystemStatus(db?: DatabaseClient): Promise<Public
       case "payments":
         if (client) {
           probe = await probeDatabase(client);
-          probe.targetUrl = "Cashfree Payments & Cloudflare D1";
+          probe.targetUrl = "Razorpay Payments & Cloudflare D1";
         } else {
           probe = await probeEndpoint(webUrl);
         }

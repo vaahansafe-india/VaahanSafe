@@ -33,7 +33,15 @@ export async function getAuthenticatedCustomer(): Promise<AuthenticatedCustomerS
     }
 
     return { user, session };
-  } catch (err) {
+  } catch (err: unknown) {
+    if (
+      typeof err === "object" &&
+      err !== null &&
+      "digest" in err &&
+      (err as { digest: string }).digest === "DYNAMIC_SERVER_USAGE"
+    ) {
+      throw err;
+    }
     console.error("[VaahanSafe] Error fetching authenticated customer:", err);
     return null;
   }

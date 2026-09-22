@@ -52,7 +52,7 @@ export function PaymentSignalRail({ signals }: PaymentSignalRailProps) {
         <PaymentSignal
           label="Last Verified"
           value={<span className="text-base sm:text-lg font-semibold">{formattedLastVerified}</span>}
-          hint="Signed Cashfree event"
+          hint="Signed gateway event"
         />
       </div>
     </div>

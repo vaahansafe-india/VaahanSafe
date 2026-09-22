@@ -215,6 +215,18 @@ export interface QrActivationAttemptRecord {
   createdAt: string;
 }
 
+export interface QrActivationChallenge {
+  id: string;
+  challengeTokenHash: string;
+  qrId: string;
+  publicId: string;
+  userId?: string | null;
+  proofVerifiedAt: string;
+  expiresAt: string;
+  consumedAt?: string | null;
+  createdAt: string;
+}
+
 export interface QrScanEvent {
   id: string;
   stickerId: string;
@@ -288,13 +300,14 @@ export type PaymentStatus = "INITIATED" | "PENDING" | "SUCCESS" | "FAILED" | "US
 export interface Payment {
   id: string;
   orderId: string;
-  gatewayOrderId: string; // Cashfree order ID
+  gatewayOrderId: string; // Provider (Razorpay / Cashfree) order ID
   gatewayPaymentId?: string;
   amount: number;
   currency: string;
   status: PaymentStatus;
   paymentMethod?: string;
-  cfPaymentTime?: string;
+  gatewayPaymentTime?: string;
+  cfPaymentTime?: string; // Legacy alias retained for backward compatibility
   createdAt: string;
   updatedAt: string;
 }
