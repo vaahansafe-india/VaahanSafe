@@ -39,6 +39,33 @@ interface NavUserProps {
 
 export function NavUser({ user }: NavUserProps) {
   const { isMobile } = useSidebar()
+  const [isSigningOut, setIsSigningOut] = React.useState(false)
+
+  const handleSignOut = React.useCallback(async () => {
+    if (isSigningOut) return
+    setIsSigningOut(true)
+
+    try {
+      // Clear non-HttpOnly client cookies immediately as an initial precaution
+      document.cookie = "vs_session=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;"
+      document.cookie = "vs_admin_session=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;"
+
+      // Trigger server logout endpoint with strict 2.5s timeout
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 2500)
+
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        headers: { Accept: "application/json" },
+        signal: controller.signal,
+      }).finally(() => clearTimeout(timeoutId))
+    } catch {
+      // Ignore network errors or aborts during logout — redirect unconditionally
+    } finally {
+      // Authoritative hard redirect to /login to ensure clean state
+      window.location.href = "/login"
+    }
+  }, [isSigningOut])
 
   const displayName =
     user?.name?.trim() ||
@@ -157,25 +184,20 @@ export function NavUser({ user }: NavUserProps) {
             <DropdownMenuSeparator className="bg-border" />
             <DropdownMenuItem
               onSelect={(e) => {
-                const form = document.getElementById("nav-user-logout-form") as HTMLFormElement;
-                if (form) {
-                  form.submit();
-                }
+                e.preventDefault()
+                handleSignOut()
               }}
+              disabled={isSigningOut}
               className="focus:bg-destructive/10 focus:text-destructive text-destructive cursor-pointer"
             >
-              <form id="nav-user-logout-form" action="/api/auth/logout" method="POST" className="w-full">
-                <button
-                  type="submit"
-                  className="flex w-full items-center gap-2 py-0.5 text-xs font-medium"
-                  onClick={(e) => {
-                    e.currentTarget.form?.submit();
-                  }}
-                >
+              <div className="flex w-full items-center gap-2 py-0.5 text-xs font-medium">
+                {isSigningOut ? (
+                  <span className="inline-block size-3.5 animate-spin rounded-full border-2 border-destructive border-t-transparent" />
+                ) : (
                   <LogOut className="size-3.5" />
-                  <span>Sign out</span>
-                </button>
-              </form>
+                )}
+                <span>{isSigningOut ? "Signing out..." : "Sign out"}</span>
+              </div>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

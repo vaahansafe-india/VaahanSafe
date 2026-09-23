@@ -8,8 +8,11 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import { execSync } from "node:child_process";
+import { exec } from "node:child_process";
+import { promisify } from "node:util";
 import { DatabaseClient, normalizeDatabaseError } from "./d1";
+
+const execAsync = promisify(exec);
 
 import dns from "node:dns";
 if (typeof dns !== "undefined" && typeof dns.setDefaultResultOrder === "function") {
@@ -141,10 +144,10 @@ export class CloudflareD1HttpClient implements DatabaseClient {
     return null;
   }
 
-  private executeViaWrangler(
+  private async executeViaWrangler(
     sql: string,
     params: unknown[] = []
-  ): { results: any[]; meta: any; success: boolean } {
+  ): Promise<{ results: any[]; meta: any; success: boolean }> {
     const formatted = formatSql(sql, params);
     const repoRoot = findRepoRoot();
     const configFile = path.join(
@@ -161,13 +164,14 @@ export class CloudflareD1HttpClient implements DatabaseClient {
 
     try {
       const remoteCmd = `npx wrangler d1 execute vaahansafe-dev-db --remote --config "${configFile}" --command "${safeSql}" --json`;
-      const output = execSync(remoteCmd, {
+      const { stdout } = await execAsync(remoteCmd, {
         encoding: "utf8",
         cwd: repoRoot,
-        stdio: ["pipe", "pipe", "pipe"],
+        timeout: 5000,
+        maxBuffer: 10 * 1024 * 1024,
       });
 
-      const parsed = JSON.parse(output);
+      const parsed = JSON.parse(stdout);
       if (Array.isArray(parsed) && parsed.length > 0) {
         return parsed[0];
       }
@@ -240,7 +244,7 @@ export class CloudflareD1HttpClient implements DatabaseClient {
     }
 
     // Authoritative execution via Cloudflare Wrangler runner
-    return this.executeViaWrangler(sql, params);
+    return await this.executeViaWrangler(sql, params);
   }
 
   async query<T = unknown>(sql: string, params: unknown[] = []): Promise<T[]> {

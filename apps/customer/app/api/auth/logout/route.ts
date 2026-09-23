@@ -8,18 +8,26 @@ import {
 import { getSessionRepository } from "@vaahansafe/database";
 
 async function performLogout(req: Request) {
-  // 1. Invalidate session record in Cloudflare D1
-  try {
-    const cookieHeader = req.headers.get("cookie");
-    const rawToken = parseSessionCookie(cookieHeader, CUSTOMER_SESSION_COOKIE_NAME);
-    if (rawToken) {
-      const tokenHash = await hashSessionToken(rawToken);
-      const sessionRepo = getSessionRepository();
-      await sessionRepo.revokeSession(tokenHash, "USER_LOGOUT");
+  // 1. Invalidate session record in Cloudflare D1 with bounded timeout
+  const revokePromise = (async () => {
+    try {
+      const cookieHeader = req.headers.get("cookie");
+      const rawToken = parseSessionCookie(cookieHeader, CUSTOMER_SESSION_COOKIE_NAME);
+      if (rawToken) {
+        const tokenHash = await hashSessionToken(rawToken);
+        const sessionRepo = getSessionRepository();
+        await sessionRepo.revokeSession(tokenHash, "USER_LOGOUT");
+      }
+    } catch (err) {
+      console.warn("[VaahanSafe Logout] Session revocation in D1 skipped or failed:", err);
     }
-  } catch (err) {
-    console.error("[VaahanSafe Logout] Failed to revoke session in D1:", err);
-  }
+  })();
+
+  // Guarantee logout response returns in under 1s even if external D1 or CLI is lagging
+  await Promise.race([
+    revokePromise,
+    new Promise((resolve) => setTimeout(resolve, 1000)),
+  ]);
 
   // 2. Resolve authoritative base URL behind reverse proxies and Vercel Edge
   const url = new URL(req.url);
@@ -46,6 +54,14 @@ async function performLogout(req: Request) {
   // 5. Apply cookie clearing to headers and Next.js response cookies
   response.headers.set("Set-Cookie", clearCookieHeader);
   response.cookies.set(CUSTOMER_SESSION_COOKIE_NAME, "", {
+    path: "/",
+    maxAge: 0,
+    expires: new Date(0),
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: "lax",
+  });
+  response.cookies.set("vs_admin_session", "", {
     path: "/",
     maxAge: 0,
     expires: new Date(0),
