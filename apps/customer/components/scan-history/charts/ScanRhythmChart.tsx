@@ -104,10 +104,11 @@ export function ScanRhythmChart({
         />
       ) : (
         <div className="space-y-3">
-          <div className="h-[220px] sm:h-[260px] w-full" aria-hidden="true">
-            <ResponsiveContainer width="100%" height="100%">
+          <div className="h-[220px] sm:h-[260px] w-full outline-none focus:outline-none focus-visible:outline-none [&_.recharts-surface]:outline-none [&_.recharts-wrapper]:outline-none" aria-hidden="true">
+            <ResponsiveContainer width="100%" height="100%" className="outline-none focus:outline-none focus-visible:outline-none">
               <AreaChart
                 data={data}
+                className="outline-none focus:outline-none focus-visible:outline-none select-none"
                 margin={{ top: 12, right: 8, left: -22, bottom: 0 }}
                 onClick={(e: any) => {
                   if (e && e.activePayload && e.activePayload[0]) {

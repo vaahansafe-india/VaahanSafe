@@ -390,3 +390,47 @@ html[data-scroll-locked],
   margin-right: 0 !important;
   padding-right: 0 !important;
 }
+
+/* ==================================================================
+   09. RECHARTS GLOBAL FOCUS & SELECTION BORDER RESET
+   Completely removes default browser black outline, focus borders,
+   and tap-highlight rings from Recharts SVG surfaces, wrappers,
+   and child graphical elements across all chart instances.
+   ================================================================== */
+.recharts-surface,
+.recharts-wrapper,
+.recharts-responsive-container,
+.recharts-responsive-container *,
+.recharts-surface *,
+.recharts-wrapper * {
+  outline: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+.recharts-surface:focus,
+.recharts-surface:focus-visible,
+.recharts-surface:active,
+.recharts-wrapper:focus,
+.recharts-wrapper:focus-visible,
+.recharts-wrapper:active,
+.recharts-responsive-container:focus,
+.recharts-responsive-container:focus-visible,
+.recharts-responsive-container:active,
+svg.recharts-surface:focus,
+svg.recharts-surface:focus-visible,
+svg.recharts-surface:active,
+.recharts-layer:focus,
+.recharts-layer:focus-visible,
+.recharts-curve:focus,
+.recharts-curve:focus-visible,
+.recharts-dot:focus,
+.recharts-dot:focus-visible,
+.recharts-rectangle:focus,
+.recharts-rectangle:focus-visible,
+.recharts-sector:focus,
+.recharts-sector:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+

@@ -83,10 +83,11 @@ export function TemporalScanField({ data }: TemporalScanFieldProps) {
         </div>
       ) : (
         <div className="space-y-2">
-          <div className="h-[130px] w-full" aria-hidden="true">
-            <ResponsiveContainer width="100%" height="100%">
+          <div className="h-[130px] w-full outline-none focus:outline-none focus-visible:outline-none [&_.recharts-surface]:outline-none [&_.recharts-wrapper]:outline-none" aria-hidden="true">
+            <ResponsiveContainer width="100%" height="100%" className="outline-none focus:outline-none focus-visible:outline-none">
               <BarChart
                 data={data}
+                className="outline-none focus:outline-none focus-visible:outline-none select-none"
                 margin={{ top: 8, right: 0, left: -28, bottom: 0 }}
                 barCategoryGap="12%"
               >

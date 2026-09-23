@@ -113,10 +113,11 @@ export function QrScanDistribution({ data, onSelectQr }: QrScanDistributionProps
       </div>
 
       <div className="space-y-3">
-        <div className="h-[140px] w-full" aria-hidden="true">
-          <ResponsiveContainer width="100%" height="100%">
+        <div className="h-[140px] w-full outline-none focus:outline-none focus-visible:outline-none [&_.recharts-surface]:outline-none [&_.recharts-wrapper]:outline-none" aria-hidden="true">
+          <ResponsiveContainer width="100%" height="100%" className="outline-none focus:outline-none focus-visible:outline-none">
             <BarChart
               data={data}
+              className="outline-none focus:outline-none focus-visible:outline-none select-none"
               layout="vertical"
               margin={{ top: 4, right: 30, left: 10, bottom: 4 }}
               barCategoryGap="20%"
