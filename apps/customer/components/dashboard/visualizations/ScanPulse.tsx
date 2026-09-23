@@ -21,17 +21,18 @@ export function ScanPulse({
   onRangeChange,
 }: ScanPulseProps) {
   const [hoveredIndex, setHoveredIndex] = React.useState<number | null>(null);
+  const [isHovering, setIsHovering] = React.useState(false);
   const [showTable, setShowTable] = React.useState(false);
   const svgRef = React.useRef<SVGSVGElement | null>(null);
 
   const points = summary.points;
   const hasData = points.length > 0 && summary.totalScans > 0;
 
-  // Compute SVG geometry with ample vertical headroom and date label space
+  // Compute SVG geometry with balanced vertical headroom and date label space
   const svgWidth = 800;
-  const svgHeight = 230;
-  const paddingX = 54;
-  const paddingTop = 32;
+  const svgHeight = 200;
+  const paddingX = 52;
+  const paddingTop = 24;
   const chartHeight = 140;
   const baselineY = paddingTop + chartHeight;
   const chartWidth = svgWidth - paddingX * 2;
@@ -164,6 +165,21 @@ export function ScanPulse({
     return points;
   }, [points, hasData, range]);
 
+  // Default to latest active point (or last point) so telemetry is active immediately on load
+  const defaultHoverIndex = React.useMemo(() => {
+    if (displayPoints.length === 0) return null;
+    for (let i = displayPoints.length - 1; i >= 0; i--) {
+      if (displayPoints[i]!.count > 0) return i;
+    }
+    return displayPoints.length - 1;
+  }, [displayPoints]);
+
+  React.useEffect(() => {
+    if (defaultHoverIndex !== null) {
+      setHoveredIndex(defaultHoverIndex);
+    }
+  }, [range, defaultHoverIndex]);
+
   // Tick spacing helper to prevent label crowding across large date domains
   const shouldShowTick = React.useCallback((index: number, total: number) => {
     if (total <= 8) return true;
@@ -215,6 +231,7 @@ export function ScanPulse({
   // High-performance, jitter-free cursor tracking
   const handleMouseMove = React.useCallback(
     (e: React.MouseEvent<SVGElement>) => {
+      setIsHovering(true);
       const svg = svgRef.current;
       if (!svg || coordinates.length === 0) return;
       const rect = svg.getBoundingClientRect();
@@ -234,7 +251,7 @@ export function ScanPulse({
     [coordinates, svgWidth]
   );
 
-  // Mobile Touch Scrubbing
+  // Mobile Touch Scrubbing: keeps selected point active on finger lift
   const handleTouch = React.useCallback(
     (e: React.TouchEvent<SVGElement>) => {
       const svg = svgRef.current;
@@ -258,15 +275,16 @@ export function ScanPulse({
   );
 
   const handleMouseLeave = React.useCallback(() => {
-    setHoveredIndex(null);
-  }, []);
+    setIsHovering(false);
+    setHoveredIndex(defaultHoverIndex);
+  }, [defaultHoverIndex]);
 
   const activeCoord = hoveredIndex !== null ? coordinates[hoveredIndex] : null;
 
   return (
-    <div className="relative flex flex-col justify-between rounded-3xl border border-[#252320] bg-[#181715] p-4 sm:p-6 lg:p-7 text-[#FAF9F5] shadow-xl w-full max-w-full overflow-hidden">
+    <div className="relative flex flex-col rounded-3xl border border-[#252320] bg-[#181715] p-4 sm:p-6 lg:p-7 text-[#FAF9F5] shadow-xl w-full max-w-full overflow-hidden">
       {/* Header & Metric Signals */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-5">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-4 sm:pb-5">
         <div className="space-y-1 min-w-0">
           <div className="flex items-center gap-2">
             <span className="flex h-2 w-2 rounded-full bg-[#cc785c] animate-pulse" />
@@ -322,9 +340,9 @@ export function ScanPulse({
       </div>
 
       {/* Main Chart Body */}
-      <div className="relative mt-6 min-h-[230px] w-full">
+      <div className="relative mt-3 sm:mt-5 w-full">
         {!hasData ? (
-          <div className="flex min-h-[230px] flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 bg-white/[0.02] p-6 sm:p-8 text-center">
+          <div className="flex min-h-[180px] sm:min-h-[220px] flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 bg-white/[0.02] p-6 sm:p-8 text-center">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/5 text-[#8E8B82]">
               <VaahanIcon name="activity" size={20} />
             </div>
@@ -345,7 +363,7 @@ export function ScanPulse({
             )}
           </div>
         ) : (
-          <div className="relative w-full overflow-hidden">
+          <div className="relative w-full">
             {/* SVG Visual Instrument */}
             <svg
               ref={svgRef}
@@ -455,14 +473,17 @@ export function ScanPulse({
                 if (!shouldShowTick(c.index, coordinates.length)) return null;
                 const parts = c.point.dateBucket.split("-");
                 const label = parts.length === 3 ? `${parts[2]}/${parts[1]}` : c.point.dateBucket;
+                const isCurrentActive = hoveredIndex === c.index;
                 return (
                   <text
                     key={`tick-${c.index}`}
                     x={c.x}
-                    y={baselineY + 20}
+                    y={baselineY + 18}
                     textAnchor="middle"
-                    fontSize="12"
-                    className="font-mono fill-[#8E8B82] pointer-events-none select-none font-medium"
+                    fontSize="11"
+                    className={`font-mono pointer-events-none select-none font-medium ${
+                      isCurrentActive ? "fill-[#cc785c] font-bold" : "fill-[#8E8B82]"
+                    }`}
                   >
                     {label}
                   </text>
@@ -554,11 +575,11 @@ export function ScanPulse({
                 height={svgHeight}
                 fill="transparent"
                 className="cursor-crosshair touch-none"
+                onMouseEnter={() => setIsHovering(true)}
                 onMouseMove={handleMouseMove}
                 onMouseLeave={handleMouseLeave}
                 onTouchStart={handleTouch}
                 onTouchMove={handleTouch}
-                onTouchEnd={handleMouseLeave}
               />
             </svg>
 
@@ -570,6 +591,7 @@ export function ScanPulse({
                 qrVisibleCode={qrVisibleCode}
                 x={(activeCoord.x / svgWidth) * 100}
                 y={(activeCoord.y / svgHeight) * 100}
+                isHovering={isHovering}
               />
             )}
           </div>
@@ -577,7 +599,7 @@ export function ScanPulse({
       </div>
 
       {/* Accessible Table Alternative & Screen Reader Summary */}
-      <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 border-t border-white/10 pt-3">
+      <div className="mt-3 sm:mt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-t border-white/10 pt-2.5 sm:pt-3">
         <div className="font-mono text-[10px] text-[#8E8B82]">
           {(() => {
             if (!hasData) return "No telemetry records in filter window";
