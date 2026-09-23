@@ -169,7 +169,7 @@ export function OtpVerificationForm({
 
       {/* 01. Six Individual Digit Input Boxes */}
       <div
-        className="flex items-center justify-between gap-1.5 sm:gap-2"
+        className="flex items-center justify-between gap-1 xs:gap-1.5 sm:gap-2"
         role="group"
         aria-labelledby="otp-group-label"
       >
@@ -196,9 +196,9 @@ export function OtpVerificationForm({
             aria-label={`Digit ${idx + 1} of 6`}
             aria-invalid={Boolean(errorMessage)}
             className={`
-              h-11 w-10 sm:h-11 sm:w-11 text-center
+              h-10.5 w-9 xs:h-11 xs:w-10 sm:h-11 sm:w-11 text-center
               rounded-lg border bg-background
-              font-mono text-xl font-bold text-foreground
+              font-mono text-lg xs:text-xl font-bold text-foreground
               shadow-2xs transition-all duration-150
               focus:outline-none focus:ring-2
               disabled:cursor-not-allowed disabled:opacity-50

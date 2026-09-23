@@ -146,7 +146,7 @@ export function AuthCard({
         relative z-10 w-full
         max-w-[430px]
         rounded-2xl border border-border
-        bg-card p-6 shadow-sm sm:px-8 sm:py-7
+        bg-card p-4 sm:p-7 sm:px-8 shadow-sm
         transition-all duration-300
       "
     >
@@ -243,7 +243,7 @@ export function AuthCard({
           </div>
 
           {/* 04. In-Card Footer: Legal Notice & Signature Progress Rail */}
-          <div className="mt-4.5 space-y-3 border-t border-[#f0eae1] pt-3.5 dark:border-white/[0.06]">
+          <div className="mt-4 sm:mt-5 space-y-2.5 sm:space-y-3 border-t border-[#f0eae1] pt-3 sm:pt-3.5 dark:border-white/[0.06]">
             <AuthLegalNotice type="in-card" />
             <AuthProgressRail
               currentStage={

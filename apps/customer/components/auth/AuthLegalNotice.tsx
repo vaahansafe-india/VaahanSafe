@@ -14,7 +14,7 @@ export function AuthLegalNotice({ type }: AuthLegalNoticeProps) {
 
   if (type === "in-card") {
     return (
-      <p className="text-center text-xs leading-relaxed text-muted-foreground">
+      <p className="text-center text-[11px] sm:text-xs leading-relaxed text-muted-foreground">
         By continuing, you agree to the VaahanSafe{" "}
         <a
           href={termsUrl}
@@ -39,50 +39,31 @@ export function AuthLegalNotice({ type }: AuthLegalNoticeProps) {
   }
 
   return (
-    <footer className="mt-4 sm:mt-5 flex flex-col items-center gap-2 text-center">
+    <footer className="mt-3.5 sm:mt-5 flex flex-col items-center gap-1.5 sm:gap-2 text-center select-none">
       {/* Subtle brand identifier */}
-      <div className="font-mono text-[9px] uppercase tracking-[0.26em] text-muted-foreground">
+      <div className="font-mono text-[8.5px] sm:text-[9px] uppercase tracking-[0.22em] text-muted-foreground/80">
         VAAHANSAFE / VEHICLE SAFETY IDENTITY
       </div>
 
-      {/* External reference links */}
-      <div className="flex items-center gap-4 text-xs text-muted-foreground">
+      {/* External reference navigation */}
+      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+        <a
+          href={webUrl}
+          className="inline-flex items-center gap-1.5 font-mono text-[9.5px] sm:text-[10px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-[#cc785c]"
+        >
+          <VaahanIcon name="arrow-left" size={11} aria-hidden="true" />
+          <span>Back to VaahanSafe</span>
+        </a>
+        <span className="text-border">•</span>
         <a
           href={helpUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="transition-colors hover:text-[#cc785c]"
+          className="font-mono text-[9.5px] sm:text-[10px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-[#cc785c]"
         >
           Help
         </a>
-        <span className="text-border">•</span>
-        <a
-          href={privacyUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="transition-colors hover:text-[#cc785c]"
-        >
-          Privacy
-        </a>
-        <span className="text-border">•</span>
-        <a
-          href={termsUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="transition-colors hover:text-[#cc785c]"
-        >
-          Terms
-        </a>
       </div>
-
-      {/* Return to marketing website */}
-      <a
-        href={webUrl}
-        className="mt-1 inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-[#cc785c]"
-      >
-        <VaahanIcon name="arrow-left" size={11} aria-hidden="true" />
-        <span>Back to VaahanSafe</span>
-      </a>
     </footer>
   );
 }

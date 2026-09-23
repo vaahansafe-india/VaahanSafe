@@ -36,7 +36,7 @@ export function AuthShell({
         relative isolate flex min-h-[100dvh] w-full
         flex-col items-center justify-start sm:justify-center
         overflow-x-hidden overflow-y-auto
-        bg-background px-4 py-5 sm:px-6 sm:py-8
+        bg-background px-3.5 py-4 sm:px-6 sm:py-8
         text-foreground antialiased
       "
     >
@@ -44,7 +44,7 @@ export function AuthShell({
       <AuthIdentityField />
 
       {/* 02. Visually Centered & Scrollable Login Card */}
-      <div className="relative z-10 my-auto flex w-full flex-col items-center justify-center">
+      <div className="relative z-10 my-auto flex w-full max-w-[430px] flex-col items-center justify-center">
         <AuthCard
           returnUrl={returnUrl}
           mode={mode}
