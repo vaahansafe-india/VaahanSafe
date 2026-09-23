@@ -325,25 +325,32 @@ export async function getDashboardOverview(
     : null;
 
   // 4. Calculate Date Range for Scans & Telemetry
-  let dateFilterCutoff: string | null = null;
   const now = new Date();
+  let dateFilterCutoff: string | null = null;
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const formatSqliteUtc = (d: Date) =>
+    `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())} ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}:${pad(d.getUTCSeconds())}`;
+
   if (filterState.range === "today") {
-    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    dateFilterCutoff = startOfDay.toISOString();
+    // Current UTC calendar day from 00:00:00
+    const startOfToday = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0));
+    dateFilterCutoff = formatSqliteUtc(startOfToday);
   } else if (filterState.range === "7d") {
-    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-    dateFilterCutoff = sevenDaysAgo.toISOString();
+    const sevenDaysAgo = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 6, 0, 0, 0));
+    dateFilterCutoff = formatSqliteUtc(sevenDaysAgo);
   } else if (filterState.range === "30d") {
-    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-    dateFilterCutoff = thirtyDaysAgo.toISOString();
+    const thirtyDaysAgo = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 29, 0, 0, 0));
+    dateFilterCutoff = formatSqliteUtc(thirtyDaysAgo);
   }
 
   // 5. Query Scan Events & QR Lifecycle History
   let scanRows: DbScanRow[] = [];
   let qrHistoryRows: DbQrHistoryRow[] = [];
 
-  if (qrSticker?.id) {
-    const scanParams: unknown[] = [qrSticker.id];
+  const targetQrId = filterState.qrId || qrSticker?.id;
+
+  if (targetQrId) {
+    const scanParams: unknown[] = [targetQrId];
     let scanSql = `SELECT id, scan_type, result, city, state, created_at
                    FROM qr_scan_events
                    WHERE qr_id = ?`;
@@ -352,17 +359,26 @@ export async function getDashboardOverview(
       scanSql += ` AND created_at >= ?`;
       scanParams.push(dateFilterCutoff);
     }
+
+    if (filterState.eventType === "emergency") {
+      scanSql += ` AND scan_type = 'EMERGENCY_TRIGGER'`;
+    } else if (filterState.eventType === "scan") {
+      scanSql += ` AND scan_type != 'EMERGENCY_TRIGGER'`;
+    }
+
     scanSql += ` ORDER BY created_at ASC`;
 
     const [scans, qrHistory] = await Promise.all([
       db.query<DbScanRow>(scanSql, scanParams),
-      db.query<DbQrHistoryRow>(
-        `SELECT id, from_status, to_status, reason_code, actor_type, created_at
-         FROM qr_status_history
-         WHERE qr_id = ?
-         ORDER BY created_at ASC`,
-        [qrSticker.id]
-      ),
+      qrSticker?.id
+        ? db.query<DbQrHistoryRow>(
+            `SELECT id, from_status, to_status, reason_code, actor_type, created_at
+             FROM qr_status_history
+             WHERE qr_id = ?
+             ORDER BY created_at ASC`,
+            [qrSticker.id]
+          )
+        : Promise.resolve([]),
     ]);
 
     scanRows = scans;
@@ -387,8 +403,12 @@ export async function getDashboardOverview(
       lastScanLocation = scan.state ? `${scan.city}, ${scan.state}` : scan.city;
     }
 
-    // Format bucket: YYYY-MM-DD
-    const dateBucket = scan.created_at.slice(0, 10);
+    // Format bucket: for "today", bucket by hour ("HH:00"); for other ranges, bucket by date ("YYYY-MM-DD")
+    const dateBucket =
+      filterState.range === "today"
+        ? `${scan.created_at.slice(11, 13)}:00`
+        : scan.created_at.slice(0, 10);
+
     const existing = pulseBucketMap.get(dateBucket);
     if (existing) {
       existing.count += 1;
@@ -472,30 +492,37 @@ export async function getDashboardOverview(
   // 8. Assemble Activity Constellation (Cross-domain temporal event surface)
   const constellationEvents: DashboardConstellationEvent[] = [];
 
-  // Lane: VEHICLE
-  constellationEvents.push({
-    id: `veh-${activeVehicle.id}`,
-    lane: "VEHICLE",
-    title: "Vehicle Registered",
-    summary: `${activeVehicle.make} ${activeVehicle.model} (${activeVehicle.registrationNumber})`,
-    timestamp: activeVehicle.createdAt,
-  });
+  const includeGeneralLanes = !filterState.eventType || filterState.eventType === "all";
 
-  // Lane: QR
-  for (const qe of qrLifeline) {
+  // Lane: VEHICLE
+  if (includeGeneralLanes) {
     constellationEvents.push({
-      id: `const-qr-${qe.id}`,
-      lane: "QR",
-      title: qe.title,
-      summary: qe.description,
-      timestamp: qe.timestamp,
-      level: qe.status === "REVOKED" || qe.status === "SUSPENDED" ? "ATTENTION" : "NORMAL",
+      id: `veh-${activeVehicle.id}`,
+      lane: "VEHICLE",
+      title: "Vehicle Registered",
+      summary: `${activeVehicle.make} ${activeVehicle.model} (${activeVehicle.registrationNumber})`,
+      timestamp: activeVehicle.createdAt,
     });
+
+    // Lane: QR
+    for (const qe of qrLifeline) {
+      constellationEvents.push({
+        id: `const-qr-${qe.id}`,
+        lane: "QR",
+        title: qe.title,
+        summary: qe.description,
+        timestamp: qe.timestamp,
+        level: qe.status === "REVOKED" || qe.status === "SUSPENDED" ? "ATTENTION" : "NORMAL",
+      });
+    }
   }
 
   // Lane: SCAN
   for (const scan of scanRows.slice(-15)) {
     const isEmerg = scan.scan_type === "EMERGENCY_TRIGGER";
+    if (filterState.eventType === "emergency" && !isEmerg) continue;
+    if (filterState.eventType === "scan" && isEmerg) continue;
+
     constellationEvents.push({
       id: `const-scan-${scan.id}`,
       lane: "SCAN",
@@ -506,38 +533,40 @@ export async function getDashboardOverview(
     });
   }
 
-  // Lane: SAFETY
-  if (profileRow?.updated_at) {
-    constellationEvents.push({
-      id: `const-safety-${profileRow.id}`,
-      lane: "SAFETY",
-      title: "Safety Projection Configured",
-      summary: `${contacts.length} emergency contacts active`,
-      timestamp: profileRow.updated_at,
-    });
-  }
+  if (includeGeneralLanes) {
+    // Lane: SAFETY
+    if (profileRow?.updated_at) {
+      constellationEvents.push({
+        id: `const-safety-${profileRow.id}`,
+        lane: "SAFETY",
+        title: "Safety Projection Configured",
+        summary: `${contacts.length} emergency contacts active`,
+        timestamp: profileRow.updated_at,
+      });
+    }
 
-  // Lane: ORDER
-  for (const ord of orderRows) {
-    constellationEvents.push({
-      id: `const-ord-${ord.id}`,
-      lane: "ORDER",
-      title: `Order ${ord.order_number}`,
-      summary: `Status: ${ord.status}`,
-      timestamp: ord.created_at,
-    });
-  }
+    // Lane: ORDER
+    for (const ord of orderRows) {
+      constellationEvents.push({
+        id: `const-ord-${ord.id}`,
+        lane: "ORDER",
+        title: `Order ${ord.order_number}`,
+        summary: `Status: ${ord.status}`,
+        timestamp: ord.created_at,
+      });
+    }
 
-  // Lane: NOTIF
-  for (const notif of notifRows.slice(0, 5)) {
-    constellationEvents.push({
-      id: `const-notif-${notif.id}`,
-      lane: "NOTIF",
-      title: notif.title,
-      summary: notif.body_safe,
-      timestamp: notif.created_at,
-      level: notif.priority === "CRITICAL" ? "EMERGENCY" : notif.priority === "HIGH" ? "ATTENTION" : "NORMAL",
-    });
+    // Lane: NOTIF
+    for (const notif of notifRows.slice(0, 5)) {
+      constellationEvents.push({
+        id: `const-notif-${notif.id}`,
+        lane: "NOTIF",
+        title: notif.title,
+        summary: notif.body_safe,
+        timestamp: notif.created_at,
+        level: notif.priority === "CRITICAL" ? "EMERGENCY" : notif.priority === "HIGH" ? "ATTENTION" : "NORMAL",
+      });
+    }
   }
 
   // Sort constellation events chronologically descending

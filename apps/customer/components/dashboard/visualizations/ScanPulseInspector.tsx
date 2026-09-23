@@ -38,7 +38,7 @@ export function ScanPulseInspector({
           SCAN TELEMETRY
         </span>
         <span className="font-mono text-[9.5px] font-semibold text-[#8E8B82]">
-          {point.dateBucket}
+          {point.dateBucket.includes(":") ? `Today, ${point.dateBucket}` : point.dateBucket}
         </span>
       </div>
 

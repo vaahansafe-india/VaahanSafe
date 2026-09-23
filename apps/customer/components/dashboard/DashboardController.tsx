@@ -170,6 +170,7 @@ export function DashboardController({ initialData }: DashboardControllerProps) {
           summary={scanSummary}
           vehiclePlate={activeVehicle.registrationNumber}
           qrVisibleCode={qrSticker?.visibleCode}
+          range={filterState.range}
           onRangeChange={() => setFiltersSheetOpen(true)}
         />
       </section>

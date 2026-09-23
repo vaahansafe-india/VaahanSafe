@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { VaahanIcon } from "@vaahansafe/icons";
 import {
   Sheet,
@@ -29,6 +29,7 @@ export function DashboardFilterSheet({
 }: DashboardFilterSheetProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
 
   const [selectedRange, setSelectedRange] = React.useState<DashboardFilterState["range"]>(
     filterState.range
@@ -63,7 +64,9 @@ export function DashboardFilterSheet({
       params.set("type", selectedType);
     }
 
-    router.push(`/dashboard?${params.toString()}`);
+    const query = params.toString();
+    router.push(query ? `${pathname}?${query}` : pathname, { scroll: false });
+    router.refresh();
     onOpenChange(false);
   };
 
@@ -72,7 +75,9 @@ export function DashboardFilterSheet({
     params.delete("range");
     params.delete("type");
     params.delete("qr");
-    router.push(`/dashboard?${params.toString()}`);
+    const query = params.toString();
+    router.push(query ? `${pathname}?${query}` : pathname, { scroll: false });
+    router.refresh();
     onOpenChange(false);
   };
 

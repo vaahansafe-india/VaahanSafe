@@ -9,6 +9,7 @@ interface ScanPulseProps {
   summary: DashboardScanSummary;
   vehiclePlate: string;
   qrVisibleCode?: string;
+  range?: "today" | "7d" | "30d" | "all";
   onRangeChange?: () => void;
 }
 
@@ -16,6 +17,7 @@ export function ScanPulse({
   summary,
   vehiclePlate,
   qrVisibleCode,
+  range = "30d",
   onRangeChange,
 }: ScanPulseProps) {
   const [hoveredIndex, setHoveredIndex] = React.useState<number | null>(null);
@@ -38,12 +40,102 @@ export function ScanPulse({
   const peak = summary.peakCount > 0 ? summary.peakCount : 4;
   const maxVal = Math.max(Math.ceil(peak * 1.35), 5);
 
-  // Temporal sequence: If data is concentrated in a single bucket (e.g. today's scans),
-  // contextualize across a preceding 7-day window so it renders as a true pulse curve
-  // instead of a flat horizontal line across the top.
+  // Dynamic temporal timeline mapping based on active range preset
   const displayPoints = React.useMemo<DashboardScanPulsePoint[]>(() => {
     if (!hasData) return [];
 
+    const pad = (n: number) => String(n).padStart(2, "0");
+
+    // Case 1: Today -> 24 hourly buckets across today (00:00 to 23:00)
+    if (range === "today") {
+      const list: DashboardScanPulsePoint[] = [];
+      const bucketLookup = new Map<string, DashboardScanPulsePoint>();
+      for (const p of points) {
+        const hourKey = p.dateBucket.includes(":")
+          ? p.dateBucket.slice(0, 5)
+          : `${pad(new Date(p.timestamp).getUTCHours())}:00`;
+        bucketLookup.set(hourKey, p);
+      }
+
+      const todayBase = points[0]?.timestamp.slice(0, 10) || new Date().toISOString().slice(0, 10);
+      for (let h = 0; h < 24; h++) {
+        const hh = `${pad(h)}:00`;
+        const existing = bucketLookup.get(hh);
+        if (existing) {
+          list.push(existing);
+        } else {
+          list.push({
+            dateBucket: hh,
+            timestamp: `${todayBase}T${pad(h)}:00:00Z`,
+            count: 0,
+            emergencyCount: 0,
+          });
+        }
+      }
+      return list;
+    }
+
+    // Case 2: 7 Days -> 7 calendar days (T-6 to T)
+    if (range === "7d") {
+      const list: DashboardScanPulsePoint[] = [];
+      const bucketLookup = new Map<string, DashboardScanPulsePoint>();
+      for (const p of points) {
+        bucketLookup.set(p.dateBucket.slice(0, 10), p);
+      }
+
+      const anchorDate = points[points.length - 1]?.dateBucket
+        ? new Date(points[points.length - 1]!.dateBucket + "T00:00:00Z")
+        : new Date();
+
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(Date.UTC(anchorDate.getUTCFullYear(), anchorDate.getUTCMonth(), anchorDate.getUTCDate() - i));
+        const key = `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}`;
+        const existing = bucketLookup.get(key);
+        if (existing) {
+          list.push(existing);
+        } else {
+          list.push({
+            dateBucket: key,
+            timestamp: `${key}T00:00:00Z`,
+            count: 0,
+            emergencyCount: 0,
+          });
+        }
+      }
+      return list;
+    }
+
+    // Case 3: 30 Days -> 30 calendar days (T-29 to T)
+    if (range === "30d") {
+      const list: DashboardScanPulsePoint[] = [];
+      const bucketLookup = new Map<string, DashboardScanPulsePoint>();
+      for (const p of points) {
+        bucketLookup.set(p.dateBucket.slice(0, 10), p);
+      }
+
+      const anchorDate = points[points.length - 1]?.dateBucket
+        ? new Date(points[points.length - 1]!.dateBucket + "T00:00:00Z")
+        : new Date();
+
+      for (let i = 29; i >= 0; i--) {
+        const d = new Date(Date.UTC(anchorDate.getUTCFullYear(), anchorDate.getUTCMonth(), anchorDate.getUTCDate() - i));
+        const key = `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}`;
+        const existing = bucketLookup.get(key);
+        if (existing) {
+          list.push(existing);
+        } else {
+          list.push({
+            dateBucket: key,
+            timestamp: `${key}T00:00:00Z`,
+            count: 0,
+            emergencyCount: 0,
+          });
+        }
+      }
+      return list;
+    }
+
+    // Case 4: "all" (All Time)
     if (points.length === 1) {
       const single = points[0]!;
       const dateParts = single.dateBucket.split("-").map(Number);
@@ -56,8 +148,8 @@ export function ScanPulse({
       for (let i = 6; i >= 1; i--) {
         const d = new Date(targetDate.getTime() - i * 24 * 60 * 60 * 1000);
         const yyyy = d.getUTCFullYear();
-        const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
-        const dd = String(d.getUTCDate()).padStart(2, "0");
+        const mm = pad(d.getUTCMonth() + 1);
+        const dd = pad(d.getUTCDate());
         list.push({
           dateBucket: `${yyyy}-${mm}-${dd}`,
           timestamp: `${yyyy}-${mm}-${dd}T00:00:00Z`,
@@ -70,7 +162,17 @@ export function ScanPulse({
     }
 
     return points;
-  }, [points, hasData]);
+  }, [points, hasData, range]);
+
+  // Tick spacing helper to prevent label crowding across large date domains
+  const shouldShowTick = React.useCallback((index: number, total: number) => {
+    if (total <= 8) return true;
+    if (total <= 16) return index % 2 === 0 || index === total - 1;
+    if (total <= 25) return index % 4 === 0 || index === total - 1;
+    if (total <= 31) return index % 5 === 0 || index === total - 1;
+    const step = Math.ceil(total / 6);
+    return index % step === 0 || index === total - 1;
+  }, []);
 
   // Compute coordinates
   const coordinates = React.useMemo(() => {
@@ -324,6 +426,7 @@ export function ScanPulse({
 
               {/* X-Axis Date Tick Labels */}
               {coordinates.map((c) => {
+                if (!shouldShowTick(c.index, coordinates.length)) return null;
                 const parts = c.point.dateBucket.split("-");
                 const label = parts.length === 3 ? `${parts[2]}/${parts[1]}` : c.point.dateBucket;
                 return (
@@ -446,9 +549,21 @@ export function ScanPulse({
       {/* Accessible Table Alternative & Screen Reader Summary */}
       <div className="mt-4 flex items-center justify-between border-t border-white/10 pt-3">
         <div className="font-mono text-[10px] text-[#8E8B82]">
-          {hasData
-            ? `${summary.totalScans} scan${summary.totalScans === 1 ? "" : "s"} across ${points.length} active date${points.length === 1 ? "" : "s"}`
-            : "No telemetry records in filter window"}
+          {(() => {
+            if (!hasData) return "No telemetry records in filter window";
+            const scanWord = summary.totalScans === 1 ? "scan" : "scans";
+            const activeCount = points.filter((p) => p.count > 0).length;
+            if (range === "today") {
+              return `${summary.totalScans} ${scanWord} recorded today across ${activeCount} active hour${activeCount === 1 ? "" : "s"}`;
+            }
+            if (range === "7d") {
+              return `${summary.totalScans} ${scanWord} across ${activeCount} active date${activeCount === 1 ? "" : "s"} in 7-day window`;
+            }
+            if (range === "30d") {
+              return `${summary.totalScans} ${scanWord} across ${activeCount} active date${activeCount === 1 ? "" : "s"} in 30-day window`;
+            }
+            return `${summary.totalScans} total lifetime ${scanWord} across ${activeCount} active date${activeCount === 1 ? "" : "s"}`;
+          })()}
         </div>
 
         {hasData && (
@@ -467,7 +582,7 @@ export function ScanPulse({
           <table className="w-full text-left font-mono">
             <thead>
               <tr className="border-b border-white/10 text-[10px] text-[#8E8B82]">
-                <th className="pb-1">Date</th>
+                <th className="pb-1">{range === "today" ? "Time" : "Date"}</th>
                 <th className="pb-1">Scans</th>
                 <th className="pb-1">Emergency</th>
                 <th className="pb-1">Location</th>
@@ -476,7 +591,9 @@ export function ScanPulse({
             <tbody className="divide-y divide-white/5 text-[11px]">
               {points.map((pt) => (
                 <tr key={pt.dateBucket}>
-                  <td className="py-1 text-white">{pt.dateBucket}</td>
+                  <td className="py-1 text-white">
+                    {pt.dateBucket.includes(":") ? `Today, ${pt.dateBucket}` : pt.dateBucket}
+                  </td>
                   <td className="py-1 text-[#cc785c]">{pt.count}</td>
                   <td className="py-1">{pt.emergencyCount}</td>
                   <td className="py-1 text-[#8E8B82]">

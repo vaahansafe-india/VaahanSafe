@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { VaahanIcon } from "@vaahansafe/icons";
 import type { DashboardFilterState } from "@/lib/dashboard-types";
 
@@ -16,23 +16,34 @@ export function DashboardFilters({
 }: DashboardFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const [isPending, startTransition] = React.useTransition();
 
   const handleRangeChange = (range: DashboardFilterState["range"]) => {
-    const params = new URLSearchParams(searchParams?.toString() || "");
-    if (range === "30d") {
-      params.delete("range");
-    } else {
-      params.set("range", range);
-    }
-    router.push(`/dashboard?${params.toString()}`);
+    if (range === filterState.range) return;
+    startTransition(() => {
+      const params = new URLSearchParams(searchParams?.toString() || "");
+      if (range === "30d") {
+        params.delete("range");
+      } else {
+        params.set("range", range);
+      }
+      const query = params.toString();
+      router.push(query ? `${pathname}?${query}` : pathname, { scroll: false });
+      router.refresh();
+    });
   };
 
   const handleReset = () => {
-    const params = new URLSearchParams(searchParams?.toString() || "");
-    params.delete("range");
-    params.delete("qr");
-    params.delete("type");
-    router.push(`/dashboard?${params.toString()}`);
+    startTransition(() => {
+      const params = new URLSearchParams(searchParams?.toString() || "");
+      params.delete("range");
+      params.delete("qr");
+      params.delete("type");
+      const query = params.toString();
+      router.push(query ? `${pathname}?${query}` : pathname, { scroll: false });
+      router.refresh();
+    });
   };
 
   const isFiltered =
@@ -52,8 +63,11 @@ export function DashboardFilters({
       {/* Mobile Top Row / Desktop Left Header */}
       <div className="flex items-center justify-between gap-2 w-full sm:w-auto">
         <div className="flex items-center gap-2 min-w-0">
-          <span className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground shrink-0">
+          <span className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground shrink-0 flex items-center gap-1.5">
             RANGE:
+            {isPending && (
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#cc785c] animate-ping" />
+            )}
           </span>
           {filterState.eventType && (
             <span className="inline-flex sm:hidden items-center gap-1 rounded-md border border-[#cc785c]/30 bg-[#cc785c]/10 px-2 py-0.5 font-mono text-[10px] text-[#cc785c] truncate">
@@ -67,8 +81,9 @@ export function DashboardFilters({
           {isFiltered && (
             <button
               type="button"
+              disabled={isPending}
               onClick={handleReset}
-              className="font-mono text-xs text-[#cc785c] hover:underline"
+              className="font-mono text-xs text-[#cc785c] hover:underline cursor-pointer disabled:opacity-50"
             >
               Reset
             </button>
@@ -76,7 +91,7 @@ export function DashboardFilters({
           <button
             type="button"
             onClick={onOpenDetailedFilters}
-            className="flex items-center gap-1.5 rounded-xl border border-border bg-background px-2.5 py-1 text-xs text-foreground hover:border-[#cc785c]/40 shadow-2xs active:scale-95 transition-all"
+            className="flex items-center gap-1.5 rounded-xl border border-border bg-background px-2.5 py-1 text-xs text-foreground hover:border-[#cc785c]/40 shadow-2xs active:scale-95 transition-all cursor-pointer"
           >
             <VaahanIcon name="settings" size={13} className="text-muted-foreground" />
             <span>Advanced</span>
@@ -93,12 +108,13 @@ export function DashboardFilters({
               <button
                 key={r.id}
                 type="button"
+                disabled={isPending}
                 onClick={() => handleRangeChange(r.id)}
-                className={`rounded-lg px-2 sm:px-3 py-1 font-mono text-xs transition-all text-center truncate ${
+                className={`rounded-lg px-2 sm:px-3 py-1 font-mono text-xs transition-all text-center truncate cursor-pointer ${
                   isActive
                     ? "bg-card font-bold text-foreground shadow-2xs"
                     : "text-muted-foreground hover:text-foreground"
-                }`}
+                } ${isPending ? "opacity-75 cursor-wait" : ""}`}
               >
                 {r.label}
               </button>
