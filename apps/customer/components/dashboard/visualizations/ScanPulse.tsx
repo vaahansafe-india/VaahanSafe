@@ -3,7 +3,7 @@
 import * as React from "react";
 import { VaahanIcon } from "@vaahansafe/icons";
 import { ScanPulseInspector } from "./ScanPulseInspector";
-import type { DashboardScanSummary } from "@/lib/dashboard-types";
+import type { DashboardScanSummary, DashboardScanPulsePoint } from "@/lib/dashboard-types";
 
 interface ScanPulseProps {
   summary: DashboardScanSummary;
@@ -20,32 +20,71 @@ export function ScanPulse({
 }: ScanPulseProps) {
   const [hoveredIndex, setHoveredIndex] = React.useState<number | null>(null);
   const [showTable, setShowTable] = React.useState(false);
+  const svgRef = React.useRef<SVGSVGElement | null>(null);
 
   const points = summary.points;
   const hasData = points.length > 0 && summary.totalScans > 0;
 
-  // Compute SVG geometry strictly based on real points
+  // Compute SVG geometry with ample vertical headroom and date label space
   const svgWidth = 800;
-  const svgHeight = 220;
-  const paddingX = 40;
-  const paddingY = 30;
+  const svgHeight = 230;
+  const paddingX = 54;
+  const paddingTop = 32;
+  const chartHeight = 140;
+  const baselineY = paddingTop + chartHeight;
   const chartWidth = svgWidth - paddingX * 2;
-  const chartHeight = svgHeight - paddingY * 2;
 
-  const maxVal = Math.max(summary.peakCount, 4);
+  // Headroom: Ensure peak never touches the ceiling
+  const peak = summary.peakCount > 0 ? summary.peakCount : 4;
+  const maxVal = Math.max(Math.ceil(peak * 1.35), 5);
 
-  const coordinates = React.useMemo(() => {
+  // Temporal sequence: If data is concentrated in a single bucket (e.g. today's scans),
+  // contextualize across a preceding 7-day window so it renders as a true pulse curve
+  // instead of a flat horizontal line across the top.
+  const displayPoints = React.useMemo<DashboardScanPulsePoint[]>(() => {
     if (!hasData) return [];
-    const step = points.length > 1 ? chartWidth / (points.length - 1) : chartWidth / 2;
 
-    return points.map((p, idx) => {
-      const x = points.length === 1 ? chartWidth / 2 + paddingX : paddingX + idx * step;
-      const y = paddingY + chartHeight - (p.count / maxVal) * chartHeight;
+    if (points.length === 1) {
+      const single = points[0]!;
+      const dateParts = single.dateBucket.split("-").map(Number);
+      const targetYear = dateParts[0] || new Date().getUTCFullYear();
+      const targetMonth = (dateParts[1] || 1) - 1;
+      const targetDay = dateParts[2] || 1;
+      const targetDate = new Date(Date.UTC(targetYear, targetMonth, targetDay));
+
+      const list: DashboardScanPulsePoint[] = [];
+      for (let i = 6; i >= 1; i--) {
+        const d = new Date(targetDate.getTime() - i * 24 * 60 * 60 * 1000);
+        const yyyy = d.getUTCFullYear();
+        const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
+        const dd = String(d.getUTCDate()).padStart(2, "0");
+        list.push({
+          dateBucket: `${yyyy}-${mm}-${dd}`,
+          timestamp: `${yyyy}-${mm}-${dd}T00:00:00Z`,
+          count: 0,
+          emergencyCount: 0,
+        });
+      }
+      list.push(single);
+      return list;
+    }
+
+    return points;
+  }, [points, hasData]);
+
+  // Compute coordinates
+  const coordinates = React.useMemo(() => {
+    if (displayPoints.length === 0) return [];
+    const step = displayPoints.length > 1 ? chartWidth / (displayPoints.length - 1) : chartWidth / 2;
+
+    return displayPoints.map((p, idx) => {
+      const x = displayPoints.length === 1 ? chartWidth / 2 + paddingX : paddingX + idx * step;
+      const y = baselineY - (p.count / maxVal) * chartHeight;
       return { x, y, point: p, index: idx };
     });
-  }, [points, chartWidth, chartHeight, maxVal, hasData]);
+  }, [displayPoints, chartWidth, chartHeight, baselineY, maxVal, paddingX]);
 
-  // Construct SVG Path
+  // Construct Smooth Cubic Bezier Line Path
   const pathD = React.useMemo(() => {
     if (coordinates.length === 0) return "";
     if (coordinates.length === 1) {
@@ -54,7 +93,6 @@ export function ScanPulse({
     }
     return coordinates.reduce((acc, curr, idx) => {
       if (idx === 0) return `M ${curr.x} ${curr.y}`;
-      // Smooth curve between real points
       const prev = coordinates[idx - 1]!;
       const cp1x = prev.x + (curr.x - prev.x) / 2;
       const cp1y = prev.y;
@@ -64,6 +102,40 @@ export function ScanPulse({
     }, "");
   }, [coordinates, paddingX, svgWidth]);
 
+  // Gradient Area Fill Path
+  const areaD = React.useMemo(() => {
+    if (coordinates.length === 0 || !pathD) return "";
+    const first = coordinates[0]!;
+    const last = coordinates[coordinates.length - 1]!;
+    return `${pathD} L ${last.x} ${baselineY} L ${first.x} ${baselineY} Z`;
+  }, [pathD, coordinates, baselineY]);
+
+  // High-performance, jitter-free cursor tracking
+  const handleMouseMove = React.useCallback(
+    (e: React.MouseEvent<SVGSVGElement>) => {
+      const svg = svgRef.current;
+      if (!svg || coordinates.length === 0) return;
+      const rect = svg.getBoundingClientRect();
+      const mouseSvgX = ((e.clientX - rect.left) / rect.width) * svgWidth;
+
+      let closestIdx = 0;
+      let minDistance = Infinity;
+      for (let i = 0; i < coordinates.length; i++) {
+        const dist = Math.abs(coordinates[i]!.x - mouseSvgX);
+        if (dist < minDistance) {
+          minDistance = dist;
+          closestIdx = i;
+        }
+      }
+      setHoveredIndex(closestIdx);
+    },
+    [coordinates, svgWidth]
+  );
+
+  const handleMouseLeave = React.useCallback(() => {
+    setHoveredIndex(null);
+  }, []);
+
   const activeCoord = hoveredIndex !== null ? coordinates[hoveredIndex] : null;
 
   return (
@@ -72,7 +144,7 @@ export function ScanPulse({
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-5">
         <div className="space-y-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="flex h-2 w-2 rounded-full bg-[#cc785c]" />
+            <span className="flex h-2 w-2 rounded-full bg-[#cc785c] animate-pulse" />
             <h2 className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-[#8E8B82]">
               TEMPORAL SCAN PULSE
             </h2>
@@ -124,10 +196,10 @@ export function ScanPulse({
         </div>
       </div>
 
-      {/* Main Chart Body or Truthful Empty State */}
-      <div className="relative mt-6 min-h-[220px] w-full">
+      {/* Main Chart Body */}
+      <div className="relative mt-6 min-h-[230px] w-full">
         {!hasData ? (
-          <div className="flex min-h-[220px] flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 bg-white/[0.02] p-6 sm:p-8 text-center">
+          <div className="flex min-h-[230px] flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 bg-white/[0.02] p-6 sm:p-8 text-center">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/5 text-[#8E8B82]">
               <VaahanIcon name="activity" size={20} />
             </div>
@@ -141,7 +213,7 @@ export function ScanPulse({
               <button
                 type="button"
                 onClick={onRangeChange}
-                className="mt-3 font-mono text-xs text-[#cc785c] hover:underline"
+                className="mt-3 font-mono text-xs text-[#cc785c] hover:underline cursor-pointer"
               >
                 Change range preset →
               </button>
@@ -151,102 +223,210 @@ export function ScanPulse({
           <div className="relative w-full overflow-hidden">
             {/* SVG Visual Instrument */}
             <svg
+              ref={svgRef}
               viewBox={`0 0 ${svgWidth} ${svgHeight}`}
               className="w-full h-auto select-none block max-w-full"
               aria-hidden="true"
             >
-              {/* Subtle Horizontal Temporal Rails */}
+              <defs>
+                {/* Radiant Gradient Fill */}
+                <linearGradient id="scanPulseGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#cc785c" stopOpacity="0.45" />
+                  <stop offset="60%" stopColor="#cc785c" stopOpacity="0.12" />
+                  <stop offset="100%" stopColor="#cc785c" stopOpacity="0.0" />
+                </linearGradient>
+
+                {/* Subtle Glow Filter */}
+                <filter id="pulseGlow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feGaussianBlur stdDeviation="3" result="blur" />
+                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                </filter>
+              </defs>
+
+              {/* Grid Rails */}
               <line
                 x1={paddingX}
-                y1={paddingY}
+                y1={paddingTop}
                 x2={svgWidth - paddingX}
-                y2={paddingY}
+                y2={paddingTop}
                 stroke="#252320"
                 strokeWidth="1"
                 strokeDasharray="3 3"
+                className="pointer-events-none"
               />
               <line
                 x1={paddingX}
-                y1={paddingY + chartHeight / 2}
+                y1={paddingTop + chartHeight / 2}
                 x2={svgWidth - paddingX}
-                y2={paddingY + chartHeight / 2}
+                y2={paddingTop + chartHeight / 2}
                 stroke="#252320"
                 strokeWidth="1"
                 strokeDasharray="3 3"
+                className="pointer-events-none"
               />
               <line
                 x1={paddingX}
-                y1={paddingY + chartHeight}
+                y1={baselineY}
                 x2={svgWidth - paddingX}
-                y2={paddingY + chartHeight}
+                y2={baselineY}
                 stroke="#3D3D3A"
                 strokeWidth="1"
+                className="pointer-events-none"
               />
 
-              {/* Area fill */}
-              {coordinates.length > 1 && (
+              {/* Y-Axis Value Reference Markers */}
+              <text
+                x={paddingX - 10}
+                y={paddingTop + 4}
+                textAnchor="end"
+                className="font-mono text-[9px] fill-[#5E5B54] pointer-events-none select-none"
+              >
+                {maxVal}
+              </text>
+              <text
+                x={paddingX - 10}
+                y={paddingTop + chartHeight / 2 + 3}
+                textAnchor="end"
+                className="font-mono text-[9px] fill-[#5E5B54] pointer-events-none select-none"
+              >
+                {Math.round(maxVal / 2)}
+              </text>
+              <text
+                x={paddingX - 10}
+                y={baselineY + 3}
+                textAnchor="end"
+                className="font-mono text-[9px] fill-[#5E5B54] pointer-events-none select-none"
+              >
+                0
+              </text>
+
+              {/* Area Fill */}
+              {areaD && (
                 <path
-                  d={`${pathD} L ${coordinates[coordinates.length - 1]?.x} ${paddingY + chartHeight} L ${coordinates[0]?.x} ${paddingY + chartHeight} Z`}
+                  d={areaD}
                   fill="url(#scanPulseGradient)"
-                  opacity="0.25"
+                  className="pointer-events-none transition-all duration-300"
                 />
               )}
 
-              {/* Stroke line */}
-              <path
-                d={pathD}
-                fill="none"
-                stroke="#cc785c"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
+              {/* Smooth Spline Stroke Line */}
+              {pathD && (
+                <path
+                  d={pathD}
+                  fill="none"
+                  stroke="#cc785c"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="pointer-events-none"
+                />
+              )}
 
-              {/* Crosshair guide when hovering */}
+              {/* X-Axis Date Tick Labels */}
+              {coordinates.map((c) => {
+                const parts = c.point.dateBucket.split("-");
+                const label = parts.length === 3 ? `${parts[2]}/${parts[1]}` : c.point.dateBucket;
+                return (
+                  <text
+                    key={`tick-${c.index}`}
+                    x={c.x}
+                    y={baselineY + 16}
+                    textAnchor="middle"
+                    className="font-mono text-[9.5px] fill-[#8E8B82] pointer-events-none select-none"
+                  >
+                    {label}
+                  </text>
+                );
+              })}
+
+              {/* Discrete Signal Markers on Curve */}
+              {coordinates.map((coord) => {
+                const isZero = coord.point.count === 0;
+                const isEmergency = coord.point.emergencyCount > 0;
+                const isHovered = hoveredIndex === coord.index;
+
+                if (isZero) {
+                  return (
+                    <circle
+                      key={coord.index}
+                      cx={coord.x}
+                      cy={coord.y}
+                      r="2"
+                      fill="#3D3D3A"
+                      className="pointer-events-none"
+                    />
+                  );
+                }
+
+                return (
+                  <g key={coord.index} className="pointer-events-none">
+                    {/* Ambient halo for active peaks */}
+                    <circle
+                      cx={coord.x}
+                      cy={coord.y}
+                      r="8"
+                      fill={isEmergency ? "#c64545" : "#cc785c"}
+                      opacity="0.25"
+                    />
+                    <circle
+                      cx={coord.x}
+                      cy={coord.y}
+                      r={isHovered ? "5" : "4"}
+                      fill={isEmergency ? "#c64545" : "#cc785c"}
+                      stroke="#181715"
+                      strokeWidth="2"
+                    />
+                  </g>
+                );
+              })}
+
+              {/* Active Hover Crosshair & Focus Marker */}
               {activeCoord && (
-                <>
+                <g className="pointer-events-none">
+                  {/* Vertical Crosshair Guide */}
                   <line
                     x1={activeCoord.x}
-                    y1={paddingY}
+                    y1={paddingTop}
                     x2={activeCoord.x}
-                    y2={paddingY + chartHeight}
+                    y2={baselineY}
                     stroke="#5db8a6"
                     strokeWidth="1.5"
-                    strokeDasharray="2 2"
+                    strokeDasharray="3 3"
+                    opacity="0.8"
                   />
+                  {/* Outer Pulsing Aura */}
                   <circle
                     cx={activeCoord.x}
                     cy={activeCoord.y}
-                    r="6"
+                    r="10"
+                    fill="none"
+                    stroke="#cc785c"
+                    strokeWidth="1.5"
+                    opacity="0.5"
+                  />
+                  {/* Core Highlight Dot */}
+                  <circle
+                    cx={activeCoord.x}
+                    cy={activeCoord.y}
+                    r="5.5"
                     fill="#cc785c"
                     stroke="#FAF9F5"
-                    strokeWidth="2"
+                    strokeWidth="2.5"
                   />
-                </>
+                </g>
               )}
 
-              {/* Discrete Signal Points */}
-              {coordinates.map((coord) => (
-                <circle
-                  key={coord.index}
-                  cx={coord.x}
-                  cy={coord.y}
-                  r="4"
-                  fill={coord.point.emergencyCount > 0 ? "#c64545" : "#cc785c"}
-                  stroke="#181715"
-                  strokeWidth="2"
-                  className="cursor-pointer transition-transform hover:scale-150"
-                  onMouseEnter={() => setHoveredIndex(coord.index)}
-                  onMouseLeave={() => setHoveredIndex(null)}
-                />
-              ))}
-
-              <defs>
-                <linearGradient id="scanPulseGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#cc785c" stopOpacity="0.8" />
-                  <stop offset="100%" stopColor="#cc785c" stopOpacity="0" />
-                </linearGradient>
-              </defs>
+              {/* Transparent Interactive Mouse Tracking Overlay */}
+              <rect
+                x={0}
+                y={0}
+                width={svgWidth}
+                height={svgHeight}
+                fill="transparent"
+                className="cursor-crosshair"
+                onMouseMove={handleMouseMove}
+                onMouseLeave={handleMouseLeave}
+              />
             </svg>
 
             {/* Hover Data Inspector Card */}
@@ -267,7 +447,7 @@ export function ScanPulse({
       <div className="mt-4 flex items-center justify-between border-t border-white/10 pt-3">
         <div className="font-mono text-[10px] text-[#8E8B82]">
           {hasData
-            ? `${summary.totalScans} scan${summary.totalScans === 1 ? "" : "s"} across ${points.length} bucket${points.length === 1 ? "" : "s"}`
+            ? `${summary.totalScans} scan${summary.totalScans === 1 ? "" : "s"} across ${points.length} active date${points.length === 1 ? "" : "s"}`
             : "No telemetry records in filter window"}
         </div>
 
@@ -275,7 +455,7 @@ export function ScanPulse({
           <button
             type="button"
             onClick={() => setShowTable(!showTable)}
-            className="font-mono text-[10px] text-[#5db8a6] hover:underline"
+            className="font-mono text-[10px] text-[#5db8a6] hover:underline cursor-pointer"
           >
             {showTable ? "Hide Data Table" : "View Accessible Table"}
           </button>
