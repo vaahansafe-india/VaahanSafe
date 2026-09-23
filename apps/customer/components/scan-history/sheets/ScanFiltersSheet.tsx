@@ -63,7 +63,7 @@ export function ScanFiltersSheet({
         className="w-full sm:max-w-[420px] p-0 flex flex-col justify-between border-l border-border bg-card text-card-foreground shadow-2xl"
       >
         <div className="overflow-y-auto p-6 space-y-6">
-          <SheetHeader className="text-left space-y-1">
+          <SheetHeader className="text-left space-y-1 pr-14 sm:pr-16">
             <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-primary">
               Scan Intelligence
             </div>

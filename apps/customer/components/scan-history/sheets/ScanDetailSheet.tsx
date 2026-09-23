@@ -30,30 +30,30 @@ export function ScanDetailSheet({
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <SheetContent
         side="right"
-        className="w-full sm:max-w-[520px] p-0 overflow-y-auto border-l border-border bg-card text-card-foreground shadow-2xl"
+        className="flex flex-col h-full max-h-screen w-full sm:max-w-[520px] p-0 border-l border-border bg-card text-card-foreground shadow-2xl overflow-hidden"
       >
-        {/* Header */}
-        <SheetHeader className="p-6 border-b border-border/70 space-y-2 text-left bg-muted/20">
-          <div className="flex items-center justify-between">
-            <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-primary">
+        {/* Fixed Header with clearance for Close button */}
+        <SheetHeader className="sticky top-0 z-20 shrink-0 p-5 sm:p-6 pr-16 sm:pr-20 border-b border-border/70 space-y-2 text-left bg-card/95 backdrop-blur-md shadow-2xs">
+          <div className="flex items-center justify-between gap-3">
+            <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-primary truncate">
               Scan Encounter Audit
             </div>
-            <Badge variant={event.resultBadgeVariant} className="text-[10px] font-mono">
+            <Badge variant={event.resultBadgeVariant} className="text-[10px] font-mono shrink-0">
               {event.resultLabel}
             </Badge>
           </div>
 
-          <SheetTitle className="font-serif text-2xl font-medium text-foreground">
+          <SheetTitle className="font-serif text-xl sm:text-2xl font-medium text-foreground truncate">
             {event.occurredDateFormatted} &bull; {event.occurredAtFormatted}
           </SheetTitle>
 
-          <SheetDescription className="text-xs text-muted-foreground font-mono">
+          <SheetDescription className="text-xs text-muted-foreground font-mono truncate">
             Event Reference: {event.id}
           </SheetDescription>
         </SheetHeader>
 
-        {/* Content Body */}
-        <div className="p-6 space-y-6 text-xs">
+        {/* Scrollable Content Body */}
+        <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-6 text-xs">
           {/* Linked Vehicle & Pass Card */}
           <div className="rounded-xl border border-border bg-background p-4 space-y-3">
             <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
