@@ -45,14 +45,17 @@ export async function POST(req: NextRequest) {
     const now = new Date().toISOString();
 
     if (existing) {
+      const hasBloodGroup = typeof bloodGroup === "string";
+      const hasMedicalNotes = typeof medicalNotes === "string";
+
       await db.execute(
         `UPDATE emergency_profiles SET
           show_owner_name = COALESCE(?, show_owner_name),
           show_blood_group = COALESCE(?, show_blood_group),
           show_medical_notes = COALESCE(?, show_medical_notes),
           show_vehicle_details = COALESCE(?, show_vehicle_details),
-          blood_group = COALESCE(?, blood_group),
-          medical_notes = COALESCE(?, medical_notes),
+          blood_group = CASE WHEN ? = 1 THEN ? ELSE blood_group END,
+          medical_notes = CASE WHEN ? = 1 THEN ? ELSE medical_notes END,
           updated_at = ?
         WHERE id = ?`,
         [
@@ -60,8 +63,10 @@ export async function POST(req: NextRequest) {
           typeof showBloodGroup === "boolean" ? (showBloodGroup ? 1 : 0) : null,
           typeof showMedicalNotes === "boolean" ? (showMedicalNotes ? 1 : 0) : null,
           typeof showVehicleDetails === "boolean" ? (showVehicleDetails ? 1 : 0) : null,
-          bloodGroup !== undefined ? bloodGroup : null,
-          medicalNotes !== undefined ? medicalNotes : null,
+          hasBloodGroup ? 1 : 0,
+          hasBloodGroup ? (bloodGroup.trim() || null) : null,
+          hasMedicalNotes ? 1 : 0,
+          hasMedicalNotes ? (medicalNotes.trim() || null) : null,
           now,
           existing.id,
         ]

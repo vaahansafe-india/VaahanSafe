@@ -29,10 +29,16 @@ import {
   PaintBoardIcon,
   Logout01Icon,
   Edit02Icon,
+  RefreshIcon,
+  Add01Icon,
 } from "@hugeicons/core-free-icons";
 
 export const navigationIcons = {
+  plus: Add01Icon,
+  add: Add01Icon,
   home: Home01Icon,
+  refresh: RefreshIcon,
+  "rotate-ccw": RefreshIcon,
   menu: Menu01Icon,
   close: Cancel01Icon,
   edit: Edit02Icon,

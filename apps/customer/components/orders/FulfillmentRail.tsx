@@ -33,13 +33,37 @@ export function FulfillmentRail({
     );
   }
 
+  const completedIndex = steps.reduce(
+    (acc, step, idx) => (step.state === "completed" ? idx : acc),
+    -1
+  );
+
   return (
     <div className={cn("w-full", className)}>
       {/* DESKTOP HORIZONTAL RAIL (md and up) */}
       <div className={cn("hidden md:block", isCompact ? "py-2" : "py-3")}>
-        <div className="relative flex items-center justify-between">
-          {/* Background track line */}
-          <div className="absolute left-4 right-4 top-3 h-0.5 bg-border -translate-y-1/2 z-0" />
+        <div className="relative flex items-start justify-between">
+          {/* Background track line - runs through exact center of all circles */}
+          {steps.length > 1 && (
+            <div
+              className="absolute top-3 h-0.5 bg-border -translate-y-1/2 z-0"
+              style={{
+                left: `${100 / (steps.length * 2)}%`,
+                right: `${100 / (steps.length * 2)}%`,
+              }}
+            />
+          )}
+
+          {/* Active progress track line */}
+          {completedIndex >= 0 && steps.length > 1 && (
+            <div
+              className="absolute top-3 h-0.5 bg-teal-600 -translate-y-1/2 z-0 transition-all duration-300"
+              style={{
+                left: `${100 / (steps.length * 2)}%`,
+                width: `${(completedIndex / (steps.length - 1)) * (100 - 100 / steps.length)}%`,
+              }}
+            />
+          )}
 
           {steps.map((step, idx) => {
             const isCompleted = step.state === "completed";
@@ -50,12 +74,12 @@ export function FulfillmentRail({
             return (
               <div
                 key={step.id}
-                className="relative z-10 flex flex-1 flex-col items-center text-center first:items-start last:items-end"
+                className="relative z-10 flex flex-1 flex-col items-center text-center px-1"
               >
-                {/* Node indicator */}
+                {/* Node indicator - anchored to top-0, center at y = 12px */}
                 <div
                   className={cn(
-                    "flex size-6 items-center justify-center rounded-full border text-[10px] font-mono font-bold transition-all duration-300",
+                    "flex size-6 shrink-0 items-center justify-center rounded-full border text-[10px] font-mono font-bold transition-all duration-300",
                     isCompleted && "border-teal-600 bg-teal-600 text-white shadow-xs",
                     isCurrent && "border-[#cc785c] bg-[#cc785c] text-white ring-4 ring-[#cc785c]/20 shadow-xs",
                     isFailed && "border-destructive bg-destructive text-white",
@@ -71,17 +95,11 @@ export function FulfillmentRail({
                   )}
                 </div>
 
-                {/* Node Labels */}
-                <div
-                  className={cn(
-                    "mt-2 space-y-0.5",
-                    idx === 0 && "text-left",
-                    idx === steps.length - 1 && "text-right"
-                  )}
-                >
+                {/* Node Labels - centered under node indicator */}
+                <div className="mt-2 space-y-0.5 w-full">
                   <div
                     className={cn(
-                      "font-mono text-[11px] font-medium tracking-tight",
+                      "font-mono text-[11px] font-medium tracking-tight leading-snug",
                       isCurrent
                         ? "font-semibold text-[#cc785c]"
                         : isCompleted
@@ -92,7 +110,7 @@ export function FulfillmentRail({
                     {step.label}
                   </div>
                   {step.sublabel && (
-                    <div className="text-[10px] text-muted-foreground">
+                    <div className="text-[10px] text-muted-foreground font-mono">
                       {step.sublabel}
                     </div>
                   )}
@@ -105,7 +123,7 @@ export function FulfillmentRail({
 
       {/* MOBILE VERTICAL RAIL (<md) */}
       <div className="block md:hidden">
-        <div className="relative space-y-4 pl-7 before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-0.5 before:bg-border">
+        <div className="relative space-y-4 pl-7 before:absolute before:left-[9px] before:top-2.5 before:bottom-2.5 before:w-0.5 before:bg-border">
           {steps.map((step, idx) => {
             const isCompleted = step.state === "completed";
             const isCurrent = step.state === "current";

@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getVehicleRepository } from "@vaahansafe/database";
+import { getVehicleRepository, getNotificationRepository } from "@vaahansafe/database";
 import { getAuthenticatedCustomer } from "../../lib/session";
 import { CustomerAppShell } from "../../components/shell/CustomerAppShell";
 
@@ -16,35 +16,24 @@ export default async function AuthenticatedCustomerLayout({
 
   const { user } = auth;
 
-  // Load real vehicles for shell context
-  let vehicles: Array<{
-    id: string;
-    registrationNumber: string;
-    make: string;
-    model: string;
-    publicQrId?: string;
-  }> = [];
+  // Concurrently execute initial layout shell queries
+  const [vehiclesResult, notifResult] = await Promise.allSettled([
+    getVehicleRepository().findByCustomerId(user.id),
+    getNotificationRepository().countUnreadByUserId(user.id),
+  ]);
 
-  try {
-    const vehicleRepo = getVehicleRepository();
-    const userVehicles = await vehicleRepo.findByCustomerId(user.id);
-    vehicles = userVehicles.map((v) => ({
-      id: v.id,
-      registrationNumber: v.registrationNumber,
-      make: v.make,
-      model: v.model,
-    }));
-  } catch (err) {
-    console.warn("[VaahanSafe] Could not load vehicles for layout shell:", err);
-  }
+  const vehicles =
+    vehiclesResult.status === "fulfilled"
+      ? vehiclesResult.value.map((v) => ({
+          id: v.id,
+          registrationNumber: v.registrationNumber,
+          make: v.make,
+          model: v.model,
+        }))
+      : [];
 
-  let unreadNotificationCount = 0;
-  try {
-    const notifRepo = (await import("@vaahansafe/database")).getNotificationRepository();
-    unreadNotificationCount = await notifRepo.countUnreadByUserId(user.id);
-  } catch (err) {
-    console.warn("[VaahanSafe] Could not load unread notification count for shell:", err);
-  }
+  const unreadNotificationCount =
+    notifResult.status === "fulfilled" ? notifResult.value : 0;
 
   return (
     <CustomerAppShell

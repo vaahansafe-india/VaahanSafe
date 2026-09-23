@@ -43,7 +43,7 @@ export function ScanHistoryEmptyState({ hasActiveQr }: ScanHistoryEmptyStateProp
             variant="outline"
             className="w-full sm:w-auto h-11 px-6 rounded-xl border-border bg-card hover:bg-muted/60 text-xs font-semibold uppercase tracking-wider shadow-xs"
           >
-            <Link href="http://localhost:3002">
+            <Link href="/qr/activate">
               Activate Retail Pack
             </Link>
           </Button>

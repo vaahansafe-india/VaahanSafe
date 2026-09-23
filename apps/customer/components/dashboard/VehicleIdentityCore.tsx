@@ -25,7 +25,7 @@ export function VehicleIdentityCore({
 }: VehicleIdentityCoreProps) {
   if (!vehicle) {
     return (
-      <div className="relative overflow-hidden rounded-3xl border border-[#252320] bg-[#181715] p-8 text-[#FAF9F5] shadow-xl">
+      <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-[#252320] bg-[#181715] p-5 sm:p-8 text-[#FAF9F5] shadow-xl w-full max-w-full">
         <div className="flex flex-col items-center justify-center py-10 text-center">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/5 text-[#cc785c]">
             <VaahanIcon name="vehicle" size={28} />
@@ -119,25 +119,25 @@ export function VehicleIdentityCore({
   })();
 
   return (
-    <div className="relative flex h-full flex-1 flex-col justify-between overflow-hidden rounded-3xl border border-[#252320] bg-[#181715] p-5 text-[#FAF9F5] shadow-2xl sm:p-7 lg:p-8">
+    <div className="relative flex h-full flex-1 flex-col justify-between overflow-hidden rounded-2xl sm:rounded-3xl border border-[#252320] bg-[#181715] p-4 sm:p-6 lg:p-7 text-[#FAF9F5] shadow-2xl w-full max-w-full">
       {/* Background Architectural Registration Rails & Subtle Accents */}
       <div className="pointer-events-none absolute top-0 right-0 h-64 w-64 rounded-full bg-[#cc785c]/5 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-10 -left-10 h-48 w-48 rounded-full bg-[#5db8a6]/5 blur-3xl" />
       
       {/* Top Header Rail */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-5">
-        <div className="flex items-center gap-2.5">
-          <span className="flex h-2 w-2 rounded-full bg-[#cc785c] animate-pulse" />
-          <span className="font-mono text-[11px] font-semibold tracking-[0.2em] text-[#8E8B82] uppercase">
+      <div className="flex flex-wrap items-center justify-between gap-2.5 sm:gap-3 border-b border-white/10 pb-4 sm:pb-5">
+        <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+          <span className="flex h-2 w-2 shrink-0 rounded-full bg-[#cc785c] animate-pulse" />
+          <span className="font-mono text-[10px] sm:text-[11px] font-semibold tracking-[0.16em] sm:tracking-[0.2em] text-[#8E8B82] uppercase truncate">
             VEHICLE IDENTITY / {vehicle.status}
           </span>
-          <span className="font-mono text-[10px] text-white/30">&bull;</span>
-          <span className="font-mono text-[10px] text-white/50">{vehicle.type}</span>
+          <span className="font-mono text-[10px] text-white/30 shrink-0">&bull;</span>
+          <span className="font-mono text-[10px] text-white/50 shrink-0">{vehicle.type}</span>
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           <span
-            className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 sm:px-3 font-mono text-[10px] font-semibold tracking-wider uppercase ${qrStatusConfig.badgeClass}`}
+            className={`inline-flex items-center gap-1.5 rounded-full border px-2 sm:px-3 py-0.5 sm:py-1 font-mono text-[9px] sm:text-[10px] font-semibold tracking-wider uppercase ${qrStatusConfig.badgeClass}`}
           >
             <span className={`h-1.5 w-1.5 rounded-full ${qrStatusConfig.dotClass}`} />
             {qrStatusConfig.label}
@@ -145,7 +145,7 @@ export function VehicleIdentityCore({
           <button
             type="button"
             onClick={onViewQr}
-            className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-medium text-[#FAF9F5] transition-colors hover:border-[#cc785c]/60 hover:bg-[#cc785c]/10"
+            className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2 sm:px-2.5 py-0.5 sm:py-1 text-[10px] sm:text-[11px] font-medium text-[#FAF9F5] transition-colors hover:border-[#cc785c]/60 hover:bg-[#cc785c]/10"
           >
             <VaahanIcon name="qr" size={13} className="text-[#cc785c]" />
             <span>Inspect QR</span>
@@ -162,10 +162,10 @@ export function VehicleIdentityCore({
               REGISTERED PLATE ID
             </div>
             <div className="mt-1 flex flex-wrap items-baseline gap-2 sm:gap-3">
-              <span className="font-mono text-2xl xs:text-3xl sm:text-4xl font-extrabold tracking-wider text-white">
+              <span className="font-mono text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-wider text-white break-all">
                 {vehicle.registrationNumber}
               </span>
-              <span className="rounded bg-white/10 px-2 py-0.5 font-mono text-[10px] font-semibold text-[#FAF9F5]">
+              <span className="rounded bg-white/10 px-2 py-0.5 font-mono text-[10px] font-semibold text-[#FAF9F5] shrink-0">
                 IND
               </span>
             </div>

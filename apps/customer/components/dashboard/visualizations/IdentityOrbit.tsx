@@ -30,7 +30,14 @@ export function IdentityOrbit({
   const isVehicleConfigured = Boolean(vehicle);
   const isQrActive = qrSticker?.status === "ACTIVE" || qrSticker?.status === "ACTIVATED";
   const isReplacementPending = Boolean(qrSticker?.replacementPending);
-  const isSafetyConfigured = Boolean(safetyProfile.bloodGroup);
+  const isSafetyConfigured = Boolean(
+    safetyProfile.bloodGroup ||
+    safetyProfile.medicalNotes ||
+    safetyProfile.showVehicleDetails ||
+    safetyProfile.showBloodGroup ||
+    safetyProfile.showMedicalNotes ||
+    safetyProfile.showOwnerName
+  );
   const isContactsConfigured = safetyProfile.contacts.length > 0;
 
   const qrNodeStatus = isReplacementPending
@@ -99,15 +106,15 @@ export function IdentityOrbit({
   ];
 
   return (
-    <div className="flex h-full flex-1 flex-col justify-between rounded-3xl border border-border bg-card p-5 sm:p-6 shadow-sm">
+    <div className="flex h-full flex-1 flex-col justify-between rounded-2xl sm:rounded-3xl border border-border bg-card p-4 sm:p-6 lg:p-7 shadow-sm w-full max-w-full overflow-hidden">
       <div className="border-b border-border pb-3">
         <div className="flex items-center gap-2">
-          <span className="flex h-2 w-2 rounded-full bg-[#cc785c]" />
-          <h3 className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-foreground">
+          <span className="flex h-2 w-2 shrink-0 rounded-full bg-[#cc785c]" />
+          <h3 className="font-mono text-[11px] sm:text-xs font-bold uppercase tracking-[0.16em] sm:tracking-[0.2em] text-foreground truncate">
             IDENTITY ORBIT
           </h3>
         </div>
-        <p className="mt-1 text-xs text-muted-foreground">
+        <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
           Topological map of your vehicle, safety sticker, privacy projection, and emergency responders.
         </p>
       </div>
@@ -267,23 +274,23 @@ export function IdentityOrbit({
               key={node.id}
               type="button"
               onClick={node.onClick}
-              className="flex w-full items-center justify-between py-2.5 text-left text-xs"
+              className="flex w-full items-center justify-between py-2.5 text-left text-xs gap-3 transition-colors hover:bg-muted/30"
             >
-              <div className="flex items-center gap-2.5">
-                <span className={`flex h-7 w-7 items-center justify-center rounded-lg ${iconBg}`}>
+              <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${iconBg}`}>
                   <VaahanIcon name={node.icon} size={14} />
                 </span>
-                <div>
-                  <div className="font-mono text-[11px] font-bold text-foreground">
+                <div className="min-w-0 flex-1">
+                  <div className="font-mono text-[11px] font-bold text-foreground truncate">
                     {node.name}
                   </div>
-                  <div className={`text-[10px] font-mono ${statusColor}`}>
+                  <div className={`text-[10px] font-mono truncate ${statusColor}`}>
                     {node.status} {node.subtext ? `(${node.subtext})` : ""}
                   </div>
                 </div>
               </div>
 
-              <span className={`font-mono text-[10px] font-bold ${statusColor}`}>
+              <span className={`font-mono text-[10px] font-bold shrink-0 ${statusColor}`}>
                 Inspect →
               </span>
             </button>

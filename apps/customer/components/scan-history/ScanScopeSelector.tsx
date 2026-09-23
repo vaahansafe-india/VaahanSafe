@@ -45,7 +45,7 @@ export function ScanScopeSelector({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="h-10 sm:h-11 px-3.5 sm:px-4 justify-between gap-2.5 rounded-xl border-border bg-card hover:bg-muted/60 text-left min-w-[210px] shadow-xs"
+          className="h-10 sm:h-11 px-3 sm:px-4 justify-between gap-2.5 rounded-xl border-border bg-card hover:bg-muted/60 text-left w-full md:w-auto min-w-0 md:min-w-[210px] shadow-xs"
         >
           <div className="flex items-center gap-2 truncate">
             <VaahanIcon name="qr-code" size={16} className="text-primary shrink-0" />
@@ -62,7 +62,7 @@ export function ScanScopeSelector({
         </Button>
       </PopoverTrigger>
 
-      <PopoverContent className="w-[280px] p-0 rounded-xl border-border bg-popover text-popover-foreground shadow-xl" align="end">
+      <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[280px] max-w-sm p-0 rounded-xl border-border bg-popover text-popover-foreground shadow-xl" align="end">
         <Command>
           <CommandInput placeholder="Search authorized pass..." className="h-9 font-sans text-xs" />
           <CommandList className="max-h-[260px] p-1">

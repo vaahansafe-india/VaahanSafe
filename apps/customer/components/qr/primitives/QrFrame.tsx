@@ -36,10 +36,14 @@ export function QrFrame({
   return (
     <div
       className={cn(
-        "relative flex flex-col items-center justify-center rounded-xl bg-white p-4 shadow-sm border border-neutral-200 dark:border-neutral-800",
+        "relative flex flex-col items-center justify-center rounded-xl bg-white p-3 sm:p-4 shadow-sm border border-border/80 dark:border-border/60 max-w-full",
         className
       )}
-      style={{ width: size + 32, minHeight: size + 48 }}
+      style={{
+        width: hideFooter ? (className?.includes("p-0") ? size : size + 16) : size + 32,
+        minHeight: hideFooter ? (className?.includes("p-0") ? size : size + 16) : size + 48,
+        maxWidth: "100%",
+      }}
     >
       {/* Corner Ticks */}
       {showTicks && (
@@ -56,7 +60,7 @@ export function QrFrame({
         width={size}
         height={size}
         viewBox={`0 0 ${matrixSize} ${matrixSize}`}
-        className="shape-rendering-crispEdges select-none"
+        className="shape-rendering-crispEdges select-none max-w-full h-auto"
         aria-label={`Official Scannable QR Code for VaahanSafe Identity ${displayCode} (${url})`}
         role="img"
       >

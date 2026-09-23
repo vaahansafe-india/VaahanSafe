@@ -63,7 +63,7 @@ export async function createOrderAndPaymentSession(
     const db = getAuthoritativeDatabaseClient();
 
     // 1. Authoritative Product & Pricing Resolution (Server-Authoritative Pricing)
-    const products = await db.query<{
+    let products = await db.query<{
       id: string;
       code: string;
       name: string;
@@ -78,9 +78,56 @@ export async function createOrderAndPaymentSession(
       [productCode]
     );
 
-    const product = products[0];
+    let product = products[0];
     if (!product) {
-      return { success: false, error: "Product is currently unavailable." };
+      // If products table has not yet been populated in D1 or migration is running, provision canonical hardware product
+      if (
+        productCode === "PROD_QR_STICKER_INDIVIDUAL" ||
+        productCode === "prod_qr_sticker_kit" ||
+        !productCode
+      ) {
+        await db.execute(
+          `INSERT OR IGNORE INTO products (
+            id, code, name, description, product_type, status, price_minor, currency, requires_shipping, requires_qr_allocation
+          ) VALUES (
+            'prod_qr_sticker_kit',
+            'PROD_QR_STICKER_INDIVIDUAL',
+            'VaahanSafe Automotive Safety Kit',
+            '2x UV-Laminated Weatherproof Physical QR Stickers with Cryptographic Safety Routing.',
+            'PHYSICAL_QR_STICKER',
+            'ACTIVE',
+            49900,
+            'INR',
+            1,
+            1
+          )`
+        );
+
+        const refetched = await db.query<{
+          id: string;
+          code: string;
+          name: string;
+          price_minor: number;
+          currency: string;
+          status: string;
+        }>(
+          `SELECT id, code, name, price_minor, currency, status
+           FROM products
+           WHERE (code = 'PROD_QR_STICKER_INDIVIDUAL' OR product_type = 'PHYSICAL_QR_STICKER') AND status = 'ACTIVE'
+           LIMIT 1`
+        );
+
+        product = refetched[0] || {
+          id: "prod_qr_sticker_kit",
+          code: "PROD_QR_STICKER_INDIVIDUAL",
+          name: "VaahanSafe Automotive Safety Kit",
+          price_minor: 49900,
+          currency: "INR",
+          status: "ACTIVE",
+        };
+      } else {
+        return { success: false, error: "Product is currently unavailable." };
+      }
     }
 
     // 2. Validate Vehicle Ownership if specified
@@ -259,6 +306,13 @@ export async function createOrderAndPaymentSession(
     };
   } catch (err: any) {
     console.error("[createOrderAndPaymentSession] Error:", err);
+    const msg = err?.message || "";
+    if (msg.includes("Order creation failed (401)") || msg.includes("Authentication failed")) {
+      return {
+        success: false,
+        error: "Razorpay authentication failed (401). Your RAZORPAY_KEY_ID or RAZORPAY_KEY_SECRET in .env.local is invalid or expired. Please update with active keys from dashboard.razorpay.com.",
+      };
+    }
     return {
       success: false,
       error: "We couldn't initiate secure payment. Please try again in a few moments.",

@@ -71,14 +71,12 @@ export function ProfileSettings({ data }: ProfileSettingsProps) {
 
       {/* Mandatory Verification Alert Banner if Unverified */}
       {!isVerified && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
-          <div className="flex items-start gap-3">
-            <VaahanIcon
-              name="alert"
-              size={18}
-              className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5"
-            />
-            <div className="space-y-0.5">
+        <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
+          <div className="flex items-start gap-3 min-w-0 flex-1">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-500/20 text-amber-600 dark:text-amber-400 mt-0.5">
+              <VaahanIcon name="alert" size={18} />
+            </div>
+            <div className="space-y-1 min-w-0">
               <div className="text-xs font-semibold text-amber-900 dark:text-amber-200">
                 Action Required: Mobile Number Verification
               </div>
@@ -91,7 +89,7 @@ export function ProfileSettings({ data }: ProfileSettingsProps) {
             type="button"
             size="sm"
             onClick={() => setIsMobileDialogOpen(true)}
-            className="bg-[#cc785c] hover:bg-[#b8674d] text-white text-xs h-8 shrink-0 self-start sm:self-center font-medium shadow-xs"
+            className="bg-[#cc785c] hover:bg-[#b8674d] text-white text-xs h-8 px-4 shrink-0 self-start sm:self-center font-medium shadow-xs"
           >
             Verify Mobile &rarr;
           </Button>
@@ -107,22 +105,16 @@ export function ProfileSettings({ data }: ProfileSettingsProps) {
           title="Profile Photo"
           description="A clear representation helps first responders identify the vehicle owner."
         >
-          <div className="flex items-center gap-3">
-            <Avatar className="h-10 w-10 border border-border bg-[#cc785c]/10 text-[#cc785c]">
+          <div className="flex items-center gap-2.5 justify-end">
+            <Avatar className="h-9 w-9 sm:h-10 sm:w-10 border border-border bg-[#cc785c]/10 text-[#cc785c] shrink-0 shadow-2xs">
               {data.user.avatarUrl && <AvatarImage src={data.user.avatarUrl} alt={userName} />}
               <AvatarFallback className="font-mono text-xs font-semibold text-[#cc785c]">
                 {initials}
               </AvatarFallback>
             </Avatar>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="text-xs h-8"
-              onClick={() => setIsNameDialogOpen(true)}
-            >
-              Change Name
-            </Button>
+            <span className="font-mono text-xs text-muted-foreground hidden sm:inline">
+              {data.user.avatarUrl ? "Synced via Google" : "Default Avatar"}
+            </span>
           </div>
         </SettingRow>
 
@@ -131,16 +123,16 @@ export function ProfileSettings({ data }: ProfileSettingsProps) {
           title="Full Name"
           description="Used across account management and optional public vehicle safety view."
         >
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap sm:flex-nowrap justify-end">
             <span className="text-sm font-medium text-foreground">{userName}</span>
             <Button
               type="button"
-              variant="ghost"
+              variant="outline"
               size="sm"
               onClick={() => setIsNameDialogOpen(true)}
-              className="text-xs h-7 text-[#cc785c] hover:text-[#b8674d] hover:bg-[#cc785c]/5"
+              className="text-xs h-8 px-3 rounded-lg border-border hover:border-[#cc785c] text-foreground shrink-0 font-medium shadow-2xs"
             >
-              Edit &rarr;
+              Edit Name &rarr;
             </Button>
           </div>
         </SettingRow>
@@ -151,7 +143,7 @@ export function ProfileSettings({ data }: ProfileSettingsProps) {
           description="Authoritative identity anchor for SMS OTP authentication and emergency scan alerts."
           status={<SettingStatus status={isVerified ? "VERIFIED" : "REQUIRED"} />}
         >
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap sm:flex-nowrap justify-end">
             {isVerified && userPhone ? (
               <>
                 <span className="font-mono text-xs text-foreground tracking-wider font-medium">
@@ -162,7 +154,7 @@ export function ProfileSettings({ data }: ProfileSettingsProps) {
                   variant="outline"
                   size="sm"
                   onClick={() => setIsMobileDialogOpen(true)}
-                  className="text-xs h-7 border-border hover:border-[#cc785c]"
+                  className="text-xs h-8 px-3 rounded-lg border-border hover:border-[#cc785c] shrink-0 font-medium shadow-2xs"
                 >
                   Change &rarr;
                 </Button>
@@ -177,7 +169,7 @@ export function ProfileSettings({ data }: ProfileSettingsProps) {
                   type="button"
                   size="sm"
                   onClick={() => setIsMobileDialogOpen(true)}
-                  className="text-xs h-7 bg-[#cc785c] hover:bg-[#b8674d] text-white shadow-xs font-medium"
+                  className="text-xs h-8 px-3.5 rounded-lg bg-[#cc785c] hover:bg-[#b8674d] text-white shadow-xs font-medium shrink-0"
                 >
                   Verify Mobile &rarr;
                 </Button>

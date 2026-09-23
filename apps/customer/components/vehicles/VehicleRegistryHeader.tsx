@@ -88,16 +88,6 @@ export function VehicleRegistryHeader({
             Manage the vehicles associated with your VaahanSafe account and understand how each physical asset connects to its identity, QR and safety view.
           </p>
         </div>
-
-        {/* Dynamic Registry Counter */}
-        <div className="flex flex-col items-end">
-          <div className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
-            VEHICLE REGISTRY / {formattedCount}
-          </div>
-          <div className="mt-1 font-mono text-[11px] text-[#5db8a6]">
-            Verified &amp; Synchronized
-          </div>
-        </div>
       </div>
 
       {/* 02. Controls Surface (Search, Filters, Sort, View Switcher, Add CTA) */}

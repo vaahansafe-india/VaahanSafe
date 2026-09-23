@@ -70,7 +70,7 @@ export function DataPrivacySettings({ data }: DataPrivacySettingsProps) {
           </p>
         </div>
 
-        <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-4 sm:p-5">
+        <div className="rounded-2xl border border-destructive/30 bg-destructive/5 overflow-hidden">
           <SettingRow
             title="Permanently Close Account"
             description="Revokes all active sessions and removes access to customer control centers. Invoices and orders are retained for legal audit compliance."

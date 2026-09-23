@@ -17,7 +17,7 @@ export function NeedsAttention({ items, onAction }: NeedsAttentionProps) {
   return (
     <section
       aria-label="Items Requiring Attention"
-      className="rounded-2xl border border-[#e8a55a]/30 bg-[#e8a55a]/5 p-4 sm:p-5 shadow-xs"
+      className="w-full max-w-full rounded-2xl border border-[#e8a55a]/30 bg-[#e8a55a]/5 p-3.5 sm:p-5 shadow-xs"
     >
       <div className="flex items-center justify-between border-b border-[#e8a55a]/20 pb-3">
         <div className="flex items-center gap-2">
@@ -57,11 +57,11 @@ export function NeedsAttention({ items, onAction }: NeedsAttentionProps) {
                 </div>
               </div>
 
-              <div className="shrink-0 sm:pl-4">
+              <div className="w-full sm:w-auto shrink-0 sm:pl-4">
                 <button
                   type="button"
                   onClick={() => onAction(item.actionTarget)}
-                  className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 font-mono text-xs font-medium transition-all ${
+                  className={`inline-flex w-full sm:w-auto items-center justify-center gap-1.5 rounded-lg border px-3 py-1.5 font-mono text-xs font-medium transition-all ${
                     isRed
                       ? "border-[#c64545]/40 bg-[#c64545]/10 text-[#c64545] hover:bg-[#c64545]/20"
                       : "border-[#e8a55a]/40 bg-[#e8a55a]/10 text-[#e8a55a] hover:bg-[#e8a55a]/20"

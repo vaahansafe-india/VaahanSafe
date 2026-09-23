@@ -10,6 +10,7 @@ import {
   DialogDescription,
 } from "@vaahansafe/ui";
 import type { DashboardConstellationEvent } from "@/lib/dashboard-types";
+import { formatFullIstTimestamp } from "@/lib/datetime";
 
 interface ConstellationEventDialogProps {
   event: DashboardConstellationEvent | null;
@@ -24,7 +25,7 @@ export function ConstellationEventDialog({
 
   return (
     <Dialog open={Boolean(event)} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md bg-card p-6 border-border">
+      <DialogContent className="w-full sm:max-w-md bg-card p-4 sm:p-6 border-border">
         <DialogHeader className="border-b border-border pb-3">
           <div className="flex items-center gap-2">
             <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#cc785c]">
@@ -47,7 +48,7 @@ export function ConstellationEventDialog({
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">Recorded Timestamp</span>
               <span className="font-mono text-foreground">
-                {event.timestamp ? event.timestamp.replace("T", " ") : "Recorded"}
+                {formatFullIstTimestamp(event.timestamp)}
               </span>
             </div>
             <div className="flex items-center justify-between">

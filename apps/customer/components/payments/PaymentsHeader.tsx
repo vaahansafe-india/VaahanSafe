@@ -25,7 +25,7 @@ export function PaymentsHeader({
   onVehicleChange,
 }: PaymentsHeaderProps) {
   return (
-    <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between border-b border-border/80 pb-6">
+    <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between border-b border-border/80 pb-6">
       <div className="space-y-1.5">
         <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.24em] text-[#cc785c]">
           <span>Financial Records</span>
@@ -41,17 +41,17 @@ export function PaymentsHeader({
       </div>
 
       {vehicles.length > 0 && (
-        <div className="shrink-0 flex items-center gap-2 self-start md:self-end">
-          <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground flex items-center gap-1">
+        <div className="flex items-center gap-2 w-full sm:w-auto self-start sm:self-end shrink-0">
+          <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground flex items-center gap-1 shrink-0">
             <VaahanIcon name="vehicle" size={13} className="text-[#cc785c]" />
             <span>Scope:</span>
           </span>
-          <div className="min-w-[170px]">
+          <div className="flex-1 min-w-0 sm:w-52">
             <Select
               value={selectedVehicleId}
               onValueChange={onVehicleChange}
             >
-              <SelectTrigger className="h-8.5 rounded-lg border-border bg-card px-2.5 font-mono text-xs text-foreground focus:ring-[#cc785c]">
+              <SelectTrigger className="h-9 w-full rounded-xl border-border bg-card px-3 font-mono text-xs text-foreground focus:ring-[#cc785c]">
                 <SelectValue placeholder="All Connected Vehicles">
                   {selectedVehicleId === "all"
                     ? "All Connected Vehicles"

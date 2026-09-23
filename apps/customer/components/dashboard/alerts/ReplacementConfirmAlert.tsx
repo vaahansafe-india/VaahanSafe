@@ -34,7 +34,7 @@ export function ReplacementConfirmAlert({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md bg-card p-6 border border-[#c64545]/30">
+      <DialogContent className="w-full sm:max-w-md bg-card p-4 sm:p-6 border border-[#c64545]/30">
         <DialogHeader className="border-b border-border pb-3">
           <div className="flex items-center gap-2 text-[#c64545]">
             <VaahanIcon name="warning" size={18} />
@@ -42,7 +42,7 @@ export function ReplacementConfirmAlert({
               REPLACEMENT CONSEQUENCE AUDIT
             </span>
           </div>
-          <DialogTitle className="font-serif text-xl font-medium text-foreground">
+          <DialogTitle className="font-serif text-lg sm:text-xl font-medium text-foreground">
             Replace Active QR Sticker?
           </DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground">
@@ -68,20 +68,20 @@ export function ReplacementConfirmAlert({
           </div>
         </div>
 
-        <div className="mt-6 flex items-center justify-end gap-3 border-t border-border pt-3">
+        <div className="mt-6 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 sm:gap-3 border-t border-border pt-3">
           <button
             type="button"
             onClick={() => onOpenChange(false)}
-            className="rounded-xl border border-border px-4 py-2 text-xs font-medium text-foreground hover:bg-muted"
+            className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl border border-border px-4 py-2 text-xs font-medium text-foreground hover:bg-muted"
           >
             Keep Current Sticker
           </button>
           <button
             type="button"
             onClick={handleProceed}
-            className="rounded-xl bg-[#c64545] px-4 py-2 font-mono text-xs font-semibold text-white hover:bg-[#a93838]"
+            className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl bg-[#c64545] px-4 py-2 font-mono text-xs font-semibold text-white hover:bg-[#a93838]"
           >
-            Confirm &amp; Proceed to Replacement →
+            Confirm &amp; Proceed →
           </button>
         </div>
       </DialogContent>

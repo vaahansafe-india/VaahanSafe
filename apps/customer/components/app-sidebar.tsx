@@ -153,18 +153,14 @@ export function AppSidebar({ user, vehicles = [], ...props }: AppSidebarProps) {
     >
       {/* 01. Brand Header — Fixed h-14 to align with top navbar */}
       <SidebarHeader className="h-14 justify-center border-b border-sidebar-border px-3.5 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:p-0">
-        {/* Expanded state: Full logo and identity rail */}
-        <div className="flex items-center justify-between w-full group-data-[collapsible=icon]:hidden">
+        {/* Expanded state: Full brand logo */}
+        <div className="flex items-center w-full group-data-[collapsible=icon]:hidden">
           <Link
             href="/dashboard"
             className="inline-flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#cc785c] rounded-md"
           >
             <VaahanSafeLogo size="sm" variant="brand" showTagline={false} />
           </Link>
-          <div className="flex items-center gap-1.5 font-mono text-[8.5px] uppercase tracking-[0.16em] text-muted-foreground">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#cc785c]" />
-            <span>IDENTITY</span>
-          </div>
         </div>
 
         {/* Collapsed icon state: Centered brand mark only */}

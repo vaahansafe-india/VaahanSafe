@@ -4,6 +4,7 @@ import { VaahanIcon } from "@vaahansafe/icons";
 import { Badge, Button } from "@vaahansafe/ui";
 import { PaymentReference } from "./PaymentReference";
 import type { PaymentRecordItem } from "@/lib/payments-types";
+import { formatDateIst } from "@/lib/datetime";
 
 interface PaymentRecordProps {
   payment: PaymentRecordItem;
@@ -18,11 +19,7 @@ export function PaymentRecord({
   onViewInvoice,
   onRetryPayment,
 }: PaymentRecordProps) {
-  const formattedDate = new Intl.DateTimeFormat("en-IN", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  }).format(new Date(payment.confirmedAt || payment.createdAt));
+  const formattedDate = formatDateIst(payment.confirmedAt || payment.createdAt);
 
   const formattedAmount = `₹${(payment.amountMinor / 100).toLocaleString("en-IN")}`;
 

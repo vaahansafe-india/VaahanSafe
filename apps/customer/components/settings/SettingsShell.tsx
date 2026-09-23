@@ -101,7 +101,7 @@ export function SettingsShell({
               onBack={handleMobileBack}
               categoryTitle={categoryTitles[activeCategory]}
             />
-            <div className="max-w-xl mx-auto">{renderActiveContent()}</div>
+            <div className="max-w-xl mx-auto space-y-6">{renderActiveContent()}</div>
           </div>
         )}
       </div>
@@ -122,10 +122,8 @@ export function SettingsShell({
         </aside>
 
         {/* Right Focused Settings Workspace */}
-        <main className="flex-1 min-w-0 max-w-3xl pb-16">
-          <div className="rounded-2xl border border-border/70 bg-card/60 p-8 shadow-xs backdrop-blur-xs">
-            {renderActiveContent()}
-          </div>
+        <main className="flex-1 min-w-0 max-w-3xl pb-16 space-y-8">
+          {renderActiveContent()}
         </main>
       </div>
     </div>

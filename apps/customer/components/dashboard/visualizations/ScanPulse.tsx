@@ -67,10 +67,10 @@ export function ScanPulse({
   const activeCoord = hoveredIndex !== null ? coordinates[hoveredIndex] : null;
 
   return (
-    <div className="relative flex flex-col justify-between rounded-3xl border border-[#252320] bg-[#181715] p-6 text-[#FAF9F5] shadow-xl sm:p-7">
+    <div className="relative flex flex-col justify-between rounded-3xl border border-[#252320] bg-[#181715] p-4 sm:p-6 lg:p-7 text-[#FAF9F5] shadow-xl w-full max-w-full overflow-hidden">
       {/* Header & Metric Signals */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-5">
-        <div className="space-y-1">
+        <div className="space-y-1 min-w-0">
           <div className="flex items-center gap-2">
             <span className="flex h-2 w-2 rounded-full bg-[#cc785c]" />
             <h2 className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-[#8E8B82]">
@@ -127,7 +127,7 @@ export function ScanPulse({
       {/* Main Chart Body or Truthful Empty State */}
       <div className="relative mt-6 min-h-[220px] w-full">
         {!hasData ? (
-          <div className="flex min-h-[220px] flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 bg-white/[0.02] p-8 text-center">
+          <div className="flex min-h-[220px] flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 bg-white/[0.02] p-6 sm:p-8 text-center">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/5 text-[#8E8B82]">
               <VaahanIcon name="activity" size={20} />
             </div>
@@ -152,7 +152,7 @@ export function ScanPulse({
             {/* SVG Visual Instrument */}
             <svg
               viewBox={`0 0 ${svgWidth} ${svgHeight}`}
-              className="w-full h-auto select-none"
+              className="w-full h-auto select-none block max-w-full"
               aria-hidden="true"
             >
               {/* Subtle Horizontal Temporal Rails */}

@@ -136,6 +136,7 @@ export async function resolvePublicQr(
   // 5. Non-Active States Handling
   if (publicState === "ACTIVATION_AVAILABLE") {
     return {
+      qrId: row.qr_id,
       publicId: row.public_id,
       visibleCode: row.visible_code,
       state: "ACTIVATION_AVAILABLE",
@@ -148,6 +149,7 @@ export async function resolvePublicQr(
 
   if (publicState === "REPLACED") {
     return {
+      qrId: row.qr_id,
       publicId: row.public_id,
       visibleCode: row.visible_code,
       state: "REPLACED",
@@ -158,6 +160,7 @@ export async function resolvePublicQr(
 
   if (publicState === "LOST_DAMAGED") {
     return {
+      qrId: row.qr_id,
       publicId: row.public_id,
       visibleCode: row.visible_code,
       state: "LOST_DAMAGED",
@@ -167,6 +170,7 @@ export async function resolvePublicQr(
 
   if (publicState === "BLOCKED") {
     return {
+      qrId: row.qr_id,
       publicId: row.public_id,
       visibleCode: row.visible_code,
       state: "BLOCKED",
@@ -179,6 +183,7 @@ export async function resolvePublicQr(
     // A sticker is only eligible if bound to an active vehicle
     if (!row.vehicle_id) {
       return {
+        qrId: row.qr_id,
         publicId: row.public_id,
         visibleCode: row.visible_code,
         state: "ACTIVATION_AVAILABLE",
@@ -213,6 +218,7 @@ export async function resolvePublicQr(
 
     if (!isEntitled) {
       return {
+        qrId: row.qr_id,
         publicId: row.public_id,
         visibleCode: row.visible_code,
         state: "BLOCKED",
@@ -269,6 +275,7 @@ export async function resolvePublicQr(
     assertSafePublicProjection(profile as unknown as Record<string, unknown>);
 
     return {
+      qrId: row.qr_id,
       publicId: row.public_id,
       visibleCode: row.visible_code,
       state: "ACTIVE",

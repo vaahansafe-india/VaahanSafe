@@ -31,6 +31,7 @@
     "@vaahansafe/validation": "*",
     "@vaahansafe/vehicles": "*",
     "class-variance-authority": "^0.7.1",
+    "jspdf": "^4.2.1",
     "lucide-react": "^1.47.0",
     "next": "^15.1.0",
     "qrcode": "^1.5.4",

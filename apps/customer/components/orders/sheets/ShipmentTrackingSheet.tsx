@@ -1,8 +1,10 @@
 "use client";
 
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, Badge, Button, Separator, ScrollArea } from "@vaahansafe/ui/components";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, Badge, Button, ScrollArea } from "@vaahansafe/ui/components";
+import { cn } from "@vaahansafe/ui/lib/utils";
 import { VaahanIcon } from "@vaahansafe/icons";
 import type { OrderListItem } from "@/lib/orders-types";
+import { formatFullIstTimestamp } from "@/lib/datetime";
 
 interface ShipmentTrackingSheetProps {
   order: OrderListItem | null;
@@ -21,6 +23,7 @@ export function ShipmentTrackingSheet({
   const trackingNumber = order.shipment?.trackingReference || "Pending Allocation";
   const isDelivered = order.fulfillmentStage === "DELIVERED";
   const isShipped = order.fulfillmentStage === "SHIPPED";
+  const isCancelled = order.fulfillmentStage === "CANCELLED";
 
   // Build shipment timeline events from real data
   const events: Array<{
@@ -77,49 +80,54 @@ export function ShipmentTrackingSheet({
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent side="right" className="w-full sm:max-w-lg p-0 flex flex-col bg-background font-sans">
-        {/* HEADER */}
-        <SheetHeader className="p-6 border-b border-border/80 bg-card/60">
-          <div className="flex items-center justify-between gap-3">
-            <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-[#cc785c]">
-              Logistics Tracking
+      <SheetContent
+        side="right"
+        className="w-full sm:max-w-lg h-full max-h-screen p-0 flex flex-col bg-background font-sans overflow-hidden"
+      >
+        {/* FIXED STICKY HEADER */}
+        <div className="sticky top-0 z-10 shrink-0 border-b border-border/80 bg-card/95 backdrop-blur-md p-4 sm:p-6 pr-14 sm:pr-16 space-y-1">
+          <SheetHeader className="text-left space-y-1 p-0">
+            <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.24em] text-[#cc785c]">
+              <span>Logistics Tracking</span>
             </div>
-            <Badge
-              variant={isDelivered ? "success" : isShipped ? "default" : "outline"}
-              className="font-mono text-[10px] uppercase tracking-wider"
-            >
-              {order.fulfillmentStage}
-            </Badge>
-          </div>
 
-          <SheetTitle className="font-mono text-lg font-bold tracking-tight text-foreground mt-1">
-            Fulfillment Journey
-          </SheetTitle>
+            <div className="flex flex-wrap items-center justify-between gap-2 pt-0.5">
+              <SheetTitle className="font-mono text-lg sm:text-xl font-bold tracking-tight text-foreground truncate max-w-[calc(100%-85px)]">
+                Fulfillment Journey
+              </SheetTitle>
+              <Badge
+                variant={isDelivered ? "success" : isCancelled ? "destructive" : isShipped ? "default" : "outline"}
+                className="font-mono text-[10px] uppercase tracking-wider shrink-0"
+              >
+                {order.fulfillmentStage}
+              </Badge>
+            </div>
 
-          <SheetDescription className="text-xs text-muted-foreground">
-            Order Ref: {order.orderNumber}
-          </SheetDescription>
-        </SheetHeader>
+            <SheetDescription className="text-xs text-muted-foreground truncate">
+              Order Ref: {order.orderNumber}
+            </SheetDescription>
+          </SheetHeader>
+        </div>
 
         {/* TRACKING SUMMARY CARD */}
-        <div className="p-6 pb-2">
+        <div className="p-4 sm:p-6 pb-2 shrink-0">
           <div className="rounded-2xl border border-border bg-card p-4 space-y-3">
-            <div className="flex items-center justify-between text-xs">
+            <div className="flex flex-wrap items-center justify-between gap-1 text-xs">
               <span className="font-mono text-muted-foreground">Courier Partner:</span>
               <span className="font-semibold text-foreground">{courierProvider}</span>
             </div>
 
-            <div className="flex items-center justify-between text-xs">
+            <div className="flex flex-wrap items-center justify-between gap-1 text-xs">
               <span className="font-mono text-muted-foreground">Tracking Number:</span>
               <span className="font-mono font-bold text-[#cc785c]">{trackingNumber}</span>
             </div>
 
             {order.shippingAddress && (
-              <div className="pt-2 border-t border-border/60 text-xs text-muted-foreground">
+              <div className="pt-2 border-t border-border/60 text-xs text-muted-foreground space-y-0.5">
                 <span className="font-mono text-[10px] uppercase text-muted-foreground/80 block">
                   Delivering to:
                 </span>
-                <span className="font-medium text-foreground">
+                <span className="font-medium text-foreground block break-words">
                   {order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.postalCode}
                 </span>
               </div>
@@ -128,45 +136,62 @@ export function ShipmentTrackingSheet({
         </div>
 
         {/* TIMELINE EVENTS */}
-        <ScrollArea className="flex-1 px-6 py-4">
-          <div className="space-y-6 pl-4 border-l-2 border-border/80 my-2">
+        <ScrollArea className="flex-1 px-4 sm:px-6 py-4">
+          <div className="space-y-0 py-1">
             {events.map((event, idx) => {
+              const isLast = idx === events.length - 1;
               const formattedEventDate = event.date
-                ? new Date(event.date).toLocaleString("en-IN", {
-                    day: "numeric",
-                    month: "short",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })
+                ? formatFullIstTimestamp(event.date, { compact: true })
                 : "Pending stage";
 
               return (
-                <div key={idx} className="relative pl-5">
-                  {/* Node marker on vertical line */}
-                  <div
-                    className={`absolute -left-[23px] top-1 size-3.5 rounded-full border-2 ${
-                      event.isCompleted
-                        ? "border-teal-600 bg-teal-600"
-                        : event.isCurrent
-                        ? "border-[#cc785c] bg-[#cc785c] ring-3 ring-[#cc785c]/20"
-                        : "border-border bg-background"
-                    }`}
-                  />
+                <div key={idx} className="flex items-start gap-3.5 group">
+                  {/* Marker + Track Column */}
+                  <div className="flex flex-col items-center self-stretch shrink-0">
+                    <div
+                      className={cn(
+                        "relative z-10 flex size-4 items-center justify-center rounded-full border-2 transition-all mt-0.5",
+                        event.isCompleted
+                          ? "border-teal-600 bg-teal-600 text-white shadow-xs"
+                          : event.isCurrent
+                          ? "border-[#cc785c] bg-[#cc785c] text-white ring-4 ring-[#cc785c]/20 shadow-xs"
+                          : "border-border bg-background"
+                      )}
+                    >
+                      {event.isCompleted ? (
+                        <VaahanIcon name="check" className="size-2.5 stroke-[3]" />
+                      ) : event.isCurrent ? (
+                        <div className="size-1 rounded-full bg-white animate-pulse" />
+                      ) : null}
+                    </div>
 
-                  <div className="space-y-0.5">
-                    <div className="flex flex-wrap items-center justify-between gap-1">
+                    {/* Connecting line between nodes - only rendered if NOT last */}
+                    {!isLast && (
+                      <div
+                        className={cn(
+                          "w-0.5 flex-1 min-h-[36px] my-1",
+                          event.isCompleted ? "bg-teal-600/70" : "bg-border/80"
+                        )}
+                      />
+                    )}
+                  </div>
+
+                  {/* Content Column */}
+                  <div className={cn("min-w-0 flex-1 space-y-1", !isLast ? "pb-6" : "pb-2")}>
+                    <div className="flex flex-wrap items-baseline justify-between gap-1">
                       <span
-                        className={`text-xs font-semibold ${
+                        className={cn(
+                          "text-xs font-semibold",
                           event.isCurrent
                             ? "text-[#cc785c]"
                             : event.isCompleted
                             ? "text-foreground"
                             : "text-muted-foreground"
-                        }`}
+                        )}
                       >
                         {event.title}
                       </span>
-                      <span className="font-mono text-[10px] text-muted-foreground">
+                      <span className="font-mono text-[10px] text-muted-foreground shrink-0">
                         {formattedEventDate}
                       </span>
                     </div>
@@ -177,8 +202,8 @@ export function ShipmentTrackingSheet({
 
                     {event.location && (
                       <div className="flex items-center gap-1 text-[11px] text-muted-foreground/80 pt-0.5">
-                        <VaahanIcon name="map-pin" className="size-3" />
-                        <span>{event.location}</span>
+                        <VaahanIcon name="map-pin" className="size-3 shrink-0" />
+                        <span className="truncate">{event.location}</span>
                       </div>
                     )}
                   </div>
@@ -189,7 +214,7 @@ export function ShipmentTrackingSheet({
         </ScrollArea>
 
         {/* FOOTER */}
-        <div className="p-4 border-t border-border/80 bg-card/60 flex justify-end">
+        <div className="sticky bottom-0 z-10 shrink-0 p-4 border-t border-border/80 bg-card/95 backdrop-blur-md flex justify-end">
           <Button variant="outline" size="sm" onClick={onClose} className="font-mono text-xs">
             Close Tracking
           </Button>

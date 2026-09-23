@@ -42,22 +42,22 @@ export function InvoiceDialog({ payment, isOpen, onClose }: InvoiceDialogProps) 
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-4xl p-0 overflow-hidden bg-card border border-border shadow-2xl font-sans rounded-2xl [&>button.absolute]:hidden">
+      <DialogContent className="fixed inset-auto inset-x-auto bottom-auto left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[94vw] sm:w-full sm:max-w-3xl md:max-w-4xl max-h-[92vh] flex flex-col p-0 overflow-hidden bg-card border border-border shadow-2xl font-sans rounded-2xl sm:rounded-2xl [&>button.absolute]:hidden">
         {/* EXTERNAL MODAL TOOLBAR (Hidden in Print) */}
-        <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 bg-card text-foreground border-b border-border print:hidden">
-          <div className="flex items-center gap-2">
-            <VaahanIcon name="receipt" size={16} className="text-[#cc785c]" />
-            <DialogTitle className="font-mono text-xs uppercase tracking-wider text-foreground">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 px-3.5 sm:px-6 py-3 bg-card text-foreground border-b border-border shrink-0 print:hidden">
+          <div className="flex items-center gap-2 min-w-0">
+            <VaahanIcon name="receipt" size={16} className="text-[#cc785c] shrink-0" />
+            <DialogTitle className="font-mono text-xs uppercase tracking-wider text-foreground truncate">
               Official Document / {documentData.documentNumber}
             </DialogTitle>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
             <Button
               type="button"
               size="sm"
               onClick={handlePrint}
-              className="bg-[#cc785c] hover:bg-[#a9583e] text-white font-mono text-xs gap-1.5 h-8 px-3 shadow-sm transition-colors"
+              className="bg-[#cc785c] hover:bg-[#a9583e] text-white font-mono text-xs gap-1.5 h-8 px-2.5 sm:px-3 shadow-xs transition-colors"
             >
               <VaahanIcon name="download" size={12} />
               <span>Print / Save PDF</span>
@@ -68,7 +68,7 @@ export function InvoiceDialog({ payment, isOpen, onClose }: InvoiceDialogProps) 
               variant="outline"
               size="sm"
               onClick={onClose}
-              className="border-border bg-background hover:bg-muted text-foreground font-mono text-xs h-8 px-3 transition-colors"
+              className="border-border bg-background hover:bg-muted text-foreground font-mono text-xs h-8 px-2.5 sm:px-3 transition-colors"
             >
               <VaahanIcon name="close" size={12} />
               <span>Close</span>
@@ -77,7 +77,7 @@ export function InvoiceDialog({ payment, isOpen, onClose }: InvoiceDialogProps) 
         </div>
 
         {/* DOCUMENT PREVIEW CONTAINER */}
-        <div className="max-h-[80vh] overflow-y-auto p-3 sm:p-6 bg-muted/40 dark:bg-black/40 print:p-0 print:max-h-none print:overflow-visible print:bg-white">
+        <div className="flex-1 overflow-y-auto p-2 sm:p-5 md:p-6 bg-muted/40 dark:bg-black/40 print:p-0 print:max-h-none print:overflow-visible print:bg-white">
           <FinancialDocument data={documentData} />
         </div>
       </DialogContent>

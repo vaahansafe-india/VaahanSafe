@@ -61,26 +61,26 @@ export function QrSignalRail({
   return (
     <div
       className={cn(
-        "rounded-2xl border border-border bg-card/80 dark:bg-card/40 p-4 sm:p-5 backdrop-blur-xs transition-colors",
+        "w-full max-w-full overflow-hidden rounded-2xl border border-border bg-card/80 dark:bg-card/40 p-4 sm:p-5 backdrop-blur-xs transition-colors",
         className
       )}
     >
-      <div className="flex items-center justify-between border-b border-border/60 pb-3">
-        <div className="flex items-center gap-2">
-          <div className="flex size-6 items-center justify-center rounded-md bg-[#cc785c]/10 text-[#cc785c]">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/60 pb-3">
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="flex size-6 shrink-0 items-center justify-center rounded-md bg-[#cc785c]/10 text-[#cc785c]">
             <VaahanIcon name="activity" size={14} aria-hidden="true" />
           </div>
-          <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+          <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] sm:tracking-[0.2em] text-muted-foreground truncate">
             IDENTITY SIGNAL LIFELINE
           </span>
         </div>
-        <span className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground">
+        <span className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground shrink-0">
           Real-time D1 Readiness
         </span>
       </div>
 
       {/* Responsive Horizontal / Wrapped Node Track */}
-      <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-5 sm:gap-2">
+      <div className="mt-4 grid grid-cols-2 gap-2.5 sm:gap-3 sm:grid-cols-5">
         {NODES.map((node, index) => {
           const state = states[node.key];
           const style = getNodeClasses(state);
@@ -95,6 +95,7 @@ export function QrSignalRail({
               className={cn(
                 "group relative flex flex-col justify-between rounded-xl border p-3 transition-all",
                 style.container,
+                index === 4 && "col-span-2 sm:col-span-1",
                 isInteractive && "cursor-pointer hover:border-[#cc785c]/40 hover:shadow-xs"
               )}
             >

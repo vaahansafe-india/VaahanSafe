@@ -43,9 +43,9 @@ export default async function DynamicQrResolverPage({ params }: QrResolverPagePr
     // 2. Non-blocking Telemetry Logging (Rule 39, 40, 41)
     try {
       const reqHeaders = await headers();
-      recordPublicScanEventSafely({
+      await recordPublicScanEventSafely({
         db,
-        qrId: publicId,
+        qrId: resolution.qrId || publicId,
         state: resolution.state,
         headers: reqHeaders,
       }).catch(() => {

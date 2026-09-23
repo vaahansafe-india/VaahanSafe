@@ -40,7 +40,7 @@ export function DashboardController({ initialData }: DashboardControllerProps) {
     vehicles,
     activeVehicle,
     qrSticker,
-    safetyProfile,
+    safetyProfile: initialSafetyProfile,
     scanSummary,
     qrLifeline,
     constellationEvents,
@@ -51,6 +51,13 @@ export function DashboardController({ initialData }: DashboardControllerProps) {
     unreadNotificationCount,
     filterState,
   } = initialData;
+
+  // Real-time reactive safety profile state
+  const [safetyProfile, setSafetyProfile] = React.useState(initialSafetyProfile);
+
+  React.useEffect(() => {
+    setSafetyProfile(initialSafetyProfile);
+  }, [initialSafetyProfile]);
 
   // Active sheets
   const [vehicleSheetOpen, setVehicleSheetOpen] = React.useState(false);
@@ -216,6 +223,12 @@ export function DashboardController({ initialData }: DashboardControllerProps) {
         onOpenChange={setSafetySheetOpen}
         vehicle={activeVehicle}
         profile={safetyProfile}
+        onSaved={(updated) => {
+          setSafetyProfile((prev) => ({
+            ...prev,
+            ...updated,
+          }));
+        }}
       />
 
       <EmergencyContactSheet

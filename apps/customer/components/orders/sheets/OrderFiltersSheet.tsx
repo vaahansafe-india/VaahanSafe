@@ -36,20 +36,23 @@ export function OrderFiltersSheet({
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent side="right" className="w-full sm:max-w-md p-0 flex flex-col bg-background font-sans">
-        <SheetHeader className="p-6 border-b border-border/80 bg-card/60">
-          <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-[#cc785c]">
-            Filter Parameters
-          </div>
-          <SheetTitle className="font-serif text-xl font-medium tracking-tight text-foreground">
-            Filter Orders &amp; Shipments
-          </SheetTitle>
-          <SheetDescription className="text-xs text-muted-foreground">
-            Narrow your hardware orders by fulfillment stage, payment, or vehicle.
-          </SheetDescription>
-        </SheetHeader>
+      <SheetContent side="right" className="w-full sm:max-w-md h-full max-h-screen p-0 flex flex-col bg-background font-sans overflow-hidden">
+        {/* FIXED STICKY HEADER */}
+        <div className="sticky top-0 z-10 shrink-0 border-b border-border/80 bg-card/95 backdrop-blur-md p-4 sm:p-6 pr-14 sm:pr-16 space-y-1">
+          <SheetHeader className="text-left space-y-1 p-0">
+            <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-[#cc785c]">
+              Filter Parameters
+            </div>
+            <SheetTitle className="font-serif text-xl font-medium tracking-tight text-foreground truncate">
+              Filter Orders &amp; Shipments
+            </SheetTitle>
+            <SheetDescription className="text-xs text-muted-foreground">
+              Narrow your hardware orders by fulfillment stage, payment, or vehicle.
+            </SheetDescription>
+          </SheetHeader>
+        </div>
 
-        <div className="flex-1 p-6 space-y-5">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5">
           {/* Order Status */}
           <div className="space-y-2">
             <label className="font-mono text-xs font-semibold text-foreground uppercase tracking-wider block">
@@ -120,7 +123,7 @@ export function OrderFiltersSheet({
         </div>
 
         {/* FOOTER */}
-        <div className="p-4 border-t border-border/80 bg-card/60 flex items-center justify-between gap-3">
+        <div className="sticky bottom-0 z-10 shrink-0 p-4 border-t border-border/80 bg-card/95 backdrop-blur-md flex items-center justify-between gap-3">
           <Button variant="ghost" size="sm" onClick={handleReset} className="font-mono text-xs text-muted-foreground">
             Reset All
           </Button>

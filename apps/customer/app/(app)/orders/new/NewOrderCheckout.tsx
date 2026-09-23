@@ -8,12 +8,21 @@ import {
   ShieldCheck,
   Truck,
   CheckCircle2,
-  Lock,
   Sparkles,
   MapPin,
   AlertCircle,
   Car,
+  LocateFixed,
+  Navigation,
+  Loader2,
 } from "lucide-react";
+import { SearchableCombobox } from "@/components/ui/searchable-combobox";
+import {
+  getIndianStates,
+  getDistrictsForState,
+  resolvePincodeData,
+  reverseGeocodeLocation,
+} from "@/lib/india-states-districts";
 import { createOrderAndPaymentSession } from "./actions";
 
 declare global {
@@ -85,6 +94,134 @@ export function NewOrderCheckout({
   const [city, setCity] = React.useState("");
   const [state, setState] = React.useState("");
   const [postalCode, setPostalCode] = React.useState("");
+
+  // Location detection & verification states
+  const [isDetectingLocation, setIsDetectingLocation] = React.useState(false);
+  const [isResolvingPin, setIsResolvingPin] = React.useState(false);
+  const [detectionStatus, setDetectionStatus] = React.useState<{
+    type: "success" | "error" | "info";
+    message: string;
+  } | null>(null);
+
+  const allStates = React.useMemo(() => getIndianStates(), []);
+  const districtOptions = React.useMemo(() => getDistrictsForState(state), [state]);
+
+  const handleStateChange = (newState: string) => {
+    setState(newState);
+    // If current city is not in the new state's districts, reset it
+    const newDistricts = getDistrictsForState(newState);
+    if (city && !newDistricts.some((d) => d.toLowerCase() === city.toLowerCase())) {
+      setCity("");
+    }
+  };
+
+  const handlePostalCodeChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const clean = e.target.value.replace(/\D/g, "").slice(0, 6);
+    setPostalCode(clean);
+
+    if (clean.length === 6) {
+      setIsResolvingPin(true);
+      try {
+        const res = await resolvePincodeData(clean);
+        if (res) {
+          if (res.state) {
+            setState(res.state);
+          }
+          if (res.district) {
+            setCity(res.district);
+          }
+          if (res.landmark && !landmark) {
+            setLandmark(res.landmark);
+          }
+          setDetectionStatus({
+            type: "success",
+            message: `PIN ${clean} verified: ${res.district ? `${res.district}, ` : ""}${res.state}${res.landmark ? ` • ${res.landmark}` : ""}`,
+          });
+        }
+      } catch {
+        // network/timeout error
+      } finally {
+        setIsResolvingPin(false);
+      }
+    }
+  };
+
+  const handleDetectLocation = () => {
+    if (typeof window === "undefined" || !navigator.geolocation) {
+      setDetectionStatus({
+        type: "error",
+        message: "Geolocation is not supported by your browser. Please enter your address manually.",
+      });
+      return;
+    }
+
+    setIsDetectingLocation(true);
+    setDetectionStatus({
+      type: "info",
+      message: "Requesting location access from your device...",
+    });
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const { latitude, longitude } = position.coords;
+          const res = await reverseGeocodeLocation(latitude, longitude);
+
+          if (res && (res.state || res.city || res.pincode)) {
+            if (res.state) setState(res.state);
+            if (res.district || res.city) setCity(res.district || res.city);
+            if (res.pincode) setPostalCode(res.pincode);
+            if (res.locality && !line2) setLine2(res.locality);
+            if (res.road && !line1) setLine1(res.road);
+            if (res.landmark && !landmark) setLandmark(res.landmark);
+
+            const locationParts = [
+              res.district || res.city || "",
+              res.state,
+              res.pincode,
+            ].filter(Boolean).join(", ");
+
+            const landmarkText = res.landmark ? ` • ${res.landmark}` : "";
+
+            setDetectionStatus({
+              type: "success",
+              message: `Location detected: ${locationParts}${landmarkText}`.trim(),
+            });
+          } else {
+            setDetectionStatus({
+              type: "info",
+              message: "Coordinates detected. Please select your State and District from the dropdowns below.",
+            });
+          }
+        } catch {
+          setDetectionStatus({
+            type: "error",
+            message: "Failed to reverse geocode location. Please select your State and District manually.",
+          });
+        } finally {
+          setIsDetectingLocation(false);
+        }
+      },
+      (error) => {
+        setIsDetectingLocation(false);
+        if (error.code === error.PERMISSION_DENIED) {
+          setDetectionStatus({
+            type: "error",
+            message: "Location permission was denied. Please select your State and District manually.",
+          });
+        } else {
+          setDetectionStatus({
+            type: "error",
+            message: "Unable to detect GPS position. Please select your State and District manually.",
+          });
+        }
+      },
+      {
+        timeout: 10000,
+        enableHighAccuracy: true,
+      }
+    );
+  };
 
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
@@ -204,24 +341,16 @@ export function NewOrderCheckout({
         </Link>
 
         {/* Page Header */}
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-[#cc785c]">
-              FINAL CHECKOUT &bull; STEP 02
-            </div>
-            <h1 className="mt-1 font-serif text-3xl font-medium tracking-tight text-foreground sm:text-4xl">
-              Delivery & Payment
-            </h1>
-            <p className="mt-1.5 max-w-2xl text-sm text-muted-foreground">
-              Provide your delivery address to dispatch your genuine UV-laminated QR kit. Payments are securely processed via Razorpay.
-            </p>
+        <div>
+          <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-[#cc785c]">
+            FINAL CHECKOUT &bull; STEP 02
           </div>
-
-          <div className="flex items-center gap-2 rounded-xl border border-border bg-card px-3.5 py-2 font-mono text-xs">
-            <Lock className="size-3.5 text-emerald-500" />
-            <span className="text-muted-foreground">Secure Gateway:</span>
-            <span className="font-bold text-foreground">Razorpay 256-Bit SSL</span>
-          </div>
+          <h1 className="mt-1 font-serif text-3xl font-medium tracking-tight text-foreground sm:text-4xl">
+            Delivery & Payment
+          </h1>
+          <p className="mt-1.5 max-w-2xl text-sm text-muted-foreground">
+            Provide your delivery address to dispatch your genuine UV-laminated QR kit. Payments are securely processed via Razorpay.
+          </p>
         </div>
 
         {/* Error Notification */}
@@ -305,6 +434,71 @@ export function NewOrderCheckout({
                 </div>
               ) : (
                 <div className="mt-5 space-y-4">
+                  {/* Location Auto-Detection Bar */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-border/80 bg-muted/20 p-3 sm:p-3.5">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-[#cc785c]/10 text-[#cc785c]">
+                        <Navigation className="size-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-xs font-bold text-foreground">
+                          Location Detection &amp; Auto-Fill
+                        </div>
+                        <div className="text-[11px] text-muted-foreground">
+                          Auto-detect via GPS or enter your 6-digit PIN code
+                        </div>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={handleDetectLocation}
+                      disabled={isDetectingLocation}
+                      className="inline-flex h-9 sm:h-10 items-center justify-center gap-2 rounded-xl border border-[#cc785c]/40 bg-[#cc785c]/10 px-3.5 sm:px-4 font-mono text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-[#cc785c] hover:bg-[#cc785c] hover:text-white transition-all disabled:opacity-50 cursor-pointer shrink-0 shadow-2xs"
+                    >
+                      {isDetectingLocation ? (
+                        <>
+                          <Loader2 className="size-3.5 animate-spin shrink-0" />
+                          <span>Detecting GPS...</span>
+                        </>
+                      ) : (
+                        <>
+                          <LocateFixed className="size-3.5 shrink-0" />
+                          <span>Use Current Location</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+
+                  {/* Feedback Status Pill */}
+                  {detectionStatus && (
+                    <div
+                      className={`flex items-center justify-between gap-2 rounded-xl px-3.5 py-2 text-xs font-medium ${
+                        detectionStatus.type === "success"
+                          ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20"
+                          : detectionStatus.type === "error"
+                          ? "bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20"
+                          : "bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/20"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        {detectionStatus.type === "success" ? (
+                          <CheckCircle2 className="size-3.5 shrink-0" />
+                        ) : (
+                          <AlertCircle className="size-3.5 shrink-0" />
+                        )}
+                        <span className="truncate">{detectionStatus.message}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setDetectionStatus(null)}
+                        className="text-xs opacity-70 hover:opacity-100 cursor-pointer shrink-0"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  )}
+
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
                       <label className="block font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
@@ -380,45 +574,56 @@ export function NewOrderCheckout({
 
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                     <div>
-                      <label className="block font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
-                        City *
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={city}
-                        onChange={(e) => setCity(e.target.value)}
-                        placeholder="e.g. Mumbai"
-                        className="mt-1.5 w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-xs text-foreground placeholder:text-muted-foreground/60 focus:border-[#cc785c] focus:outline-none focus:ring-1 focus:ring-[#cc785c]"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+                      <label className="block font-mono text-[11px] uppercase tracking-wider text-muted-foreground mb-1.5">
                         State *
                       </label>
-                      <input
-                        type="text"
-                        required
+                      <SearchableCombobox
+                        options={allStates}
                         value={state}
-                        onChange={(e) => setState(e.target.value)}
-                        placeholder="e.g. Maharashtra"
-                        className="mt-1.5 w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-xs text-foreground placeholder:text-muted-foreground/60 focus:border-[#cc785c] focus:outline-none focus:ring-1 focus:ring-[#cc785c]"
+                        onChange={handleStateChange}
+                        placeholder="Select state..."
+                        searchPlaceholder="Search 28 states & 8 UTs..."
+                        required
                       />
                     </div>
 
                     <div>
-                      <label className="block font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
-                        PIN Code *
+                      <label className="block font-mono text-[11px] uppercase tracking-wider text-muted-foreground mb-1.5">
+                        District / City *
                       </label>
+                      <SearchableCombobox
+                        options={districtOptions}
+                        value={city}
+                        onChange={setCity}
+                        placeholder={state ? "Select district..." : "Select State first..."}
+                        searchPlaceholder={
+                          state ? `Search districts in ${state}...` : "Type city or select state..."
+                        }
+                        allowCustom
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="block font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+                          PIN Code *
+                        </label>
+                        {isResolvingPin && (
+                          <span className="flex items-center gap-1 font-mono text-[10px] text-[#cc785c]">
+                            <Loader2 className="size-2.5 animate-spin" />
+                            <span>Auto-lookup...</span>
+                          </span>
+                        )}
+                      </div>
                       <input
                         type="text"
                         required
                         maxLength={6}
                         value={postalCode}
-                        onChange={(e) => setPostalCode(e.target.value.replace(/\D/g, ""))}
+                        onChange={handlePostalCodeChange}
                         placeholder="6-digit PIN"
-                        className="mt-1.5 w-full rounded-xl border border-border bg-background px-3.5 py-2.5 font-mono text-xs text-foreground placeholder:text-muted-foreground/60 focus:border-[#cc785c] focus:outline-none focus:ring-1 focus:ring-[#cc785c]"
+                        className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 font-mono text-xs text-foreground placeholder:text-muted-foreground/60 focus:border-[#cc785c] focus:outline-none focus:ring-1 focus:ring-[#cc785c]"
                       />
                     </div>
                   </div>

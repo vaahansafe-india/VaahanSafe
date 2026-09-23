@@ -133,180 +133,165 @@ export async function getVehicleRegistry(
     console.warn("[VehicleService] Failed to query user vehicles:", err);
   }
 
-  const items: VehicleRegistryItem[] = [];
-  let totalAttentionCount = 0;
+  const items: VehicleRegistryItem[] = await Promise.all(
+    vehicleRows.map(async (v) => {
+      // 2. Parallel queries for QR assignment and emergency profile
+      const [qrRowResult, profileRowResult] = await Promise.allSettled([
+        db.queryFirst<
+          DbQrRow & {
+            replacement_id?: string | null;
+            replacement_status?: string | null;
+            replacement_reason?: string | null;
+          }
+        >(
+          `SELECT s.id, s.public_id, s.visible_code, s.batch_id, s.status, s.activated_at, a.assigned_at,
+                  r.id as replacement_id, r.status as replacement_status, r.reason as replacement_reason
+           FROM qr_stickers s
+           INNER JOIN qr_assignments a ON s.id = a.qr_id
+           LEFT JOIN replacement_requests r ON (r.old_qr_sticker_id = s.id OR r.vehicle_id = a.vehicle_id)
+             AND r.status NOT IN ('REJECTED', 'COMPLETED', 'CANCELLED')
+           WHERE a.vehicle_id = ? AND a.ended_at IS NULL
+           LIMIT 1`,
+          [v.id]
+        ),
+        db.queryFirst<DbProfileRow>(
+          `SELECT id, vehicle_id, display_name, blood_group, medical_notes, public_vehicle_details,
+                  show_owner_name, show_blood_group, show_medical_notes, show_vehicle_details, status, created_at, updated_at
+           FROM emergency_profiles
+           WHERE vehicle_id = ? AND status = 'ACTIVE'
+           LIMIT 1`,
+          [v.id]
+        ),
+      ]);
 
-  for (const v of vehicleRows) {
-    // 2. Query active QR assignment & replacement state
-    let qrRow: (DbQrRow & {
-      replacement_id?: string | null;
-      replacement_status?: string | null;
-      replacement_reason?: string | null;
-    }) | null = null;
-    try {
-      qrRow = await db.queryFirst<
-        DbQrRow & {
-          replacement_id?: string | null;
-          replacement_status?: string | null;
-          replacement_reason?: string | null;
+      const qrRow = qrRowResult.status === "fulfilled" ? qrRowResult.value : null;
+      const profileRow = profileRowResult.status === "fulfilled" ? profileRowResult.value : null;
+
+      // 3. Query emergency contacts if profile exists
+      let contactRows: DbContactRow[] = [];
+      if (profileRow) {
+        try {
+          contactRows = await db.query<DbContactRow>(
+            `SELECT id, emergency_profile_id, name, relationship_label, phone, priority, is_enabled, allow_call, allow_message, created_at
+             FROM emergency_contacts
+             WHERE emergency_profile_id = ? AND is_enabled = 1
+             ORDER BY priority ASC`,
+            [profileRow.id]
+          );
+        } catch (err) {
+          console.warn(`[VehicleService] Contacts query failed for profile ${profileRow.id}:`, err);
         }
-      >(
-        `SELECT s.id, s.public_id, s.visible_code, s.batch_id, s.status, s.activated_at, a.assigned_at,
-                r.id as replacement_id, r.status as replacement_status, r.reason as replacement_reason
-         FROM qr_stickers s
-         INNER JOIN qr_assignments a ON s.id = a.qr_id
-         LEFT JOIN replacement_requests r ON (r.old_qr_sticker_id = s.id OR r.vehicle_id = a.vehicle_id)
-           AND r.status NOT IN ('REJECTED', 'COMPLETED', 'CANCELLED')
-         WHERE a.vehicle_id = ? AND a.ended_at IS NULL
-         LIMIT 1`,
-        [v.id]
-      );
-    } catch (err) {
-      console.warn(`[VehicleService] QR query failed for vehicle ${v.id}:`, err);
-    }
-
-    // 3. Query emergency profile
-    let profileRow: DbProfileRow | null = null;
-    try {
-      profileRow = await db.queryFirst<DbProfileRow>(
-        `SELECT id, vehicle_id, display_name, blood_group, medical_notes, public_vehicle_details,
-                show_owner_name, show_blood_group, show_medical_notes, show_vehicle_details, status, created_at, updated_at
-         FROM emergency_profiles
-         WHERE vehicle_id = ? AND status = 'ACTIVE'
-         LIMIT 1`,
-        [v.id]
-      );
-    } catch (err) {
-      console.warn(`[VehicleService] Profile query failed for vehicle ${v.id}:`, err);
-    }
-
-    // 4. Query emergency contacts
-    let contactRows: DbContactRow[] = [];
-    if (profileRow) {
-      try {
-        contactRows = await db.query<DbContactRow>(
-          `SELECT id, emergency_profile_id, name, relationship_label, phone, priority, is_enabled, allow_call, allow_message, created_at
-           FROM emergency_contacts
-           WHERE emergency_profile_id = ? AND is_enabled = 1
-           ORDER BY priority ASC`,
-          [profileRow.id]
-        );
-      } catch (err) {
-        console.warn(`[VehicleService] Contacts query failed for profile ${profileRow.id}:`, err);
       }
-    }
 
-    // 5. Derive deterministic readiness & attention items
-    const attentionItems: VehicleAttentionItem[] = [];
+      // 4. Derive deterministic readiness & attention items
+      const attentionItems: VehicleAttentionItem[] = [];
 
-    let qrNode: ReadinessNodeState = "ready";
-    let safetyNode: ReadinessNodeState = "ready";
-    let contactNode: ReadinessNodeState = "ready";
+      let qrNode: ReadinessNodeState = "ready";
+      let safetyNode: ReadinessNodeState = "ready";
+      let contactNode: ReadinessNodeState = "ready";
 
-    if (!qrRow) {
-      qrNode = "not_configured";
-      attentionItems.push({
-        id: `att-qr-${v.id}`,
-        severity: "AMBER",
-        title: "QR Sticker Not Connected",
-        description: "Link a physical VaahanSafe safety sticker or activate a retail pack.",
-        actionLabel: "Connect QR",
-        actionTarget: "qr",
-      });
-    } else if (qrRow.status !== "ACTIVATED" && qrRow.status !== "ACTIVE") {
-      qrNode = "attention";
-      attentionItems.push({
-        id: `att-qr-stat-${v.id}`,
-        severity: "AMBER",
-        title: "QR Activation Pending",
-        description: `Sticker status is ${qrRow.status}. Complete activation to verify emergency relay.`,
-        actionLabel: "Verify QR",
-        actionTarget: "qr",
-      });
-    }
+      if (!qrRow) {
+        qrNode = "not_configured";
+        attentionItems.push({
+          id: `att-qr-${v.id}`,
+          severity: "AMBER",
+          title: "QR Sticker Not Connected",
+          description: "Link a physical VaahanSafe safety sticker or activate a retail pack.",
+          actionLabel: "Connect QR",
+          actionTarget: "qr",
+        });
+      } else if (qrRow.status !== "ACTIVATED" && qrRow.status !== "ACTIVE") {
+        qrNode = "attention";
+        attentionItems.push({
+          id: `att-qr-stat-${v.id}`,
+          severity: "AMBER",
+          title: "QR Activation Pending",
+          description: `Sticker status is ${qrRow.status}. Complete activation to verify emergency relay.`,
+          actionLabel: "Verify QR",
+          actionTarget: "qr",
+        });
+      }
 
-    if (!profileRow) {
-      safetyNode = "not_configured";
-      attentionItems.push({
-        id: `att-prof-${v.id}`,
-        severity: "AMBER",
-        title: "Safety View Incomplete",
-        description: "Configure what first responders and finders see upon scanning.",
-        actionLabel: "Configure Safety",
-        actionTarget: "safety",
-      });
-    }
+      if (!profileRow) {
+        safetyNode = "not_configured";
+        attentionItems.push({
+          id: `att-prof-${v.id}`,
+          severity: "AMBER",
+          title: "Safety View Incomplete",
+          description: "Configure what first responders and finders see upon scanning.",
+          actionLabel: "Configure Safety",
+          actionTarget: "safety",
+        });
+      }
 
-    if (contactRows.length === 0) {
-      contactNode = "attention";
-      attentionItems.push({
-        id: `att-cnt-${v.id}`,
-        severity: "RED",
-        title: "Emergency Contact Missing",
-        description: "Add at least one priority contact for instant Golden Hour SMS alerts.",
-        actionLabel: "Add Contact",
-        actionTarget: "contact",
-      });
-    }
+      if (contactRows.length === 0) {
+        contactNode = "attention";
+        attentionItems.push({
+          id: `att-cnt-${v.id}`,
+          severity: "RED",
+          title: "Emergency Contact Missing",
+          description: "Add at least one priority contact for instant Golden Hour SMS alerts.",
+          actionLabel: "Add Contact",
+          actionTarget: "contact",
+        });
+      }
 
-    if (attentionItems.length > 0) {
-      totalAttentionCount += attentionItems.length;
-    }
+      const isReady = attentionItems.length === 0;
+      const maskedReg = maskVehicleRegistration(v.registration_number, { mode: "PARTIAL" });
+      const identityCode = qrRow ? `VS-${qrRow.public_id}` : `VS-REG-${v.id.slice(-6).toUpperCase()}`;
 
-    const isReady = attentionItems.length === 0;
+      return {
+        id: v.id,
+        registrationNumber: v.registration_number,
+        registrationNumberNormalized: v.registration_number_normalized,
+        registrationNumberMasked: maskedReg,
+        make: v.make,
+        model: v.model,
+        variant: v.variant || undefined,
+        year: v.year || undefined,
+        color: v.color || undefined,
+        type: (v.vehicle_type as VehicleCategory) || "CAR",
+        status: v.status,
+        createdAt: v.created_at,
+        identityId: identityCode,
+        qr: {
+          hasQr: Boolean(qrRow),
+          publicId: qrRow?.public_id,
+          status: (qrRow?.status as QrStatus) || "UNLINKED",
+          assignedAt: qrRow?.assigned_at || undefined,
+          replacementPending: Boolean(qrRow?.replacement_id),
+          replacementStatus: qrRow?.replacement_status || undefined,
+          replacementReason: qrRow?.replacement_reason || undefined,
+        },
+        safety: {
+          isConfigured: Boolean(profileRow),
+          status: profileRow ? "CONFIGURED" : "NEEDS_SETUP",
+          showOwnerName: profileRow ? profileRow.show_owner_name === 1 : true,
+          showBloodGroup: profileRow ? profileRow.show_blood_group === 1 : true,
+          showMedicalNotes: profileRow ? profileRow.show_medical_notes === 1 : false,
+          showVehicleDetails: profileRow ? profileRow.show_vehicle_details === 1 : true,
+          bloodGroup: profileRow?.blood_group,
+          medicalNotes: profileRow?.medical_notes,
+        },
+        contacts: {
+          count: contactRows.length,
+          primaryName: contactRows[0]?.name,
+          primaryRelationship: contactRows[0]?.relationship_label,
+        },
+        readiness: {
+          isReady,
+          vehicleNode: "ready",
+          identityNode: "ready",
+          qrNode,
+          safetyNode,
+          contactNode,
+        },
+        attention: attentionItems,
+      };
+    })
+  );
 
-    const maskedReg = maskVehicleRegistration(v.registration_number, { mode: "PARTIAL" });
-    const identityCode = qrRow ? `VS-${qrRow.public_id}` : `VS-REG-${v.id.slice(-6).toUpperCase()}`;
-
-    items.push({
-      id: v.id,
-      registrationNumber: v.registration_number,
-      registrationNumberNormalized: v.registration_number_normalized,
-      registrationNumberMasked: maskedReg,
-      make: v.make,
-      model: v.model,
-      variant: v.variant || undefined,
-      year: v.year || undefined,
-      color: v.color || undefined,
-      type: (v.vehicle_type as VehicleCategory) || "CAR",
-      status: v.status,
-      createdAt: v.created_at,
-      identityId: identityCode,
-      qr: {
-        hasQr: Boolean(qrRow),
-        publicId: qrRow?.public_id,
-        status: (qrRow?.status as QrStatus) || "UNLINKED",
-        assignedAt: qrRow?.assigned_at || undefined,
-        replacementPending: Boolean(qrRow?.replacement_id),
-        replacementStatus: qrRow?.replacement_status || undefined,
-        replacementReason: qrRow?.replacement_reason || undefined,
-      },
-      safety: {
-        isConfigured: Boolean(profileRow),
-        status: profileRow ? "CONFIGURED" : "NEEDS_SETUP",
-        showOwnerName: profileRow ? profileRow.show_owner_name === 1 : true,
-        showBloodGroup: profileRow ? profileRow.show_blood_group === 1 : true,
-        showMedicalNotes: profileRow ? profileRow.show_medical_notes === 1 : false,
-        showVehicleDetails: profileRow ? profileRow.show_vehicle_details === 1 : true,
-        bloodGroup: profileRow?.blood_group,
-        medicalNotes: profileRow?.medical_notes,
-      },
-      contacts: {
-        count: contactRows.length,
-        primaryName: contactRows[0]?.name,
-        primaryRelationship: contactRows[0]?.relationship_label,
-      },
-      readiness: {
-        isReady,
-        vehicleNode: "ready",
-        identityNode: "ready",
-        qrNode,
-        safetyNode,
-        contactNode,
-      },
-      attention: attentionItems,
-    });
-  }
+  const totalAttentionCount = items.reduce((acc, item) => acc + item.attention.length, 0);
 
   // 6. Apply filter parameters
   let filtered = items;

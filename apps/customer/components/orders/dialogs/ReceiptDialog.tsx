@@ -25,7 +25,7 @@ export function ReceiptDialog({ order, isOpen, onClose }: ReceiptDialogProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-md p-0 overflow-hidden bg-card font-sans border-border rounded-2xl shadow-xl">
+      <DialogContent className="fixed inset-auto inset-x-auto bottom-auto left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[92vw] sm:w-full max-w-md p-0 overflow-hidden bg-card font-sans border-border rounded-2xl shadow-xl max-h-[90vh] overflow-y-auto">
         {/* RECEIPT HEADER */}
         <div className="bg-card p-6 text-foreground text-center space-y-2 border-b border-border">
           <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-[#cc785c]">

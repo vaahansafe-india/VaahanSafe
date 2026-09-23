@@ -3,6 +3,7 @@
 import * as React from "react";
 import { VaahanIcon } from "@vaahansafe/icons";
 import type { FinancialDocumentData } from "@/lib/payments-types";
+import { parseUtcDate } from "@/lib/datetime";
 
 interface FinancialDocumentProps {
   data: FinancialDocumentData;
@@ -10,50 +11,54 @@ interface FinancialDocumentProps {
 }
 
 export function FinancialDocument({ data, className = "" }: FinancialDocumentProps) {
-  const formattedIssueDate = new Intl.DateTimeFormat("en-IN", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  }).format(new Date(data.issuedAt));
-
-  const formattedPaidDate = data.paidAt
+  const formattedIssueDate = data.issuedAt
     ? new Intl.DateTimeFormat("en-IN", {
+        timeZone: "Asia/Kolkata",
         day: "numeric",
         month: "long",
         year: "numeric",
-      }).format(new Date(data.paidAt))
+      }).format(parseUtcDate(data.issuedAt) || new Date(data.issuedAt))
+    : "—";
+
+  const formattedPaidDate = data.paidAt
+    ? new Intl.DateTimeFormat("en-IN", {
+        timeZone: "Asia/Kolkata",
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      }).format(parseUtcDate(data.paidAt) || new Date(data.paidAt))
     : null;
 
   return (
     <div
-      className={`financial-document bg-[#FAF9F5] dark:bg-[#151413] text-[#141413] dark:text-[#f4f4f5] p-6 sm:p-10 border border-[#E6DFD8] dark:border-[#2b2824] rounded-2xl shadow-sm relative overflow-hidden font-sans print:bg-white print:text-black print:border-neutral-300 print:shadow-none print:p-6 print:rounded-none transition-colors ${className}`}
+      className={`financial-document bg-[#FAF9F5] dark:bg-[#151413] text-[#141413] dark:text-[#f4f4f5] p-4 sm:p-8 md:p-10 border border-[#E6DFD8] dark:border-[#2b2824] rounded-2xl shadow-sm relative overflow-hidden font-sans print:bg-white print:text-black print:border-neutral-300 print:shadow-none print:p-6 print:rounded-none transition-colors ${className}`}
     >
       {/* Registration Marks / Geometric Precision Rails */}
       <div className="pointer-events-none absolute inset-0 opacity-25 dark:opacity-40 print:hidden">
-        <div className="absolute left-4 sm:left-6 top-4 sm:top-6 h-3 w-3 border-l border-t border-[#cc785c]" />
-        <div className="absolute right-4 sm:right-6 top-4 sm:top-6 h-3 w-3 border-r border-t border-[#cc785c]" />
-        <div className="absolute left-4 sm:left-6 bottom-4 sm:bottom-6 h-3 w-3 border-l border-b border-[#cc785c]" />
-        <div className="absolute right-4 sm:right-6 bottom-4 sm:bottom-6 h-3 w-3 border-r border-b border-[#cc785c]" />
+        <div className="absolute left-3 sm:left-6 top-3 sm:top-6 h-3 w-3 border-l border-t border-[#cc785c]" />
+        <div className="absolute right-3 sm:right-6 top-3 sm:top-6 h-3 w-3 border-r border-t border-[#cc785c]" />
+        <div className="absolute left-3 sm:left-6 bottom-3 sm:bottom-6 h-3 w-3 border-l border-b border-[#cc785c]" />
+        <div className="absolute right-3 sm:right-6 bottom-3 sm:bottom-6 h-3 w-3 border-r border-b border-[#cc785c]" />
       </div>
 
       {/* 1. DOCUMENT TOP HEADER */}
-      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-[#E6DFD8] dark:border-[#2b2824] pb-6 print:border-neutral-300">
-        <div>
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 border-b border-[#E6DFD8] dark:border-[#2b2824] pb-6 print:border-neutral-300">
+        <div className="space-y-1">
           <div className="flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-[#cc785c]" />
             <span className="font-mono text-xs uppercase tracking-[0.24em] font-bold text-[#cc785c]">
               VaahanSafe
             </span>
           </div>
-          <h2 className="mt-1 font-serif text-2xl sm:text-3xl font-medium tracking-tight text-[#141413] dark:text-[#f4f4f5] print:text-black">
+          <h2 className="font-serif text-2xl sm:text-3xl font-medium tracking-tight text-[#141413] dark:text-[#f4f4f5] print:text-black">
             Vehicle Safety Identity Platform
           </h2>
-          <p className="text-xs text-[#6C6A64] dark:text-[#a1a1aa] mt-0.5 print:text-neutral-600">
+          <p className="text-xs text-[#6C6A64] dark:text-[#a1a1aa] print:text-neutral-600">
             Cloudflare D1 Verified Authoritative Commercial Ledger
           </p>
         </div>
 
-        <div className="text-right font-mono">
+        <div className="text-left sm:text-right font-mono pt-3 sm:pt-0 border-t sm:border-t-0 border-[#E6DFD8]/60 dark:border-[#2b2824]/60">
           <div className="text-xs uppercase tracking-[0.2em] text-[#6C6A64] dark:text-[#a1a1aa] print:text-neutral-600">
             {data.documentType === "INVOICE" ? "COMMERCIAL INVOICE" : "PAYMENT RECEIPT"}
           </div>
@@ -68,22 +73,22 @@ export function FinancialDocument({ data, className = "" }: FinancialDocumentPro
       </div>
 
       {/* 2. DOCUMENT METADATA GRID */}
-      <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4 py-4 border-b border-[#E6DFD8] dark:border-[#2b2824] text-xs font-mono print:border-neutral-300">
-        <div>
+      <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 py-4 border-b border-[#E6DFD8] dark:border-[#2b2824] text-xs font-mono print:border-neutral-300">
+        <div className="min-w-0">
           <span className="text-[10px] uppercase text-[#6C6A64] dark:text-[#a1a1aa] block print:text-neutral-600">Date Issued</span>
-          <span className="font-semibold text-[#141413] dark:text-[#f4f4f5] print:text-black">{formattedIssueDate}</span>
+          <span className="font-semibold text-[#141413] dark:text-[#f4f4f5] print:text-black truncate block">{formattedIssueDate}</span>
         </div>
-        <div>
+        <div className="min-w-0">
           <span className="text-[10px] uppercase text-[#6C6A64] dark:text-[#a1a1aa] block print:text-neutral-600">Payment Date</span>
-          <span className="font-semibold text-[#141413] dark:text-[#f4f4f5] print:text-black">{formattedPaidDate || "Pending"}</span>
+          <span className="font-semibold text-[#141413] dark:text-[#f4f4f5] print:text-black truncate block">{formattedPaidDate || "Pending"}</span>
         </div>
-        <div>
+        <div className="min-w-0">
           <span className="text-[10px] uppercase text-[#6C6A64] dark:text-[#a1a1aa] block print:text-neutral-600">Order Ref</span>
-          <span className="font-semibold text-[#141413] dark:text-[#f4f4f5] print:text-black">{data.orderNumber}</span>
+          <span className="font-semibold text-[#141413] dark:text-[#f4f4f5] print:text-black truncate block" title={data.orderNumber}>{data.orderNumber}</span>
         </div>
-        <div>
+        <div className="min-w-0">
           <span className="text-[10px] uppercase text-[#6C6A64] dark:text-[#a1a1aa] block print:text-neutral-600">Gateway Provider</span>
-          <span className="font-semibold text-[#141413] dark:text-[#f4f4f5] print:text-black">
+          <span className="font-semibold text-[#141413] dark:text-[#f4f4f5] print:text-black truncate block">
             {data.gatewayReference
               ? data.gatewayReference.startsWith("pay_") || data.gatewayReference.startsWith("order_")
                 ? `Razorpay (${data.gatewayReference.slice(-6)})`
@@ -125,19 +130,19 @@ export function FinancialDocument({ data, className = "" }: FinancialDocumentPro
             Vehicle &amp; Safety Service Connection
           </div>
           {data.vehicle ? (
-            <div className="space-y-1 rounded-xl border border-[#E6DFD8] dark:border-[#2b2824] bg-[#F5F0E8]/70 dark:bg-[#1c1b18] p-3 font-mono text-xs print:bg-neutral-50 print:border-neutral-200">
-              <div className="flex items-center justify-between">
-                <span className="text-[#6C6A64] dark:text-[#a1a1aa] print:text-neutral-600">Registered Vehicle</span>
-                <span className="font-bold text-[#141413] dark:text-[#f4f4f5] print:text-black">{data.vehicle.plateNumber}</span>
+            <div className="space-y-1.5 rounded-xl border border-[#E6DFD8] dark:border-[#2b2824] bg-[#F5F0E8]/70 dark:bg-[#1c1b18] p-3 font-mono text-xs print:bg-neutral-50 print:border-neutral-200">
+              <div className="flex flex-wrap items-baseline justify-between gap-1">
+                <span className="text-[#6C6A64] dark:text-[#a1a1aa] text-[11px] print:text-neutral-600 shrink-0">Registered Vehicle</span>
+                <span className="font-bold text-[#141413] dark:text-[#f4f4f5] print:text-black text-right font-mono">{data.vehicle.plateNumber}</span>
               </div>
-              <div className="flex items-center justify-between text-[11px] text-[#6C6A64] dark:text-[#a1a1aa] print:text-neutral-600">
-                <span>Make / Model</span>
-                <span className="text-[#141413] dark:text-[#f4f4f5] print:text-black">{data.vehicle.makeModel}</span>
+              <div className="flex flex-wrap items-baseline justify-between gap-1 text-[11px] text-[#6C6A64] dark:text-[#a1a1aa] print:text-neutral-600">
+                <span className="shrink-0">Make / Model</span>
+                <span className="text-[#141413] dark:text-[#f4f4f5] print:text-black text-right">{data.vehicle.makeModel}</span>
               </div>
               {data.qrSticker && (
-                <div className="flex items-center justify-between pt-1 border-t border-[#E6DFD8] dark:border-[#2b2824] text-[11px] print:border-neutral-200">
-                  <span className="text-[#6C6A64] dark:text-[#a1a1aa] print:text-neutral-600">QR Identity Code</span>
-                  <span className="font-bold text-[#cc785c]">{data.qrSticker.visibleCode}</span>
+                <div className="flex flex-wrap items-baseline justify-between gap-1 pt-1.5 border-t border-[#E6DFD8] dark:border-[#2b2824] text-[11px] print:border-neutral-200">
+                  <span className="text-[#6C6A64] dark:text-[#a1a1aa] print:text-neutral-600 shrink-0">QR Identity Code</span>
+                  <span className="font-bold text-[#cc785c] text-right font-mono">{data.qrSticker.visibleCode}</span>
                 </div>
               )}
             </div>

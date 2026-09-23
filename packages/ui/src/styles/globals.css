@@ -106,6 +106,20 @@
     --emergency-soft: 353 82% 96%; /* #FDEBED */
     --on-emergency: 0 0% 100%;
 
+    /* Neutral Palette Scale (matching tailwind.preset.js) */
+    --neutral-50: #fafafa;
+    --neutral-100: #f5f5f5;
+    --neutral-200: #e5e5e5;
+    --neutral-300: #d4d4d4;
+    --neutral-400: #a3a3a3;
+    --neutral-500: #737373;
+    --neutral-600: #525252;
+    --neutral-700: #404040;
+    --neutral-800: #262626;
+    --neutral-900: #171717;
+    --neutral-950: #0a0a0a;
+    --neutral-1000: #000000;
+
     /* Semantics */
     --success: 135 39% 54%; /* #5db872 */
     --success-foreground: 0 0% 100%;
@@ -213,6 +227,20 @@
     --sidebar-accent-foreground: 0 0% 98%; /* #fafafa */
     --sidebar-border: 240 3.7% 15.9%; /* #27272a (zinc-800) */
     --sidebar-ring: 15 50% 58%;
+
+    /* Neutral Palette Scale (Dark Context) */
+    --neutral-50: #0a0a0a;
+    --neutral-100: #171717;
+    --neutral-200: #262626;
+    --neutral-300: #3f3f46;
+    --neutral-400: #525252;
+    --neutral-500: #71717a;
+    --neutral-600: #a1a1aa;
+    --neutral-700: #3f3f46;
+    --neutral-800: #27272a;
+    --neutral-900: #18181b;
+    --neutral-950: #09090b;
+    --neutral-1000: #ffffff;
 
     /* Signature & Emergency */
     --signature: 15 50% 58%; /* #cc785c (warm coral) */
@@ -341,4 +369,24 @@
   .scrollbar-thin::-webkit-scrollbar-thumb {
     border-width: 1px;
   }
+}
+
+/* ==================================================================
+   08. RADIX UI / SHADCN SCROLL-LOCK INTEROP FIX
+   Prevents Radix UI overlays (Select, Dialog, Popover, DropdownMenu)
+   from locking body overflow and breaking sticky navigation headers.
+   ================================================================== */
+html {
+  scrollbar-gutter: stable;
+}
+
+html body[data-scroll-locked],
+body[data-scroll-locked],
+html[data-scroll-locked],
+[data-scroll-locked],
+.react-remove-scroll-bar-no-scroll {
+  overflow: visible !important;
+  overflow-x: clip !important;
+  margin-right: 0 !important;
+  padding-right: 0 !important;
 }

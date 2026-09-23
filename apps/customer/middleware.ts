@@ -26,6 +26,9 @@ export function middleware(request: NextRequest) {
 
   // All other pages require an authenticated session
   if (!sessionToken) {
+    if (pathname.startsWith("/api/")) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     const loginUrl = new URL("/login", request.url);
     if (pathname !== "/") {
       loginUrl.searchParams.set("returnUrl", pathname);

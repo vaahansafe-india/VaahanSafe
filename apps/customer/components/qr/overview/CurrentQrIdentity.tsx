@@ -3,7 +3,6 @@
 import * as React from "react";
 import Link from "next/link";
 import { VaahanIcon } from "@vaahansafe/icons";
-import { RotateCcw } from "lucide-react";
 import { QrFrame } from "../primitives/QrFrame";
 import type { QrStickerDetail } from "@/lib/qr-types";
 import { cn } from "@vaahansafe/ui/lib/utils";
@@ -105,11 +104,18 @@ export function CurrentQrIdentity({
           </div>
 
           <div className="rounded-xl border border-border/60 bg-muted/20 p-3.5 text-xs text-muted-foreground">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-2">
               <span>Permanent Resolver URL</span>
-              <span className="font-mono text-[10.5px] text-foreground select-all">
-                {sticker.resolverUrl}
-              </span>
+              <a
+                href={sticker.resolverUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 font-mono text-[10.5px] text-[#cc785c] hover:underline transition-colors select-all"
+                title="Open Public Resolver Profile"
+              >
+                <span>{sticker.resolverUrl}</span>
+                <VaahanIcon name="external-link" size={11} aria-hidden="true" />
+              </a>
             </div>
             <div className="mt-2 flex items-center justify-between border-t border-border/40 pt-2 text-[11px]">
               <span>Emergency Contacts Relay</span>
@@ -133,14 +139,14 @@ export function CurrentQrIdentity({
               href="/qr/digital"
               className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border bg-background px-3 font-mono text-xs font-semibold uppercase tracking-wider text-foreground hover:bg-muted transition-colors"
             >
-              <VaahanIcon name="phone" size={13} aria-hidden="true" />
+              <VaahanIcon name="id-card" size={13} aria-hidden="true" />
               <span>Digital Pass</span>
             </Link>
             <Link
               href="/qr/replace"
               className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border bg-background px-3 font-mono text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
             >
-              <RotateCcw className="size-3.5" aria-hidden="true" />
+              <VaahanIcon name="refresh" size={13} aria-hidden="true" />
               <span>Replace</span>
             </Link>
           </div>

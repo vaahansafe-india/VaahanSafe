@@ -18,7 +18,7 @@ interface SafetyViewSheetProps {
   onOpenChange: (open: boolean) => void;
   vehicle: DashboardVehicle | null;
   profile: DashboardEmergencyProfile;
-  onSaved?: () => void;
+  onSaved?: (updated: Partial<DashboardEmergencyProfile>) => void;
 }
 
 export function SafetyViewSheet({
@@ -57,19 +57,21 @@ export function SafetyViewSheet({
     setSaving(true);
     setFeedback(null);
 
+    const payload = {
+      vehicleId: vehicle.id,
+      showOwnerName,
+      showBloodGroup,
+      showMedicalNotes,
+      showVehicleDetails,
+      bloodGroup: bloodGroup.trim(),
+      medicalNotes: medicalNotes.trim(),
+    };
+
     try {
       const res = await fetch("/api/dashboard/safety-view", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          vehicleId: vehicle.id,
-          showOwnerName,
-          showBloodGroup,
-          showMedicalNotes,
-          showVehicleDetails,
-          bloodGroup: bloodGroup.trim() || undefined,
-          medicalNotes: medicalNotes.trim() || undefined,
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (!res.ok) {
@@ -77,8 +79,17 @@ export function SafetyViewSheet({
       }
 
       setFeedback("Safety projection settings saved successfully.");
+      if (onSaved) {
+        onSaved({
+          showOwnerName,
+          showBloodGroup,
+          showMedicalNotes,
+          showVehicleDetails,
+          bloodGroup: bloodGroup.trim(),
+          medicalNotes: medicalNotes.trim(),
+        });
+      }
       router.refresh();
-      if (onSaved) onSaved();
 
       setTimeout(() => {
         setFeedback(null);

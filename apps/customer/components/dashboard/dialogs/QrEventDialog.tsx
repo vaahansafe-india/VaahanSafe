@@ -10,6 +10,7 @@ import {
   DialogDescription,
 } from "@vaahansafe/ui";
 import type { DashboardQrLifelineEvent } from "@/lib/dashboard-types";
+import { formatFullIstTimestamp } from "@/lib/datetime";
 
 interface QrEventDialogProps {
   event: DashboardQrLifelineEvent | null;
@@ -21,7 +22,7 @@ export function QrEventDialog({ event, onOpenChange }: QrEventDialogProps) {
 
   return (
     <Dialog open={Boolean(event)} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md bg-card p-6 border-border">
+      <DialogContent className="w-full sm:max-w-md bg-card p-4 sm:p-6 border-border">
         <DialogHeader className="border-b border-border pb-3">
           <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#cc785c]">
             AUDIT TRAIL MILESTONE
@@ -43,7 +44,7 @@ export function QrEventDialog({ event, onOpenChange }: QrEventDialogProps) {
             <div className="flex items-center justify-between p-3">
               <span className="text-muted-foreground">Timestamp</span>
               <span className="font-mono text-foreground">
-                {event.timestamp ? event.timestamp.replace("T", " ") : "Recorded"}
+                {formatFullIstTimestamp(event.timestamp)}
               </span>
             </div>
             <div className="flex items-center justify-between p-3">

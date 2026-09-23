@@ -62,19 +62,18 @@ const SheetContent = React.forwardRef<
     >
       {children}
       <SheetPrimitive.Close
-        className="
-          absolute right-5 top-5
-          flex h-9 w-9 items-center justify-center
-          rounded-full
-          border border-border
-          bg-muted/60 text-muted-foreground
-          transition-all duration-200
-          hover:scale-105 hover:border-primary hover:bg-primary/10 hover:text-primary
-          active:scale-95
-          focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40
-          disabled:pointer-events-none
-          dark:border-border dark:bg-muted/50 dark:text-muted-foreground dark:hover:border-primary/40 dark:hover:bg-primary/15 dark:hover:text-foreground
-        "
+        className={cn(
+          "absolute right-4 top-4 sm:right-5 sm:top-5 z-50",
+          "flex h-9 w-9 items-center justify-center",
+          "rounded-full border border-border",
+          "bg-muted/80 text-muted-foreground shadow-xs backdrop-blur-xs",
+          "transition-all duration-200",
+          "hover:scale-105 hover:border-primary hover:bg-primary/10 hover:text-primary",
+          "active:scale-95",
+          "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
+          "disabled:pointer-events-none",
+          "dark:border-border dark:bg-muted/70 dark:text-muted-foreground dark:hover:border-primary/40 dark:hover:bg-primary/15 dark:hover:text-foreground"
+        )}
       >
         <VaahanIcon name="close" size={15} />
         <span className="sr-only">Close</span>

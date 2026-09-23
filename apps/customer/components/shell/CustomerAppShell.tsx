@@ -111,6 +111,7 @@ export function CustomerAppShell({
     <SidebarProvider defaultOpen={true}>
       {/* 01. Sidebar */}
       <AppSidebar
+        className="print:hidden"
         user={{
           name: userName,
           phone: userPhone,
@@ -121,36 +122,36 @@ export function CustomerAppShell({
       />
 
       {/* 02. Inset Canvas */}
-      <SidebarInset className="bg-background flex flex-col min-h-[100dvh] min-w-0 max-w-full">
+      <SidebarInset className="bg-background flex flex-col min-h-[100dvh] min-w-0 w-full max-w-full overflow-x-clip">
         {/* Contextual Fixed Top Bar with SidebarTrigger, Separator, Breadcrumb & ThemeToggle */}
-        <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center justify-between gap-3 border-b border-border bg-background/95 px-4 backdrop-blur-md sm:px-6">
-          <div className="flex items-center gap-2">
-            <SidebarTrigger className="-ml-1 text-muted-foreground hover:text-foreground hover:bg-accent" />
-            <Separator orientation="vertical" className="mr-2 h-4 bg-border" />
-            <Breadcrumb>
-              <BreadcrumbList>
+        <header className="sticky top-0 z-40 flex h-14 w-full shrink-0 items-center justify-between gap-2.5 sm:gap-3 border-b border-border bg-background/95 px-3.5 backdrop-blur-md sm:px-6 print:hidden">
+          <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-1 overflow-hidden">
+            <SidebarTrigger className="-ml-1 text-muted-foreground hover:text-foreground hover:bg-accent shrink-0" />
+            <Separator orientation="vertical" className="mr-1.5 sm:mr-2 h-4 bg-border shrink-0" />
+            <Breadcrumb className="min-w-0 flex-1 overflow-hidden">
+              <BreadcrumbList className="flex-nowrap overflow-hidden text-xs sm:text-sm">
                 {breadcrumbs.map((crumb, idx) => {
                   const isLast = idx === breadcrumbs.length - 1;
                   return (
                     <React.Fragment key={crumb.label}>
-                      <BreadcrumbItem>
+                      <BreadcrumbItem className="min-w-0 truncate">
                         {isLast ? (
-                          <BreadcrumbPage className="font-medium text-foreground">
+                          <BreadcrumbPage className="font-medium text-foreground truncate">
                             {crumb.label}
                           </BreadcrumbPage>
                         ) : crumb.href ? (
                           <BreadcrumbLink
                             href={crumb.href}
-                            className="text-muted-foreground hover:text-[#cc785c] transition-colors"
+                            className="text-muted-foreground hover:text-[#cc785c] transition-colors truncate"
                           >
                             {crumb.label}
                           </BreadcrumbLink>
                         ) : (
-                          <span className="text-muted-foreground">{crumb.label}</span>
+                          <span className="text-muted-foreground truncate">{crumb.label}</span>
                         )}
                       </BreadcrumbItem>
                       {!isLast && (
-                        <BreadcrumbSeparator className="text-muted-foreground" />
+                        <BreadcrumbSeparator className="text-muted-foreground shrink-0" />
                       )}
                     </React.Fragment>
                   );
@@ -160,7 +161,7 @@ export function CustomerAppShell({
           </div>
 
           {/* Right Header Tools */}
-          <div className="flex items-center gap-2 sm:gap-2.5">
+          <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
             {/* Active Vehicle Context */}
             {vehicles.length > 0 && activeVehicle ? (
               <div className="hidden sm:flex items-center gap-2 rounded-lg border border-border bg-muted/40 px-2.5 py-1">
@@ -185,7 +186,7 @@ export function CustomerAppShell({
             <Link
               href="/notifications"
               aria-label={`Notifications${unreadNotificationCount > 0 ? `, ${unreadNotificationCount} unread` : ""}`}
-              className="relative flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-background text-muted-foreground hover:border-[#cc785c] hover:text-[#cc785c] transition-colors"
+              className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border bg-background text-muted-foreground hover:border-[#cc785c] hover:text-[#cc785c] transition-colors"
             >
               <VaahanIcon name="notification" size={15} aria-hidden="true" />
               {unreadNotificationCount > 0 && (
@@ -196,14 +197,14 @@ export function CustomerAppShell({
             </Link>
 
             {/* Theme Toggle (Dark & Light) */}
-            <ThemeToggle className="h-8 w-8 rounded-lg border border-border bg-background text-muted-foreground hover:border-[#cc785c] hover:text-[#cc785c] transition-colors" />
+            <ThemeToggle className="h-8 w-8 shrink-0 rounded-lg border border-border bg-background text-muted-foreground hover:border-[#cc785c] hover:text-[#cc785c] transition-colors" />
           </div>
         </header>
 
         {/* Dynamic Page Content inside Inset Canvas */}
         <div
           id="main-app-content"
-          className="flex-1 p-4 sm:p-6 lg:p-8 w-full min-w-0 max-w-full pb-20 md:pb-8"
+          className="flex-1 p-3.5 sm:p-6 lg:p-8 w-full min-w-0 max-w-full pb-20 md:pb-8 overflow-x-clip print:p-0 print:m-0"
         >
           {children}
         </div>

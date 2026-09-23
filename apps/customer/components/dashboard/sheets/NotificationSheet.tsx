@@ -10,6 +10,7 @@ import {
   SheetDescription,
 } from "@vaahansafe/ui";
 import type { DashboardNotificationItem } from "@/lib/dashboard-types";
+import { formatFullIstTimestamp } from "@/lib/datetime";
 
 interface NotificationSheetProps {
   open: boolean;
@@ -84,7 +85,7 @@ export function NotificationSheet({
                     <p className="text-xs text-muted-foreground">{n.bodySafe}</p>
 
                     <div className="font-mono text-[9px] text-muted-foreground">
-                      {n.createdAt ? n.createdAt.slice(0, 16).replace("T", " ") : ""}
+                      {n.createdAt ? formatFullIstTimestamp(n.createdAt, { compact: true }) : ""}
                     </div>
                   </div>
                 );

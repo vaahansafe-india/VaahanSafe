@@ -21,10 +21,10 @@ export function QrIdentityHero({
   const hasActiveQr = primarySticker?.status === "ACTIVATED";
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-border bg-card/80 dark:bg-card/40 text-card-foreground p-6 sm:p-8 lg:p-10 shadow-xs backdrop-blur-xs transition-colors">
+    <div className="relative w-full max-w-full">
       {/* Background Ambience Gradient */}
       <div
-        className="pointer-events-none absolute -top-40 -right-40 h-96 w-96 rounded-full bg-radial from-[#cc785c]/10 via-transparent to-transparent blur-3xl"
+        className="pointer-events-none absolute -top-24 right-0 h-96 w-96 rounded-full bg-radial from-[#cc785c]/8 via-transparent to-transparent blur-3xl"
         aria-hidden="true"
       />
 
@@ -37,48 +37,48 @@ export function QrIdentityHero({
             <span>QR IDENTITY</span>
           </div>
 
-          <h1 className="mt-2.5 font-serif text-3xl font-medium tracking-tight text-foreground sm:text-4xl lg:text-5xl lg:leading-[1.12]">
+          <h1 className="mt-2.5 font-serif text-2xl sm:text-4xl lg:text-5xl font-medium tracking-tight text-foreground leading-[1.18] lg:leading-[1.12]">
             One QR. A useful vehicle identity.
           </h1>
 
-          <p className="mt-3.5 max-w-xl text-sm sm:text-base text-muted-foreground leading-relaxed">
+          <p className="mt-3.5 max-w-xl text-xs sm:text-sm lg:text-base text-muted-foreground leading-relaxed">
             Your VaahanSafe QR connects your vehicle to its verified identity and the critical emergency contacts you choose to make available.
           </p>
 
-          {/* Primary Action Buttons */}
-          <div className="mt-6 flex flex-wrap items-center gap-3">
+          {/* Primary Action Buttons — Aligned in One Single Row */}
+          <div className="mt-6 flex flex-row items-center gap-2 sm:gap-3 w-full sm:w-auto">
             {hasActiveQr ? (
               <>
                 <Link
                   href="/qr/digital"
-                  className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#cc785c] px-5 font-mono text-xs font-semibold uppercase tracking-wider text-white transition-all hover:bg-[#b5654b] shadow-xs hover:shadow-sm"
+                  className="flex-1 sm:flex-initial inline-flex h-10 sm:h-11 items-center justify-center gap-1.5 sm:gap-2 rounded-xl bg-[#cc785c] px-3 sm:px-5 font-mono text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-white transition-all hover:bg-[#b5654b] shadow-xs hover:shadow-sm text-center"
                 >
-                  <VaahanIcon name="qr" size={15} aria-hidden="true" />
-                  <span>View Digital Pass</span>
+                  <VaahanIcon name="qr" size={14} className="shrink-0" aria-hidden="true" />
+                  <span className="truncate">View Digital Pass</span>
                 </Link>
                 <Link
                   href="/qr/codes"
-                  className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-border bg-background/80 px-5 font-mono text-xs font-semibold uppercase tracking-wider text-foreground transition-colors hover:bg-muted"
+                  className="flex-1 sm:flex-initial inline-flex h-10 sm:h-11 items-center justify-center gap-1.5 sm:gap-2 rounded-xl border border-border bg-card px-3 sm:px-5 font-mono text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-foreground transition-colors hover:bg-muted text-center"
                 >
-                  <VaahanIcon name="activity" size={14} aria-hidden="true" />
-                  <span>Manage QR Codes</span>
+                  <VaahanIcon name="activity" size={13} className="shrink-0" aria-hidden="true" />
+                  <span className="truncate">Manage QR Codes</span>
                 </Link>
               </>
             ) : (
               <>
                 <Link
                   href="/qr/activate"
-                  className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#cc785c] px-5 font-mono text-xs font-semibold uppercase tracking-wider text-white transition-all hover:bg-[#b5654b] shadow-xs hover:shadow-sm"
+                  className="flex-1 sm:flex-initial inline-flex h-10 sm:h-11 items-center justify-center gap-1.5 sm:gap-2 rounded-xl bg-[#cc785c] px-2.5 sm:px-5 font-mono text-[10.5px] sm:text-xs font-semibold uppercase tracking-wider text-white transition-all hover:bg-[#b5654b] shadow-xs hover:shadow-sm text-center"
                 >
-                  <VaahanIcon name="qr-scan" size={15} aria-hidden="true" />
-                  <span>Activate Retail QR</span>
+                  <VaahanIcon name="qr-scan" size={14} className="shrink-0" aria-hidden="true" />
+                  <span className="truncate">Activate Retail QR</span>
                 </Link>
                 <Link
                   href="/qr/buy"
-                  className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-border bg-background/80 px-5 font-mono text-xs font-semibold uppercase tracking-wider text-foreground transition-colors hover:bg-muted"
+                  className="flex-1 sm:flex-initial inline-flex h-10 sm:h-11 items-center justify-center gap-1.5 sm:gap-2 rounded-xl border border-border bg-card px-2.5 sm:px-5 font-mono text-[10.5px] sm:text-xs font-semibold uppercase tracking-wider text-foreground transition-colors hover:bg-muted text-center"
                 >
-                  <VaahanIcon name="cart" size={15} aria-hidden="true" />
-                  <span>Buy QR Safety Kit</span>
+                  <VaahanIcon name="cart" size={14} className="shrink-0" aria-hidden="true" />
+                  <span className="truncate">Buy QR Safety Kit</span>
                 </Link>
               </>
             )}
@@ -86,9 +86,9 @@ export function QrIdentityHero({
 
           {/* Identity Snapshot Pill */}
           {primaryVehicle && (
-            <div className="mt-6 flex flex-wrap items-center gap-3 border-t border-border/60 pt-5 font-mono text-xs text-muted-foreground">
+            <div className="mt-6 flex flex-wrap items-center gap-2 sm:gap-3 border-t border-border/60 pt-4 sm:pt-5 font-mono text-xs text-muted-foreground">
               <span className="flex items-center gap-1.5 font-bold text-foreground">
-                <VaahanIcon name="car" size={14} className="text-[#cc785c]" />
+                <VaahanIcon name="vehicle" size={14} className="text-[#cc785c]" />
                 <span>{primaryVehicle.maskedPlate}</span>
               </span>
               <span>&bull;</span>
@@ -100,19 +100,19 @@ export function QrIdentityHero({
         </div>
 
         {/* Right Column: Tangible Physical QR Object */}
-        <div className="lg:col-span-5 flex justify-center">
+        <div className="lg:col-span-5 flex justify-center w-full">
           <PhysicalQrObject
             publicId={primarySticker?.publicId || "7F3K9021"}
             visibleCode={primarySticker?.visibleCode}
             vehiclePlate={primaryVehicle?.maskedPlate}
             status={primarySticker?.status || "ACTIVATED"}
-            className="w-full"
+            className="w-full max-w-sm sm:max-w-md mx-auto"
           />
         </div>
       </div>
 
-      {/* Embedded Bottom Signal Rail */}
-      <div className="mt-8">
+      {/* Standalone Bottom Signal Rail */}
+      <div className="mt-8 sm:mt-10">
         <QrSignalRail
           states={overview.railStates}
           onNodeClick={onOpenSignalNode}

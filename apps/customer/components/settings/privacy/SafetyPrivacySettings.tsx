@@ -60,22 +60,22 @@ export function SafetyPrivacySettings({ data }: SafetyPrivacySettingsProps) {
       </div>
 
       {/* Signature Rail: PRIVATE ACCOUNT → OWNER CONTROLS → PUBLIC SAFETY PROJECTION */}
-      <div className="rounded-xl border border-border/80 bg-gradient-to-r from-card via-muted/20 to-card p-4 sm:p-5">
+      <div className="rounded-2xl border border-border bg-card shadow-xs p-4 sm:p-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-2">
-            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#cc785c] font-semibold">
+            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#cc785c] font-semibold block">
               Security Architecture
             </span>
-            <div className="flex items-center gap-2 text-xs font-medium text-foreground flex-wrap">
-              <span className="rounded bg-muted px-2 py-1 font-mono text-[11px] border border-border/60">
+            <div className="flex items-center gap-1.5 sm:gap-2 text-xs font-medium text-foreground flex-wrap">
+              <span className="rounded bg-muted px-2 py-0.5 sm:py-1 font-mono text-[10px] sm:text-[11px] border border-border/60">
                 PRIVATE ACCOUNT
               </span>
-              <span className="text-muted-foreground">&rarr;</span>
-              <span className="rounded bg-[#cc785c]/10 text-[#cc785c] px-2 py-1 font-mono text-[11px] border border-[#cc785c]/25">
+              <span className="text-muted-foreground text-xs">&rarr;</span>
+              <span className="rounded bg-[#cc785c]/10 text-[#cc785c] px-2 py-0.5 sm:py-1 font-mono text-[10px] sm:text-[11px] border border-[#cc785c]/25">
                 OWNER CONTROLS
               </span>
-              <span className="text-muted-foreground">&rarr;</span>
-              <span className="rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2 py-1 font-mono text-[11px] border border-emerald-500/20">
+              <span className="text-muted-foreground text-xs">&rarr;</span>
+              <span className="rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 sm:py-1 font-mono text-[10px] sm:text-[11px] border border-emerald-500/20">
                 PUBLIC SAFETY VIEW
               </span>
             </div>
@@ -88,7 +88,7 @@ export function SafetyPrivacySettings({ data }: SafetyPrivacySettingsProps) {
             type="button"
             size="sm"
             onClick={() => setIsPreviewOpen(true)}
-            className="bg-[#cc785c] hover:bg-[#b8674d] text-white shrink-0 self-start sm:self-center gap-2"
+            className="bg-[#cc785c] hover:bg-[#b8674d] text-white shrink-0 w-full sm:w-auto justify-center gap-2 shadow-xs"
           >
             <VaahanIcon name="eye" size={14} />
             Preview Public View
@@ -224,7 +224,7 @@ export function SafetyPrivacySettings({ data }: SafetyPrivacySettingsProps) {
       )}
 
       {/* Invariant Note */}
-      <div className="rounded-lg border border-border/60 bg-muted/20 p-3 text-[11px] text-muted-foreground leading-relaxed">
+      <div className="rounded-xl border border-border/60 bg-muted/20 p-3.5 sm:p-4 text-[11px] text-muted-foreground leading-relaxed">
         <span className="font-medium text-foreground">Zero-Exposure Guarantee: </span>
         Personal phone numbers of your emergency contacts are connected via masked VoIP call proxying or encrypted WhatsApp alerts. Scanners never see raw contact numbers.
       </div>

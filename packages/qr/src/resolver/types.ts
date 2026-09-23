@@ -43,6 +43,7 @@ export interface PublicResolverMeta {
 import type { PublicEmergencyProfile } from "./projection";
 
 export interface PublicQrResolution {
+  qrId?: string;
   publicId: string;
   visibleCode?: string;
   state: QrPublicResolverState;

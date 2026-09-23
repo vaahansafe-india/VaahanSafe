@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, Badge, Button, Separator, ScrollArea } from "@vaahansafe/ui/components";
 import { VaahanIcon } from "@vaahansafe/icons";
 import type { OrderListItem } from "@/lib/orders-types";
+import { formatDateIst } from "@/lib/datetime";
 import { ProductMedia } from "../media/ProductMedia";
 import { FulfillmentRail } from "../FulfillmentRail";
 
@@ -26,11 +27,7 @@ export function OrderDetailsSheet({
 }: OrderDetailsSheetProps) {
   if (!order) return null;
 
-  const formattedDate = new Date(order.createdAt).toLocaleDateString("en-IN", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
+  const formattedDate = formatDateIst(order.createdAt);
 
   const paymentBadgeVariant =
     order.paymentStatus === "PAID"
@@ -43,29 +40,37 @@ export function OrderDetailsSheet({
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent side="right" className="w-full sm:max-w-lg p-0 flex flex-col bg-background font-sans">
-        {/* HEADER */}
-        <SheetHeader className="p-6 border-b border-border/80 bg-card/60">
-          <div className="flex items-center justify-between gap-3">
-            <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-[#cc785c]">
-              Order Dossier
+      <SheetContent
+        side="right"
+        className="w-full sm:max-w-lg h-full max-h-screen p-0 flex flex-col bg-background font-sans overflow-hidden"
+      >
+        {/* FIXED STICKY HEADER */}
+        <div className="sticky top-0 z-10 shrink-0 border-b border-border/80 bg-card/95 backdrop-blur-md p-4 sm:p-6 pr-14 sm:pr-16 space-y-1">
+          <SheetHeader className="text-left space-y-1 p-0">
+            <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.24em] text-[#cc785c]">
+              <span>Order Dossier</span>
             </div>
-            <Badge variant={paymentBadgeVariant} className="font-mono text-[10px] uppercase tracking-wider">
-              {order.paymentStatus}
-            </Badge>
-          </div>
 
-          <SheetTitle className="font-mono text-lg font-bold tracking-tight text-foreground mt-1">
-            {order.orderNumber}
-          </SheetTitle>
+            <div className="flex flex-wrap items-center justify-between gap-2 pt-0.5">
+              <SheetTitle className="font-mono text-base sm:text-lg font-bold tracking-tight text-foreground truncate max-w-[calc(100%-80px)]">
+                {order.orderNumber}
+              </SheetTitle>
+              <Badge
+                variant={paymentBadgeVariant}
+                className="font-mono text-[10px] uppercase tracking-wider shrink-0"
+              >
+                {order.paymentStatus}
+              </Badge>
+            </div>
 
-          <SheetDescription className="text-xs text-muted-foreground">
-            Placed on {formattedDate} &bull; Total ₹{(order.totalMinor / 100).toFixed(0)}
-          </SheetDescription>
-        </SheetHeader>
+            <SheetDescription className="text-xs text-muted-foreground truncate">
+              Placed on {formattedDate} &bull; Total ₹{(order.totalMinor / 100).toFixed(0)}
+            </SheetDescription>
+          </SheetHeader>
+        </div>
 
         {/* BODY SCROLL */}
-        <ScrollArea className="flex-1 px-6 py-5">
+        <ScrollArea className="flex-1 px-4 sm:px-6 py-5">
           <div className="space-y-6">
             {/* 1. FULFILLMENT TIMELINE */}
             <div className="space-y-3">
@@ -292,7 +297,7 @@ export function OrderDetailsSheet({
         </ScrollArea>
 
         {/* FOOTER ACTIONS */}
-        <div className="p-4 border-t border-border/80 bg-card/60 flex items-center justify-between gap-3">
+        <div className="sticky bottom-0 z-10 shrink-0 p-4 border-t border-border/80 bg-card/95 backdrop-blur-md flex items-center justify-between gap-3">
           {order.canCancel ? (
             <Button
               variant="outline"

@@ -64,9 +64,9 @@ export function PublicSafetyPreviewDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md p-0 overflow-hidden rounded-3xl border border-border bg-background shadow-xl">
+      <DialogContent className="fixed inset-auto inset-x-auto bottom-auto left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[92vw] sm:w-full max-w-md p-0 overflow-hidden rounded-3xl border border-border bg-background shadow-2xl max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="p-5 pr-14 border-b border-border/70 bg-card/60">
+        <div className="p-5 pr-14 border-b border-border/70 bg-card/60 shrink-0">
           <div className="flex flex-wrap items-center gap-2">
             <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-[#5db8a6]">
               Real QR Projection Preview
@@ -107,7 +107,7 @@ export function PublicSafetyPreviewDialog({
         </div>
 
         {/* Realistic Mock Smartphone Card View */}
-        <div className="p-5 bg-muted/20">
+        <div className="p-5 bg-muted/20 overflow-y-auto flex-1">
           <div className="rounded-2xl border-2 border-border/80 bg-card p-4 shadow-sm space-y-4">
             {/* Top Bar of Public View */}
             <div className="flex items-center justify-between border-b border-border/60 pb-3">
@@ -207,7 +207,7 @@ export function PublicSafetyPreviewDialog({
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-border/70 bg-card/60 flex justify-end">
+        <div className="p-4 border-t border-border/70 bg-card/60 flex justify-end shrink-0">
           <button
             type="button"
             onClick={() => onOpenChange(false)}

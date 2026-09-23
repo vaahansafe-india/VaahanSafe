@@ -3,6 +3,7 @@
 import * as React from "react";
 import { VaahanIcon } from "@vaahansafe/icons";
 import type { DashboardConstellationEvent, ConstellationLane } from "@/lib/dashboard-types";
+import { formatTimelineTimestamp } from "@/lib/datetime";
 
 interface ActivityConstellationProps {
   events: DashboardConstellationEvent[];
@@ -38,20 +39,20 @@ export function ActivityConstellation({
   }, [events]);
 
   return (
-    <div className="flex flex-col justify-between rounded-3xl border border-border bg-card p-6 shadow-sm">
+    <div className="flex flex-col justify-between rounded-2xl sm:rounded-3xl border border-border bg-card p-4 sm:p-6 lg:p-7 shadow-sm w-full max-w-full overflow-hidden">
       <div className="border-b border-border pb-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="flex h-2 w-2 rounded-full bg-[#cc785c]" />
-            <h3 className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-foreground">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="flex h-2 w-2 shrink-0 rounded-full bg-[#cc785c]" />
+            <h3 className="font-mono text-[11px] sm:text-xs font-bold uppercase tracking-[0.16em] sm:tracking-[0.2em] text-foreground truncate">
               ACTIVITY CONSTELLATION &bull; MULTI-LANE EVENT FIELD
             </h3>
           </div>
-          <span className="font-mono text-[10px] text-muted-foreground">
+          <span className="font-mono text-[10px] text-muted-foreground shrink-0">
             {events.length} RECORDED INCIDENT{events.length === 1 ? "" : "S"}
           </span>
         </div>
-        <p className="mt-1 text-xs text-muted-foreground">
+        <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
           Synchronized temporal map of vehicle events across scans, hardware lifecycle, privacy updates, and orders.
         </p>
       </div>
@@ -132,21 +133,21 @@ export function ActivityConstellation({
             <div
               key={evt.id}
               onClick={() => onSelectEvent(evt)}
-              className="flex items-start gap-3 py-2.5 cursor-pointer"
+              className="flex items-start gap-3 py-2.5 cursor-pointer transition-colors hover:bg-muted/30"
             >
               <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-muted text-[#cc785c]">
                 <VaahanIcon name="activity" size={13} />
               </span>
-              <div className="flex-1">
+              <div className="flex-1 min-w-0">
                 <div className="flex items-baseline justify-between gap-1">
-                  <span className="font-mono text-xs font-bold text-foreground">
+                  <span className="font-mono text-xs font-bold text-foreground truncate">
                     {evt.title}
                   </span>
-                  <span className="font-mono text-[9px] text-muted-foreground">
-                    {evt.timestamp ? evt.timestamp.slice(5, 16).replace("T", " ") : ""}
+                  <span className="font-mono text-[9px] text-muted-foreground shrink-0">
+                    {formatTimelineTimestamp(evt.timestamp)}
                   </span>
                 </div>
-                <div className="text-[11px] text-muted-foreground">
+                <div className="text-[11px] text-muted-foreground leading-relaxed line-clamp-2">
                   {evt.summary}
                 </div>
                 <span className="inline-block mt-0.5 font-mono text-[8px] uppercase tracking-wider text-[#cc785c]">

@@ -89,8 +89,9 @@ export class RazorpayClient {
 
     if (!response.ok) {
       const errorText = await response.text();
+      const hint = response.status === 401 ? " (Authentication failed: verify RAZORPAY_KEY_ID & RAZORPAY_KEY_SECRET in .env.local)" : "";
       throw new Error(
-        `[RazorpayClient] Order creation failed (${response.status}): ${errorText}`
+        `[RazorpayClient] Order creation failed (${response.status}): ${errorText}${hint}`
       );
     }
 

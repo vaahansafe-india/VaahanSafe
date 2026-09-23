@@ -54,7 +54,7 @@ export function CustomerTopBar({
   };
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 w-full items-center justify-between border-b border-border bg-background/95 px-4 backdrop-blur-sm sm:h-15 sm:px-6">
+    <header className="sticky top-0 z-40 flex h-14 w-full items-center justify-between border-b border-border bg-background/95 px-4 backdrop-blur-md sm:h-15 sm:px-6">
       {/* 01. Left: Mobile Menu & Current Context */}
       <div className="flex items-center gap-3">
         {onOpenMobileMenu && (

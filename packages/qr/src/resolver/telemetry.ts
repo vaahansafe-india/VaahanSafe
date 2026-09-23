@@ -95,11 +95,25 @@ export async function recordPublicScanEventSafely(
     const uaFamily = parseUserAgentFamily(userAgent);
     const eventId = `qse_${crypto.randomUUID().replace(/-/g, "").slice(0, 16)}`;
 
+    // Resolve internal primary key if a publicId was supplied
+    let resolvedQrId = qrId;
+    if (resolvedQrId && !resolvedQrId.startsWith("qr_")) {
+      const sticker = await db.queryFirst<{ id: string }>(
+        `SELECT id FROM qr_stickers WHERE public_id = ? OR id = ? LIMIT 1`,
+        [resolvedQrId, resolvedQrId]
+      );
+      if (!sticker) {
+        // Unknown or non-existent QR identifier: skip inserting to respect foreign key constraint
+        return;
+      }
+      resolvedQrId = sticker.id;
+    }
+
     await db.execute(
       `INSERT INTO qr_scan_events (
          id, qr_id, scan_type, result, city, state, user_agent_family, referrer_class, created_at
        ) VALUES (?, ?, 'PUBLIC_RESOLVE', ?, ?, ?, ?, 'DIRECT_SCAN', datetime('now'))`,
-      [eventId, qrId, scanResult, city, region, uaFamily]
+      [eventId, resolvedQrId, scanResult, city, region, uaFamily]
     );
   } catch (err) {
     // Invariant 41: Analytics failure MUST NOT block public QR resolution

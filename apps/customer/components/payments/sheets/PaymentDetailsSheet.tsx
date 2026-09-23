@@ -5,6 +5,7 @@ import { VaahanIcon } from "@vaahansafe/icons";
 import { PaymentRelationshipRail } from "../relationships/PaymentRelationshipRail";
 import { PaymentVerificationTimeline } from "../relationships/PaymentVerificationTimeline";
 import type { PaymentRecordItem } from "@/lib/payments-types";
+import { formatDateIst } from "@/lib/datetime";
 
 interface PaymentDetailsSheetProps {
   payment: PaymentRecordItem | null;
@@ -21,52 +22,54 @@ export function PaymentDetailsSheet({
 }: PaymentDetailsSheetProps) {
   if (!payment) return null;
 
-  const formattedDate = new Intl.DateTimeFormat("en-IN", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  }).format(new Date(payment.confirmedAt || payment.createdAt));
-
+  const formattedDate = formatDateIst(payment.confirmedAt || payment.createdAt);
   const formattedAmount = `₹${(payment.amountMinor / 100).toLocaleString("en-IN")}`;
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent className="w-full sm:max-w-xl overflow-y-auto bg-card p-4 sm:p-6 space-y-6">
-        {/* HEADER */}
-        <SheetHeader className="border-b border-border pb-4 pr-12 text-left space-y-1">
-          <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-[#cc785c]">
-            <span>Payment Dossier</span>
-            <span>&bull;</span>
-            <span>{formattedDate}</span>
-          </div>
+      <SheetContent
+        side="right"
+        className="w-full sm:max-w-xl h-full max-h-screen p-0 flex flex-col bg-background border-l border-border overflow-hidden"
+      >
+        {/* FIXED HEADER */}
+        <div className="sticky top-0 z-10 shrink-0 border-b border-border bg-card/95 backdrop-blur-md p-5 sm:p-6 pr-16 space-y-1">
+          <SheetHeader className="text-left space-y-1 p-0">
+            <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-[#cc785c]">
+              <span>Payment Dossier</span>
+              <span>&bull;</span>
+              <span>{formattedDate}</span>
+            </div>
 
-          <div className="flex flex-wrap items-baseline justify-between gap-2 pt-1">
-            <SheetTitle className="font-mono text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-              {formattedAmount}
-            </SheetTitle>
-            <Badge
-              variant="outline"
-              className={`font-mono text-xs font-semibold transition-colors ${
-                payment.status === "SUCCESS"
-                  ? "border-[#5db8a6]/40 bg-[#5db8a6]/10 text-[#5db8a6] hover:bg-[#5db8a6]/15 hover:text-[#5db8a6]"
-                  : payment.status === "PENDING"
-                  ? "border-[#e8a55a]/40 bg-[#e8a55a]/10 text-[#e8a55a] hover:bg-[#e8a55a]/15 hover:text-[#e8a55a]"
-                  : "border-[#c64545]/40 bg-[#c64545]/10 text-[#c64545] hover:bg-[#c64545]/15 hover:text-[#c64545]"
-              }`}
-            >
-              {payment.statusLabel}
-            </Badge>
-          </div>
+            <div className="flex flex-wrap items-baseline justify-between gap-2 pt-1">
+              <SheetTitle className="font-mono text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+                {formattedAmount}
+              </SheetTitle>
+              <Badge
+                variant="outline"
+                className={`font-mono text-xs font-semibold transition-colors ${
+                  payment.status === "SUCCESS"
+                    ? "border-[#5db8a6]/40 bg-[#5db8a6]/10 text-[#5db8a6] hover:bg-[#5db8a6]/15 hover:text-[#5db8a6]"
+                    : payment.status === "PENDING"
+                    ? "border-[#e8a55a]/40 bg-[#e8a55a]/10 text-[#e8a55a] hover:bg-[#e8a55a]/15 hover:text-[#e8a55a]"
+                    : "border-[#c64545]/40 bg-[#c64545]/10 text-[#c64545] hover:bg-[#c64545]/15 hover:text-[#c64545]"
+                }`}
+              >
+                {payment.statusLabel}
+              </Badge>
+            </div>
 
-          <SheetDescription className="text-xs text-muted-foreground">
-            Authoritative financial transaction connected to order {payment.orderNumber}.
-          </SheetDescription>
-        </SheetHeader>
-
-        {/* 1. RELATIONSHIP PIPELINE */}
-        <div className="space-y-2">
-          <PaymentRelationshipRail payment={payment} />
+            <SheetDescription className="text-xs text-muted-foreground">
+              Authoritative financial transaction connected to order {payment.orderNumber}.
+            </SheetDescription>
+          </SheetHeader>
         </div>
+
+        {/* SCROLLABLE BODY */}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
+          {/* 1. RELATIONSHIP PIPELINE */}
+          <div className="space-y-2">
+            <PaymentRelationshipRail payment={payment} />
+          </div>
 
         {/* 2. ACTIONS STRIP */}
         <div className="flex items-center gap-3">
@@ -172,6 +175,7 @@ export function PaymentDetailsSheet({
             </div>
           </div>
         )}
+        </div>
       </SheetContent>
     </Sheet>
   );

@@ -64,10 +64,16 @@ export function IdentityReadinessRail({
     {
       step: "03",
       name: "SAFETY VIEW",
-      status: safetyProfile.bloodGroup ? "Configured" : "Incomplete",
-      isReady: Boolean(safetyProfile.bloodGroup),
+      status: (safetyProfile.bloodGroup || safetyProfile.medicalNotes || safetyProfile.showVehicleDetails || safetyProfile.showMedicalNotes) ? "Configured" : "Incomplete",
+      isReady: Boolean(safetyProfile.bloodGroup || safetyProfile.medicalNotes || safetyProfile.showVehicleDetails || safetyProfile.showMedicalNotes),
       isPending: false,
-      subtext: safetyProfile.bloodGroup ? `Blood: ${safetyProfile.bloodGroup}` : "Set blood group",
+      subtext: safetyProfile.bloodGroup
+        ? `Blood: ${safetyProfile.bloodGroup}`
+        : safetyProfile.medicalNotes
+        ? "Medical notes set"
+        : safetyProfile.showMedicalNotes
+        ? "Safety projection active"
+        : "Set blood group",
       icon: "shield" as const,
       onClick: onOpenSafetySheet,
     },
@@ -85,11 +91,11 @@ export function IdentityReadinessRail({
 
   return (
     <section aria-label="Identity Readiness Rail" className="space-y-2">
-      <div className="flex items-center justify-between">
-        <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+      <div className="flex flex-wrap items-center justify-between gap-1">
+        <div className="font-mono text-[10px] uppercase tracking-[0.16em] sm:tracking-[0.2em] text-muted-foreground truncate">
           IDENTITY READINESS RAIL &bull; CLICK NODE TO INSPECT
         </div>
-        <div className="font-mono text-[10px] text-muted-foreground">
+        <div className="font-mono text-[10px] text-muted-foreground shrink-0">
           {nodes.filter((n) => n.isReady).length} / 4 VERIFIED
         </div>
       </div>
@@ -100,20 +106,20 @@ export function IdentityReadinessRail({
             key={node.step}
             type="button"
             onClick={node.onClick}
-            className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-border bg-card p-4 text-left shadow-2xs transition-all hover:border-[#cc785c]/40 hover:shadow-xs focus:outline-none focus:ring-2 focus:ring-[#cc785c]/30"
+            className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-border bg-card p-3.5 sm:p-4 text-left shadow-2xs transition-all hover:border-[#cc785c]/40 hover:shadow-xs focus:outline-none focus:ring-2 focus:ring-[#cc785c]/30"
           >
             {/* Top Index & Status Dot */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="font-mono text-[10px] font-bold text-muted-foreground">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="font-mono text-[10px] font-bold text-muted-foreground shrink-0">
                   {node.step}
                 </span>
-                <span className="font-mono text-xs font-semibold tracking-wider text-foreground">
+                <span className="font-mono text-xs font-semibold tracking-wider text-foreground truncate">
                   {node.name}
                 </span>
               </div>
               <span
-                className={`flex h-2 w-2 rounded-full ${
+                className={`flex h-2 w-2 shrink-0 rounded-full ${
                   node.isPending
                     ? "bg-[#cc785c] animate-pulse"
                     : node.isReady
@@ -124,10 +130,10 @@ export function IdentityReadinessRail({
             </div>
 
             {/* Bottom Content & Arrow */}
-            <div className="mt-4 flex items-end justify-between">
-              <div>
+            <div className="mt-4 flex items-end justify-between gap-2">
+              <div className="min-w-0 flex-1">
                 <div
-                  className={`font-mono text-sm font-bold ${
+                  className={`font-mono text-sm font-bold truncate ${
                     node.isPending
                       ? "text-[#cc785c]"
                       : node.isReady
@@ -142,7 +148,7 @@ export function IdentityReadinessRail({
                 </div>
               </div>
 
-              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-muted text-muted-foreground transition-all group-hover:bg-[#cc785c]/10 group-hover:text-[#cc785c] group-hover:translate-x-0.5">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground transition-all group-hover:bg-[#cc785c]/10 group-hover:text-[#cc785c] group-hover:translate-x-0.5">
                 <VaahanIcon name="arrow-right" size={12} />
               </span>
             </div>

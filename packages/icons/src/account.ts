@@ -7,6 +7,15 @@ import {
   Mail01Icon,
   Notification01Icon,
   IdCardIcon,
+  ChromeIcon,
+  SafariIcon,
+  BrowserIcon,
+  GoogleIcon,
+  WindowsNewIcon,
+  Apple01Icon,
+  AndroidIcon,
+  PhoneIcon,
+  Message01Icon,
 } from "@hugeicons/core-free-icons";
 
 export const accountIcons = {
@@ -15,11 +24,22 @@ export const accountIcons = {
   lock: LockIcon,
   unlock: LockKeyIcon,
   phone: Call02Icon,
+  mobile: PhoneIcon,
+  smartphone: PhoneIcon,
   mail: Mail01Icon,
   email: Mail01Icon,
   notification: Notification01Icon,
   bell: Notification01Icon,
   "id-card": IdCardIcon,
+  sms: Message01Icon,
+  message: Message01Icon,
+  google: GoogleIcon,
+  chrome: ChromeIcon,
+  safari: SafariIcon,
+  browser: BrowserIcon,
+  windows: WindowsNewIcon,
+  apple: Apple01Icon,
+  android: AndroidIcon,
 } as const;
 
 export type AccountIconName = keyof typeof accountIcons;

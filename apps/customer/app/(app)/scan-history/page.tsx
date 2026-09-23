@@ -12,6 +12,9 @@ export const metadata: Metadata = {
     "Review verified passerby encounters, emergency contact relays, and public safety view resolutions connected to your vehicle passes.",
 };
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 interface ScanHistoryPageProps {
   searchParams: Promise<{
     period?: string;

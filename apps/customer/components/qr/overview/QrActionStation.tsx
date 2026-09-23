@@ -64,7 +64,7 @@ const ACTIONS: ActionItem[] = [
     description: "Access your verifiable digital pass with direct roadside presentation and safety preview.",
     href: "/qr/digital",
     badge: "PASS",
-    icon: "phone",
+    icon: "id-card",
     isRecommendedKey: "DIGITAL",
   },
   {
@@ -74,7 +74,7 @@ const ACTIONS: ActionItem[] = [
     title: "Replace QR",
     description: "Lost or damaged your sticker? Migrate your vehicle identity to a new sticker with zero data loss.",
     href: "/qr/replace",
-    icon: "rotate-ccw",
+    icon: "refresh",
     isRecommendedKey: "MANAGE",
   },
 ];

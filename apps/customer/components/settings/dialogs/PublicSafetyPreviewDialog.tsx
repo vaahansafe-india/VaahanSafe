@@ -165,7 +165,7 @@ export function PublicSafetyPreviewDialog({
           </div>
 
           {/* Identity & Medical Grid */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 min-[380px]:grid-cols-2 gap-2.5 sm:gap-3">
             {/* Owner Card */}
             <div
               className={`rounded-xl border p-3.5 space-y-1 shadow-2xs transition-colors ${

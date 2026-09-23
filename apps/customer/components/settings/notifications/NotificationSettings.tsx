@@ -85,6 +85,8 @@ export function NotificationSettings({ data }: NotificationSettingsProps) {
       <SettingsSection
         title="Delivery Channel Matrix"
         description="Choose preferred channels for each category. Required security messages cannot be disabled."
+        cardClassName="p-4 sm:p-6"
+        noDivide
       >
         {/* Table / Matrix Header */}
         <div className="hidden sm:grid grid-cols-12 gap-4 pb-2 border-b border-border/60 text-muted-foreground">

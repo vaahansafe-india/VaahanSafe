@@ -242,7 +242,7 @@ export function ServicePassport({
           </div>
 
           {/* Action Row inside Passport */}
-          <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2.5">
+          <div className="pt-2 flex flex-row items-stretch sm:items-center gap-2 sm:gap-2.5">
             {passport.hasSubscription ? (
               <>
                 <button

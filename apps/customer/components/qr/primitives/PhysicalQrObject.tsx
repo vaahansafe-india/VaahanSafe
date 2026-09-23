@@ -27,7 +27,7 @@ export function PhysicalQrObject({
   return (
     <div
       className={cn(
-        "relative mx-auto flex max-w-sm flex-col items-center rounded-2xl border border-border/90 bg-card text-card-foreground shadow-xl dark:border-neutral-800 dark:bg-[#121417] dark:text-white dark:shadow-2xl overflow-hidden transition-colors",
+        "relative mx-auto flex w-full max-w-sm sm:max-w-md flex-col items-center rounded-2xl border border-border/90 bg-card p-4 sm:p-5 text-card-foreground shadow-xl dark:border-border/80 dark:bg-[#121417] dark:text-white dark:shadow-2xl overflow-hidden transition-colors",
         className
       )}
     >
@@ -42,7 +42,7 @@ export function PhysicalQrObject({
       />
 
       {/* Header: VaahanSafe Safety Mark */}
-      <div className="flex w-full items-center justify-between border-b border-border/80 dark:border-neutral-800/80 pb-3.5">
+      <div className="flex w-full items-center justify-between border-b border-border/80 dark:border-border/60 pb-3.5">
         <div className="flex items-center gap-2">
           <VaahanSafeMark className="h-5 w-5 text-[#cc785c]" />
           <div>
@@ -62,7 +62,7 @@ export function PhysicalQrObject({
 
       {/* Centerpiece: Physical QR Frame */}
       <div className="my-5 flex flex-col items-center">
-        <div className="relative rounded-2xl bg-gradient-to-b from-neutral-100 to-neutral-200/90 dark:from-neutral-800 dark:to-neutral-900 border border-neutral-200/80 dark:border-neutral-700/60 p-1.5 shadow-xs dark:shadow-md">
+        <div className="relative rounded-2xl bg-gradient-to-b from-neutral-100 to-neutral-200/90 dark:from-neutral-800/80 dark:to-neutral-900 border border-neutral-200/80 dark:border-border/60 p-1.5 shadow-xs dark:shadow-md">
           <QrFrame
             publicId={publicId}
             visibleCode={displayCode}
@@ -80,7 +80,7 @@ export function PhysicalQrObject({
       </div>
 
       {/* Physical Sticker Anatomy Footer */}
-      <div className="w-full rounded-xl border border-border/80 bg-muted/40 dark:border-neutral-800 dark:bg-neutral-900/80 p-3">
+      <div className="w-full rounded-xl border border-border/80 bg-muted/40 dark:border-border/60 dark:bg-muted/20 p-3">
         <div className="flex items-center justify-between text-xs">
           <div>
             <div className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground dark:text-neutral-400">
@@ -103,7 +103,7 @@ export function PhysicalQrObject({
         </div>
 
         {/* Conceptual Scan Progression */}
-        <div className="mt-2.5 flex items-center justify-between border-t border-border/70 dark:border-neutral-800/80 pt-2 font-mono text-[8.5px] uppercase tracking-wider text-muted-foreground dark:text-neutral-400">
+        <div className="mt-2.5 flex items-center justify-between border-t border-border/70 dark:border-border/50 pt-2 font-mono text-[8.5px] uppercase tracking-wider text-muted-foreground dark:text-neutral-400">
           <span className="text-foreground/80 dark:text-neutral-300 font-medium">1. Scan QR</span>
           <span>&rarr;</span>
           <span className="text-foreground/80 dark:text-neutral-300 font-medium">2. Owner Shield</span>

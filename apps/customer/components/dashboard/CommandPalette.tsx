@@ -219,7 +219,7 @@ export function CommandPalette({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-xl p-0 overflow-hidden border-border bg-card shadow-2xl [&>button.absolute]:hidden">
+      <DialogContent className="w-[calc(100vw-2rem)] sm:max-w-xl p-0 overflow-hidden border-border bg-card shadow-2xl [&>button.absolute]:hidden">
         {/* Search Bar Header */}
         <div className="flex items-center gap-3 border-b border-border px-4 py-3">
           <VaahanIcon name="search" size={17} className="text-[#cc785c] shrink-0" />

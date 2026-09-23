@@ -17,9 +17,9 @@ export function PaymentRelationshipRail({ payment }: PaymentRelationshipRailProp
         <span className="text-[#5db8a6] font-semibold">Authoritative Chain</span>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 text-center sm:text-left">
+      <div className="grid grid-cols-2 gap-2.5 sm:gap-3 text-left">
         {/* Step 1: Payment */}
-        <div className="rounded-lg border border-border/80 bg-card p-3 space-y-1">
+        <div className="rounded-lg border border-border/80 bg-card p-3 space-y-1 min-w-0">
           <div className="flex items-center justify-between text-[10px] text-muted-foreground uppercase">
             <span>01. Payment</span>
             <VaahanIcon name="payment" size={13} className="text-[#cc785c]" />
@@ -29,7 +29,7 @@ export function PaymentRelationshipRail({ payment }: PaymentRelationshipRailProp
         </div>
 
         {/* Step 2: Order */}
-        <div className="rounded-lg border border-border/80 bg-card p-3 space-y-1">
+        <div className="rounded-lg border border-border/80 bg-card p-3 space-y-1 min-w-0">
           <div className="flex items-center justify-between text-[10px] text-muted-foreground uppercase">
             <span>02. Order</span>
             <VaahanIcon name="package" size={13} className="text-[#cc785c]" />
@@ -41,26 +41,26 @@ export function PaymentRelationshipRail({ payment }: PaymentRelationshipRailProp
         </div>
 
         {/* Step 3: Hardware / QR */}
-        <div className="rounded-lg border border-border/80 bg-card p-3 space-y-1">
+        <div className="rounded-lg border border-border/80 bg-card p-3 space-y-1 min-w-0">
           <div className="flex items-center justify-between text-[10px] text-muted-foreground uppercase">
             <span>03. QR Hardware</span>
             <VaahanIcon name="qr" size={13} className="text-[#cc785c]" />
           </div>
-          <div className="font-bold text-[#cc785c] text-xs">
+          <div className="font-bold text-[#cc785c] text-xs truncate">
             {payment.qrSticker?.visibleCode || "Kit In Fulfillment"}
           </div>
-          <div className="text-[10px] text-muted-foreground">
+          <div className="text-[10px] text-muted-foreground truncate">
             {payment.qrSticker?.status || "Hardware Entitled"}
           </div>
         </div>
 
         {/* Step 4: Vehicle */}
-        <div className="rounded-lg border border-border/80 bg-card p-3 space-y-1">
+        <div className="rounded-lg border border-border/80 bg-card p-3 space-y-1 min-w-0">
           <div className="flex items-center justify-between text-[10px] text-muted-foreground uppercase">
             <span>04. Vehicle</span>
             <VaahanIcon name="vehicle" size={13} className="text-[#5db8a6]" />
           </div>
-          <div className="font-bold text-foreground text-xs">
+          <div className="font-bold text-foreground text-xs truncate">
             {payment.vehicle?.plateNumber || "Pending Binding"}
           </div>
           <div className="text-[10px] text-muted-foreground truncate">

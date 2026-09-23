@@ -142,8 +142,16 @@ function getDateGroupKey(date: Date, now: Date): string {
   }).format(date);
 }
 
+export function parseDbUtcDate(dateStr: string | null | undefined): Date {
+  if (!dateStr) return new Date();
+  if (dateStr.endsWith("Z") || /[+-]\d{2}:\d{2}$/.test(dateStr)) {
+    return new Date(dateStr);
+  }
+  return new Date(dateStr.replace(" ", "T") + "Z");
+}
+
 function formatRelativeTime(dateStr: string): string {
-  const date = new Date(dateStr);
+  const date = parseDbUtcDate(dateStr);
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
   const diffMinutes = Math.floor(diffMs / (60 * 1000));
@@ -320,7 +328,7 @@ export async function getScanHistoryOverview(
   const cutoffMs = getPeriodCutoff(activeFilters.period);
   const periodFilteredScans = scopedScans.filter((s) => {
     if (cutoffMs === 0) return true;
-    return new Date(s.created_at).getTime() >= cutoffMs;
+    return parseDbUtcDate(s.created_at).getTime() >= cutoffMs;
   });
 
   // 4. Compute Signals Rail
@@ -336,7 +344,7 @@ export async function getScanHistoryOverview(
             hour: "2-digit",
             minute: "2-digit",
             hour12: false,
-          }).format(new Date(lastScanEvent.created_at)),
+          }).format(parseDbUtcDate(lastScanEvent.created_at)),
           relativeTime: formatRelativeTime(lastScanEvent.created_at),
         }
       : null,
@@ -368,7 +376,7 @@ export async function getScanHistoryOverview(
   });
 
   for (const s of periodFilteredScans) {
-    const d = new Date(s.created_at);
+    const d = parseDbUtcDate(s.created_at);
     const hour = d.getHours();
     if (temporalField[hour]) {
       temporalField[hour].scanCount += 1;
@@ -460,7 +468,7 @@ export async function getScanHistoryOverview(
   const events: ScanEventItem[] = filteredRegistryScans.map((s) => {
     const sticker = qrMap.get(s.qr_id);
     const vehicle = sticker ? vehicleMap.get(sticker.vehicle_id) : null;
-    const occurredDate = new Date(s.created_at);
+    const occurredDate = parseDbUtcDate(s.created_at);
 
     const publicId = sticker?.public_id || "VS-UNKNOWN";
     const maskedId = maskPublicId(publicId);
@@ -607,7 +615,7 @@ function buildRhythmSeries(
       const bucketEnd = new Date(bucketStart.getTime() + 60 * 60 * 1000);
 
       const bucketScans = scans.filter((s) => {
-        const t = new Date(s.created_at).getTime();
+        const t = parseDbUtcDate(s.created_at).getTime();
         return t >= bucketStart.getTime() && t < bucketEnd.getTime();
       });
 
@@ -626,7 +634,7 @@ function buildRhythmSeries(
               hour: "2-digit",
               minute: "2-digit",
               hour12: false,
-            }).format(new Date(bucketScans[0].created_at))
+            }).format(parseDbUtcDate(bucketScans[0].created_at))
           : undefined,
       });
     }
@@ -654,7 +662,7 @@ function buildRhythmSeries(
     }).format(dayStart);
 
     const bucketScans = scans.filter((s) => {
-      const t = new Date(s.created_at).getTime();
+      const t = parseDbUtcDate(s.created_at).getTime();
       return t >= dayStart.getTime() && t <= dayEnd.getTime();
     });
 
@@ -673,7 +681,7 @@ function buildRhythmSeries(
             hour: "2-digit",
             minute: "2-digit",
             hour12: false,
-          }).format(new Date(bucketScans[0].created_at))
+          }).format(parseDbUtcDate(bucketScans[0].created_at))
         : undefined,
     });
   }

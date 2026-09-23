@@ -27,7 +27,7 @@ export function ScanPulseInspector({
   return (
     <div
       style={style}
-      className="pointer-events-none absolute z-30 -translate-x-1/2 -translate-y-full mb-3 w-56 rounded-xl border border-white/15 bg-[#252320] p-3 text-[#FAF9F5] shadow-2xl backdrop-blur-md transition-all duration-75"
+      className="pointer-events-none absolute z-30 -translate-x-1/2 -translate-y-full mb-3 w-56 max-w-[calc(100vw-3rem)] rounded-xl border border-white/15 bg-[#252320] p-3 text-[#FAF9F5] shadow-2xl backdrop-blur-md transition-all duration-75"
     >
       <div className="flex items-center justify-between border-b border-white/10 pb-1.5">
         <span className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-[#cc785c]">

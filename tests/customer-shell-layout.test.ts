@@ -89,6 +89,8 @@ describe("Customer Application Shell Layout & Accessibility (Section 07-13, 29-3
       expect(shellContent).toContain("AppSidebar");
       expect(shellContent).toContain("SidebarInset");
       expect(shellContent).toContain("bg-background"); // Zinc canvas
+      expect(shellContent).toContain("sticky top-0 z-40"); // Fixed top bar
+      expect(shellContent).toContain("overflow-x-clip"); // Safe horizontal clipping without breaking sticky
     });
   });
 
@@ -176,5 +178,123 @@ describe("Customer Application Shell Layout & Accessibility (Section 07-13, 29-3
       expect(content).toContain("--sidebar-border");
     });
   });
+
+  describe("07. Dashboard Card Responsiveness & Fluid Geometry", () => {
+    it("ensures CommerceServicePanel is fully responsive with fluid width, adaptive grids, and responsive buttons", () => {
+      const filePath = path.resolve(customerAppDir, "components/dashboard/CommerceServicePanel.tsx");
+      const content = fs.readFileSync(filePath, "utf-8");
+      expect(content).toContain("grid grid-cols-1");
+      expect(content).toContain("lg:grid-cols-2");
+      expect(content).toContain("w-full max-w-full overflow-hidden");
+      expect(content).toContain("w-full sm:w-auto");
+      expect(content).toContain("grid-cols-2");
+    });
+
+    it("ensures SafetyProjectionMatrix has responsive padding, scroll protection, and adaptive headers", () => {
+      const filePath = path.resolve(customerAppDir, "components/dashboard/visualizations/SafetyProjectionMatrix.tsx");
+      const content = fs.readFileSync(filePath, "utf-8");
+      expect(content).toContain("w-full max-w-full overflow-hidden");
+      expect(content).toContain("overflow-x-auto no-scrollbar");
+      expect(content).toContain("flex-wrap");
+      expect(content).toContain("sm:hidden");
+    });
+
+    it("ensures QrLifeline has responsive padding and adaptive buttons", () => {
+      const filePath = path.resolve(customerAppDir, "components/dashboard/visualizations/QrLifeline.tsx");
+      const content = fs.readFileSync(filePath, "utf-8");
+      expect(content).toContain("w-full max-w-full overflow-hidden");
+      expect(content).toContain("w-full sm:w-auto");
+    });
+
+    it("ensures IdentityOrbit has responsive container and truncation on mobile items", () => {
+      const filePath = path.resolve(customerAppDir, "components/dashboard/visualizations/IdentityOrbit.tsx");
+      const content = fs.readFileSync(filePath, "utf-8");
+      expect(content).toContain("w-full max-w-full overflow-hidden");
+      expect(content).toContain("min-w-0 flex-1");
+    });
+
+    it("ensures VehicleIdentityCore uses responsive padding and word-break on registration plate", () => {
+      const filePath = path.resolve(customerAppDir, "components/dashboard/VehicleIdentityCore.tsx");
+      const content = fs.readFileSync(filePath, "utf-8");
+      expect(content).toContain("w-full max-w-full");
+      expect(content).toContain("break-all");
+    });
+
+    it("ensures QrIdentityHero has no clunky outer card border and uses one-row aligned mobile buttons", () => {
+      const filePath = path.resolve(customerAppDir, "components/qr/overview/QrIdentityHero.tsx");
+      const content = fs.readFileSync(filePath, "utf-8");
+      expect(content).toContain("relative w-full max-w-full");
+      expect(content).not.toContain("rounded-3xl border border-border bg-card/80");
+      expect(content).toContain("flex-row");
+      expect(content).toContain("flex-1 sm:flex-initial");
+    });
+
+    it("ensures QrSignalRail has responsive overflow protection and mobile grid spanning for 5th item", () => {
+      const filePath = path.resolve(customerAppDir, "components/qr/primitives/QrSignalRail.tsx");
+      const content = fs.readFileSync(filePath, "utf-8");
+      expect(content).toContain("w-full max-w-full overflow-hidden");
+      expect(content).toContain("index === 4 && \"col-span-2 sm:col-span-1\"");
+    });
+
+    it("ensures QrActionStation uses canonical icons: id-card for Digital QR and refresh for Replace QR", () => {
+      const filePath = path.resolve(customerAppDir, "components/qr/overview/QrActionStation.tsx");
+      const content = fs.readFileSync(filePath, "utf-8");
+      expect(content).toContain('icon: "id-card"');
+      expect(content).toContain('icon: "refresh"');
+      expect(content).not.toContain('icon: "phone"');
+      expect(content).not.toContain('icon: "rotate-ccw"');
+    });
+
+    it("ensures DialogContent has rounded-2xl sm:rounded-3xl border-radius across all viewports to eliminate sharp corners", () => {
+      const filePath = path.resolve(customerAppDir, "components/ui/dialog.tsx");
+      const content = fs.readFileSync(filePath, "utf-8");
+      expect(content).toContain("rounded-2xl sm:rounded-3xl");
+      expect(content).toContain("overflow-hidden");
+      expect(content).toContain("rounded-full");
+    });
+
+    it("ensures QrOverviewController renders differentiated contextual inspectors for all 5 lifeline nodes", () => {
+      const filePath = path.resolve(customerAppDir, "components/qr/overview/QrOverviewController.tsx");
+      const content = fs.readFileSync(filePath, "utf-8");
+      expect(content).toContain("activeNode === \"vehicleNode\"");
+      expect(content).toContain("01 VEHICLE INSPECTOR");
+      expect(content).toContain("activeNode === \"identityNode\"");
+      expect(content).toContain("02 IDENTITY VAULT");
+      expect(content).toContain("03 QR HARDWARE");
+      expect(content).toContain("activeNode === \"contactNode\"");
+      expect(content).toContain("04 EMERGENCY CONTACTS");
+      expect(content).toContain("activeNode === \"safetyNode\"");
+      expect(content).toContain("05 PUBLIC SAFETY VIEW");
+      expect(content).toContain("rounded-2xl sm:rounded-3xl");
+    });
+
+    it("ensures QrRegistryExperience has full-width responsive header buttons, sm:flex-row alignment, and overflow protection", () => {
+      const filePath = path.resolve(customerAppDir, "components/qr/registry/QrRegistryExperience.tsx");
+      const content = fs.readFileSync(filePath, "utf-8");
+      expect(content).toContain("w-full max-w-full min-w-0");
+      expect(content).toContain("flex flex-col sm:flex-row sm:items-end justify-between");
+      expect(content).toContain("flex-row items-center gap-2 sm:gap-2.5 w-full sm:w-auto");
+      expect(content).toContain("flex-1 sm:flex-initial");
+      expect(content).not.toContain("gird grid-col-2");
+      expect(content).toContain("overflow-hidden min-w-0");
+    });
+
+    it("ensures PhysicalQrObject scales responsively up to sm:max-w-md to avoid asymmetrical right-side gaps", () => {
+      const filePath = path.resolve(customerAppDir, "components/qr/primitives/PhysicalQrObject.tsx");
+      const content = fs.readFileSync(filePath, "utf-8");
+      expect(content).toContain("max-w-sm sm:max-w-md");
+      expect(content).toContain("dark:border-border/80");
+    });
+
+    it("ensures packages/ui globals.css defines complete neutral palette scale to prevent white currentColor fallback", () => {
+      const globalsCssPath = path.resolve(__dirname, "../packages/ui/src/styles/globals.css");
+      const content = fs.readFileSync(globalsCssPath, "utf-8");
+      expect(content).toContain("--neutral-800: #27272a;");
+      expect(content).toContain("--neutral-700: #3f3f46;");
+      expect(content).toContain("--neutral-900: #18181b;");
+    });
+  });
 });
+
+
 
