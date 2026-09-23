@@ -1,6 +1,6 @@
 "use client";
 
-import { Badge, Button } from "@vaahansafe/ui";
+import { Badge } from "@vaahansafe/ui";
 import { VaahanIcon } from "@vaahansafe/icons";
 import { ScanEventNode } from "./ScanEventNode";
 import type { ScanEventItem } from "@/lib/scan-history-types";
@@ -14,72 +14,91 @@ export function ScanEventRow({ event, onSelect }: ScanEventRowProps) {
   const isEmergency = event.scanType === "EMERGENCY_TRIGGER";
 
   return (
-    <div className="group flex items-stretch gap-3 sm:gap-4 py-3 px-2 sm:px-4 rounded-xl hover:bg-muted/40 transition-colors">
-      {/* Vertical Rail + Node */}
-      <div className="pt-1.5 shrink-0">
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={() => onSelect(event)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onSelect(event);
+        }
+      }}
+      className="group relative flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 p-3.5 sm:px-4 sm:py-3.5 rounded-xl border border-border/40 sm:border-transparent hover:border-border/80 hover:bg-muted/40 transition-all duration-150 cursor-pointer select-none bg-card/50 sm:bg-transparent"
+    >
+      {/* Desktop Node Indicator (Left Rail) */}
+      <div className="hidden sm:flex items-center shrink-0">
         <ScanEventNode isEmergency={isEmergency} />
       </div>
 
-      {/* Main Row Content */}
+      {/* Main Content Area */}
       <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4 min-w-0">
-        {/* Left: Time + Identity + Vehicle */}
-        <div className="flex items-start sm:items-center gap-3 sm:gap-5 min-w-0">
-          {/* Time */}
-          <div className="shrink-0 w-12 text-left">
-            <span className="font-mono text-xs font-semibold text-foreground">
-              {event.occurredAtFormatted}
+        {/* Mobile Top Row / Desktop Left Block */}
+        <div className="flex items-center justify-between sm:justify-start gap-2.5 sm:gap-4 min-w-0">
+          {/* Time Badge */}
+          <div className="flex items-center gap-1.5 shrink-0">
+            <span className="sm:hidden">
+              <ScanEventNode isEmergency={isEmergency} />
             </span>
-            <div className="text-[10px] font-mono text-muted-foreground hidden sm:block">
-              IST
+            <div className="font-mono text-xs font-bold text-foreground">
+              {event.occurredAtFormatted}
+              <span className="ml-1 text-[10px] text-muted-foreground font-normal">
+                IST
+              </span>
             </div>
           </div>
 
-          {/* QR Identity */}
-          <div className="shrink-0">
-            <span className="font-mono text-xs font-medium px-2 py-0.5 rounded-md bg-muted/60 border border-border text-foreground">
-              {event.publicQrIdentity}
-            </span>
-          </div>
+          {/* Pass ID Pill */}
+          <span className="font-mono text-[11px] font-semibold px-2 py-0.5 rounded-md bg-muted/80 border border-border/80 text-foreground shrink-0">
+            {event.publicQrIdentity}
+          </span>
 
-          {/* Vehicle */}
-          <div className="min-w-0 truncate">
-            <div className="text-xs sm:text-sm font-semibold text-foreground truncate">
+          {/* Vehicle Plate & Model (Desktop) */}
+          <div className="hidden md:block min-w-0 truncate">
+            <div className="text-xs font-semibold text-foreground truncate">
               {event.vehicleDisplay}
             </div>
-            <div className="font-mono text-[10px] text-muted-foreground truncate">
+            <div className="font-mono text-[10.5px] text-muted-foreground truncate">
               {event.vehiclePlate}
             </div>
           </div>
         </div>
 
-        {/* Right: Outcome + Safe Context + Action */}
-        <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 shrink-0 pl-15 sm:pl-0">
-          {/* Public View Result Badge */}
+        {/* Mobile Mid Row: Vehicle info */}
+        <div className="md:hidden flex items-baseline justify-between gap-2 border-t border-border/30 pt-2 sm:border-0 sm:pt-0">
+          <span className="text-xs font-semibold text-foreground truncate">
+            {event.vehicleDisplay}
+          </span>
+          <span className="font-mono text-[11px] text-muted-foreground shrink-0">
+            {event.vehiclePlate}
+          </span>
+        </div>
+
+        {/* Outcome, Location & CTA */}
+        <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 shrink-0 border-t border-border/30 pt-2 sm:border-0 sm:pt-0">
+          {/* Result Badge */}
           <Badge
             variant={event.resultBadgeVariant}
-            className="text-[10px] font-mono font-medium whitespace-nowrap"
+            className="text-[10px] font-mono font-medium whitespace-nowrap uppercase tracking-wider"
           >
             {event.resultLabel}
           </Badge>
 
-          {/* Safe Context (Approximate region & device) */}
-          <div className="hidden md:flex flex-col text-right font-mono text-[10px] text-muted-foreground max-w-[140px] truncate">
-            <span className="truncate">
+          {/* Location & Device Family */}
+          <div className="flex flex-col text-right font-mono text-[10px] text-muted-foreground max-w-[140px] truncate">
+            <span className="truncate text-foreground/80 font-medium">
               {event.approximateRegion || "Regional network"}
             </span>
-            <span>{event.deviceCategory}</span>
+            <span className="text-[9.5px] text-muted-foreground truncate">
+              {event.deviceCategory}
+            </span>
           </div>
 
-          {/* View Details Button */}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onSelect(event)}
-            className="h-8 px-2.5 rounded-lg text-xs font-medium gap-1 text-primary hover:text-primary hover:bg-primary/10 transition-colors shadow-none"
-          >
+          {/* Action Trigger */}
+          <div className="inline-flex items-center gap-1 text-xs font-mono font-semibold text-primary group-hover:translate-x-0.5 transition-transform shrink-0">
             <span>View</span>
-            <VaahanIcon name="arrow-right" size={13} />
-          </Button>
+            <VaahanIcon name="arrow-right" size={12} aria-hidden="true" />
+          </div>
         </div>
       </div>
     </div>
