@@ -234,6 +234,29 @@ export function ScanPulse({
     [coordinates, svgWidth]
   );
 
+  // Mobile Touch Scrubbing
+  const handleTouch = React.useCallback(
+    (e: React.TouchEvent<SVGElement>) => {
+      const svg = svgRef.current;
+      if (!svg || coordinates.length === 0 || !e.touches[0]) return;
+      const rect = svg.getBoundingClientRect();
+      const clientX = e.touches[0].clientX;
+      const touchSvgX = ((clientX - rect.left) / rect.width) * svgWidth;
+
+      let closestIdx = 0;
+      let minDistance = Infinity;
+      for (let i = 0; i < coordinates.length; i++) {
+        const dist = Math.abs(coordinates[i]!.x - touchSvgX);
+        if (dist < minDistance) {
+          minDistance = dist;
+          closestIdx = i;
+        }
+      }
+      setHoveredIndex(closestIdx);
+    },
+    [coordinates, svgWidth]
+  );
+
   const handleMouseLeave = React.useCallback(() => {
     setHoveredIndex(null);
   }, []);
@@ -378,26 +401,29 @@ export function ScanPulse({
 
               {/* Y-Axis Value Reference Markers */}
               <text
-                x={paddingX - 10}
+                x={paddingX - 12}
                 y={paddingTop + 4}
                 textAnchor="end"
-                className="font-mono text-[9px] fill-[#5E5B54] pointer-events-none select-none"
+                fontSize="12"
+                className="font-mono fill-[#7E7B74] pointer-events-none select-none font-medium"
               >
                 {maxVal}
               </text>
               <text
-                x={paddingX - 10}
+                x={paddingX - 12}
                 y={paddingTop + chartHeight / 2 + 3}
                 textAnchor="end"
-                className="font-mono text-[9px] fill-[#5E5B54] pointer-events-none select-none"
+                fontSize="12"
+                className="font-mono fill-[#7E7B74] pointer-events-none select-none font-medium"
               >
                 {Math.round(maxVal / 2)}
               </text>
               <text
-                x={paddingX - 10}
+                x={paddingX - 12}
                 y={baselineY + 3}
                 textAnchor="end"
-                className="font-mono text-[9px] fill-[#5E5B54] pointer-events-none select-none"
+                fontSize="12"
+                className="font-mono fill-[#7E7B74] pointer-events-none select-none font-medium"
               >
                 0
               </text>
@@ -433,9 +459,10 @@ export function ScanPulse({
                   <text
                     key={`tick-${c.index}`}
                     x={c.x}
-                    y={baselineY + 16}
+                    y={baselineY + 20}
                     textAnchor="middle"
-                    className="font-mono text-[9.5px] fill-[#8E8B82] pointer-events-none select-none"
+                    fontSize="12"
+                    className="font-mono fill-[#8E8B82] pointer-events-none select-none font-medium"
                   >
                     {label}
                   </text>
@@ -519,16 +546,19 @@ export function ScanPulse({
                 </g>
               )}
 
-              {/* Transparent Interactive Mouse Tracking Overlay */}
+              {/* Transparent Interactive Touch & Mouse Tracking Overlay */}
               <rect
                 x={0}
                 y={0}
                 width={svgWidth}
                 height={svgHeight}
                 fill="transparent"
-                className="cursor-crosshair"
+                className="cursor-crosshair touch-none"
                 onMouseMove={handleMouseMove}
                 onMouseLeave={handleMouseLeave}
+                onTouchStart={handleTouch}
+                onTouchMove={handleTouch}
+                onTouchEnd={handleMouseLeave}
               />
             </svg>
 
@@ -547,7 +577,7 @@ export function ScanPulse({
       </div>
 
       {/* Accessible Table Alternative & Screen Reader Summary */}
-      <div className="mt-4 flex items-center justify-between border-t border-white/10 pt-3">
+      <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 border-t border-white/10 pt-3">
         <div className="font-mono text-[10px] text-[#8E8B82]">
           {(() => {
             if (!hasData) return "No telemetry records in filter window";
