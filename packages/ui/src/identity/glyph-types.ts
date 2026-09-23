@@ -1,34 +1,30 @@
 import type * as React from "react";
 
 export type IdentityAvatarSize = "xs" | "sm" | "md" | "lg" | "profile";
+export type IdentityAvatarVariant = "aura" | "marble" | "shield";
 
-export interface GlyphSeed {
+export interface ColorBlob {
+  cx: number;
+  cy: number;
+  r: number;
+  color: string;
+}
+
+export interface AvatarSeedData {
   hash: number;
-  fingerprint: string;       // e.g. "VS-7C21" for technical safety badge
-  family: number;            // 0 - 7 safety geometry families
-  rotation: 0 | 90 | 180 | 270;
-  mirrorX: boolean;
-  mirrorY: boolean;
-  segmentMask: number;       // bitmask for active sub-rails
-  nodePosition: number;      // 0 - 3 (which terminal has the verification node)
-  hasAuxRail: boolean;       // secondary structural construction segment
-  isVerified?: boolean;
+  fingerprint: string;
+  initials: string;
+  palette: [string, string, string, string]; // [base, accent1, accent2, accent3]
+  blobs: ColorBlob[];
+  isVerified: boolean;
 }
 
-export interface IdentityGlyphProps extends React.SVGProps<SVGSVGElement> {
-  seed: string;
-  name?: string;
-  size?: IdentityAvatarSize;
-  isVerified?: boolean;
-  className?: string;
-  showFingerprint?: boolean;
-}
-
-export interface IdentityAvatarProps {
+export interface IdentityAvatarProps extends React.HTMLAttributes<HTMLDivElement> {
   seed: string;
   name?: string;
   src?: string | null;
   size?: IdentityAvatarSize;
+  variant?: IdentityAvatarVariant;
   isVerified?: boolean;
   className?: string;
   showFingerprint?: boolean;
