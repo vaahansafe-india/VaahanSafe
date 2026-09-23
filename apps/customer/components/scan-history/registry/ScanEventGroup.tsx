@@ -68,7 +68,7 @@ export function ScanEventGroup({
         <div className="flex items-center gap-3 shrink-0">
           {emergencyCount > 0 && (
             <span className="inline-flex items-center gap-1 rounded-md bg-[#c64545]/10 px-2 py-0.5 font-mono text-[10px] font-bold text-[#c64545] border border-[#c64545]/20">
-              <VaahanIcon name="alert-triangle" size={11} aria-hidden="true" />
+              <VaahanIcon name="alert" size={11} aria-hidden="true" />
               <span>{emergencyCount} Emergency</span>
             </span>
           )}

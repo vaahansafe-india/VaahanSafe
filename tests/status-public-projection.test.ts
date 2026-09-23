@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import fs from "node:fs";
 import path from "node:path";
-import { getPublicSystemStatus } from "@vaahansafe/status-core";
+import { getPublicSystemStatus } from "@vaahansafe/status-core/server";
 
 describe("VaahanSafe Status — Public Projection, System Pulse & Zero-Leak Invariants", () => {
   const statusAppDir = path.resolve(__dirname, "../apps/status");

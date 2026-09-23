@@ -214,7 +214,7 @@ export function ScanPulse({
 
   // High-performance, jitter-free cursor tracking
   const handleMouseMove = React.useCallback(
-    (e: React.MouseEvent<SVGSVGElement>) => {
+    (e: React.MouseEvent<SVGElement>) => {
       const svg = svgRef.current;
       if (!svg || coordinates.length === 0) return;
       const rect = svg.getBoundingClientRect();
