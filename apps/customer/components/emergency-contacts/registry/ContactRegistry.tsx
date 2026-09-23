@@ -175,7 +175,7 @@ export function ContactRegistry({
           </button>
         </div>
       ) : (
-        <div className="divide-y divide-border/60">
+        <div className="flex flex-col gap-2.5 sm:gap-0 sm:divide-y sm:divide-border/60">
           {filteredContacts.map((contact, idx) => (
             <ContactRecord
               key={contact.id}

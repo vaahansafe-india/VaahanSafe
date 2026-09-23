@@ -45,7 +45,7 @@ export function PrimaryContactPanel({
                 className="shrink-0"
               />
               <div className="flex-1 min-w-0">
-                <h3 className="truncate font-serif text-xl sm:text-2xl font-medium text-foreground">
+                <h3 className="font-serif text-lg sm:text-2xl font-medium text-foreground leading-snug break-words">
                   {primaryContact.name}
                 </h3>
                 <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs">

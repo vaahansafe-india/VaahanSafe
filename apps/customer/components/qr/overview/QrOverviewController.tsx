@@ -513,7 +513,7 @@ export function QrOverviewController({ overview }: QrOverviewControllerProps) {
                   )}
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-2">
+                <div className="flex flex-row gap-2">
                   {primarySticker?.resolverUrl ? (
                     <>
                       <a
