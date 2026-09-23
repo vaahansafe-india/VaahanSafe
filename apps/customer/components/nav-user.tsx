@@ -7,8 +7,6 @@ import {
   LogOut,
   Shield,
   User as UserIcon,
-  PhoneCall,
-  Settings,
 } from "lucide-react"
 
 import {
@@ -156,21 +154,9 @@ export function NavUser({ user }: NavUserProps) {
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild className="focus:bg-accent focus:text-accent-foreground cursor-pointer">
-                <Link href="/settings" className="flex items-center gap-2">
-                  <Settings className="size-4 text-muted-foreground" />
-                  <span>Account Overview</span>
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild className="focus:bg-accent focus:text-accent-foreground cursor-pointer">
                 <Link href="/settings/security" className="flex items-center gap-2">
                   <Shield className="size-4 text-muted-foreground" />
                   <span>Security & Sessions</span>
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild className="focus:bg-accent focus:text-accent-foreground cursor-pointer">
-                <Link href="/emergency-contacts" className="flex items-center gap-2">
-                  <PhoneCall className="size-4 text-[#5db8a6]" />
-                  <span>Emergency Contacts</span>
                 </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
