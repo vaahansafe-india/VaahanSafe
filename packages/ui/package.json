@@ -14,6 +14,7 @@
     "./theme": "./src/theme/index.ts",
     "./theme/*": "./src/theme/*.tsx",
     "./brand": "./src/brand/index.ts",
+    "./identity": "./src/identity/index.ts",
     "./lib/utils": "./src/lib/utils.ts",
     "./styles/globals.css": "./src/styles/globals.css",
     "./brand/styles.css": "./src/brand/brand-motion.css"

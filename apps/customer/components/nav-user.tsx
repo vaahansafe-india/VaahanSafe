@@ -9,11 +9,8 @@ import {
   User as UserIcon,
 } from "lucide-react"
 
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar"
+import { IdentityAvatar } from "@vaahansafe/ui"
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -48,13 +45,6 @@ export function NavUser({ user }: NavUserProps) {
     (user?.email ? user.email.split("@")[0] : undefined) ||
     (user?.phone ? (user.phone.startsWith("+91") ? `+91 ${user.phone.slice(-10)}` : user.phone) : "Vehicle Owner")
 
-  const avatarInitial = (
-    user?.name?.trim() ||
-    user?.email ||
-    "V"
-  )
-    .charAt(0)
-    .toUpperCase()
 
   const isVerified = user?.phoneVerified ?? Boolean(user?.phone)
 
@@ -74,13 +64,15 @@ export function NavUser({ user }: NavUserProps) {
               tooltip={displayName}
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground border border-transparent hover:border-sidebar-border transition-all rounded-xl p-2 group-data-[collapsible=icon]:!size-8 group-data-[collapsible=icon]:!p-0 group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:items-center"
             >
-              {/* Dynamic Coral Monogram Avatar */}
-              <Avatar className="h-8 w-8 rounded-lg border border-[#cc785c]/30 bg-[#cc785c]/15 text-[#cc785c] shrink-0">
-                {user?.avatar && <AvatarImage src={user.avatar} alt={displayName} />}
-                <AvatarFallback className="rounded-lg bg-transparent font-mono text-xs font-bold text-[#cc785c]">
-                  {avatarInitial}
-                </AvatarFallback>
-              </Avatar>
+              {/* Deterministic VaahanSafe Identity Glyph Avatar */}
+              <IdentityAvatar
+                seed={user?.phone || user?.email || displayName}
+                name={displayName}
+                src={user?.avatar}
+                isVerified={isVerified}
+                size="sm"
+                className="shrink-0"
+              />
 
               <div className="grid flex-1 text-left text-xs leading-tight min-w-0 group-data-[collapsible=icon]:hidden">
                 <span className="truncate font-medium text-sidebar-foreground">
@@ -115,12 +107,14 @@ export function NavUser({ user }: NavUserProps) {
           >
             <DropdownMenuLabel className="p-2 font-normal">
               <div className="flex items-center gap-3 text-left text-sm">
-                <Avatar className="h-9 w-9 rounded-lg border border-[#cc785c]/30 bg-[#cc785c]/15 text-[#cc785c]">
-                  {user?.avatar && <AvatarImage src={user.avatar} alt={displayName} />}
-                  <AvatarFallback className="rounded-lg bg-transparent font-mono text-sm font-bold text-[#cc785c]">
-                    {avatarInitial}
-                  </AvatarFallback>
-                </Avatar>
+                <IdentityAvatar
+                  seed={user?.phone || user?.email || displayName}
+                  name={displayName}
+                  src={user?.avatar}
+                  isVerified={isVerified}
+                  size="md"
+                  className="shrink-0"
+                />
                 <div className="grid flex-1 text-left text-xs leading-tight">
                   <span className="truncate font-semibold text-popover-foreground">
                     {displayName}

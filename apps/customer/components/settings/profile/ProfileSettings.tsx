@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { VaahanIcon } from "@vaahansafe/icons";
-import { Button, Avatar, AvatarFallback, AvatarImage } from "@vaahansafe/ui";
+import { Button, IdentityAvatar } from "@vaahansafe/ui";
 import { SettingsSection } from "../primitives/SettingsSection";
 import { SettingRow } from "../primitives/SettingRow";
 import { SettingStatus } from "../primitives/SettingStatus";
@@ -31,15 +31,6 @@ export function ProfileSettings({ data }: ProfileSettingsProps) {
   const [isNameDialogOpen, setIsNameDialogOpen] = React.useState(false);
   const [isMobileDialogOpen, setIsMobileDialogOpen] = React.useState(false);
 
-  // Compute initials for avatar fallback
-  const initials =
-    userName
-      .split(" ")
-      .map((n) => n[0])
-      .filter(Boolean)
-      .slice(0, 2)
-      .join("")
-      .toUpperCase() || "VS";
 
   const handleMobileVerificationSuccess = (newPhone: string) => {
     setRawPhone(newPhone);
@@ -106,14 +97,15 @@ export function ProfileSettings({ data }: ProfileSettingsProps) {
           description="A clear representation helps first responders identify the vehicle owner."
         >
           <div className="flex items-center gap-2.5 justify-end">
-            <Avatar className="h-9 w-9 sm:h-10 sm:w-10 border border-border bg-[#cc785c]/10 text-[#cc785c] shrink-0 shadow-2xs">
-              {data.user.avatarUrl && <AvatarImage src={data.user.avatarUrl} alt={userName} />}
-              <AvatarFallback className="font-mono text-xs font-semibold text-[#cc785c]">
-                {initials}
-              </AvatarFallback>
-            </Avatar>
+            <IdentityAvatar
+              seed={data.user.phone || data.user.email || userName}
+              name={userName}
+              src={data.user.avatarUrl}
+              isVerified={isVerified}
+              size="md"
+            />
             <span className="font-mono text-xs text-muted-foreground hidden sm:inline">
-              {data.user.avatarUrl ? "Synced via Google" : "Default Avatar"}
+              {data.user.avatarUrl ? "Synced via Google" : "Safety Identity Glyph"}
             </span>
           </div>
         </SettingRow>
