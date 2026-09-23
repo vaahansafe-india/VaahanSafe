@@ -57,7 +57,7 @@ export function SettingRow({
         <div
           className={`shrink-0 flex items-center gap-2 sm:gap-3 ${
             stackOnMobile
-              ? `${icon ? "pl-13 sm:pl-0" : ""} self-start sm:self-center w-full sm:w-auto justify-start sm:justify-end`
+              ? `${icon ? "pl-12 sm:pl-0" : ""} self-start sm:self-center w-full sm:w-auto justify-start sm:justify-end`
               : "self-center justify-end"
           }`}
         >
