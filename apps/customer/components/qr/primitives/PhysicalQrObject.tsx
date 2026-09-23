@@ -42,14 +42,14 @@ export function PhysicalQrObject({
       />
 
       {/* Header: VaahanSafe Safety Mark */}
-      <div className="flex w-full items-center justify-between border-b border-border/80 dark:border-border/60 pb-3.5">
+      <div className="flex w-full items-center justify-between border-b border-border/80 dark:border-white/10 pb-3.5">
         <div className="flex items-center gap-2">
           <VaahanSafeMark className="h-5 w-5 text-[#cc785c]" />
           <div>
-            <span className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground dark:text-neutral-100">
+            <span className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground dark:text-zinc-100">
               VAAHANSAFE
             </span>
-            <span className="ml-2 font-mono text-[9px] uppercase tracking-wider text-muted-foreground dark:text-neutral-400">
+            <span className="ml-2 font-mono text-[9px] uppercase tracking-wider text-muted-foreground dark:text-zinc-400">
               SAFETY IDENTITY
             </span>
           </div>
@@ -73,29 +73,29 @@ export function PhysicalQrObject({
         </div>
 
         {/* Scan instruction */}
-        <div className="mt-3 flex items-center gap-1.5 font-mono text-[10px] text-muted-foreground dark:text-neutral-400">
+        <div className="mt-3 flex items-center gap-1.5 font-mono text-[10px] text-muted-foreground dark:text-zinc-300 font-medium">
           <VaahanIcon name="qr-scan" size={13} className="text-[#cc785c]" />
           <span>Scan with camera to connect</span>
         </div>
       </div>
 
       {/* Physical Sticker Anatomy Footer */}
-      <div className="w-full rounded-xl border border-border/80 bg-muted/40 dark:border-border/60 dark:bg-muted/20 p-3">
+      <div className="w-full rounded-xl border border-border/80 bg-muted/40 dark:border-white/10 dark:bg-white/[0.04] p-3">
         <div className="flex items-center justify-between text-xs">
           <div>
-            <div className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground dark:text-neutral-400">
+            <div className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground dark:text-zinc-400">
               Permanent Identity
             </div>
-            <div className="font-mono font-bold tracking-wider text-foreground dark:text-neutral-200">
+            <div className="font-mono font-bold tracking-wider text-foreground dark:text-zinc-100">
               {displayCode}
             </div>
           </div>
           {vehiclePlate && (
             <div className="text-right">
-              <div className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground dark:text-neutral-400">
+              <div className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground dark:text-zinc-400">
                 Connected Vehicle
               </div>
-              <div className="font-mono font-semibold text-foreground dark:text-neutral-200">
+              <div className="font-mono font-semibold text-foreground dark:text-zinc-100">
                 {vehiclePlate}
               </div>
             </div>
@@ -103,11 +103,11 @@ export function PhysicalQrObject({
         </div>
 
         {/* Conceptual Scan Progression */}
-        <div className="mt-2.5 flex items-center justify-between border-t border-border/70 dark:border-border/50 pt-2 font-mono text-[8.5px] uppercase tracking-wider text-muted-foreground dark:text-neutral-400">
-          <span className="text-foreground/80 dark:text-neutral-300 font-medium">1. Scan QR</span>
-          <span>&rarr;</span>
-          <span className="text-foreground/80 dark:text-neutral-300 font-medium">2. Owner Shield</span>
-          <span>&rarr;</span>
+        <div className="mt-2.5 flex items-center justify-between border-t border-border/70 dark:border-white/10 pt-2 font-mono text-[8.5px] uppercase tracking-wider text-muted-foreground dark:text-zinc-400">
+          <span className="text-foreground/90 dark:text-zinc-200 font-medium">1. Scan QR</span>
+          <span className="text-muted-foreground/60 dark:text-zinc-500">&rarr;</span>
+          <span className="text-foreground/90 dark:text-zinc-200 font-medium">2. Owner Shield</span>
+          <span className="text-muted-foreground/60 dark:text-zinc-500">&rarr;</span>
           <span className="text-emerald-600 dark:text-emerald-400 font-semibold">3. Safety View</span>
         </div>
       </div>
