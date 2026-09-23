@@ -24,7 +24,7 @@ export function ScanEventRow({ event, onSelect }: ScanEventRowProps) {
           onSelect(event);
         }
       }}
-      className="group relative flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 p-3.5 sm:px-4 sm:py-3.5 rounded-xl border border-border/40 sm:border-transparent hover:border-border/80 hover:bg-muted/40 transition-all duration-150 cursor-pointer select-none bg-card/50 sm:bg-transparent"
+      className="group relative flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 p-3.5 sm:px-4 sm:py-3.5 rounded-xl border border-border/60 hover:border-border/90 hover:bg-muted/40 transition-all duration-150 cursor-pointer select-none bg-card/60 sm:bg-card/40 shadow-xs"
     >
       {/* Desktop Node Indicator (Left Rail) */}
       <div className="hidden sm:flex items-center shrink-0">

@@ -32,7 +32,9 @@ export function ScanEventGroup({
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
         aria-expanded={isOpen}
-        className="w-full flex items-center justify-between p-3.5 sm:p-4 bg-muted/20 hover:bg-muted/40 transition-colors cursor-pointer select-none text-left"
+        className={`w-full flex items-center justify-between p-3.5 sm:p-4 bg-muted/20 hover:bg-muted/40 transition-colors cursor-pointer select-none text-left ${
+          isOpen ? "border-b border-border/40" : ""
+        }`}
       >
         {/* Left: Date Category & Pulse Pill */}
         <div className="flex items-center gap-2.5 min-w-0">
@@ -90,7 +92,7 @@ export function ScanEventGroup({
 
       {/* Accordion Body: Event Rows */}
       {isOpen && (
-        <div className="divide-y divide-border/30 p-1 sm:p-2 bg-background/30">
+        <div className="flex flex-col gap-2.5 sm:gap-2 p-2.5 sm:p-3 bg-muted/5">
           {events.map((evt) => (
             <ScanEventRow key={evt.id} event={evt} onSelect={onSelectEvent} />
           ))}
