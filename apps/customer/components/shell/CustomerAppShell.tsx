@@ -164,18 +164,18 @@ export function CustomerAppShell({
           <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
             {/* Active Vehicle Context */}
             {vehicles.length > 0 && activeVehicle ? (
-              <div className="hidden sm:flex items-center gap-2 rounded-lg border border-border bg-muted/40 px-2.5 py-1">
+              <div className="hidden sm:flex h-8 items-center gap-2 rounded-lg border border-border bg-muted/40 px-3 shrink-0">
                 <span className="text-[#cc785c]">
                   <VaahanIcon name="vehicle" size={13} aria-hidden="true" />
                 </span>
-                <span className="font-mono text-xs font-bold uppercase text-foreground">
+                <span className="font-mono text-xs font-bold uppercase text-foreground leading-none">
                   {activeVehicle.registrationNumber}
                 </span>
               </div>
             ) : (
               <Link
                 href="/vehicles"
-                className="hidden sm:inline-flex items-center gap-1.5 rounded-lg border border-dashed border-[#cc785c]/60 bg-[#cc785c]/5 px-2.5 py-1 text-xs font-medium text-[#cc785c] hover:bg-[#cc785c]/10 transition-colors"
+                className="hidden sm:inline-flex h-8 items-center gap-1.5 rounded-lg border border-dashed border-[#cc785c]/60 bg-[#cc785c]/5 px-3 text-xs font-medium text-[#cc785c] hover:bg-[#cc785c]/10 transition-colors shrink-0"
               >
                 <span className="font-mono text-xs font-bold leading-none">+</span>
                 <span>Link Vehicle</span>

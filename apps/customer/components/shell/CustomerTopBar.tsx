@@ -83,7 +83,7 @@ export function CustomerTopBar({
         {/* VEHICLE CONTEXT: Selector (Real Data or Intentional Empty State) */}
         <div aria-label="VEHICLE CONTEXT" className="flex items-center">
           {vehicles.length > 0 && activeVehicle ? (
-            <div className="hidden sm:flex items-center gap-2 rounded-lg border border-border bg-muted/40 px-2.5 py-1.5">
+            <div className="hidden sm:flex h-9 items-center gap-2 rounded-lg border border-border bg-muted/40 px-3 shrink-0">
             <span className="text-[#cc785c]">
               <VaahanIcon name="vehicle" size={14} aria-hidden="true" />
             </span>
@@ -104,7 +104,7 @@ export function CustomerTopBar({
         ) : (
           <Link
             href="/vehicles/new"
-            className="hidden sm:inline-flex items-center gap-1.5 rounded-lg border border-dashed border-[#cc785c]/60 bg-[#cc785c]/5 px-2.5 py-1 text-xs font-medium text-[#cc785c] transition-colors hover:bg-[#cc785c]/10"
+            className="hidden sm:inline-flex h-9 items-center gap-1.5 rounded-lg border border-dashed border-[#cc785c]/60 bg-[#cc785c]/5 px-3 text-xs font-medium text-[#cc785c] transition-colors hover:bg-[#cc785c]/10 shrink-0"
           >
             <span className="font-mono text-xs font-bold leading-none">+</span>
             <span>Link Vehicle</span>
