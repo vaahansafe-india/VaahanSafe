@@ -1,102 +1,31 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { ArrowUpRight, FileText } from "lucide-react";
+import { OFFICIAL_GUIDES, calculateReadingTimeMinutes } from "../../lib/documents/official-guides";
 import { SiteHeader } from "../../components/marketing/site-header";
 import { SiteFooter } from "../../components/marketing/site-footer";
-import { DocumentsHero } from "../../components/documents/DocumentsHero";
-import { LibraryJourneyRail } from "../../components/documents/LibraryJourneyRail";
-import { DocumentsCatalogue } from "../../components/documents/DocumentsCatalogue";
-import { DocumentsCrossLinkStation } from "../../components/documents/DocumentsCrossLinkStation";
 
-export const metadata: Metadata = {
-  title: "Documents | VaahanSafe",
-  description:
-    "Explore official VaahanSafe product, activation, QR placement, safety, privacy and service guides.",
-  openGraph: {
-    title: "VaahanSafe Documents — Official Product Library",
-    description:
-      "Explore official VaahanSafe product, activation, QR placement, safety, privacy and service guides.",
-    url: "https://vaahansafe.com/documents",
-    type: "website",
-  },
-  alternates: {
-    canonical: "https://vaahansafe.com/documents",
-  },
-};
-
-export default function DocumentsPage() {
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "CollectionPage",
-    name: "VaahanSafe Product Library",
-    description:
-      "Official reference library and documentation for VaahanSafe vehicle safety identities.",
-    url: "https://vaahansafe.com/documents",
-    publisher: {
-      "@type": "Organization",
-      name: "VaahanSafe",
-      url: "https://vaahansafe.com",
-    },
-    hasPart: [
-      {
-        "@type": "TechArticle",
-        name: "VaahanSafe Product Guide",
-        url: "https://vaahansafe.com/documents/product-guide",
-      },
-      {
-        "@type": "TechArticle",
-        name: "VaahanSafe Quick-Start Guide",
-        url: "https://vaahansafe.com/documents/quick-start",
-      },
-      {
-        "@type": "TechArticle",
-        name: "Retail QR Activation Guide",
-        url: "https://vaahansafe.com/documents/activation",
-      },
-      {
-        "@type": "TechArticle",
-        name: "QR Placement Guide",
-        url: "https://vaahansafe.com/documents/qr-placement",
-      },
-      {
-        "@type": "TechArticle",
-        name: "Safety & Emergency Contact Guide",
-        url: "https://vaahansafe.com/documents/safety",
-      },
-      {
-        "@type": "TechArticle",
-        name: "VaahanSafe Privacy Guide",
-        url: "https://vaahansafe.com/documents/privacy",
-      },
-      {
-        "@type": "TechArticle",
-        name: "Plans, Orders & Support Guide",
-        url: "https://vaahansafe.com/documents/plans-orders-support",
-      },
-    ],
-  };
-
-  return (
-    <div className="flex min-h-screen flex-col bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-      <SiteHeader />
-
-      <main id="main-content" className="flex-1">
-        {/* 01 Hero */}
-        <DocumentsHero />
-
-        {/* 02 Thin Architectural Journey Rail */}
-        <LibraryJourneyRail />
-
-        {/* 03 Editorial Document Catalogue with Integrated Search */}
-        <DocumentsCatalogue />
-
-        {/* 04 Ecosystem Cross-Link */}
-        <DocumentsCrossLinkStation />
-      </main>
-
-      <SiteFooter />
-    </div>
-  );
+export const metadata: Metadata = { title: "Documents & Guides | VaahanSafe", description: "Product, activation, placement, safety, privacy and service guides for VaahanSafe." };
+const policies = [
+  { title: "Privacy policy", href: "/privacy", description: "Account data, public safety information and your privacy choices." },
+  { title: "Terms of service", href: "/terms", description: "Account, vehicle, QR and service responsibilities." },
+  { title: "Refund policy", href: "/refund-policy", description: "How a purchase problem or refund request is reviewed." },
+  { title: "Shipping policy", href: "/shipping-policy", description: "Order fulfilment, delivery and tracking guidance." },
+  { title: "Subscription terms", href: "/subscription-terms", description: "Optional plan features, billing and renewal conditions." },
+  { title: "Cookie policy", href: "/cookie-policy", description: "How website cookies support essential functions." },
+  { title: "Disclaimer", href: "/disclaimer", description: "The limits of safety information and emergency contact tools." },
+];
+export default function Page() {
+  return <div className="vs-page"><SiteHeader /><main id="main-content" className="vs-page-main">
+    <section className="vs-page-hero"><div className="vs-container"><span className="vs-kicker">THE LIBRARY / GUIDES & POLICIES</span><h1>Good guidance,<br /><em>close at hand.</em></h1><p>Everything you need to understand the product, set up your vehicle identity, choose what can be shared and find the right support path.</p></div></section>
+    <section className="vs-page-body"><div className="vs-container">
+      <div className="vs-doc-intro"><div><span className="vs-kicker">A PLACE TO START</span><h2>Follow the step you are on.</h2><p>New to VaahanSafe? Begin with the Product Guide, then use Quick Start for setup. If you already have a retail kit, use the Activation Guide. Keep the separate scratch proof private and enter it only in the official activation flow.</p></div><Link className="vs-button vs-button-dark" href="/documents/quick-start">Open quick start <ArrowUpRight size={18} /></Link></div>
+      <nav className="vs-doc-journey" aria-label="Guide topics">{OFFICIAL_GUIDES.map(guide => <a key={guide.slug} href={`#guide-${guide.slug}`}><span>{guide.number}</span>{guide.stepName}</a>)}</nav>
+      <div className="vs-section-heading"><span className="vs-kicker">01 / PRODUCT GUIDES</span><h2>Read the guide that fits.</h2><p>Each document covers a distinct part of the journey. You can read them in order or go directly to the detail you need.</p></div>
+      <div className="vs-doc-grid">{OFFICIAL_GUIDES.map(guide => <Link id={`guide-${guide.slug}`} href={`/documents/${guide.slug}`} key={guide.slug}><span><FileText size={19} aria-hidden="true" /> {guide.docId}</span><strong>{guide.title}</strong><p>{guide.subtitle}</p><small>{calculateReadingTimeMinutes(guide)} min read · {guide.sections.length} sections</small><b>Read guide <ArrowUpRight size={17} /></b></Link>)}</div>
+      <div className="vs-section-heading vs-doc-policy-heading"><span className="vs-kicker">02 / POLICIES</span><h2>The details that matter.</h2><p>These pages explain privacy, account use, purchases and service conditions. Documents awaiting final legal review are marked on their own pages.</p></div>
+      <div className="vs-doc-policies">{policies.map(policy => <Link key={policy.href} href={policy.href}><span><strong>{policy.title}</strong><small>{policy.description}</small></span><ArrowUpRight size={19} aria-hidden="true" /></Link>)}</div>
+      <div className="vs-resource-panel"><span className="vs-kicker">03 / WHEN YOU NEED SUPPORT</span><h2>Bring the right reference.</h2><p>For an order or account issue, include the relevant reference and the step you are completing. Do not send an OTP, password, card detail or activation proof. If someone is in immediate danger in India, call 112.</p><Link className="vs-button vs-button-dark" href="/help">Open help centre <ArrowUpRight size={18} /></Link></div>
+    </div></section>
+  </main><SiteFooter /></div>;
 }

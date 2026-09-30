@@ -159,7 +159,8 @@ describe("Section 15.4 VaahanSafe Documents Reference Library", () => {
 
     const sub07b = guide?.sections.find((s) => s.id === "sub-guide-07b");
     expect(sub07b?.title).toContain("07B Purchase & Refund Guide");
-    expect(sub07b?.callout?.text).toContain("NO REFUND DOES NOT MEAN NO SUPPORT");
+    expect(sub07b?.callout?.text).toContain("Support reviews the confirmed issue");
+    expect(sub07b?.callout?.text).toContain("no automatic refund");
 
     const sub07c = guide?.sections.find((s) => s.id === "sub-guide-07c");
     expect(sub07c?.title).toContain("07C Shipping & Courier Guide");

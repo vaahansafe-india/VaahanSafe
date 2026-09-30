@@ -348,10 +348,10 @@ export const PUBLISHED_ARTICLES: readonly BlogPost[] = [
     slug: "good-samaritan-law-india",
     title: "Good Samaritan Law in India: Legal Protection for Roadside Helpers",
     excerpt:
-      "A complete legal treatise on your statutory immunity under Section 134A of the Motor Vehicles Act, hospital admission mandates under Section 357C CrPC, police interrogation boundaries, and the MoRTH ₹5,000 incentive scheme.",
-    deck: "Fear of legal entanglement and police harassment has historically prevented 80% of bystanders from assisting accident victims. Indian law now guarantees absolute civil and criminal immunity, strict confidentiality, and free hospital admission.",
+      "An overview of India's Good Samaritan protections, hospital duties and official guidance for people helping at a road incident. Check current government guidance for scheme details.",
+    deck: "A starting point for understanding Good Samaritan protections and where to find the current official rules.",
     intro:
-      "For decades, the standard advice given to motorists in India was to 'never get involved' in a roadside accident. The fear of endless police interrogations, being framed under Section 304A IPC for negligent death, spending years attending magistrate court hearings, and being extorted by private hospitals for admission deposits paralyzed potential lifesavers. Today, that legal reality has been completely overturned. The Supreme Court of India and Parliament have codified ironclad protections for Good Samaritans. This guide details every single legal right, boundary, and protocol you possess as a roadside helper.",
+      "People may hesitate to help at a road incident because they are unsure of their safety or legal position. India has Good Samaritan protections, including Section 134A of the Motor Vehicles Act and related rules. This article introduces those sources; for a specific situation, consult the current official text and qualified local advice.",
     category: "Vehicle Safety",
     categorySlug: "vehicle-safety",
     status: "PUBLISHED",
@@ -371,11 +371,11 @@ export const PUBLISHED_ARTICLES: readonly BlogPost[] = [
       href: "/documents/good-samaritan-charter",
     },
     keyTakeaways: [
-      "Section 134A of the Motor Vehicles Act 1988 (amended 2019) grants complete statutory immunity: no bystander can be held liable in any civil or criminal action for injury or death of an accident victim.",
+      "Section 134A of the Motor Vehicles Act provides defined civil and criminal liability protection to Good Samaritans assisting a road accident victim. Read the statutory conditions before treating that protection as absolute.",
       "Police cannot compel any helper to disclose their name, residential address, telephone number, or religion. Anonymous reporting via 112 or 1033 is an established legal right.",
       "Both government and private hospitals are legally barred from demanding advance deposits, registration fees, or admission paperwork before initiating emergency trauma care (Section 357C CrPC).",
       "If a helper voluntarily agrees to be a witness, they can only be examined in a single sitting, at a time and location of their own choosing, and in plain clothes.",
-      "Under the MoRTH Incentive Scheme, Good Samaritans are entitled to an immediate ₹5,000 cash grant and a Certificate of Appreciation, alongside eligibility for national awards of ₹1,00,000.",
+      "Awards have separate eligibility and time limits. The Ministry's Rah-Veer scheme guidelines dated April 2025 should be checked against any later extension before relying on an award amount or application route.",
     ],
     body: [
       {
@@ -392,13 +392,13 @@ export const PUBLISHED_ARTICLES: readonly BlogPost[] = [
         heading: "2. Section 134A Motor Vehicles Act: The Statutory Immunity Framework",
         paragraphs: [
           "The centerpiece of bystander protection is Section 134A of the Motor Vehicles (Amendment) Act 2019, which entered into force across all states and Union Territories. The statute provides:",
-          "'A Good Samaritan shall not be liable for any civil or criminal action for any injury to or death of the victim of an accident observed by them or while assisting them, resulting from their negligence or omission in rendering emergency medical or non-medical care or assistance.'",
+          "The Act defines when a Good Samaritan is protected from civil or criminal action for injury or death resulting from negligence while rendering emergency medical or non-medical care or assistance. Read the full section for its scope and conditions.",
           "The definition of a 'Good Samaritan' covers any individual who voluntarily steps forward to administer first aid, arrange transport, alert emergency services, or assist a victim in good faith. The protection applies universally on highways, municipal roads, and rural corridors.",
         ],
         callout: {
           type: "statute",
           title: "Section 134A(1) Motor Vehicles Act 1988",
-          text: "Absolute immunity: A Good Samaritan cannot be sued, prosecuted, or investigated for civil or criminal damages if an accident victim suffers complications or passes away during bona fide rescue efforts.",
+          text: "Section 134A provides a defined liability protection for Good Samaritans. It should be read with the statutory definition and current rules; this article is not a case-specific legal determination.",
         },
       },
       {
@@ -441,15 +441,13 @@ export const PUBLISHED_ARTICLES: readonly BlogPost[] = [
       },
       {
         id: "section-5",
-        heading: "5. Cash Rewards & State Recognition: The MoRTH Incentive Scheme",
+        heading: "5. Awards: Check the Current Rah-Veer Guidelines",
         paragraphs: [
-          "To actively encourage citizens to rescue accident victims, MoRTH operationalized the 'Scheme for Financial Assistance to Good Samaritans'. The scheme provides tangible monetary incentives and state recognition:",
+          "The Ministry issued revised Rah-Veer award guidelines on 21 April 2025. That document specified an award amount and an operating period ending 31 March 2026. Confirm whether a later scheme or extension applies before making a claim.",
         ],
         bullets: [
-          "Immediate Cash Grant: Any Good Samaritan who rescues an accident victim involving serious trauma and transports them to a hospital within the Golden Hour receives a cash reward of ₹5,000 per incident.",
-          "Certificate of Appreciation: Along with the financial reward, the District Magistrate (DM) issues an official government Certificate of Appreciation.",
-          "Multiple Incidents: A helper can receive the ₹5,000 award up to five times in a single calendar year.",
-          "National Annual Awards: The Ministry selects the top 10 Good Samaritans across India each year, conferring a national award of ₹1,00,000 each, presented by the Minister of Road Transport & Highways.",
+          "Read the Ministry's current scheme document for eligibility, award amount, evidence and application procedure.",
+          "Do not assume a payment is automatic or immediate after helping at a road incident.",
         ],
       },
       {
@@ -484,7 +482,7 @@ export const PUBLISHED_ARTICLES: readonly BlogPost[] = [
       {
         question: "What happens if an accident victim passes away despite my immediate help?",
         answer:
-          "Under Section 134A(1) of the Motor Vehicles Act, you have absolute statutory immunity. You cannot be subjected to civil litigation for medical consequences or criminal prosecution for unintentional death resulting from your bona fide rescue efforts. The law explicitly protects you from liability.",
+          "Section 134A provides a defined protection for Good Samaritans assisting a road accident victim. Whether it applies to a specific incident depends on the facts and the statutory conditions. Seek qualified legal advice if you face a claim or investigation.",
       },
       {
         question: "Can a hospital ask me to pay for blood or ICU admission before treating the victim?",
@@ -497,9 +495,9 @@ export const PUBLISHED_ARTICLES: readonly BlogPost[] = [
           "No. The Central Motor Vehicles (Protection of Good Samaritans) Rules 2020 strictly forbid police from summoning Good Samaritans to police stations. If you voluntarily agree to provide a witness statement, the examination must take place at a time and location of your own convenience (such as your residence or office), in a single sitting, and by an officer dressed in plain clothes.",
       },
       {
-        question: "How do I claim the MoRTH ₹5,000 Good Samaritan reward?",
+        question: "Where can I check current Rah-Veer award eligibility?",
         answer:
-          "When you bring a victim to the hospital casualty ward, the attending medical officer records the incident in an official Good Samaritan registry and informs the local District Level Appraisal Committee (headed by the District Magistrate). Once confirmed, the ₹5,000 award is disbursed directly into your bank account via Direct Benefit Transfer (DBT).",
+          "Check the latest Ministry of Road Transport and Highways Rah-Veer guidelines and your state transport authority. The April 2025 guidelines set an operating period through 31 March 2026; confirm any later extension before relying on the award process.",
       },
     ],
     references: [
@@ -524,9 +522,10 @@ export const PUBLISHED_ARTICLES: readonly BlogPost[] = [
         relevance: "Mandatory free emergency first aid and medical stabilization at all private and public hospitals",
       },
       {
-        citation: "MoRTH Scheme for Financial Assistance to Good Samaritans (Order No. RT-25035/101/2014-RS)",
+        citation: "MoRTH Rah-Veer Scheme Guidelines dated 21 April 2025",
         source: "morth.nic.in",
-        relevance: "Operational guidelines for the ₹5,000 cash grant and annual National Good Samaritan awards",
+        url: "https://morth.gov.in/sites/default/files/Scheme-Guidelines-on-RahVeer.pdf",
+        relevance: "Historical award terms and operating period; check for newer guidance",
       },
     ],
     relatedSlugs: ["roadside-bystander-action-chain", "emergency-contact-relays"],
@@ -968,8 +967,8 @@ export const PUBLISHED_ARTICLES: readonly BlogPost[] = [
       "The system enforces four distinct, decoupled concepts: Payment State, QR Lifecycle State, Entitlement State, and Subscription State.",
       "Three identifiers must NEVER be collapsed: Internal Database ID != Public Opaque Identifier != Activation Secret Key.",
       "Physical retail stickers exist in inventory prior to ownership, remaining inert with zero active capabilities until cryptographic verification.",
-      "Retail activation requires one-way SHA-256 hash verification of a concealed scratch PIN alongside server-verified phone authentication.",
-      "Edge resolvers on Cloudflare Workers return dynamic safety projections in under 45ms without exposing underlying D1 database schemas.",
+      "Retail activation requires server-side verification of a separate private proof and a verified account before a vehicle can be bound.",
+      "A public QR identifier is only a lookup key. The server decides which information and services, if any, may be shown.",
     ],
     body: [
       {
@@ -1016,8 +1015,8 @@ export const PUBLISHED_ARTICLES: readonly BlogPost[] = [
           headers: ["Identifier", "Format / Example", "Storage Location", "Public Exposure Rule"],
           rows: [
             ["1. Internal Database ID", "`qr_9x2k41b08f`", "Cloudflare D1 Primary Key", "STRICTLY PRIVATE: Never returned to client DOM or URLs"],
-            ["2. Public Opaque Identifier", "`vs_8f4k9a21` (High-entropy nanoid)", "D1 Unique Indexed Column", "PUBLIC: Encoded into physical QR URL (`qr.vaahansafe.com/vs_...`)"],
-            ["3. Activation Secret Proof", "Concealed 6-to-8 digit scratch PIN", "Stored as salted SHA-256 hash", "PRIVATE: Concealed under scratch foil; never stored in plaintext"],
+            ["2. Public Opaque Identifier", "Cryptographically random, non-sequential value", "D1 unique indexed column", "PUBLIC: Encoded into the physical resolver URL"],
+            ["3. Activation Secret Proof", "Separate private claim credential", "Server-side one-way verification", "PRIVATE: Never encoded in the QR or exposed by the resolver"],
           ],
         },
       },
@@ -1043,13 +1042,13 @@ export const PUBLISHED_ARTICLES: readonly BlogPost[] = [
           {
             number: "03",
             title: "Concealed Secret Proof Verification",
-            detail: "The user scratches the security foil to reveal the private PIN. The server computes `SHA-256(PIN + Salt)` and verifies it against D1. Rate-limiting protects against brute-force guessing.",
+            detail: "The user reveals the separate private proof and enters it in the official activation flow. The server verifies it securely and limits repeated attempts.",
             badge: "CRYPTO",
           },
           {
             number: "04",
             title: "Atomic Vehicle Binding & Entitlement Grant",
-            detail: "Upon proof match, an atomic D1 transaction transitions the decal to `ACTIVATED`, binds it to the user's verified vehicle plate, creates service entitlements, and enables live emergency routing.",
+            detail: "After proof and ownership checks, the server must atomically claim the QR, bind it to the authorized vehicle and grant only the services available for that vehicle.",
             badge: "ACTIVE",
           },
         ],
@@ -1063,14 +1062,14 @@ export const PUBLISHED_ARTICLES: readonly BlogPost[] = [
         "Authenticate using your primary phone number to receive MSG91 OTP",
         "Reveal the scratch PIN only when ready to bind to your vehicle",
         "Verify your vehicle license plate and make/model details before confirming",
-        "Confirm that your public safety view is live immediately after binding",
+        "Check the resulting QR and service status in your account after binding",
       ],
     },
     faq: [
       {
         question: "What happens if someone photographs my retail QR before I buy it?",
         answer:
-          "Nothing. Because the physical QR only encodes the public ID (`vs_xxxx`) and NOT the activation secret, photographing the code grants zero ownership rights. The sticker cannot be activated without scratching the physical foil to reveal the one-way hashed PIN.",
+          "A photograph of the public QR is not proof of ownership. The QR contains a resolver identifier, while activation requires a separate private proof, a verified account and an authorized vehicle connection.",
       },
       {
         question: "Can an activated decal be stolen and re-registered to another vehicle?",

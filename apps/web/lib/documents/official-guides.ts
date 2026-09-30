@@ -90,7 +90,7 @@ export const OFFICIAL_GUIDES: readonly OfficialGuide[] = [
         content: [
           "The architecture consists of three distinct layers:",
           "1. The Physical Decal: An engineered high-contrast vehicle decal carrying a cryptographically registered public QR code.",
-          "2. The Resolver: When scanned by any modern smartphone camera, the QR directs the scanner to the canonical VaahanSafe edge resolver (vaahansafe.com).",
+          "2. The Scan Link: A phone camera opens the official public QR service at qr.vaahansafe.com. Check the address before following a link.",
           "3. The Digital Identity: A secure vehicle record hosted on cloud edge infrastructure that determines what safety details, contact relays, and vehicle status are displayed.",
         ],
         callout: {
@@ -207,19 +207,19 @@ export const OFFICIAL_GUIDES: readonly OfficialGuide[] = [
         title: "Understanding Your Onboarding Flow",
         content: [
           "Depending on how you obtained your VaahanSafe kit, your onboarding path begins either on our website or with a physical box in your hand.",
-          "Both paths converge at Step 05 once your vehicle record is connected to a unique QR identity.",
+          "Both paths move to safety information only after the QR is connected to your vehicle through the appropriate verified process.",
         ],
         subsections: [
           {
             title: "Online Acquisition Path",
             content: [
-              "Create Account → Enter Vehicle Info → Select Decal Kit → Complete Order → Receive Decal via Courier → Connect & Place.",
+              "Create account → Add vehicle → Select kit → Complete checkout → Check payment and order status → Receive the kit → Follow the confirmed connection and placement steps.",
             ],
           },
           {
             title: "Retail Kit Path",
             content: [
-              "Kit in Hand → Scan Activation Code with Phone → Sign In or Create Account → Add Vehicle → Confirm Binding → Place Decal.",
+              "Kit in hand → Scan the public QR → Sign in with a verified mobile number → Enter the separate private activation proof → Select your vehicle → Confirm the connection → Place the decal.",
             ],
           },
         ],
@@ -229,7 +229,7 @@ export const OFFICIAL_GUIDES: readonly OfficialGuide[] = [
         title: "Step 01: Create Your Account",
         content: [
           "Visit vaahansafe.com on your smartphone or desktop computer. Enter your primary Indian mobile phone number.",
-          "You will receive a 6-digit verification code via SMS. Enter the code to authenticate. No complex password creation is necessary.",
+          "Complete the mobile verification step using the one-time code sent through the official sign-in flow. Keep that code private.",
         ],
       },
       {
@@ -252,15 +252,15 @@ export const OFFICIAL_GUIDES: readonly OfficialGuide[] = [
         id: "step-04-connect-qr",
         title: "Step 04: Connect Your VaahanSafe QR",
         content: [
-          "If you ordered online, your decal kit is automatically pre-associated with your order and arrives ready to confirm.",
-          "If you purchased a retail box, follow the Retail Activation Guide (Doc 03) to scan the inner activation code and pair it with your newly added vehicle.",
+          "If you ordered online, check the payment, order and QR status in your account. A checkout return or delivery alone does not mean the QR service is active.",
+          "If you purchased a retail kit, scan its public QR and follow the Retail Activation Guide (Doc 03). Enter the separate private activation proof only in the official activation flow, then connect the QR to a vehicle you are authorized to manage.",
         ],
       },
       {
         id: "step-05-safety-info",
         title: "Step 05: Configure Safety Information",
         content: [
-          "Set up at least one verified emergency contact phone number (e.g., spouse, parent, or trusted contact).",
+          "Add an emergency contact where supported and confirm that the person is willing and able to be contacted. Review which contact options are available for your vehicle.",
           "Optionally indicate driver blood group and critical medical cautions (e.g., severe allergies, asthma, insulin dependence).",
         ],
         callout: {
@@ -275,8 +275,8 @@ export const OFFICIAL_GUIDES: readonly OfficialGuide[] = [
         id: "step-06-place-qr",
         title: "Step 06: Place the QR Decal",
         content: [
-          "Clean the inside lower corner of your windshield (or front fork on two-wheelers) using the provided alcohol wipe.",
-          "Ensure the glass is dry and free of oil or dust before adhering the decal. Follow Doc 04 (QR Placement Guide) for detailed vehicle-specific locations.",
+          "Choose a visible, suitable surface that does not obstruct the driver's view, a light, a registration mark or a required safety label. Follow the placement instructions provided with your kit.",
+          "Prepare the surface as directed and follow Doc 04 (QR Placement Guide) for placement and care. Check scannability after installation.",
         ],
       },
       {
@@ -284,7 +284,7 @@ export const OFFICIAL_GUIDES: readonly OfficialGuide[] = [
         title: "Step 07: Perform a Verification Scan",
         content: [
           "Use a smartphone camera to scan the positioned decal from outside the vehicle.",
-          "Verify that the public safety screen opens smoothly, shows the expected vehicle details, and offers your designated contact relays.",
+          "Check that the public view reflects the vehicle's actual QR and service status and shows only the information and contact options you intended to make available. If the QR is not yet enabled, follow the account's next-step guidance.",
         ],
       },
     ],
@@ -748,7 +748,7 @@ export const OFFICIAL_GUIDES: readonly OfficialGuide[] = [
         content: [
           "A fundamental concept in VaahanSafe is the clear separation between your physical vehicle identity and the optional service plans surrounding it.",
           "• QR Identity: Represents your vehicle's physical decal, edge resolver route, and essential public safety view.",
-          "• Subscription Plan: Represents value-added cloud communication capabilities, such as automated multi-contact relay chaining, scheduled parking alerts, and prioritized operational monitoring.",
+          "• Subscription Plan: Adds the optional capabilities listed in your actual customer offer. Review the included features, limits, duration and renewal terms before paying.",
         ],
         callout: {
           type: "distinction",
@@ -762,24 +762,24 @@ export const OFFICIAL_GUIDES: readonly OfficialGuide[] = [
         id: "sub-guide-07b",
         title: "07B Purchase & Refund Guide",
         content: [
-          "Completed purchases of custom-manufactured or security-sealed VaahanSafe decal kits and active digital services are generally non-refundable.",
-          "Because each physical kit involves unique cryptographic serialization, personalized fulfillment, and anti-fraud packaging, kits cannot be restocked once dispatched.",
+          "Completed purchases are generally non-refundable for a change of mind. Automatic refunds and self-service refund handling are not available yet; we are working on a clearer review process.",
+          "A payment, delivery or product problem still needs to be reported and reviewed. A support request is not a refund approval, and mandatory consumer rights remain unaffected. Read the current Refund Policy before purchasing.",
         ],
         callout: {
           type: "distinction",
           title: "CUSTOMER SUPPORT PRINCIPLE",
           left: "NO REFUND POLICY",
           right: "NO SUPPORT (FALSE)",
-          text: "NO REFUND DOES NOT MEAN NO SUPPORT. If you encounter a technical failure, duplicate billing error, shipping damage, or carrier non-delivery, our dedicated support team resolves the problem through verification, re-dispatch, or account correction.",
+          text: "If something is wrong with the order, email support@vaahansafe.com with relevant references. Support reviews the confirmed issue and appropriate next step; no automatic refund or unverified outcome is promised.",
         },
         subsections: [
           {
             title: "Evaluating Common Scenarios",
             content: [
-              "• Change of mind: Ineligible for refund once package is dispatched or digital token is claimed.",
-              "• Duplicate charge: Fully verified and credited back to original payment instrument.",
-              "• Failed transaction: Handled automatically by payment gateway within 5–7 banking days.",
-              "• Defective or damaged in transit: Eligible for prompt verified replacement without additional charge.",
+              "• Change of mind: Completed purchases are generally non-refundable under the current commercial policy, subject to mandatory rights.",
+              "• Duplicate charge: Report both transaction references for a payment review.",
+              "• Failed transaction: Check the order and contact support if a debit remains unexplained. Bank and provider processing determine the actual resolution timing.",
+              "• Defective or damaged in transit: Keep the packaging and report the condition so the appropriate remedy can be reviewed.",
             ],
           },
         ],
@@ -790,7 +790,7 @@ export const OFFICIAL_GUIDES: readonly OfficialGuide[] = [
         content: [
           "For online decal kit orders, VaahanSafe coordinates dispatch via reputed domestic courier and postal logistics partners across India.",
           "• Order Processing: Orders are validated, verified, and sent for serialized kit packaging.",
-          "• Dispatch & Tracking: Once dispatched, an automated dispatch notification with courier tracking AWB is sent via SMS and email.",
+          "• Dispatch & Tracking: Use the tracking information attached to your actual shipment; courier updates may appear separately from account updates.",
           "• Delivery Address: Ensure complete postal address including PIN code and landmark.",
           "• Address Correction: Address corrections must be submitted before order dispatch occurs.",
         ],
@@ -807,7 +807,7 @@ export const OFFICIAL_GUIDES: readonly OfficialGuide[] = [
           title: "REPLACEMENT VS REFUND",
           left: "DECAL REPLACEMENT",
           right: "PURCHASE REFUND",
-          text: "REPLACEMENT ≠ REFUND. A damaged decal entitles the owner to request a replacement unit under our replacement policy, but does not constitute grounds for cash refund of past subscription or initial purchase fees.",
+          text: "A replacement and a refund are different outcomes. Replacement eligibility and any charges must be confirmed. Nothing in the product guidance excludes a remedy required by applicable law.",
         },
         subsections: [
           {
@@ -816,7 +816,7 @@ export const OFFICIAL_GUIDES: readonly OfficialGuide[] = [
               "1. Request: Submit a replacement request via the Help Center (/help/replacement) indicating vehicle registration.",
               "2. Verification: Verify account ownership via OTP authentication.",
               "3. Dispatch / Retail Pair: Order a replacement decal or pair a new retail kit using your dashboard.",
-              "4. Transition: The old QR is retired; the new QR immediately resolves to your existing vehicle record.",
+              "4. Transition: Complete the authorized connection, review the old and new QR states, then test the installed replacement. Do not assume delivery alone activates it.",
             ],
           },
         ],

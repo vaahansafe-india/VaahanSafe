@@ -1,79 +1,51 @@
+import Link from "next/link";
+import { ParallaxImage } from "../components/marketing/parallax-image";
+import { ArrowRight, ArrowUpRight, CircleHelp, LockKeyhole, MapPin, ScanLine, ShieldCheck, Smartphone, UserRoundCheck } from "lucide-react";
+import { getActivateUrl } from "@vaahansafe/config";
 import { SiteHeader } from "../components/marketing/site-header";
 import { SiteFooter } from "../components/marketing/site-footer";
+import { ScrollReveal } from "../components/marketing/scroll-reveal";
+import { HeroBackdrop } from "../components/marketing/hero-backdrop";
 
-// PHASE 15.2: The 15 Locked Homepage Stations in Exact Narrative Sequence
-import { RouteHero } from "../components/home/RouteHero";
-import { WhatIsVaahanSafe } from "../components/home/WhatIsVaahanSafe";
-import { QrThreeStepFlow } from "../components/home/QrThreeStepFlow";
-import { PhysicalStickerAnatomy } from "../components/home/PhysicalStickerAnatomy";
-import { EmergencyScanPreview } from "../components/home/EmergencyScanPreview";
-import { CustomerAppShowcase } from "../components/home/CustomerAppShowcase";
-import { RetailActivationPreview } from "../components/home/RetailActivationPreview";
-import { PlanPreview } from "../components/home/PlanPreview";
-import { PrivacyProjection } from "../components/home/PrivacyProjection";
-import { PlacementGalleryPreview } from "../components/home/PlacementGalleryPreview";
-import { TrustSecurityAvailability } from "../components/home/TrustSecurityAvailability";
-import { ResourceStation } from "../components/home/ResourceStation";
-import { EvidenceSection } from "../components/home/EvidenceSection";
-import { HomepageFaq } from "../components/home/HomepageFaq";
-import { FinalCtaStation } from "../components/home/FinalCtaStation";
+const steps = [
+  { number: "01", title: "Place it", text: "Fix the high-contrast QR to a visible part of your vehicle after setup.", icon: MapPin },
+  { number: "02", title: "Someone scans", text: "A phone camera opens a focused roadside safety view. No app is needed to scan.", icon: ScanLine },
+  { number: "03", title: "The right people connect", text: "The information and contact options you have chosen can help someone take the next step.", icon: UserRoundCheck },
+] as const;
+
+const faqs = [
+  ["Does scanning reveal my phone number?", "Your public safety view is separate from your private account. Contact options and safety details depend on the visibility choices you make."],
+  ["Can I activate a QR bought in a shop?", "Yes. A retail QR needs its separate activation proof, a verified account and a vehicle connection before services become available."],
+  ["Is a sticker purchase the same as a subscription?", "No. The physical QR and any optional plan are separate. Available services are shown before you choose a plan."],
+  ["Is VaahanSafe an emergency service?", "No. VaahanSafe helps present selected information and contact routes. For an emergency in India, call 112."],
+] as const;
 
 export default function WebHomePage() {
-  return (
-    <div className="min-h-screen overflow-x-clip bg-background text-foreground flex flex-col antialiased selection:bg-accent selection:text-accent-foreground">
-      {/* Site Header with Navigation, Resources Dropdown, and Surface Action Links */}
-      <SiteHeader />
+  return <div className="vs-site"><SiteHeader /><main id="main-content">
+    <HeroBackdrop />
 
-      {/* Main Content Landmark with Skip-Link Anchor */}
-      <main id="main-content" className="flex-1">
-        {/* 01 Route-Based Hero */}
-        <RouteHero />
+    <section id="what-is-vaahansafe" className="vs-section vs-intro"><div className="vs-container vs-intro-grid"><div><span className="vs-kicker">01 / THE IDEA</span><h2>One small mark.<br /><em>A clearer way forward.</em></h2></div><ScrollReveal><p className="vs-lead">A QR is only the doorway. VaahanSafe gives your vehicle a managed safety identity behind it.</p><p>Place the physical sticker on your vehicle. Set up the information you want to share. If someone scans it, they see a public view designed for that moment, while your account and sensitive details stay separate.</p><Link className="vs-text-link" href="/product">See the product <ArrowUpRight size={17} /></Link></ScrollReveal></div></section>
 
-        {/* 02 What VaahanSafe Is */}
-        <WhatIsVaahanSafe />
+    <section id="how-it-works" className="vs-section vs-steps"><div className="vs-container"><ScrollReveal><div className="vs-section-heading"><span className="vs-kicker">02 / HOW IT WORKS</span><h2>Place. Scan. <em>Connect.</em></h2><p>Three simple steps between a vehicle on the road and a useful response.</p></div></ScrollReveal><div className="vs-steps-grid">{steps.map((step, index) => <ScrollReveal key={step.number} delay={index * 0.1}><article className="vs-step"><div className="vs-step-top"><span>{step.number}</span><step.icon size={26} strokeWidth={1.5} /></div><h3>{step.title}</h3><p>{step.text}</p></article></ScrollReveal>)}</div><Link className="vs-text-link" href="/how-it-works">Follow the full journey <ArrowUpRight size={17} /></Link></div></section>
 
-        {/* 03 How the QR Works (Place / Scan / Connect in 3 Concise Steps) */}
-        <QrThreeStepFlow />
+    <section id="sticker" className="vs-section vs-product-band"><div className="vs-container vs-product-grid"><ScrollReveal><span className="vs-kicker vs-kicker-light">03 / THE PHYSICAL IDENTITY</span><h2>Made to be seen.<br /><em>Built to protect.</em></h2><p>The sticker carries a public QR identity. Your activation proof stays on a separate, private card. Personal and medical details are never printed into the QR itself.</p><Link className="vs-button vs-button-outline-light" href="/product">Explore the QR <ArrowUpRight size={17} /></Link></ScrollReveal><ScrollReveal><figure className="vs-kit-figure"><div className="vs-kit-image"><ParallaxImage src="/images/qr-sticker-kit.webp" alt="Illustrative VaahanSafe sticker kit with a printed public QR and a separate covered activation proof card" sizes="(max-width:700px) 100vw, 55vw" /></div><figcaption><span>01 / PUBLIC QR</span><span>02 / PRIVATE ACTIVATION PROOF</span><small>Product illustration</small></figcaption></figure></ScrollReveal></div></section>
 
-        {/* 04 Physical QR Sticker Anatomy + Security (QR + Visible ID + Scratch Security) */}
-        <PhysicalStickerAnatomy />
+    <section id="emergency-preview" className="vs-section vs-emergency"><div className="vs-container vs-split"><ScrollReveal><span className="vs-kicker">04 / ROADSIDE VIEW</span><h2>At a scan, a calmer <em>next step.</em></h2><p>Someone who finds your vehicle can open a clear, mobile-first safety view. It presents only the details and contact routes allowed for that QR.</p><div className="vs-feature-lines"><div><ShieldCheck size={20} /> Owner-controlled public details</div><div><Smartphone size={20} /> Opens in a browser</div><div><LockKeyhole size={20} /> Private account stays private</div></div><Link className="vs-text-link" href="/safety">Understand the safety model <ArrowUpRight size={17} /></Link></ScrollReveal><ScrollReveal><div className="vs-phone-preview"><div className="vs-phone-bar"><span>vaahansafe.com</span><span>PREVIEW</span></div><div className="vs-phone-content"><div className="vs-preview-mark"><ShieldCheck size={26} /></div><span className="vs-kicker">VEHICLE SAFETY VIEW</span><h3>Help this vehicle</h3><p>This is an illustrative public view. In a real scan, available actions depend on the vehicle owner&apos;s settings.</p><div className="vs-preview-info"><span>Vehicle</span><strong>Two-wheeler</strong></div><div className="vs-preview-info"><span>VaahanSafe ID</span><strong>VS •••• 7K29</strong></div><div className="vs-preview-action">Contact through VaahanSafe <ArrowRight size={16} /></div><small>For an emergency in India, call 112.</small></div></div></ScrollReveal></div></section>
 
-        {/* 05 Emergency Scan Preview (Finder View • Zero-Login • Masked Actions) */}
-        <EmergencyScanPreview />
+    <section className="vs-scan-band" aria-label="Scanning a vehicle QR"><div className="vs-container"><figure><div className="vs-scan-image"><ParallaxImage src="/images/scan-windshield.webp" alt="Product illustration of a passer-by scanning a VaahanSafe QR on a car windshield with a phone camera" sizes="(max-width:700px) 100vw, 85vw" /></div><figcaption><span>A phone camera. A visible QR. A useful next step.</span><small>Illustrative placement and scan</small></figcaption></figure></div></section>
 
-        {/* 06 Customer App Preview (Owner View • Dashboard • Vehicles • Relays) */}
-        <CustomerAppShowcase />
+    <section id="retail-preview" className="vs-section vs-retail"><div className="vs-container vs-split"><ScrollReveal><span className="vs-kicker">05 / RETAIL ACTIVATION</span><h2>Already have a QR?<br /><em>Make it yours.</em></h2><p>Your retail kit needs to be connected to the right vehicle. Sign in with a verified mobile number, use the separate activation proof and follow the official setup steps. Wait for confirmation before relying on the sticker.</p><a className="vs-button vs-button-dark" href={getActivateUrl()}>Activate retail QR <ArrowUpRight size={17} /></a></ScrollReveal><ScrollReveal><ol className="vs-activation-rail"><li><span>01</span><strong>Scan the public QR</strong><p>Identify the kit without exposing its proof.</p></li><li><span>02</span><strong>Verify and claim</strong><p>Authenticate, submit the separate proof and choose your vehicle.</p></li><li><span>03</span><strong>Start using services</strong><p>Wait for setup confirmation, then test the installed QR.</p></li></ol></ScrollReveal></div></section>
 
-        {/* 07 Retail Activation Preview (Buy → Scan → Scratch → Activate) */}
-        <RetailActivationPreview />
+    <section id="plans-preview" className="vs-section vs-plans"><div className="vs-container vs-split"><ScrollReveal><span className="vs-kicker">06 / SERVICES & PLANS</span><h2>A vehicle identity first.<br /><em>More capability when you need it.</em></h2></ScrollReveal><ScrollReveal><p className="vs-lead">Your physical QR kit and any optional service plan are separate.</p><p>Review what your current offer includes, the optional capabilities you need and any renewal terms. Your account shows the services available for your vehicle; buying a sticker does not include every paid feature.</p><Link className="vs-text-link" href="/pricing">Explore plans <ArrowUpRight size={17} /></Link></ScrollReveal></div></section>
 
-        {/* 08 Subscription / Plan Preview (QR Identity Asset != Subscription Entitlement) */}
-        <PlanPreview />
+    <section id="privacy-controls" className="vs-section vs-privacy"><div className="vs-container vs-split"><ScrollReveal><div className="vs-privacy-visual"><div><LockKeyhole size={20} /><span>PRIVATE ACCOUNT</span><strong>Your identity, vehicle and settings</strong></div><div><ShieldCheck size={20} /><span>YOUR CONTROLS</span><strong>Choose what is available</strong></div><div><ScanLine size={20} /><span>PUBLIC SAFETY VIEW</span><strong>Only the permitted projection</strong></div></div></ScrollReveal><ScrollReveal><span className="vs-kicker">07 / PRIVACY BY DESIGN</span><h2>Useful in public.<br /><em>Careful with private.</em></h2><p>Information inside your account and information shown after a public scan serve different purposes. Keep the sensitive parts in your control.</p><Link className="vs-text-link" href="/privacy">Read our privacy approach <ArrowUpRight size={17} /></Link></ScrollReveal></div></section>
 
-        {/* 09 Vehicle + Emergency Profile Privacy Controls (Private → Control → Public) */}
-        <PrivacyProjection />
+    <section id="gallery-preview" className="vs-section vs-gallery"><div className="vs-container"><ScrollReveal><div className="vs-section-heading"><span className="vs-kicker">08 / ON THE ROAD</span><h2>Made for vehicles in motion.</h2><p>Placement should be visible, legible and appropriate for the vehicle.</p></div></ScrollReveal><div className="vs-gallery-grid"><Link href="/gallery"><ParallaxImage src="/images/gallery/car-windshield-placement.jpg" alt="Illustrative QR placement on a car windshield" sizes="(max-width: 700px) 100vw, 50vw" /><span>Car & SUV placement <ArrowUpRight size={18} /></span></Link><Link href="/gallery"><ParallaxImage src="/images/gallery/motorcycle-placement.jpg" alt="Illustrative QR placement on a motorcycle" sizes="(max-width: 700px) 100vw, 50vw" /><span>Two-wheeler placement <ArrowUpRight size={18} /></span></Link></div></div></section>
 
-        {/* 10 Gallery / Real-World Placement (Car, Bike, Helmet, Packaging, Retail) */}
-        <PlacementGalleryPreview />
+    <section id="trust" className="vs-section vs-trust"><div className="vs-container"><ScrollReveal><span className="vs-kicker vs-kicker-light">09 / BUILT WITH BOUNDARIES</span><h2>Trust starts with <em>clear rules.</em></h2></ScrollReveal><div className="vs-trust-grid"><div><LockKeyhole size={25} /><h3>Separate credentials</h3><p>The printed QR identifies the kit. The concealed activation proof is kept separate.</p></div><div><ShieldCheck size={25} /><h3>Confirmed setup</h3><p>Check the confirmed setup and service status in your account before relying on the QR.</p></div><div><CircleHelp size={25} /><h3>Honest availability</h3><p>Check the public status page for current service information.</p></div></div></div></section>
 
-        {/* 11 Trust / Security / Availability (Factual Pillars • Zero Fake Certifications) */}
-        <TrustSecurityAvailability />
+    <section id="resources" className="vs-section vs-resources"><div className="vs-container vs-split"><ScrollReveal><span className="vs-kicker">10 / FIELD NOTES</span><h2>Know it before<br /><em>you need it.</em></h2><p>Practical guides for setup, activation, placement, safety details, privacy and support.</p><Link className="vs-text-link" href="/documents">Browse all documents <ArrowUpRight size={17} /></Link></ScrollReveal><div className="vs-resource-list">{([["01", "Product guide", "/documents/product-guide"], ["02", "Quick-start guide", "/documents/quick-start"], ["03", "Activation guide", "/documents/activation"], ["04", "Placement guide", "/documents/qr-placement"], ["05", "Safety & privacy", "/documents/safety"]] as const).map(([n, label, href]) => <Link key={n} href={href}><span>{n}</span><strong>{label}</strong><ArrowUpRight size={17} /></Link>)}</div></div></section>
 
-        {/* 12 Documents / Help Resources (Connected Documentation & Self-Service Zones) */}
-        <ResourceStation />
-
-        {/* 13 Testimonials / Pilot Evidence (STRICTLY CONDITIONAL • Collapses when no evidence) */}
-        <EvidenceSection />
-
-        {/* 14 FAQ (Pre-Purchase Clarity Accordion) */}
-        <HomepageFaq />
-
-        {/* 15 Final CTA Station */}
-        <FinalCtaStation />
-      </main>
-
-      {/* Surface-Aware Directory Footer */}
-      <SiteFooter />
-    </div>
-  );
+    <section id="faq" className="vs-section vs-faq"><div className="vs-container vs-split"><ScrollReveal><span className="vs-kicker">11 / COMMON QUESTIONS</span><h2>A little clarity<br /><em>goes a long way.</em></h2><Link className="vs-text-link" href="/help">Visit help centre <ArrowUpRight size={17} /></Link></ScrollReveal><div>{faqs.map(([question, answer]) => <details key={question} className="vs-faq-item"><summary>{question}<span>+</span></summary><p>{answer}</p></details>)}</div></div></section>
+  </main><SiteFooter /></div>;
 }

@@ -289,7 +289,7 @@ export const TERMS_SECTIONS: readonly TermsSection[] = [
         title: "QR Identity ≠ Subscription Plan",
         paragraphs: [
           "A physical VaahanSafe decal provides the hardware interface to your vehicle identity. Advanced digital capabilities—such as automated emergency calling relays, SMS notifications, and expanded safety profiles—may be bundled with introductory periods or require active paid plans.",
-          "Current pricing tiers, renewal cycles, and bundled feature matrices are published at vaahansafe.com/pricing. Plan features may be adjusted periodically with advance notice.",
+          "The public pricing page explains the service model. The live customer offer and checkout show the available features, payable amount, billing period and renewal conditions for the plan you choose.",
         ],
       },
       {

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { SiteHeader } from "../../components/marketing/site-header";
 import { SiteFooter } from "../../components/marketing/site-footer";
-import { HelpCenterContainer } from "../../components/help/HelpCenterContainer";
+import { PublicHelpCenter } from "../../components/marketing/public-help-center";
 
 export const metadata: Metadata = {
   title: "Help Center | VaahanSafe",
@@ -35,15 +35,15 @@ export default function HelpPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary">
+    <div className="vs-page">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <SiteHeader />
 
-      <main id="main-content" className="flex-1">
-        <HelpCenterContainer />
+      <main id="main-content" className="vs-page-main">
+        <PublicHelpCenter />
       </main>
 
       <SiteFooter />

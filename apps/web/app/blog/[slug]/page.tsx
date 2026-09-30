@@ -9,6 +9,8 @@ import {
   getRelatedBlogPosts,
 } from "@vaahansafe/content";
 import { ReadingProgressBar } from "../../../components/blog/ReadingProgressBar";
+import { SiteHeader } from "../../../components/marketing/site-header";
+import { SiteFooter } from "../../../components/marketing/site-footer";
 
 interface BlogPostPageProps {
   params: Promise<{
@@ -55,7 +57,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const relatedPosts = getRelatedBlogPosts(slug, 2);
 
   return (
-    <div className="bg-background text-foreground min-h-screen py-10 sm:py-16">
+    <div className="vs-page"><SiteHeader /><div className="vs-blog-main py-10 sm:py-16">
       <ReadingProgressBar />
 
       <main id="main-content" className="mx-auto max-w-3xl px-5 sm:px-8 space-y-12">
@@ -107,8 +109,10 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           &ldquo;{post.intro}&rdquo;
         </div>
 
+        {post.keyTakeaways && post.keyTakeaways.length > 0 && <aside className="vs-journal-takeaways" aria-label="Key takeaways"><span className="vs-kicker">THE ESSENTIALS</span><h2>What to take away</h2><ul>{post.keyTakeaways.map(item => <li key={item}>{item}</li>)}</ul></aside>}
+
         {/* Main Article Body */}
-        <article className="space-y-10 text-sm sm:text-base leading-relaxed text-foreground/90 font-sans">
+        <article className="vs-journal-article-body space-y-10 text-sm sm:text-base leading-relaxed text-foreground/90 font-sans">
           {post.body.map((section, idx) => (
             <section key={idx} className="space-y-4">
               {section.heading && (
@@ -122,6 +126,13 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                   {p}
                 </p>
               ))}
+
+              {section.bullets && <ul className="vs-journal-bullets">{section.bullets.map(item => <li key={item}>{item}</li>)}</ul>}
+              {section.steps && <ol className="vs-journal-steps">{section.steps.map(step => <li key={step.number}><span>{step.number}</span><div><h3>{step.title}</h3><p>{step.detail}</p></div></li>)}</ol>}
+              {section.subsections?.map(sub => <div className="vs-journal-subsection" key={sub.title}><h3>{sub.title}</h3>{sub.paragraphs.map(paragraph => <p key={paragraph}>{paragraph}</p>)}{sub.bullets && <ul className="vs-journal-bullets">{sub.bullets.map(item => <li key={item}>{item}</li>)}</ul>}</div>)}
+              {section.table && <div className="vs-table-scroll" role="region" aria-label={section.table.caption ?? section.heading ?? "Article table"} tabIndex={0}><table className="vs-reference-table">{section.table.caption && <caption>{section.table.caption}</caption>}<thead><tr>{section.table.headers.map(header => <th scope="col" key={header}>{header}</th>)}</tr></thead><tbody>{section.table.rows.map((row, rowIndex) => <tr key={rowIndex}>{row.map((cell, cellIndex) => cellIndex === 0 ? <th scope="row" key={cellIndex}>{cell}</th> : <td key={cellIndex}>{cell}</td>)}</tr>)}</tbody></table></div>}
+              {section.quote && <blockquote className="vs-journal-quote"><p>{section.quote.text}</p>{section.quote.attribution && <footer>{section.quote.attribution}</footer>}</blockquote>}
+              {section.figure?.url && <figure className="vs-journal-figure"><img src={section.figure.url} alt={section.figure.alt} loading="lazy" /><figcaption>{section.figure.caption}</figcaption></figure>}
 
               {section.callout && (
                 <div
@@ -155,6 +166,9 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           ))}
         </article>
 
+        {post.checklist && <section className="vs-journal-checklist" aria-labelledby="article-checklist"><span className="vs-kicker">PRACTICAL CHECKLIST</span><h2 id="article-checklist">{post.checklist.title}</h2><ul>{post.checklist.items.map(item => <li key={item}>{item}</li>)}</ul></section>}
+        {post.faq && post.faq.length > 0 && <section className="vs-page-faq" aria-labelledby="article-questions"><span className="vs-kicker">COMMON QUESTIONS</span><h2 id="article-questions">A few useful answers.</h2>{post.faq.map(item => <details className="vs-faq-item" key={item.question}><summary>{item.question}<span aria-hidden="true">+</span></summary><p>{item.answer}</p></details>)}</section>}
+
         {/* References & Regulatory Citations */}
         {post.references && post.references.length > 0 && (
           <section className="rounded-2xl border border-border/80 bg-muted/20 p-5 sm:p-6 space-y-3">
@@ -165,7 +179,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             <ul className="space-y-2 text-xs text-muted-foreground divide-y divide-border/40">
               {post.references.map((ref, idx) => (
                 <li key={idx} className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                  <span>{ref.citation}</span>
+                  {ref.url ? <a href={ref.url} className="vs-source-link">{ref.citation} <span aria-hidden="true">↗</span></a> : <span>{ref.citation}</span>}
                   <span className="font-mono text-[10px] text-muted-foreground/80">
                     Source: {ref.source}
                   </span>
@@ -191,13 +205,13 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         <div className="rounded-3xl border border-[#cc785c]/30 bg-gradient-to-br from-[#cc785c]/10 via-card to-card p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-sm">
           <div className="space-y-1.5 max-w-md">
             <div className="font-mono text-[9px] uppercase tracking-[0.2em] text-[#cc785c] font-semibold">
-              EQUIP YOUR VEHICLE
+              EXPLORE THE PRODUCT
             </div>
             <h3 className="font-serif text-xl font-medium text-foreground">
-              Protect Your Vehicle with VaahanSafe
+              See how VaahanSafe fits your vehicle
             </h3>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Industrial UV-cured optical decals with encrypted emergency contact routing, privacy-first passerby relay, and zero exposed phone numbers.
+              Learn about the physical QR, the public safety view, setup routes and optional services. Check your account for the capabilities currently available to you.
             </p>
           </div>
 
@@ -210,7 +224,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               text-white transition-all hover:bg-[#b8674d] shadow-xs shrink-0 self-start sm:self-center
             "
           >
-            <span>View Safety Kits</span>
+            <span>Explore product and plans</span>
             <VaahanIcon name="arrow-right" size={13} aria-hidden="true" />
           </Link>
         </div>
@@ -254,6 +268,6 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           </Link>
         </div>
       </main>
-    </div>
+    </div><SiteFooter /></div>
   );
 }

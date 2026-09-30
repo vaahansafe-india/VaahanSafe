@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import "@vaahansafe/ui/styles/globals.css";
+import "./marketing.css";
+import "./editorial.css";
 import { ThemeProvider } from "@vaahansafe/ui/theme";
 
 export const metadata: Metadata = {
   title: "VaahanSafe — QR-Based Vehicle Safety & Emergency Identification Platform",
   description:
-    "India's dedicated vehicle safety identity platform. Permanent QR identification, immediate emergency contact relays, and owner-controlled safety profiles.",
+    "A QR-based vehicle safety identity for Indian roads. Connect a physical sticker to the safety information and contact options you choose to share.",
   metadataBase: new URL("https://vaahansafe.com"),
   alternates: {
     canonical: "https://vaahansafe.com",
@@ -13,7 +15,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "VaahanSafe — Vehicle Safety Identity Platform",
     description:
-      "A permanent QR connects your vehicle to a controlled emergency profile, approved contacts, and the VaahanSafe safety network.",
+      "A physical QR connects your vehicle to an owner-controlled safety view and available contact options.",
     url: "https://vaahansafe.com",
     siteName: "VaahanSafe",
     locale: "en_IN",
@@ -23,7 +25,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "VaahanSafe — Vehicle Safety Identity Platform",
     description:
-      "Permanent QR identification, immediate emergency contact relays, and owner-controlled safety profiles.",
+      "QR-based vehicle identification, owner-controlled safety information and available contact options.",
   },
   robots: {
     index: true,

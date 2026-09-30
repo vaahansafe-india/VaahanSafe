@@ -295,7 +295,7 @@ export const POLICY_SECTIONS: readonly PolicySection[] = [
         title: "Retention Principles",
         paragraphs: [
           "Account & Vehicle Records: Maintained for the duration of your active vehicle registration and customer relationship with VaahanSafe.",
-          "Emergency Contact Data: Stored while configured by you and immediately removed from the active public resolver upon account deletion or vehicle de-registration.",
+          "Emergency Contact Data: Used while configured for the vehicle. Requests to remove contacts, close an account or change a public view must be handled through the available account controls or privacy request process.",
           "Transaction & Billing Records: Retained in accordance with Indian commercial, accounting, and tax compliance requirements.",
           "Operational Diagnostic Logs: Retained on a rolling, time-bounded schedule to monitor service availability and combat automated malicious traffic.",
         ],
@@ -316,8 +316,8 @@ export const POLICY_SECTIONS: readonly PolicySection[] = [
         id: "security-measures",
         title: "Security Safeguards",
         paragraphs: [
-          "All communication across our web portal, customer application, activation flows, and QR resolvers is encrypted in transit using industry-standard Transport Layer Security (TLS 1.3).",
-          "Customer accounts are protected by multi-factor authentication via cryptographically generated One-Time Passcodes (OTP) sent to verified mobile numbers.",
+          "Production web services use secure transport to protect information in transit.",
+          "Customer sign-in uses verified identity and mobile verification in the applicable account flows. Keep your phone, passwords and one-time codes secure.",
           "Database access is restricted using strict role-based access controls (RBAC) and least-privilege security boundaries across internal operations.",
         ],
       },
