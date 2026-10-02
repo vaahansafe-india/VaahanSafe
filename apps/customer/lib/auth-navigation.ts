@@ -10,5 +10,9 @@ export function safeReturnUrl(value?: string | null): string {
 export function customerAuthOrigin(requestUrl: string, mode = process.env.NODE_ENV): string {
   const requestOrigin = new URL(requestUrl).origin;
   if (mode === "development") return requestOrigin;
-  return process.env.NEXT_PUBLIC_APP_URL ? new URL(process.env.NEXT_PUBLIC_APP_URL).origin : requestOrigin;
+  if (process.env.NEXT_PUBLIC_APP_URL) return new URL(process.env.NEXT_PUBLIC_APP_URL).origin;
+  if (requestOrigin && !requestOrigin.includes("localhost") && !requestOrigin.includes("127.0.0.1")) {
+    return requestOrigin;
+  }
+  return "https://app.vaahansafe.com";
 }

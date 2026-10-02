@@ -91,7 +91,7 @@ export function VehicleRegistryHeader({
       </div>
 
       {/* 02. Controls Surface (Search, Filters, Sort, View Switcher, Add CTA) */}
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-card p-3 shadow-2xs">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-[4px] border border-border bg-card p-3 shadow-2xs">
         {/* Search Input */}
         <div className="relative flex-1 min-w-[200px] max-w-md">
           <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">
@@ -102,7 +102,7 @@ export function VehicleRegistryHeader({
             value={filters.query || ""}
             onChange={handleSearchChange}
             placeholder="Search make, model, plate, or VS-ID..."
-            className="h-9 w-full rounded-xl border border-border bg-background pl-9 pr-3 text-xs text-foreground placeholder:text-muted-foreground focus:border-[#cc785c] focus:outline-none focus:ring-1 focus:ring-[#cc785c]"
+            className="h-9 w-full box-border rounded-[4px] border border-border bg-background pl-9 pr-3 text-xs text-foreground placeholder:text-muted-foreground focus:border-[#cc785c] focus:outline-none focus:ring-1 focus:ring-[#cc785c]"
           />
         </div>
 
@@ -114,10 +114,10 @@ export function VehicleRegistryHeader({
             variant="outline"
             size="sm"
             onClick={onOpenFilterSheet}
-            className={`h-9 gap-1.5 font-mono text-xs ${
+            className={`h-9 shrink-0 box-border gap-1.5 rounded-[4px] px-3 font-mono text-xs ${
               activeFiltersCount > 0
                 ? "border-[#cc785c] text-[#cc785c] bg-[#cc785c]/10"
-                : "text-muted-foreground hover:text-foreground"
+                : "border-border text-muted-foreground hover:text-foreground"
             }`}
           >
             <VaahanIcon name="menu" size={14} />
@@ -139,23 +139,23 @@ export function VehicleRegistryHeader({
               })
             }
           >
-            <SelectTrigger className="h-9 w-[175px] rounded-xl border-border bg-background font-mono text-xs text-muted-foreground hover:text-foreground focus:ring-[#cc785c]">
+            <SelectTrigger className="h-9 shrink-0 box-border w-[175px] rounded-[4px] border-border bg-background px-3 py-0 font-mono text-xs text-muted-foreground hover:text-foreground focus:ring-[#cc785c]">
               <span className="text-muted-foreground mr-1">Sort:</span>
               <SelectValue placeholder="Sort" />
             </SelectTrigger>
-            <SelectContent align="end" className="font-mono text-xs">
-              <SelectItem value="RECENT">Recent</SelectItem>
-              <SelectItem value="NAME">Make/Model</SelectItem>
-              <SelectItem value="ATTENTION">Needs Attention</SelectItem>
+            <SelectContent align="end" className="font-mono text-xs rounded-[4px]">
+              <SelectItem value="RECENT" className="rounded-[3px]">Recent</SelectItem>
+              <SelectItem value="NAME" className="rounded-[3px]">Make/Model</SelectItem>
+              <SelectItem value="ATTENTION" className="rounded-[3px]">Needs Attention</SelectItem>
             </SelectContent>
           </Select>
 
           {/* View Switcher (REGISTRY vs COMPACT) */}
-          <div className="hidden sm:flex items-center rounded-xl border border-border bg-muted/40 p-0.5">
+          <div className="hidden sm:flex h-9 shrink-0 box-border items-center rounded-[4px] border border-border bg-muted/40 p-0.5">
             <button
               type="button"
               onClick={() => onFilterChange({ ...filters, viewMode: "REGISTRY" })}
-              className={`rounded-lg px-2.5 py-1 font-mono text-[11px] font-medium transition-all ${
+              className={`h-full flex items-center justify-center rounded-[3px] px-2.5 font-mono text-[11px] font-medium transition-all ${
                 filters.viewMode === "REGISTRY"
                   ? "bg-card text-foreground shadow-2xs font-semibold"
                   : "text-muted-foreground hover:text-foreground"
@@ -166,7 +166,7 @@ export function VehicleRegistryHeader({
             <button
               type="button"
               onClick={() => onFilterChange({ ...filters, viewMode: "COMPACT" })}
-              className={`rounded-lg px-2.5 py-1 font-mono text-[11px] font-medium transition-all ${
+              className={`h-full flex items-center justify-center rounded-[3px] px-2.5 font-mono text-[11px] font-medium transition-all ${
                 filters.viewMode === "COMPACT"
                   ? "bg-card text-foreground shadow-2xs font-semibold"
                   : "text-muted-foreground hover:text-foreground"
@@ -179,7 +179,7 @@ export function VehicleRegistryHeader({
           {/* Primary CTA */}
           <Link
             href="/vehicles/new"
-            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-[#cc785c] px-3.5 font-mono text-xs font-semibold uppercase tracking-wider text-white shadow-xs transition-all hover:bg-[#a9583e]"
+            className="inline-flex h-9 shrink-0 box-border items-center justify-center gap-1.5 rounded-[4px] border border-transparent bg-[#cc785c] px-3.5 font-mono text-xs font-semibold uppercase tracking-wider text-white shadow-xs transition-all hover:bg-[#a9583e]"
           >
             <span className="text-sm leading-none font-bold">+</span>
             <span>Add Vehicle</span>
@@ -197,7 +197,7 @@ export function VehicleRegistryHeader({
           {filters.types?.map((t) => (
             <span
               key={t}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-[#cc785c]/30 bg-[#cc785c]/10 px-2.5 py-1 text-xs text-[#cc785c]"
+              className="inline-flex items-center gap-1.5 rounded-[4px] border border-[#cc785c]/30 bg-[#cc785c]/10 px-2.5 py-1 text-xs text-[#cc785c]"
             >
               <span>Type: {t}</span>
               <button
@@ -212,7 +212,7 @@ export function VehicleRegistryHeader({
           ))}
 
           {filters.qrStatus && filters.qrStatus !== "ALL" && (
-            <span className="inline-flex items-center gap-1.5 rounded-lg border border-[#cc785c]/30 bg-[#cc785c]/10 px-2.5 py-1 text-xs text-[#cc785c]">
+            <span className="inline-flex items-center gap-1.5 rounded-[4px] border border-[#cc785c]/30 bg-[#cc785c]/10 px-2.5 py-1 text-xs text-[#cc785c]">
               <span>QR: {filters.qrStatus}</span>
               <button
                 type="button"
@@ -226,7 +226,7 @@ export function VehicleRegistryHeader({
           )}
 
           {filters.safetyStatus && filters.safetyStatus !== "ALL" && (
-            <span className="inline-flex items-center gap-1.5 rounded-lg border border-[#cc785c]/30 bg-[#cc785c]/10 px-2.5 py-1 text-xs text-[#cc785c]">
+            <span className="inline-flex items-center gap-1.5 rounded-[4px] border border-[#cc785c]/30 bg-[#cc785c]/10 px-2.5 py-1 text-xs text-[#cc785c]">
               <span>Safety: {filters.safetyStatus === "CONFIGURED" ? "Configured" : "Needs Setup"}</span>
               <button
                 type="button"
