@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import { useCustomerRouter } from "@/lib/use-customer-router";
 import { toast } from "sonner";
 import { VaahanIcon } from "@vaahansafe/icons";
 
@@ -41,7 +41,7 @@ interface SubscriptionControllerProps {
 }
 
 export function SubscriptionController({ initialData }: SubscriptionControllerProps) {
-  const router = useRouter();
+  const router = useCustomerRouter();
 
   const {
     passport,

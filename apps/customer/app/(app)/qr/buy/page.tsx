@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
-import { getAuthenticatedCustomer } from "@/lib/session";
-import { getBuyQrData } from "@/lib/qr-service";
-import { BuyQrExperience } from "@/components/qr/buy/BuyQrExperience";
+import { Suspense } from "react";
+import { CustomerPageView } from "./CustomerPageView";
+import { CustomerPageLoading } from "@/components/query/CustomerPageState";
 
 export const metadata: Metadata = {
   title: "Buy QR Safety Kit — VaahanSafe Automotive Hardware",
@@ -10,14 +9,6 @@ export const metadata: Metadata = {
     "Order genuine VaahanSafe physical QR stickers with industrial UV lamination and tamper protection.",
 };
 
-export default async function BuyQrPage() {
-  const auth = await getAuthenticatedCustomer();
-
-  if (!auth) {
-    redirect("/login");
-  }
-
-  const data = await getBuyQrData(auth.user.id);
-
-  return <BuyQrExperience data={data} />;
+export default function CustomerPage() {
+  return <Suspense fallback={<CustomerPageLoading />}><CustomerPageView /></Suspense>;
 }

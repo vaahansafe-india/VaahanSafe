@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedCustomer } from "@/lib/session";
-import { getAuthoritativeDatabaseClient } from "@vaahansafe/database";
+import { getAuthoritativeDatabaseClient, createInAppNotification } from "@vaahansafe/database";
 import {
   verifyRazorpayCheckoutSignature,
   getRazorpayPaymentGateway,
@@ -50,8 +50,9 @@ export async function POST(req: NextRequest) {
       vehicle_id: string | null;
       status: string;
       total_minor: number;
+      order_number?: string;
     }>(
-      `SELECT id, user_id, vehicle_id, status, total_minor
+      `SELECT id, user_id, vehicle_id, status, total_minor, order_number
        FROM orders
        WHERE id = ? AND user_id = ?
        LIMIT 1`,
@@ -155,6 +156,20 @@ export async function POST(req: NextRequest) {
           db,
         });
       }
+
+      // 8. In-App Notification: Payment Received & Processing
+      const formattedAmount = (order.total_minor / 100).toFixed(0);
+      await createInAppNotification({
+        userId: order.user_id,
+        eventType: "PAYMENT_SUCCEEDED",
+        category: "COMMERCE",
+        priority: "HIGH",
+        title: `Payment Received (₹${formattedAmount})`,
+        body: `Payment of ₹${formattedAmount} for order #${order.order_number || order.id} was confirmed via Razorpay. Your hardware kit is preparing for fulfillment.`,
+        actionType: "VIEW_ORDER",
+        actionTarget: order.id,
+        db,
+      });
     }
 
     return NextResponse.json({

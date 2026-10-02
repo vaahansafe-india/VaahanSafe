@@ -70,6 +70,11 @@ export interface PublicServiceHistoryDto {
 }
 
 export interface PublicSystemStatusDto {
+  databaseHeartbeat?: {
+    status: ServiceState;
+    checkedAt: string | null;
+    latencyMs: number | null;
+  };
   overallState: ServiceState;
   headline: string;
   description: string;

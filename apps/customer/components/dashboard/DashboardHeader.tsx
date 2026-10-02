@@ -3,6 +3,7 @@
 import * as React from "react";
 import { VaahanIcon } from "@vaahansafe/icons";
 import { VehicleContextSelector } from "./VehicleContextSelector";
+import { Button } from "@/components/ui/button";
 import type { DashboardVehicle } from "@/lib/dashboard-types";
 
 interface DashboardHeaderProps {
@@ -35,7 +36,7 @@ export function DashboardHeader({
           <span className="hidden sm:inline-block h-1 w-1 rounded-full bg-border" />
           <span className="hidden sm:inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground whitespace-nowrap">
             <span className="h-1.5 w-1.5 rounded-full bg-[#5db8a6]" />
-            DASHBOARD / 01 &bull; LIVE STATUS
+            ACCOUNT OVERVIEW
           </span>
         </div>
 
@@ -44,55 +45,63 @@ export function DashboardHeader({
         </h1>
 
         <p className="max-w-2xl text-xs sm:text-sm text-muted-foreground leading-relaxed">
-          See the current state of your vehicle, QR, safety view, and real-time emergency scan activity.
+          Manage your vehicle, QR, safety information and recent scan activity.
         </p>
       </div>
 
       {/* Control Rails & Selectors */}
       <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap sm:flex-nowrap w-full xl:w-auto">
         {/* Command Palette Trigger */}
-        <button
+        <Button
           type="button"
+          variant="outline"
           onClick={onOpenCommandPalette}
-          className="hidden sm:flex h-10 shrink-0 items-center gap-2 rounded-xl border border-border bg-card px-3 text-xs text-muted-foreground shadow-2xs transition-all hover:border-[#cc785c]/40 hover:text-foreground"
+          className="hidden h-11 shrink-0 gap-2 bg-card px-3 text-xs text-muted-foreground hover:border-[#cc785c]/40 hover:text-foreground sm:inline-flex"
           title="Open Command Launcher (Ctrl+K or ⌘K)"
         >
-          <VaahanIcon name="search" size={13} />
+          <VaahanIcon name="search" size={18} />
           <span className="font-mono text-[11px]">Command</span>
           <kbd className="rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-[9px] text-muted-foreground">
-            ⌘K
+            Ctrl / ⌘ K
           </kbd>
-        </button>
+        </Button>
 
         {/* Filter Trigger */}
-        <button
+        <Button
           type="button"
+          variant="outline"
           onClick={onOpenFilters}
-          className="flex h-10 shrink-0 items-center justify-center gap-1.5 sm:gap-2 rounded-xl border border-border bg-card px-3 sm:px-3.5 text-xs font-medium text-foreground shadow-2xs transition-all hover:border-[#cc785c]/40 hover:shadow-xs"
+          className="h-11 shrink-0 gap-2 bg-card px-3 text-xs hover:border-[#cc785c]/40 sm:px-3.5"
         >
-          <VaahanIcon name="settings" size={14} className="text-[#cc785c]" />
+          <VaahanIcon name="adjustments" size={18} className="text-[#cc785c]" />
           <span>Filters</span>
           {activeFilterCount > 0 && (
             <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[#cc785c] font-mono text-[9px] font-bold text-white">
               {activeFilterCount}
             </span>
           )}
-        </button>
+        </Button>
 
         {/* Notification Bell with Real Unread Badge */}
-        <button
+        <Button
           type="button"
+          variant="outline"
+          size="icon"
           onClick={onOpenNotifications}
-          className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border bg-card text-foreground shadow-2xs transition-all hover:border-[#cc785c]/40 hover:shadow-xs"
-          aria-label="View In-App Notifications"
+          className="relative size-11 shrink-0 bg-card hover:border-[#cc785c]/40"
+          aria-label={`Notifications${unreadNotifications > 0 ? `, ${unreadNotifications} unread` : ""}`}
+          title="Notifications"
         >
-          <VaahanIcon name="bell" size={16} />
+          <VaahanIcon name="bell" size={18} />
           {unreadNotifications > 0 && (
-            <span className="absolute -top-1 -right-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[#cc785c] px-1 font-mono text-[9px] font-bold text-white shadow-xs">
+            <span
+              aria-hidden="true"
+              className="absolute -top-1 -right-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[#cc785c] px-1 font-mono text-[9px] font-bold text-white shadow-xs"
+            >
               {unreadNotifications > 9 ? "9+" : unreadNotifications}
             </span>
           )}
-        </button>
+        </Button>
 
         {/* Vehicle Context Selector — Flexes full width on mobile, auto width on tablet/desktop */}
         <div className="flex-1 min-w-0 sm:flex-initial">

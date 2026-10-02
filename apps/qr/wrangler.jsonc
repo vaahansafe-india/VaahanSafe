@@ -8,8 +8,13 @@
   // =========================================================================
   // LEAST-PRIVILEGE BINDINGS — QR EMERGENCY RESOLVER
   // INVARIANT 08: QR surface does NOT bind payment or messaging secrets.
-  // INVARIANT 11: Minimal critical path (Edge -> Worker -> D1 -> Public Projection).
+  // INVARIANT 11: Minimal critical path (Edge -> Worker -> Supabase -> Public Projection).
   // =========================================================================
+
+  "vars": {
+    "SUPABASE_URL": "https://zpjwrptrqgpeyvlvscpv.supabase.co",
+    "SUPABASE_PUBLISHABLE_KEY": "sb_publishable_b2gKJgEfWgdR99PqkQ5z2g_JOa7lfk4"
+  },
 
   // Development Environment (Default)
   "d1_databases": [

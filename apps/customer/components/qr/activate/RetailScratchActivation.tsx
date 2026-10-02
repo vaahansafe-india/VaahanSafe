@@ -2,10 +2,10 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useCustomerRouter } from "@/lib/use-customer-router";
 import { VaahanIcon } from "@vaahansafe/icons";
 import { submitQrActivationAction } from "@/app/(app)/qr/actions";
-import { Sparkles, ShieldCheck, CheckCircle2, AlertCircle, ArrowRight, KeyRound } from "lucide-react";
+import { Sparkles, ShieldCheck, CheckCircle2, AlertCircle, ArrowRight, KeyRound } from "@/components/ui/icons";
 import type { QrActivationData } from "@/lib/qr-types";
 import { cn } from "@vaahansafe/ui/lib/utils";
 
@@ -14,7 +14,7 @@ interface RetailScratchActivationProps {
 }
 
 export function RetailScratchActivation({ data }: RetailScratchActivationProps) {
-  const router = useRouter();
+  const router = useCustomerRouter();
   const [scratchCode, setScratchCode] = React.useState("");
   const [publicId, setPublicId] = React.useState("");
   const [selectedVehicleId, setSelectedVehicleId] = React.useState(
@@ -51,6 +51,7 @@ export function RetailScratchActivation({ data }: RetailScratchActivationProps) 
       });
 
       if (res.success && res.publicId && res.maskedPlate) {
+        router.refresh();
         setSuccessResult({
           publicId: res.publicId,
           maskedPlate: res.maskedPlate,

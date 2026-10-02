@@ -14,6 +14,15 @@ const config: Config = {
   },
     theme: {
     	extend: {
+    		borderRadius: {
+    			DEFAULT: "4px",
+    			sm: "4px",
+    			md: "4px",
+    			lg: "4px",
+    			xl: "4px",
+    			"2xl": "4px",
+    			"3xl": "4px",
+    		},
     		colors: {
     			sidebar: {
     				DEFAULT: 'hsl(var(--sidebar-background))',

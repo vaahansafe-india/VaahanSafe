@@ -34,10 +34,10 @@ export function ContactRecord({
   const indexNumber = String(index + 1).padStart(2, "0");
 
   const actionMenuContent = (
-    <DropdownMenuContent align="end" className="w-52 rounded-2xl p-1.5">
+    <DropdownMenuContent align="end" className="w-52 rounded-[4px] p-1">
       <DropdownMenuItem
         onClick={() => onManage(contact)}
-        className="gap-2 text-xs font-medium cursor-pointer"
+        className="gap-2 text-xs font-medium cursor-pointer rounded-[3px]"
       >
         <VaahanIcon name="eye" size={14} />
         <span>View Details</span>
@@ -45,7 +45,7 @@ export function ContactRecord({
 
       <DropdownMenuItem
         onClick={() => onEdit(contact)}
-        className="gap-2 text-xs font-medium cursor-pointer"
+        className="gap-2 text-xs font-medium cursor-pointer rounded-[3px]"
       >
         <VaahanIcon name="settings" size={14} />
         <span>Edit Contact</span>
@@ -54,7 +54,7 @@ export function ContactRecord({
       {!contact.isPrimary && (
         <DropdownMenuItem
           onClick={() => onSetPrimary(contact)}
-          className="gap-2 text-xs font-medium cursor-pointer text-[#cc785c]"
+          className="gap-2 text-xs font-medium cursor-pointer text-[#cc785c] rounded-[3px]"
         >
           <VaahanIcon name="shield" size={14} />
           <span>Set as Primary</span>
@@ -63,7 +63,7 @@ export function ContactRecord({
 
       <DropdownMenuItem
         onClick={() => onToggleVisibility(contact)}
-        className="gap-2 text-xs font-medium cursor-pointer"
+        className="gap-2 text-xs font-medium cursor-pointer rounded-[3px]"
       >
         <VaahanIcon
           name={contact.isPubliclyAvailable ? "eye-off" : "eye"}
@@ -80,7 +80,7 @@ export function ContactRecord({
 
       <DropdownMenuItem
         onClick={() => onRemove(contact)}
-        className="gap-2 text-xs font-medium text-[#c64545] focus:text-[#c64545] cursor-pointer"
+        className="gap-2 text-xs font-medium text-[#c64545] focus:text-[#c64545] cursor-pointer rounded-[3px]"
       >
         <VaahanIcon name="close" size={14} />
         <span>Remove Contact</span>
@@ -138,7 +138,7 @@ export function ContactRecord({
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
-                className="flex h-8 w-8 items-center justify-center rounded-xl border border-border/80 bg-background text-muted-foreground transition-colors hover:text-foreground hover:border-border shrink-0"
+                className="flex h-8 w-8 items-center justify-center rounded-[4px] border border-border/80 bg-background text-muted-foreground transition-colors hover:text-foreground hover:border-border shrink-0"
                 aria-label="More contact actions"
               >
                 <VaahanIcon name="more" size={14} />
@@ -222,7 +222,7 @@ export function ContactRecord({
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
-                className="flex h-8 w-8 items-center justify-center rounded-xl border border-border bg-background text-muted-foreground transition-colors hover:text-foreground shrink-0"
+                className="flex h-8 w-8 items-center justify-center rounded-[4px] border border-border bg-background text-muted-foreground transition-colors hover:text-foreground shrink-0"
                 aria-label="More contact actions"
               >
                 <VaahanIcon name="more" size={14} />

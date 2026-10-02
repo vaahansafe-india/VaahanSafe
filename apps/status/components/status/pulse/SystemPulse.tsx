@@ -41,7 +41,7 @@ export function SystemPulse({
           </div>
         </div>
         <div className="font-mono text-[9px] uppercase tracking-wider text-[#8e8b82] dark:text-[#77736d] shrink-0">
-          6 OPERATIONAL STAGES
+          6 MONITORED STAGES
         </div>
       </div>
 
@@ -50,7 +50,7 @@ export function SystemPulse({
         <div className="grid grid-cols-6 gap-2 text-center">
           {JOURNEY_STAGES.map((j, idx) => {
             const service = serviceByStage.get(j.stage);
-            const state = service?.state || "OPERATIONAL";
+            const state = service?.state || "UNKNOWN";
             const config = SERVICE_STATE_CONFIG[state] || SERVICE_STATE_CONFIG.UNKNOWN;
             const isOutage = state === "MAJOR OUTAGE" || state === "PARTIAL OUTAGE";
             const isDegraded = state === "DEGRADED";
@@ -144,7 +144,7 @@ export function SystemPulse({
       <div className="block lg:hidden pt-6 space-y-2">
         {JOURNEY_STAGES.map((j, idx) => {
           const service = serviceByStage.get(j.stage);
-          const state = service?.state || "OPERATIONAL";
+          const state = service?.state || "UNKNOWN";
           const config = SERVICE_STATE_CONFIG[state] || SERVICE_STATE_CONFIG.UNKNOWN;
           const isOutage = state === "MAJOR OUTAGE" || state === "PARTIAL OUTAGE";
           const isDegraded = state === "DEGRADED";

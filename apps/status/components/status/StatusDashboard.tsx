@@ -19,12 +19,12 @@ interface StatusDashboardProps {
 
 export function StatusDashboard({ initialStatus }: StatusDashboardProps) {
   const [status, setStatus] = React.useState<PublicSystemStatusDto>(() => initialStatus || {
-    overallState: "OPERATIONAL",
-    headline: "VaahanSafe services are operating normally.",
-    description: "All customer journey capabilities, emergency bystander QR resolvers, and dispatch channels are active and responding within nominal limits.",
+    overallState: "UNKNOWN",
+    headline: "Current service condition could not be confirmed.",
+    description: "Status telemetry is temporarily unavailable.",
     generatedAt: new Date().toISOString(),
     generatedAtFormatted: "",
-    isStale: false,
+    isStale: true,
     services: [],
     activeIncidents: [],
     activeMaintenance: [],
@@ -36,7 +36,7 @@ export function StatusDashboard({ initialStatus }: StatusDashboardProps) {
   const activeIncident = activeIncidents[0] || null;
   const activeMaintenance = status?.activeMaintenance || [];
   const services = status?.services || [];
-  const overallState = status?.overallState || "OPERATIONAL";
+  const overallState = status?.overallState || "UNKNOWN";
 
   const isDegradedOrOutage =
     overallState === "MAJOR OUTAGE" ||
@@ -70,6 +70,23 @@ export function StatusDashboard({ initialStatus }: StatusDashboardProps) {
             description={status.description}
             generatedAtFormatted={status.generatedAtFormatted}
           />
+
+          <section className="rounded-2xl border border-[#e6dfd8] bg-[#faf9f5] p-5 dark:border-[#2e2b27] dark:bg-[#181715]" aria-label="Supabase database monitor">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h2 className="font-serif text-lg">Supabase database</h2>
+                <p className="text-xs text-[#6c6a64] dark:text-[#a09d96]">Cloudflare scheduled probe · latest recorded database check</p>
+              </div>
+              <span className="font-mono text-xs font-semibold" role="status">
+                {status.databaseHeartbeat?.status ?? "UNKNOWN"}
+              </span>
+            </div>
+            <p className="mt-3 text-xs text-[#6c6a64] dark:text-[#a09d96]">
+              {status.databaseHeartbeat?.checkedAt
+                ? `Last successful check: ${new Date(status.databaseHeartbeat.checkedAt).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })} IST`
+                : "No successful scheduled check has been recorded yet."}
+            </p>
+          </section>
 
           {/* Signature System Pulse Topology */}
           <SystemPulse

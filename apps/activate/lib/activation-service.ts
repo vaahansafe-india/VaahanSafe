@@ -372,7 +372,7 @@ export async function getActivationSession(
         [challenge.qrId]
       );
 
-      // If user authenticated after challenge was created, attach user to challenge in D1
+      // If user authenticated after challenge was created, attach user to challenge in Supabase
       if (authenticatedUser && !challenge.userId) {
         await challengeRepo.attachUser(challenge.id, authenticatedUser.id);
       }
@@ -555,7 +555,7 @@ export async function activateRetailQr(params: {
     };
   }
 
-  // 5. Atomic Commitment in Cloudflare D1
+  // 5. Atomic Commitment in Supabase Database
   const assignmentId = `qra_${crypto.randomUUID().replace(/-/g, "").slice(0, 16)}`;
   const historyId = `qsh_${crypto.randomUUID().replace(/-/g, "")}`;
   const now = new Date().toISOString();
@@ -563,7 +563,7 @@ export async function activateRetailQr(params: {
   await db.batch([
     // The first insert is the claim. Database unique indexes on the current QR and
     // vehicle assignments serialize competing requests. Every later write depends
-    // on this exact assignment existing in the same D1 transaction.
+    // on this exact assignment existing in the same atomic transaction.
     {
       sql: `INSERT INTO qr_assignments (id, qr_id, vehicle_id, user_id, assignment_type, assigned_at, created_at)
             SELECT ?, s.id, v.id, u.id, 'INITIAL', ?, ?

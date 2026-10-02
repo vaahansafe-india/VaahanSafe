@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useCustomerRouter } from "@/lib/use-customer-router";
 import { VaahanIcon } from "@vaahansafe/icons";
 import {
   Popover,
@@ -25,7 +26,7 @@ export function VehicleContextSelector({
   vehicles,
   activeVehicle,
 }: VehicleContextSelectorProps) {
-  const router = useRouter();
+  const router = useCustomerRouter();
   const searchParams = useSearchParams();
   const isMobile = useIsMobile();
   const [open, setOpen] = React.useState(false);
@@ -38,7 +39,7 @@ export function VehicleContextSelector({
       (v) =>
         v.registrationNumber.toLowerCase().includes(q) ||
         v.make.toLowerCase().includes(q) ||
-        v.model.toLowerCase().includes(q)
+        v.model.toLowerCase().includes(q),
     );
   }, [vehicles, search]);
 
@@ -51,7 +52,7 @@ export function VehicleContextSelector({
 
   if (!activeVehicle) {
     return (
-      <div className="flex h-10 w-full sm:w-auto items-center gap-2 rounded-xl border border-dashed border-border px-3 font-mono text-xs text-muted-foreground">
+      <div className="flex h-11 w-full sm:w-auto items-center gap-2 rounded-md border border-dashed border-border px-3 font-mono text-xs text-muted-foreground">
         <VaahanIcon name="vehicle" size={14} />
         <span>No vehicle registered</span>
       </div>
@@ -63,7 +64,7 @@ export function VehicleContextSelector({
       type="button"
       aria-expanded={open}
       onClick={() => setOpen(true)}
-      className="group flex h-10 w-full sm:w-auto items-center justify-between sm:justify-start gap-2 sm:gap-2.5 rounded-xl border border-border bg-card px-2.5 sm:px-3 text-left shadow-2xs transition-all hover:border-[#cc785c]/40 hover:shadow-xs focus:outline-none focus:ring-2 focus:ring-[#cc785c]/30 min-w-0"
+      className="group flex h-11 w-full sm:w-auto items-center justify-between sm:justify-start gap-2 sm:gap-2.5 rounded-md border border-border bg-card px-2.5 sm:px-3 text-left shadow-2xs transition-all hover:border-[#cc785c]/40 hover:shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 min-w-0"
     >
       <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-[#cc785c]/10 text-[#cc785c] transition-colors group-hover:bg-[#cc785c] group-hover:text-white">
         <VaahanIcon name="vehicle" size={13} />
@@ -96,7 +97,11 @@ export function VehicleContextSelector({
           Switch Vehicle Context
         </div>
         <div className="mt-2.5 sm:mt-2 flex items-center gap-2 rounded-xl sm:rounded-lg border border-border bg-background px-3 py-2 sm:px-2.5 sm:py-1.5 text-xs text-foreground focus-within:border-[#cc785c]">
-          <VaahanIcon name="search" size={13} className="text-muted-foreground shrink-0" />
+          <VaahanIcon
+            name="search"
+            size={13}
+            className="text-muted-foreground shrink-0"
+          />
           <input
             type="text"
             placeholder="Search registration or model..."
@@ -144,7 +149,9 @@ export function VehicleContextSelector({
                 </div>
               </div>
               {isSelected && (
-                <span className="font-mono text-[10px] text-[#cc785c] shrink-0 ml-2">ACTIVE</span>
+                <span className="font-mono text-[10px] text-[#cc785c] shrink-0 ml-2">
+                  ACTIVE
+                </span>
               )}
             </button>
           );
@@ -188,9 +195,7 @@ export function VehicleContextSelector({
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        {triggerButton}
-      </PopoverTrigger>
+      <PopoverTrigger asChild>{triggerButton}</PopoverTrigger>
       <PopoverContent
         align="start"
         sideOffset={6}

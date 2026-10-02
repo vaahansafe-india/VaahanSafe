@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedCustomer } from "@/lib/session";
-import { getAuthoritativeDatabaseClient } from "@vaahansafe/database";
+import { getAuthoritativeDatabaseClient, createInAppNotification } from "@vaahansafe/database";
 
 interface RouteParams {
   params: Promise<{
@@ -23,8 +23,8 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     const db = getAuthoritativeDatabaseClient();
 
     // Authorize vehicle ownership
-    const vehicle = await db.queryFirst<{ id: string }>(
-      `SELECT id FROM vehicles WHERE id = ? AND user_id = ? AND status != 'DELETED'`,
+    const vehicle = await db.queryFirst<{ id: string; registration_number: string }>(
+      `SELECT id, registration_number FROM vehicles WHERE id = ? AND user_id = ? AND status != 'DELETED'`,
       [vehicleId, auth.user.id]
     );
 
@@ -119,6 +119,17 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
         ]
       );
     }
+
+    // In-App Notification: Emergency Contact Configured
+    await createInAppNotification({
+      userId: auth.user.id,
+      eventType: "EMERGENCY_CONTACT_CONFIGURED",
+      category: "SAFETY",
+      title: "Emergency Contact Configured",
+      body: `${name.trim()} (${relationship ? String(relationship).trim() : "Emergency Contact"}) was linked as a priority emergency relay for vehicle ${vehicle.registration_number}.`,
+      actionType: "NONE",
+      db,
+    });
 
     return NextResponse.json({ success: true });
   } catch (err) {

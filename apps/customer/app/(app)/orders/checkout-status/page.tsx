@@ -4,7 +4,7 @@ import Link from "next/link";
 import { getAuthenticatedCustomer } from "@/lib/session";
 import { getAuthoritativeDatabaseClient } from "@vaahansafe/database";
 import { Card, Badge } from "@vaahansafe/ui/components";
-import { CheckCircle2, Clock, XCircle, ArrowRight, RefreshCw, ShieldCheck } from "lucide-react";
+import { CheckCircle2, Clock, XCircle, ArrowRight, RefreshCw, ShieldCheck } from "@/components/ui/icons";
 
 import { getPaymentGateway } from "@vaahansafe/payments";
 import { fulfillPaidOnlineOrder } from "@vaahansafe/qr-core";

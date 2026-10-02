@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
-import { getAuthenticatedCustomer } from "@/lib/session";
-import { getQrOverview } from "@/lib/qr-service";
-import { QrOverviewController } from "@/components/qr/overview/QrOverviewController";
+import { Suspense } from "react";
+import { CustomerPageView } from "./CustomerPageView";
+import { CustomerPageLoading } from "@/components/query/CustomerPageState";
 
 export const metadata: Metadata = {
   title: "My QR Hub — VaahanSafe QR Identity Center",
@@ -10,14 +9,6 @@ export const metadata: Metadata = {
     "Authoritative vehicle QR safety identity, physical UV sticker tracking, digital pass, and lifecycle services.",
 };
 
-export default async function MyQrPage() {
-  const auth = await getAuthenticatedCustomer();
-
-  if (!auth) {
-    redirect("/login");
-  }
-
-  const overview = await getQrOverview(auth.user.id);
-
-  return <QrOverviewController overview={overview} />;
+export default function CustomerPage() {
+  return <Suspense fallback={<CustomerPageLoading />}><CustomerPageView /></Suspense>;
 }

@@ -1,4 +1,5 @@
 import * as React from "react";
+import { AuthLoader } from "./AuthLoader";
 
 interface GoogleSignInButtonProps {
   isLoading?: boolean;
@@ -22,11 +23,8 @@ export function GoogleSignInButton({
       e.preventDefault();
       return;
     }
-    if (onClick) {
-      onClick();
-    } else {
-      window.location.href = "/api/auth/google";
-    }
+    if (onClick) onClick();
+    else window.location.href = "/api/auth/google";
   };
 
   return (
@@ -36,19 +34,18 @@ export function GoogleSignInButton({
       disabled={disabled || isLoading}
       aria-busy={isLoading}
       className="
-        group relative flex h-11 w-full items-center justify-center gap-3
-        rounded-lg border border-border bg-card px-4
-        text-sm font-medium text-foreground shadow-2xs
-        transition-all duration-200
-        hover:border-[#cc785c]/40 hover:bg-muted hover:shadow-xs
-        active:scale-[0.99]
+        group relative flex h-12 w-full items-center justify-center gap-3
+        rounded-[3px] border border-[#d8d0c5] bg-white px-4
+        text-sm font-semibold text-[#1b1c1a]
+        transition-colors duration-200
+        hover:border-[#a9583e] hover:bg-[#f5f0e8]
         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#cc785c]/40 focus-visible:ring-offset-2
         disabled:cursor-not-allowed disabled:opacity-60
       "
     >
       {isLoading ? (
         <>
-          <span className="h-4 w-4 animate-spin rounded-full border-2 border-[#cc785c] border-t-transparent" />
+          <AuthLoader />
           <span className="font-sans text-sm text-muted-foreground">
             Connecting...
           </span>
@@ -57,7 +54,7 @@ export function GoogleSignInButton({
         <>
           {/* Official 4-Color Google G SVG Icon */}
           <svg
-            className="h-4 w-4 shrink-0 transition-transform duration-200 group-hover:scale-105"
+            className="h-4 w-4 shrink-0"
             viewBox="0 0 24 24"
             aria-hidden="true"
           >

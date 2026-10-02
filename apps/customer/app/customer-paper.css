@@ -1,0 +1,382 @@
+/* Customer surfaces share the paper, ink and terracotta palette of the website. */
+:root,
+.customer-paper {
+  color-scheme: light;
+  --background: 48 33% 97%;
+  --foreground: 90 4% 11%;
+  --card: 48 33% 98%;
+  --card-foreground: 90 4% 11%;
+  --popover: 48 33% 98%;
+  --popover-foreground: 90 4% 11%;
+  --muted: 38 28% 93%;
+  --muted-foreground: 40 3% 37%;
+  --accent: 36 31% 91%;
+  --accent-foreground: 90 4% 11%;
+  --secondary: 38 28% 93%;
+  --secondary-foreground: 90 4% 11%;
+  --border: 36 20% 81%;
+  --input: 36 20% 81%;
+  --primary: 16 46% 45%;
+  --primary-foreground: 48 33% 98%;
+  --sidebar-background: 40 29% 94%;
+  --sidebar-foreground: 90 4% 11%;
+  --sidebar-accent: 36 31% 88%;
+  --sidebar-accent-foreground: 90 4% 11%;
+  --sidebar-border: 36 20% 81%;
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 4px;
+  --radius-lg: 4px;
+  --radius-xl: 4px;
+  --radius-xxl: 4px;
+  --radius-xxxl: 4px;
+  --radius: 4px;
+}
+.customer-paper,
+.customer-paper [data-sidebar="sidebar"] {
+  background-image: url("/images/auth/paper-texture.webp");
+  background-size: 400px 400px;
+}
+.customer-paper #main-app-content {
+  background: transparent;
+}
+.customer-paper h1,
+.customer-paper h2 {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-weight: 500;
+}
+.customer-paper h1 {
+  font-size: clamp(2.5rem, 4vw, 3.75rem);
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+}
+.customer-paper [class*="shadow"] {
+  box-shadow: none;
+}
+:is(.customer-paper, .customer-surface, body) :is(.rounded, .rounded-sm, .rounded-md, .rounded-lg, .rounded-xl, .rounded-2xl, .rounded-3xl):not(.rounded-full):not([class*="rounded-full"]) {
+  border-radius: 4px;
+}
+.customer-paper [data-sidebar="group-label"] {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+}
+.customer-paper [data-sidebar="menu-button"][data-active="true"] {
+  background-color: #eae1d3;
+  color: #8c4e39;
+}
+.paper-section {
+  border-top: 1px solid #d8d0c5;
+  padding-block: 1.5rem;
+}
+.paper-label {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: #a9583e;
+}
+.paper-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0.65rem 1rem;
+  border: 1px solid #d8d0c5;
+  border-radius: 3px;
+  font-size: 13px;
+  font-weight: 500;
+}
+.paper-action:hover {
+  background: #eee7dc;
+}
+.paper-action-primary {
+  background: #252320;
+  color: #faf9f5;
+  border-color: #252320;
+}
+.paper-action-primary:hover {
+  background: #3a3833;
+}
+
+/* Radix and Sonner portals mount under body, outside the app canvas. */
+.customer-surface
+  :is(
+    [data-ui="sheet-overlay"],
+    [data-ui="dialog-overlay"],
+    [data-ui="alert-dialog-overlay"]
+  ) {
+  background: rgb(37 35 32 / 38%);
+  backdrop-filter: blur(3px);
+  animation-duration: 180ms;
+}
+.customer-surface
+  :is(
+    [data-ui="sheet-content"],
+    [data-ui="dialog-content"],
+    [data-ui="alert-dialog-content"]
+  ) {
+  color: #252320;
+  background-color: #faf9f5;
+  background-image: url("/images/auth/paper-texture.webp");
+  background-size: 400px 400px;
+  border-color: #d8d0c5;
+  box-shadow: 0 16px 60px rgb(37 35 32 / 12%);
+  overscroll-behavior: contain;
+  animation-duration: 200ms;
+}
+.customer-surface [data-ui="sheet-content"] {
+  max-height: 100dvh;
+  padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+}
+.customer-surface [data-ui="sheet-content"]:not([data-sidebar="sidebar"]) {
+  overflow-y: auto;
+}
+.customer-surface [data-ui="sheet-content"][data-sidebar="sidebar"] {
+  padding-bottom: 0;
+}
+.customer-surface
+  :is([data-ui="dialog-content"], [data-ui="alert-dialog-content"]) {
+  width: calc(100vw - 2rem);
+  max-height: calc(100dvh - 2rem);
+  border-radius: 4px;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+.customer-surface
+  :is(
+    [data-ui="sheet-header"],
+    [data-ui="dialog-header"],
+    [data-ui="alert-dialog-header"]
+  ) {
+  text-align: left;
+}
+.customer-surface
+  :is([data-ui="sheet-content"], [data-ui="dialog-content"])
+  > :is([data-ui="sheet-header"], [data-ui="dialog-header"]) {
+  padding-inline-end: 3.5rem;
+}
+.customer-surface
+  :is(
+    [data-ui="sheet-title"],
+    [data-ui="dialog-title"],
+    [data-ui="alert-dialog-title"]
+  ) {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 1.875rem;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+.customer-surface
+  :is(
+    [data-ui="sheet-description"],
+    [data-ui="dialog-description"],
+    [data-ui="alert-dialog-description"]
+  ) {
+  color: #615f59;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+.customer-surface
+  :is(
+    [data-ui="sheet-footer"],
+    [data-ui="dialog-footer"],
+    [data-ui="alert-dialog-footer"]
+  ) {
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid #d8d0c5;
+}
+.customer-surface
+  :is(
+    [data-ui="sheet-footer"],
+    [data-ui="dialog-footer"],
+    [data-ui="alert-dialog-footer"]
+  )
+  > :is(button, a) {
+  min-height: 44px;
+  margin: 0;
+  border-radius: 4px;
+}
+.customer-surface [data-ui="surface-close"] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  top: 12px;
+  right: 12px;
+  border: 1px solid #d8d0c5;
+  border-radius: 6px;
+  color: #615f59;
+  background: #faf9f5;
+  opacity: 1;
+  box-shadow: none;
+  transform: none;
+}
+.customer-surface [data-ui="surface-close"]:hover {
+  color: #a9583e;
+  background: #eee7dc;
+  border-color: #b59680;
+}
+.customer-surface [data-ui="surface-close"]:focus-visible {
+  outline: 2px solid #a9583e;
+  outline-offset: 2px;
+}
+/* The navigation drawer and command palette supply their own close controls. */
+.customer-surface
+  [data-ui="sheet-content"][data-sidebar="sidebar"]
+  > [data-ui="surface-close"],
+.customer-surface
+  [data-ui="dialog-content"].customer-command-dialog
+  > [data-ui="surface-close"] {
+  display: none;
+}
+.customer-surface
+  :is(
+    [data-ui="sheet-content"],
+    [data-ui="dialog-content"],
+    [data-ui="alert-dialog-content"]
+  )
+  :is(.rounded-xl, .rounded-2xl, .rounded-3xl) {
+  border-radius: 4px;
+}
+/* Radix popper dropdown menus & popovers enforce 4px (rounded-sm) corner radius */
+[data-radix-popper-content-wrapper] :is([role="menu"], [role="dialog"], [data-radix-menu-content], [data-radix-popover-content], > div):not(.rounded-full) {
+  border-radius: 4px;
+}
+.customer-surface [data-sonner-toast].customer-toast {
+  --toast-status-color: #a9583e;
+  padding: 16px 48px 16px 16px;
+  gap: 12px;
+  border: 1px solid #d8d0c5;
+  border-left: 3px solid var(--toast-status-color);
+  border-radius: 4px;
+  color: #252320;
+  background: #faf9f5 url("/images/auth/paper-texture.webp") center / 400px
+    400px;
+  box-shadow: 0 8px 28px rgb(37 35 32 / 10%);
+  font-family: inherit;
+}
+.customer-surface [data-sonner-toast][data-type="success"] {
+  --toast-status-color: #356f57;
+}
+.customer-surface [data-sonner-toast][data-type="info"] {
+  --toast-status-color: #325763;
+}
+.customer-surface [data-sonner-toast][data-type="warning"] {
+  --toast-status-color: #946721;
+}
+.customer-surface [data-sonner-toast][data-type="error"] {
+  --toast-status-color: #a33f36;
+}
+.customer-surface .customer-toast-icon {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  flex-shrink: 0;
+  color: var(--toast-status-color);
+}
+.customer-surface .customer-toast-title {
+  font-size: 14px;
+  line-height: 1.45;
+  font-weight: 600;
+}
+.customer-surface .customer-toast-description {
+  color: #615f59;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.customer-surface [data-sonner-toast] .customer-toast-close {
+  top: 8px;
+  right: 8px;
+  left: auto;
+  width: 32px;
+  height: 32px;
+  transform: none;
+  border: 1px solid #d8d0c5;
+  border-radius: 4px;
+  color: #615f59;
+  background: #faf9f5;
+}
+.customer-surface [data-sonner-toast] .customer-toast-close:hover {
+  background: #eee7dc;
+}
+.customer-surface
+  [data-sonner-toast]
+  :is(.customer-toast-action, .customer-toast-cancel) {
+  min-height: 36px;
+  height: auto;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+.customer-surface [data-sonner-toast] .customer-toast-action {
+  color: #faf9f5;
+  background: #252320;
+}
+.customer-surface [data-sonner-toast] .customer-toast-cancel {
+  color: #615f59;
+  background: #eee7dc;
+}
+@media (max-width: 639px) {
+  .customer-surface [data-ui="sheet-content"]:not([data-sidebar="sidebar"]) {
+    width: 100%;
+    max-width: 100%;
+  }
+  .customer-surface [data-ui="dialog-content"] {
+    width: 100%;
+    max-width: 100%;
+    max-height: calc(100dvh - 1rem);
+    border-radius: 4px 4px 0 0;
+    padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+  }
+  .customer-surface
+    :is(
+      [data-ui="sheet-footer"],
+      [data-ui="dialog-footer"],
+      [data-ui="alert-dialog-footer"]
+    )
+    > :is(button, a) {
+    width: 100%;
+  }
+  .customer-surface [data-sonner-toast].customer-toast {
+    flex-wrap: wrap;
+  }
+  .customer-surface [data-sonner-toast].customer-toast {
+    padding-right: 60px;
+  }
+  .customer-surface [data-sonner-toast] .customer-toast-close {
+    top: 4px;
+    right: 4px;
+    width: 44px;
+    height: 44px;
+  }
+  .customer-surface [data-sonner-toast] [data-content] {
+    flex: 1;
+    min-width: 0;
+  }
+  .customer-surface
+    [data-sonner-toast]
+    :is(.customer-toast-action, .customer-toast-cancel) {
+    min-height: 44px;
+    margin-left: 32px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .customer-surface
+    :is(
+      [data-ui="sheet-content"],
+      [data-ui="dialog-content"],
+      [data-ui="alert-dialog-content"],
+      [data-ui="sheet-overlay"],
+      [data-ui="dialog-overlay"],
+      [data-ui="alert-dialog-overlay"]
+    ) {
+    animation: none;
+    transition: none;
+  }
+}

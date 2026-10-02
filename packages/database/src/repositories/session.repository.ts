@@ -42,7 +42,7 @@ export class D1SessionRepository implements SessionRepository {
     createdAt?: string;
     lastSeenAt?: string;
   }): Promise<Session> {
-    const id = input.id || `ses_${crypto.randomUUID().replace(/-/g, "").slice(0, 16)}`;
+    const id = input.id || crypto.randomUUID();
     const now = new Date().toISOString();
     const createdAt = input.createdAt || now;
     const lastSeenAt = input.lastSeenAt || createdAt;

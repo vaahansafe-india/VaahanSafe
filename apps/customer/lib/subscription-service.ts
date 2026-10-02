@@ -99,105 +99,59 @@ interface DbOrderPaymentRow {
 export async function getSubscriptionServiceOverview(
   userId: string,
   userProfile: { name?: string; email?: string; phone?: string },
-  scopedVehicleId?: string
+  scopedVehicleId?: string,
 ): Promise<SubscriptionServiceOverview> {
   const db = getAuthoritativeDatabaseClient();
 
-  // 1. Fetch user vehicles
-  let vehicleRows: DbVehicleRow[] = [];
-  try {
-    vehicleRows = await db.query<DbVehicleRow>(
+  const [
+    vehicleRows,
+    qrRows,
+    entitlementRows,
+    subscriptionRow,
+    planRows,
+    orderPaymentRows,
+  ] = await Promise.all([
+    db.query<DbVehicleRow>(
       `SELECT id, registration_number, make, model, vehicle_type, status, created_at
-       FROM vehicles
-       WHERE user_id = ?
-       ORDER BY created_at ASC`,
-      [userId]
-    );
-  } catch (err) {
-    console.warn("[SubscriptionService] Failed to query user vehicles:", err);
-  }
-
-  // 2. Fetch QR assignments for all user vehicles
-  let qrRows: DbQrAssignmentRow[] = [];
-  if (vehicleRows.length > 0) {
-    const vehicleIds = vehicleRows.map((v) => v.id);
-    const placeholders = vehicleIds.map(() => "?").join(",");
-    try {
-      qrRows = await db.query<DbQrAssignmentRow>(
-        `SELECT a.vehicle_id, s.id as qr_id, s.public_id, s.visible_code, s.status as qr_status,
-                s.activated_at, a.assigned_at
-         FROM qr_stickers s
-         JOIN qr_assignments a ON s.id = a.qr_id
-         WHERE a.vehicle_id IN (${placeholders}) AND a.ended_at IS NULL`,
-        vehicleIds
-      );
-    } catch (err) {
-      console.warn("[SubscriptionService] Failed to query QR assignments:", err);
-    }
-  }
-
-  // 3. Fetch Service Entitlements for user
-  let entitlementRows: DbServiceEntitlementRow[] = [];
-  try {
-    entitlementRows = await db.query<DbServiceEntitlementRow>(
+       FROM vehicles WHERE user_id = ? AND status != 'DELETED' ORDER BY created_at ASC`,
+      [userId],
+    ),
+    db.query<DbQrAssignmentRow>(
+      `SELECT a.vehicle_id, s.id as qr_id, s.public_id, s.visible_code, s.status as qr_status,
+              s.activated_at, a.assigned_at
+       FROM qr_stickers s JOIN qr_assignments a ON s.id = a.qr_id
+       JOIN vehicles v ON v.id = a.vehicle_id
+       WHERE a.user_id = ? AND v.user_id = ? AND v.status != 'DELETED' AND a.ended_at IS NULL`,
+      [userId, userId],
+    ),
+    db.query<DbServiceEntitlementRow>(
       `SELECT id, vehicle_id, qr_sticker_id, capability, status, acquisition_source, order_id, verified_at, expires_at
-       FROM service_entitlements
-       WHERE user_id = ? AND status = 'ENABLED'`,
-      [userId]
-    );
-  } catch (err) {
-    console.warn("[SubscriptionService] Failed to query service entitlements:", err);
-  }
-
-  // 4. Fetch Active Subscription & Plan
-  let subscriptionRow: DbSubscriptionRow | null = null;
-  try {
-    subscriptionRow = await db.queryFirst<DbSubscriptionRow>(
+       FROM service_entitlements WHERE user_id = ? AND status = 'ENABLED'`,
+      [userId],
+    ),
+    db.queryFirst<DbSubscriptionRow>(
       `SELECT s.id, s.vehicle_id, s.plan_id, s.status, s.current_period_start, s.current_period_end,
               s.cancel_at_period_end, p.code as plan_code, p.name as plan_name, p.description as plan_description,
               p.price_minor, p.currency, p.vehicle_limit, p.contact_limit, p.features_json
-       FROM subscriptions s
-       JOIN plans p ON s.plan_id = p.id
+       FROM subscriptions s JOIN plans p ON s.plan_id = p.id
        WHERE s.user_id = ? AND s.status IN ('ACTIVE', 'PENDING_PAYMENT', 'CANCEL_AT_PERIOD_END', 'PAST_DUE')
-       ORDER BY s.created_at DESC
-       LIMIT 1`,
-      [userId]
-    );
-  } catch (err) {
-    console.warn("[SubscriptionService] Failed to query subscription:", err);
-  }
-
-  // 5. Fetch Available Plans (Commercial upgrade plans only - excludes baseline zero plans)
-  let planRows: DbPlanRow[] = [];
-  try {
-    planRows = await db.query<DbPlanRow>(
+       ORDER BY s.created_at DESC LIMIT 1`,
+      [userId],
+    ),
+    db.query<DbPlanRow>(
       `SELECT id, code, name, description, billing_interval, price_minor, currency,
               vehicle_limit, contact_limit, features_json, is_active
-       FROM plans
-       WHERE is_active = 1 AND price_minor > 0
-       ORDER BY price_minor ASC`
-    );
-  } catch (err) {
-    console.warn("[SubscriptionService] Failed to query plans:", err);
-  }
-
-  // 6. Fetch Orders & Payments
-  let orderPaymentRows: DbOrderPaymentRow[] = [];
-  try {
-    orderPaymentRows = await db.query<DbOrderPaymentRow>(
+       FROM plans WHERE is_active = 1 AND price_minor > 0 ORDER BY price_minor ASC`,
+    ),
+    db.query<DbOrderPaymentRow>(
       `SELECT o.id as order_id, o.order_number, o.status as order_status, o.total_minor, o.currency,
               o.created_at as order_created_at, p.id as payment_id, p.status as payment_status,
               p.confirmed_at, p.payment_method
-       FROM orders o
-       LEFT JOIN payments p ON o.id = p.order_id
-       WHERE o.user_id = ?
-       ORDER BY o.created_at DESC
-       LIMIT 10`,
-      [userId]
-    );
-  } catch (err) {
-    console.warn("[SubscriptionService] Failed to query order payments:", err);
-  }
+       FROM orders o LEFT JOIN payments p ON o.id = p.order_id
+       WHERE o.user_id = ? ORDER BY o.created_at DESC LIMIT 10`,
+      [userId],
+    ),
+  ]);
 
   // Map Available Plans
   const availablePlans: CommercialPlanItem[] = planRows.map((p) => {
@@ -237,48 +191,55 @@ export async function getSubscriptionServiceOverview(
     entitlementsByVehicle.set(ent.vehicle_id, list);
   }
 
-  const connectedVehicles: ConnectedVehicleServiceItem[] = vehicleRows.map((v) => {
-    const assignedQr = qrMap.get(v.id);
-    const vehicleEnts = entitlementsByVehicle.get(v.id) || [];
+  const connectedVehicles: ConnectedVehicleServiceItem[] = vehicleRows.map(
+    (v) => {
+      const assignedQr = qrMap.get(v.id);
+      const vehicleEnts = entitlementsByVehicle.get(v.id) || [];
 
-    let subStatus: ConnectedVehicleServiceItem["subscriptionStatus"] = "NONE";
-    let planName: string | undefined = undefined;
+      let subStatus: ConnectedVehicleServiceItem["subscriptionStatus"] = "NONE";
+      let planName: string | undefined = undefined;
 
-    if (subscriptionRow) {
-      if (!subscriptionRow.vehicle_id || subscriptionRow.vehicle_id === v.id) {
-        subStatus = subscriptionRow.status === "ACTIVE" ? "ACTIVE" : "PENDING_PAYMENT";
-        planName = subscriptionRow.plan_name;
+      if (subscriptionRow) {
+        if (
+          !subscriptionRow.vehicle_id ||
+          subscriptionRow.vehicle_id === v.id
+        ) {
+          subStatus =
+            subscriptionRow.status === "ACTIVE" ? "ACTIVE" : "PENDING_PAYMENT";
+          planName = subscriptionRow.plan_name;
+        }
+      } else if (assignedQr && assignedQr.qr_status === "ACTIVATED") {
+        subStatus = "BASELINE_ONLY";
+        planName = "Core Safety Baseline";
       }
-    } else if (assignedQr && assignedQr.qr_status === "ACTIVATED") {
-      subStatus = "BASELINE_ONLY";
-      planName = "Core Safety Baseline";
-    }
 
-    return {
-      id: v.id,
-      registrationNumber: v.registration_number,
-      make: v.make,
-      model: v.model,
-      vehicleType: v.vehicle_type,
-      status: v.status,
-      qr: assignedQr
-        ? {
-            id: assignedQr.qr_id,
-            publicId: assignedQr.public_id,
-            visibleCode: assignedQr.visible_code,
-            status: assignedQr.qr_status as any,
-            activatedAt: assignedQr.activated_at || undefined,
-          }
-        : null,
-      subscriptionStatus: subStatus,
-      planName,
-      entitlementsCount: vehicleEnts.length,
-    };
-  });
+      return {
+        id: v.id,
+        registrationNumber: v.registration_number,
+        make: v.make,
+        model: v.model,
+        vehicleType: v.vehicle_type,
+        status: v.status,
+        qr: assignedQr
+          ? {
+              id: assignedQr.qr_id,
+              publicId: assignedQr.public_id,
+              visibleCode: assignedQr.visible_code,
+              status: assignedQr.qr_status as any,
+              activatedAt: assignedQr.activated_at || undefined,
+            }
+          : null,
+        subscriptionStatus: subStatus,
+        planName,
+        entitlementsCount: vehicleEnts.length,
+      };
+    },
+  );
 
   // Determine Active Scoped Vehicle or Primary Vehicle
   const activeVehicle = scopedVehicleId
-    ? connectedVehicles.find((v) => v.id === scopedVehicleId) || connectedVehicles[0]
+    ? connectedVehicles.find((v) => v.id === scopedVehicleId) ||
+      connectedVehicles[0]
     : connectedVehicles[0];
 
   // Map Service Passport (truthful empty state if no subscription)
@@ -295,7 +256,8 @@ export async function getSubscriptionServiceOverview(
       statusLabel = "Payment Confirmation Pending";
     }
 
-    let nextBillingEvent: ActiveSubscriptionPassport["nextBillingEvent"] = undefined;
+    let nextBillingEvent: ActiveSubscriptionPassport["nextBillingEvent"] =
+      undefined;
     if (subscriptionRow.current_period_end && !isCancelAtEnd) {
       nextBillingEvent = {
         date: subscriptionRow.current_period_end,
@@ -327,7 +289,9 @@ export async function getSubscriptionServiceOverview(
     };
   } else {
     // Truthful Baseline Continuity: Hardware QR entitlement is active, but no recurring plan
-    const hasActiveQr = connectedVehicles.some((v) => v.qr?.status === "ACTIVATED");
+    const hasActiveQr = connectedVehicles.some(
+      (v) => v.qr?.status === "ACTIVATED",
+    );
     const hasAnyVehicle = connectedVehicles.length > 0;
 
     if (hasActiveQr) {
@@ -377,20 +341,35 @@ export async function getSubscriptionServiceOverview(
   }
 
   // Evaluate Capabilities Ledger
-  const hasDigitalQrEntitlement = entitlementRows.some((e) => e.capability === "DIGITAL_QR_ACCESS");
-  const hasSafetyViewEntitlement = entitlementRows.some((e) => e.capability === "SAFETY_VIEW_ACTIVE");
-  const hasEmergencyRouting = entitlementRows.some((e) => e.capability === "EMERGENCY_ROUTING");
-  const hasScanHistoryEntitlement = entitlementRows.some((e) => e.capability === "SCAN_HISTORY_LOGGING");
-  const hasReplacementEntitlement = entitlementRows.some((e) => e.capability === "REPLACEMENT_ELIGIBLE");
+  const hasDigitalQrEntitlement = entitlementRows.some(
+    (e) => e.capability === "DIGITAL_QR_ACCESS",
+  );
+  const hasSafetyViewEntitlement = entitlementRows.some(
+    (e) => e.capability === "SAFETY_VIEW_ACTIVE",
+  );
+  const hasEmergencyRouting = entitlementRows.some(
+    (e) => e.capability === "EMERGENCY_ROUTING",
+  );
+  const hasScanHistoryEntitlement = entitlementRows.some(
+    (e) => e.capability === "SCAN_HISTORY_LOGGING",
+  );
+  const hasReplacementEntitlement = entitlementRows.some(
+    (e) => e.capability === "REPLACEMENT_ELIGIBLE",
+  );
 
   const capabilities: ServiceCapabilityItem[] = [
     {
       id: "qr-resolver",
       name: "QR Emergency Resolver",
       category: "RESOLUTION",
-      description: "Resolves physical sticker scans to live safety identity at qr.vaahansafe.com.",
-      status: activeVehicle?.qr?.status === "ACTIVATED" || hasDigitalQrEntitlement ? "ENABLED" : "BASELINE",
-      statusLabel: activeVehicle?.qr?.status === "ACTIVATED" ? "Active" : "Ready",
+      description:
+        "Resolves physical sticker scans to live safety identity at qr.vaahansafe.com.",
+      status:
+        activeVehicle?.qr?.status === "ACTIVATED" || hasDigitalQrEntitlement
+          ? "ENABLED"
+          : "BASELINE",
+      statusLabel:
+        activeVehicle?.qr?.status === "ACTIVATED" ? "Active" : "Ready",
       iconName: "qr",
       requiresPlan: false,
       boundVehiclePlate: activeVehicle?.registrationNumber,
@@ -399,8 +378,12 @@ export async function getSubscriptionServiceOverview(
       id: "safety-view",
       name: "Public Safety View",
       category: "SAFETY",
-      description: "Exposes verified vehicle identity and owner emergency profile instructions.",
-      status: hasSafetyViewEntitlement || activeVehicle?.qr?.status === "ACTIVATED" ? "ENABLED" : "BASELINE",
+      description:
+        "Exposes verified vehicle identity and owner emergency profile instructions.",
+      status:
+        hasSafetyViewEntitlement || activeVehicle?.qr?.status === "ACTIVATED"
+          ? "ENABLED"
+          : "BASELINE",
       statusLabel: "Active",
       iconName: "shield",
       requiresPlan: false,
@@ -410,8 +393,12 @@ export async function getSubscriptionServiceOverview(
       id: "emergency-routing",
       name: "Direct Contact Actions",
       category: "COMMUNICATION",
-      description: "Provides one-touch emergency phone calling to verified contacts.",
-      status: hasEmergencyRouting || activeVehicle?.qr?.status === "ACTIVATED" ? "ENABLED" : "BASELINE",
+      description:
+        "Provides one-touch emergency phone calling to verified contacts.",
+      status:
+        hasEmergencyRouting || activeVehicle?.qr?.status === "ACTIVATED"
+          ? "ENABLED"
+          : "BASELINE",
       statusLabel: "Active",
       iconName: "phone",
       requiresPlan: false,
@@ -421,9 +408,16 @@ export async function getSubscriptionServiceOverview(
       id: "scan-history",
       name: "Scan History Logging",
       category: "INTELLIGENCE",
-      description: "Records timestamp and geographic pulse points of QR scan events.",
-      status: hasScanHistoryEntitlement || subscriptionRow?.status === "ACTIVE" ? "ENABLED" : "PLAN_REQUIRED",
-      statusLabel: hasScanHistoryEntitlement || subscriptionRow?.status === "ACTIVE" ? "Active" : "Plan Required",
+      description:
+        "Records timestamp and geographic pulse points of QR scan events.",
+      status:
+        hasScanHistoryEntitlement || subscriptionRow?.status === "ACTIVE"
+          ? "ENABLED"
+          : "PLAN_REQUIRED",
+      statusLabel:
+        hasScanHistoryEntitlement || subscriptionRow?.status === "ACTIVE"
+          ? "Active"
+          : "Plan Required",
       iconName: "calendar",
       requiresPlan: true,
       boundVehiclePlate: activeVehicle?.registrationNumber,
@@ -432,7 +426,8 @@ export async function getSubscriptionServiceOverview(
       id: "scan-alerts",
       name: "Incident Scan Notifications",
       category: "COMMUNICATION",
-      description: "Dispatches SMS notifications to emergency contacts when sticker is scanned.",
+      description:
+        "Dispatches SMS notifications to emergency contacts when sticker is scanned.",
       status: "ENABLED",
       statusLabel: "Configured",
       iconName: "notification",
@@ -443,7 +438,8 @@ export async function getSubscriptionServiceOverview(
       id: "hardware-replacement",
       name: "Hardware Replacement Support",
       category: "HARDWARE",
-      description: "Entitlement to request rapid replacement for damaged or peeled stickers.",
+      description:
+        "Entitlement to request rapid replacement for damaged or peeled stickers.",
       status: hasReplacementEntitlement ? "ENABLED" : "BASELINE",
       statusLabel: hasReplacementEntitlement ? "Eligible" : "Standard",
       iconName: "document",
@@ -461,7 +457,9 @@ export async function getSubscriptionServiceOverview(
     currency: op.currency,
     confirmedAt: op.confirmed_at || undefined,
     createdAt: op.order_created_at,
-    itemDescription: op.order_number.includes("ORD") ? "VaahanSafe QR Safety Package" : "Annual Safety Plan",
+    itemDescription: op.order_number.includes("ORD")
+      ? "VaahanSafe QR Safety Package"
+      : "Annual Safety Plan",
     paymentMethod: op.payment_method || undefined,
   }));
 
@@ -512,13 +510,17 @@ export async function getSubscriptionServiceOverview(
   }
 
   // Sort history descending
-  historyEvents.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  historyEvents.sort(
+    (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
+  );
 
   // Attention Items
   const attentionItems: SubscriptionAttentionItem[] = [];
 
   // Check pending payments
-  const pendingOrders = orderPaymentRows.filter((o) => o.order_status === "PENDING_PAYMENT");
+  const pendingOrders = orderPaymentRows.filter(
+    (o) => o.order_status === "PENDING_PAYMENT",
+  );
   if (pendingOrders.length > 0) {
     attentionItems.push({
       id: "attn-pending-payment",
@@ -531,7 +533,9 @@ export async function getSubscriptionServiceOverview(
   }
 
   // Check unlinked vehicles
-  const unlinkedVehicles = connectedVehicles.filter((v) => !v.qr || v.qr.status !== "ACTIVATED");
+  const unlinkedVehicles = connectedVehicles.filter(
+    (v) => !v.qr || v.qr.status !== "ACTIVATED",
+  );
   if (unlinkedVehicles.length > 0 && connectedVehicles.length > 0) {
     attentionItems.push({
       id: "attn-unlinked-vehicle",

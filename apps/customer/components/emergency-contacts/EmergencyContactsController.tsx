@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useCustomerRouter } from "@/lib/use-customer-router";
 import type {
   SafetyContactNetworkData,
   SafetyContactItem,
@@ -29,7 +29,7 @@ interface EmergencyContactsControllerProps {
 export function EmergencyContactsController({
   initialData,
 }: EmergencyContactsControllerProps) {
-  const router = useRouter();
+  const router = useCustomerRouter();
 
   // Sheet & Dialog State
   const [isAddOpen, setIsAddOpen] = useState(false);

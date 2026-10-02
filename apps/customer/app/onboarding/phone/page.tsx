@@ -3,6 +3,7 @@ import * as React from "react";
 import { redirect } from "next/navigation";
 import { getAuthenticatedCustomer } from "../../../lib/session";
 import { AuthShell } from "../../../components/auth/AuthShell";
+import { safeReturnUrl } from "@/lib/auth-navigation";
 
 export const metadata: Metadata = {
   title: "Verify Mobile Number — VaahanSafe",
@@ -22,13 +23,14 @@ export default async function OnboardingPhonePage({
   const auth = await getAuthenticatedCustomer();
 
   // If user already has a verified phone, proceed to destination
-  if (auth?.user?.phone) {
-    redirect(params?.returnUrl || "/dashboard");
+  if (!auth) redirect("/login");
+  if (auth.phoneVerified) {
+    redirect(safeReturnUrl(params?.returnUrl));
   }
 
   return (
     <AuthShell
-      returnUrl={params?.returnUrl || "/dashboard"}
+      returnUrl={safeReturnUrl(params?.returnUrl)}
       mode="onboarding"
       userEmail={auth?.user?.email}
       userName={auth?.user?.name}

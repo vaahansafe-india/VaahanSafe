@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import { useCustomerRouter } from "@/lib/use-customer-router";
 import { VaahanIcon } from "@vaahansafe/icons";
 import {
   Sheet,
@@ -28,7 +28,7 @@ export function SafetyViewSheet({
   profile,
   onSaved,
 }: SafetyViewSheetProps) {
-  const router = useRouter();
+  const router = useCustomerRouter();
   const [saving, setSaving] = React.useState(false);
   const [feedback, setFeedback] = React.useState<string | null>(null);
 

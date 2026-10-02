@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useCustomerRouter } from "@/lib/use-customer-router";
 import { VaahanIcon } from "@vaahansafe/icons";
 import { Button, IdentityAvatar } from "@vaahansafe/ui";
 import { SettingsSection } from "../primitives/SettingsSection";
@@ -17,7 +18,7 @@ interface ProfileSettingsProps {
 }
 
 export function ProfileSettings({ data }: ProfileSettingsProps) {
-  const router = useRouter();
+  const router = useCustomerRouter();
   const searchParams = useSearchParams();
   const returnUrl = searchParams.get("returnUrl") || undefined;
 

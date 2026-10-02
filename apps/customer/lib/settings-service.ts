@@ -30,7 +30,11 @@ function parseUserAgent(ua?: string | null): {
   deviceType: "desktop" | "mobile" | "tablet" | "device";
 } {
   if (!ua) {
-    return { browser: "Web Browser", os: "Unknown Device", deviceType: "device" };
+    return {
+      browser: "Web Browser",
+      os: "Unknown Device",
+      deviceType: "device",
+    };
   }
 
   let os = "Desktop";
@@ -82,7 +86,7 @@ function maskPhone(phone: string): string {
 
 export async function getSettingsData(
   userId: string,
-  currentSessionId: string
+  currentSessionId: string,
 ): Promise<SettingsData> {
   const userRepo = getUserRepository();
   const identityRepo = getAuthIdentityRepository();
@@ -92,21 +96,28 @@ export async function getSettingsData(
   const prefRepo = getNotificationPreferenceRepository();
   const db = getAuthoritativeDatabaseClient();
 
-  // 1. User
-  const user = await userRepo.findById(userId);
+  // Independent account reads share one network round trip in parallel.
+  const [user, identities, allSessions, savedPrefs, userVehicles] =
+    await Promise.all([
+      userRepo.findById(userId),
+      identityRepo.findByUserId(userId),
+      sessionRepo.findByUserId(userId),
+      prefRepo.findByUserId(userId),
+      vehicleRepo.findByCustomerId(userId),
+    ]);
   if (!user) {
     throw new Error(`User not found: ${userId}`);
   }
 
   const safeAccountId = `VS-ACCT-${user.id.replace(/^usr_/, "").slice(0, 6).toUpperCase()}`;
   const memberSince = user.createdAt
-    ? new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" }).format(
-        new Date(user.createdAt)
-      )
+    ? new Intl.DateTimeFormat("en-US", {
+        month: "long",
+        year: "numeric",
+      }).format(new Date(user.createdAt))
     : "September 2026";
 
   // 2. Identities
-  const identities = await identityRepo.findByUserId(userId);
   const googleIdentity = identities.find((i) => i.provider === "GOOGLE");
   const phoneIdentity = identities.find((i) => i.provider === "PHONE");
 
@@ -124,7 +135,6 @@ export async function getSettingsData(
   };
 
   // 3. Sessions
-  const allSessions = await sessionRepo.findByUserId(userId);
   const nowTime = new Date().getTime();
 
   // Filter unrevoked and unexpired
@@ -174,13 +184,14 @@ export async function getSettingsData(
   }
 
   // 4. Notification Preferences
-  const savedPrefs = await prefRepo.findByUserId(userId);
   const getPrefState = (
     cat: NotificationMatrixCategory,
     channel: "IN_APP" | "WHATSAPP" | "EMAIL",
-    defaultVal: boolean
+    defaultVal: boolean,
   ): boolean => {
-    const match = savedPrefs.find((p) => p.category === cat && p.channel === channel);
+    const match = savedPrefs.find(
+      (p) => p.category === cat && p.channel === channel,
+    );
     return match ? match.enabled : defaultVal;
   };
 
@@ -188,7 +199,8 @@ export async function getSettingsData(
     {
       key: "SAFETY",
       label: "QR Activity & Alerts",
-      description: "Immediate safety notifications when someone scans your vehicle QR sticker.",
+      description:
+        "Immediate safety notifications when someone scans your vehicle QR sticker.",
       channels: {
         IN_APP: { enabled: getPrefState("SAFETY", "IN_APP", true) },
         WHATSAPP: { enabled: getPrefState("SAFETY", "WHATSAPP", true) },
@@ -198,7 +210,8 @@ export async function getSettingsData(
     {
       key: "FULFILMENT",
       label: "Order & Dispatch Updates",
-      description: "Tracking milestones, courier dispatch, and physical sticker delivery.",
+      description:
+        "Tracking milestones, courier dispatch, and physical sticker delivery.",
       channels: {
         IN_APP: { enabled: getPrefState("FULFILMENT", "IN_APP", true) },
         WHATSAPP: { enabled: getPrefState("FULFILMENT", "WHATSAPP", true) },
@@ -208,7 +221,8 @@ export async function getSettingsData(
     {
       key: "COMMERCE",
       label: "Payments & Invoices",
-      description: "Payment confirmations, official GST tax receipts, and renewal notices.",
+      description:
+        "Payment confirmations, official GST tax receipts, and renewal notices.",
       channels: {
         IN_APP: { enabled: getPrefState("COMMERCE", "IN_APP", true) },
         WHATSAPP: { enabled: getPrefState("COMMERCE", "WHATSAPP", false) },
@@ -218,7 +232,8 @@ export async function getSettingsData(
     {
       key: "SECURITY",
       label: "Security & Authentication",
-      description: "Critical sign-in verifications, mobile changes, and security alerts.",
+      description:
+        "Critical sign-in verifications, mobile changes, and security alerts.",
       channels: {
         IN_APP: { enabled: true, disabledReason: "REQUIRED_SECURITY" },
         WHATSAPP: { enabled: getPrefState("SECURITY", "WHATSAPP", false) },
@@ -228,7 +243,6 @@ export async function getSettingsData(
   ];
 
   // 5. Vehicles & Privacy Projection
-  const userVehicles = await vehicleRepo.findByCustomerId(userId);
   const vehicleOptions: VehicleOption[] = userVehicles.map((v, idx) => ({
     id: v.id,
     registrationNumber: v.registrationNumber,
@@ -242,20 +256,21 @@ export async function getSettingsData(
   const primaryVehicle = userVehicles[0];
 
   if (primaryVehicle) {
-    const rawProfile = await emergencyRepo.findRawProfileByVehicleId(primaryVehicle.id);
-
     // Resolve public QR identifier for live preview
     interface QrRow {
       public_id: string;
     }
-    const qrRow = await db.queryFirst<QrRow>(
-      `SELECT s.public_id
+    const [rawProfile, qrRow] = await Promise.all([
+      emergencyRepo.findRawProfileByVehicleId(primaryVehicle.id),
+      db.queryFirst<QrRow>(
+        `SELECT s.public_id
        FROM qr_assignments a
        JOIN qr_stickers s ON a.qr_id = s.id
        WHERE a.vehicle_id = ? AND a.ended_at IS NULL
        LIMIT 1`,
-      [primaryVehicle.id]
-    );
+        [primaryVehicle.id],
+      ),
+    ]);
 
     const publicId = qrRow?.public_id || null;
 
@@ -269,8 +284,12 @@ export async function getSettingsData(
       medicalNotes: rawProfile?.medical_notes || null,
       showOwnerName: rawProfile ? rawProfile.show_owner_name === 1 : true,
       showBloodGroup: rawProfile ? rawProfile.show_blood_group === 1 : true,
-      showMedicalNotes: rawProfile ? rawProfile.show_medical_notes === 1 : false,
-      showVehicleDetails: rawProfile ? rawProfile.show_vehicle_details === 1 : true,
+      showMedicalNotes: rawProfile
+        ? rawProfile.show_medical_notes === 1
+        : false,
+      showVehicleDetails: rawProfile
+        ? rawProfile.show_vehicle_details === 1
+        : true,
       publicId,
       previewUrl: publicId ? `https://qr.vaahansafe.com/${publicId}` : null,
     };

@@ -9,6 +9,7 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.117.2",
     "@vaahansafe/commerce": "*",
     "@vaahansafe/notifications": "*",
     "@vaahansafe/shipping": "*",

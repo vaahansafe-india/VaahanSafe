@@ -125,8 +125,12 @@ export async function validateSessionToken(
     return null;
   }
 
-  // Sliding session activity update (fire & forget / touched)
-  await sessionRepo.touchSession(tokenHash);
+  // Validate revocation/expiry on every request; activity only needs minute-level precision.
+  const lastSeen = Date.parse(session.lastSeenAt);
+  if (!Number.isFinite(lastSeen) || Date.now() - lastSeen >= 5 * 60 * 1000) {
+    const stillActive = await sessionRepo.touchSession(tokenHash);
+    if (!stillActive) return null;
+  }
 
   return session;
 }

@@ -209,7 +209,7 @@ export async function getNotificationCenterData(
   // Enforce IDOR protection: only load real data for authenticated userId
   const [rawNotifs, userVehicles] = await Promise.all([
     notifRepo.findByUserId(userId, 200, 0),
-    vehicleRepo.findByCustomerId(userId).catch(() => [] as Array<{ id: string; registrationNumber: string; make: string; model: string }>),
+    vehicleRepo.findByCustomerId(userId),
   ]);
 
   const authorizedVehicles = userVehicles.map((v: { id: string; registrationNumber: string; make: string; model: string }) => ({

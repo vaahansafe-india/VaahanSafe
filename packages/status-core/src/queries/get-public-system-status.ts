@@ -1,6 +1,7 @@
 import { StatusRepository } from "../repositories/status.repository";
 import { deriveOverallStatus, formatIstTimestamp } from "../services/aggregate-status";
 import type { PublicSystemStatusDto, PublicStatusServiceDto } from "../dto/public-status";
+import type { ServiceState } from "../domain/service-state";
 import type { DatabaseClient } from "@vaahansafe/database";
 
 interface ProbeResult {
@@ -8,6 +9,31 @@ interface ProbeResult {
   ok: boolean;
   statusText: string;
   targetUrl: string;
+}
+
+async function getDatabaseHeartbeat(): Promise<NonNullable<PublicSystemStatusDto["databaseHeartbeat"]>> {
+  const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key =
+    process.env.SUPABASE_ANON_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    process.env.SUPABASE_PUBLISHABLE_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  if (!url || !key) return { status: "UNKNOWN", checkedAt: null, latencyMs: null };
+  const started = Date.now();
+  try {
+    const response = await fetch(
+      `${url.replace(/\/$/, "")}/rest/v1/status_heartbeats?select=checked_at&service_name=eq.supabase_database&order=checked_at.desc&limit=1`,
+      { headers: { apikey: key, "Cache-Control": "no-cache" }, signal: AbortSignal.timeout(5000) }
+    );
+    if (!response.ok) throw new Error(`Supabase returned HTTP ${response.status}`);
+    const rows = await response.json() as Array<{ checked_at: string }>;
+    const checkedAt = rows[0]?.checked_at ?? null;
+    const fresh = checkedAt !== null && Number.isFinite(Date.parse(checkedAt))
+      && Date.now() - Date.parse(checkedAt) <= 25 * 60 * 1000;
+    return { status: fresh ? "OPERATIONAL" : "DEGRADED", checkedAt, latencyMs: Date.now() - started };
+  } catch {
+    return { status: "DEGRADED", checkedAt: null, latencyMs: Date.now() - started };
+  }
 }
 
 /**
@@ -34,7 +60,7 @@ async function probeEndpoint(url: string, timeoutMs = 3000): Promise<ProbeResult
     const latency = Math.max(1, Date.now() - start);
     return {
       latencyMs: latency,
-      ok: res.status < 500,
+      ok: res.ok || res.status === 401,
       statusText: `HTTP ${res.status}`,
       targetUrl: url,
     };
@@ -45,31 +71,6 @@ async function probeEndpoint(url: string, timeoutMs = 3000): Promise<ProbeResult
       ok: false,
       statusText: "Connection Timeout / Unreachable",
       targetUrl: url,
-    };
-  }
-}
-
-/**
- * Probes Cloudflare D1 query execution roundtrip latency.
- */
-async function probeDatabase(db: DatabaseClient): Promise<ProbeResult> {
-  const start = Date.now();
-  try {
-    await db.query("SELECT 1 as ping");
-    const latency = Math.max(1, Date.now() - start);
-    return {
-      latencyMs: latency,
-      ok: true,
-      statusText: "Cloudflare D1 Query Active",
-      targetUrl: "Cloudflare D1 (vaahansafe-prod-db)",
-    };
-  } catch {
-    const latency = Math.max(1, Date.now() - start);
-    return {
-      latencyMs: latency,
-      ok: false,
-      statusText: "D1 Query Delayed",
-      targetUrl: "Cloudflare D1 (vaahansafe-prod-db)",
     };
   }
 }
@@ -91,10 +92,11 @@ export async function getPublicSystemStatus(db?: DatabaseClient): Promise<Public
   const repo = new StatusRepository(client);
 
   // 2. Query Authoritative Relational Records from Cloudflare D1
-  const [baseServices, activeIncidents, activeMaintenance] = await Promise.all([
+  const [baseServices, activeIncidents, activeMaintenance, databaseHeartbeat] = await Promise.all([
     repo.getPublicServices(),
     repo.getActiveIncidents(),
     repo.getUpcomingMaintenance(),
+    getDatabaseHeartbeat(),
   ]);
 
   // 3. Concurrently Run Live Edge Probes for Real Telemetry
@@ -119,8 +121,8 @@ export async function getPublicSystemStatus(db?: DatabaseClient): Promise<Public
       ? process.env.NEXT_PUBLIC_QR_URL
       : "");
 
-  const probePromises = baseServices.map(async (service): Promise<{ slug: string; probe: ProbeResult }> => {
-    let probe: ProbeResult;
+  const probePromises = baseServices.map(async (service): Promise<{ slug: string; probe: ProbeResult | null }> => {
+    let probe: ProbeResult | null = null;
     switch (service.slug) {
       case "website":
         probe = await probeEndpoint(webUrl);
@@ -129,56 +131,24 @@ export async function getPublicSystemStatus(db?: DatabaseClient): Promise<Public
         probe = await probeEndpoint(`${appUrl}/api/auth/session`);
         break;
       case "payments":
-        if (client) {
-          probe = await probeDatabase(client);
-          probe.targetUrl = "Razorpay Payments & Cloudflare D1";
-        } else {
-          probe = await probeEndpoint(webUrl);
-        }
+        if (process.env.PROD_PAYMENTS_HEALTH_URL) probe = await probeEndpoint(process.env.PROD_PAYMENTS_HEALTH_URL);
         break;
       case "retail-activation":
-        if (activateUrl) {
-          probe = await probeEndpoint(activateUrl);
-          if (!probe.ok && client) {
-            probe = await probeDatabase(client);
-            probe.targetUrl = "Cloudflare D1 (qr_activation_secrets)";
-          }
-        } else if (client) {
-          probe = await probeDatabase(client);
-          probe.targetUrl = "Cloudflare D1 (qr_activation_secrets)";
-        } else {
-          probe = await probeEndpoint(webUrl);
-        }
+        if (activateUrl) probe = await probeEndpoint(activateUrl);
         break;
       case "vehicle-qr-access":
-        if (qrUrl) {
-          probe = await probeEndpoint(qrUrl);
-          if (!probe.ok && client) {
-            probe = await probeDatabase(client);
-            probe.targetUrl = "Cloudflare D1 (qr_stickers resolver)";
-          }
-        } else if (client) {
-          probe = await probeDatabase(client);
-          probe.targetUrl = "Cloudflare D1 (qr_stickers resolver)";
-        } else {
-          probe = await probeEndpoint(webUrl);
-        }
+        if (qrUrl) probe = await probeEndpoint(qrUrl);
         break;
       case "notifications":
       default:
-        if (client) {
-          probe = await probeDatabase(client);
-          probe.targetUrl = "Cloudflare D1 & MSG91 Dispatch Pipeline";
-        } else {
-          probe = await probeEndpoint(webUrl);
-        }
+        if (process.env.PROD_NOTIFICATIONS_HEALTH_URL) probe = await probeEndpoint(process.env.PROD_NOTIFICATIONS_HEALTH_URL);
         break;
     }
     return { slug: service.slug, probe };
   });
 
   const probeResults = await Promise.all(probePromises);
-  const probeMap = new Map<string, ProbeResult>(
+  const probeMap = new Map<string, ProbeResult | null>(
     probeResults.map((p) => [p.slug, p.probe])
   );
 
@@ -194,25 +164,32 @@ export async function getPublicSystemStatus(db?: DatabaseClient): Promise<Public
       inc.affectedServiceSlugs.includes(service.slug)
     );
 
-    if (!incidentAffects && probe) {
-      if (!probe.ok) {
-        state = "DEGRADED";
-      } else if (state === "UNKNOWN") {
-        state = "OPERATIONAL";
-      }
+    if (!incidentAffects) {
+      if (!probe) state = "UNKNOWN";
+      else if (!probe.ok) state = "DEGRADED";
+      else if (state === "UNKNOWN") state = "OPERATIONAL";
     }
 
     return {
       ...service,
       state,
       latencyMs: probe?.latencyMs,
-      lastProbeAt: now.toISOString(),
+      lastProbeAt: probe ? now.toISOString() : undefined,
       targetUrl: probe?.targetUrl,
       probeStatus: probe?.statusText,
     };
   });
 
-  const overall = deriveOverallStatus(enrichedServices, false);
+  const databaseService: PublicStatusServiceDto = {
+    publicId: "vs_srv_supabase_database",
+    slug: "supabase-database",
+    name: "Supabase Database",
+    description: "Primary relational database and scheduled Cloudflare heartbeat.",
+    journeyStage: "ACCOUNT",
+    state: databaseHeartbeat.status as ServiceState,
+    displayOrder: enrichedServices.length + 1,
+  };
+  const overall = deriveOverallStatus([...enrichedServices, databaseService], false);
 
   return {
     overallState: overall.overallState,
@@ -221,6 +198,7 @@ export async function getPublicSystemStatus(db?: DatabaseClient): Promise<Public
     generatedAt: now.toISOString(),
     generatedAtFormatted: formatIstTimestamp(now),
     isStale: false,
+    databaseHeartbeat,
     services: enrichedServices,
     activeIncidents,
     activeMaintenance,

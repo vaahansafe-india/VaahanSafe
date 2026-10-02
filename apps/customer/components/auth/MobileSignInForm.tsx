@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { VaahanIcon } from "@vaahansafe/icons";
+import { AuthLoader } from "./AuthLoader";
 
 interface MobileSignInFormProps {
   isLoading?: boolean;
@@ -59,12 +60,12 @@ export function MobileSignInForm({
     <form onSubmit={handleSubmit} noValidate className="w-full">
       {/* 01. Restrained Divider */}
       {showDivider && (
-        <div className="relative my-3 sm:my-3.5 flex items-center justify-center">
+        <div className="relative my-[clamp(12px,2vh,28px)] flex items-center justify-center">
           <div className="absolute inset-0 flex items-center" aria-hidden="true">
-            <div className="w-full border-t border-border" />
+            <div className="w-full border-t border-[#e2dcd2]" />
           </div>
-          <div className="relative bg-card px-3">
-            <span className="font-mono text-[9px] uppercase tracking-[0.24em] text-muted-foreground">
+          <div className="relative bg-[#faf9f5] px-4">
+            <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-[#77736c]">
               Or
             </span>
           </div>
@@ -72,42 +73,42 @@ export function MobileSignInForm({
       )}
 
       {/* 02. Field Label */}
-      <div className="mb-1.5 flex items-center justify-between">
+      <div className="mb-2.5 flex items-center justify-between">
         <label
           htmlFor="mobile-number-input"
-          className="font-mono text-[10px] uppercase tracking-[0.16em] text-foreground"
+          className="text-sm font-semibold text-[#1b1c1a]"
         >
           Mobile number
         </label>
-        <span className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground">
-          SMS / WhatsApp OTP
+        <span className="font-mono text-[10px] uppercase tracking-wider text-[#77736c]">
+          SMS code
         </span>
       </div>
 
       {/* 03. Unified Input Container with +91 country prefix */}
       <div
         className={`
-          group relative flex h-11 w-full items-center
-          rounded-lg border bg-background transition-all duration-200
+          group relative flex h-12 w-full items-center
+          rounded-[3px] border bg-white transition-colors
           ${
             activeError
               ? "border-[#c64545] ring-2 ring-[#c64545]/20"
-              : "border-border focus-within:border-[#cc785c] focus-within:ring-2 focus-within:ring-[#cc785c]/30"
+              : "border-[#d8d0c5] focus-within:border-[#a9583e] focus-within:ring-2 focus-within:ring-[#cc785c]/20"
           }
         `}
       >
         {/* Distinguishable +91 Country Badge */}
-        <div className="flex h-full items-center gap-1.5 pl-3.5 pr-2.5 text-sm font-medium text-foreground select-none">
-          <span className="font-mono text-xs tracking-wider text-muted-foreground">
+        <div className="flex h-full items-center gap-1.5 pl-3.5 pr-2.5 text-sm font-medium text-[#1b1c1a] select-none">
+          <span className="font-mono text-xs tracking-wider text-[#77736c]">
             IN
           </span>
-          <span className="font-mono text-[13px] font-semibold text-foreground">
+          <span className="font-mono text-[13px] font-semibold text-[#1b1c1a]">
             +91
           </span>
         </div>
 
         {/* Subtle Vertical Inset Hairline */}
-        <div className="h-5 w-px bg-border" aria-hidden="true" />
+        <div className="h-5 w-px bg-[#e2dcd2]" aria-hidden="true" />
 
         {/* Numeric Mobile Input */}
         <input
@@ -122,13 +123,8 @@ export function MobileSignInForm({
           placeholder="98765 43210"
           aria-invalid={Boolean(activeError)}
           aria-describedby={activeError ? "mobile-error-message" : undefined}
-          className="
-            h-full w-full bg-transparent px-3
-            font-mono text-[15px] font-medium tracking-wide text-foreground
-            placeholder:font-sans placeholder:text-sm placeholder:font-normal placeholder:text-muted-foreground
-            focus:outline-none
-            disabled:cursor-not-allowed disabled:opacity-50
-          "
+          style={{ WebkitTextFillColor: "#1b1c1a" }}
+          className="h-full min-w-0 w-full bg-transparent px-3 font-mono text-base font-medium tracking-wide text-[#1b1c1a] placeholder:font-sans placeholder:text-sm placeholder:font-normal placeholder:text-[#9a968e] focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
         />
 
         {/* Clear / valid checkmark badge */}
@@ -153,25 +149,24 @@ export function MobileSignInForm({
       )}
 
       {/* 04. Primary Action Button */}
-      <div className="mt-3">
+      <div className="mt-4">
         <button
           type="submit"
           disabled={isLoading || phoneNumber.length < 10}
           aria-busy={isLoading}
           className="
-            group flex h-11 w-full items-center justify-center gap-2
-            rounded-lg bg-[#cc785c] px-4
-            font-mono text-xs font-semibold uppercase tracking-[0.14em] text-white
-            shadow-xs transition-all duration-200
-            hover:bg-[#a9583e] hover:shadow-sm
-            active:scale-[0.99]
+            group flex h-12 w-full items-center justify-center gap-2
+            rounded-[3px] bg-[#252320] px-4
+            text-sm font-semibold text-[#faf9f5]
+            transition-colors duration-200
+            hover:bg-[#3a3833]
             focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#cc785c]/45 focus-visible:ring-offset-2
             disabled:cursor-not-allowed disabled:opacity-50
           "
         >
           {isLoading ? (
             <>
-              <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              <AuthLoader />
               <span>Sending code...</span>
             </>
           ) : (

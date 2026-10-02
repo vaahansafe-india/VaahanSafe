@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
-import { getVehicleRepository, getNotificationRepository } from "@vaahansafe/database";
 import { getAuthenticatedCustomer } from "../../lib/session";
-import { CustomerAppShell } from "../../components/shell/CustomerAppShell";
+import { CustomerQueryProvider } from "@/components/query/CustomerQueryProvider";
+import { CustomerQueryShell } from "@/components/query/CustomerQueryShell";
 
 export default async function AuthenticatedCustomerLayout({
   children,
@@ -16,35 +16,16 @@ export default async function AuthenticatedCustomerLayout({
 
   const { user } = auth;
 
-  // Concurrently execute initial layout shell queries
-  const [vehiclesResult, notifResult] = await Promise.allSettled([
-    getVehicleRepository().findByCustomerId(user.id),
-    getNotificationRepository().countUnreadByUserId(user.id),
-  ]);
-
-  const vehicles =
-    vehiclesResult.status === "fulfilled"
-      ? vehiclesResult.value.map((v) => ({
-          id: v.id,
-          registrationNumber: v.registrationNumber,
-          make: v.make,
-          model: v.model,
-        }))
-      : [];
-
-  const unreadNotificationCount =
-    notifResult.status === "fulfilled" ? notifResult.value : 0;
-
+  const scope = `${user.id}:${auth.session.id}`;
   return (
-    <CustomerAppShell
+    <CustomerQueryProvider key={scope} scope={scope}><CustomerQueryShell
       userName={user.name}
       userPhone={user.phone}
       userEmail={user.email}
-      phoneVerified={Boolean(user.phone)}
-      vehicles={vehicles}
-      unreadNotificationCount={unreadNotificationCount}
+      phoneVerified={auth.phoneVerified}
+      googleVerified={auth.googleVerified}
     >
       {children}
-    </CustomerAppShell>
+    </CustomerQueryShell></CustomerQueryProvider>
   );
 }

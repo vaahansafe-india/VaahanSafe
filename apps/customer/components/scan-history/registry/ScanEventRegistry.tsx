@@ -6,7 +6,7 @@ import { ActiveScanFilters } from "./ActiveScanFilters";
 import { ScanEventGroup } from "./ScanEventGroup";
 import { ScanHistoryFilteredEmpty } from "../states/ScanHistoryFilteredEmpty";
 import { VaahanIcon } from "@vaahansafe/icons";
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "@/components/ui/icons";
 import type {
   ScanEventItem,
   ScanHistoryFilterState,

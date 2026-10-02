@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import { useCustomerRouter } from "@/lib/use-customer-router";
 import { VehicleRegistryHeader } from "./VehicleRegistryHeader";
 import { VehicleRegistryItem } from "./VehicleRegistryItem";
 import { VehicleEmptyState } from "./VehicleEmptyState";
@@ -21,7 +21,7 @@ interface VehicleRegistryProps {
 }
 
 export function VehicleRegistry({ initialItems, totalCount }: VehicleRegistryProps) {
-  const router = useRouter();
+  const router = useCustomerRouter();
 
   const [filters, setFilters] = React.useState<VehicleFilterState>({
     query: "",

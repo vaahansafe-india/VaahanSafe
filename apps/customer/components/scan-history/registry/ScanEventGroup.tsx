@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { ScanEventRow } from "./ScanEventRow";
 import { VaahanIcon } from "@vaahansafe/icons";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown } from "@/components/ui/icons";
 import type { ScanEventItem } from "@/lib/scan-history-types";
 
 interface ScanEventGroupProps {

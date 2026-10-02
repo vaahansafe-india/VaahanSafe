@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useCustomerRouter } from "@/lib/use-customer-router";
 import { VaahanIcon } from "@vaahansafe/icons";
 import {
   Popover,
@@ -22,7 +23,7 @@ interface VehicleScopeSelectorProps {
 }
 
 export function VehicleScopeSelector({ vehicles, scopedVehicleId }: VehicleScopeSelectorProps) {
-  const router = useRouter();
+  const router = useCustomerRouter();
   const searchParams = useSearchParams();
   const isMobile = useIsMobile();
   const [open, setOpen] = React.useState(false);

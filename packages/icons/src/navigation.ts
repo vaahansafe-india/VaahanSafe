@@ -31,6 +31,11 @@ import {
   Edit02Icon,
   RefreshIcon,
   Add01Icon,
+  ArrowLeftDoubleIcon,
+  ArrowRightDoubleIcon,
+  ArrowUpDownIcon,
+  PanelLeftIcon,
+  Settings03Icon,
 } from "@hugeicons/core-free-icons";
 
 export const navigationIcons = {
@@ -75,6 +80,11 @@ export const navigationIcons = {
   globe: Globe02Icon,
   palette: PaintBoardIcon,
   logout: Logout01Icon,
+  "chevrons-left": ArrowLeftDoubleIcon,
+  "chevrons-right": ArrowRightDoubleIcon,
+  "chevrons-up-down": ArrowUpDownIcon,
+  "panel-left": PanelLeftIcon,
+  adjustments: Settings03Icon,
 } as const;
 
 export type NavigationIconName = keyof typeof navigationIcons;

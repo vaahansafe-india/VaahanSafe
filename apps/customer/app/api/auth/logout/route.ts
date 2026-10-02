@@ -6,9 +6,12 @@ import {
   hashSessionToken,
 } from "@vaahansafe/auth";
 import { getSessionRepository } from "@vaahansafe/database";
+import { createClient } from "@vaahansafe/ui/lib/server";
 
 async function performLogout(req: Request) {
-  // 1. Invalidate session record in Cloudflare D1 with bounded timeout
+  const supabase = await createClient();
+  await supabase.auth.signOut({ scope: "local" });
+  // Revoke the real server session in Supabase before returning.
   const revokePromise = (async () => {
     try {
       const cookieHeader = req.headers.get("cookie");
@@ -19,15 +22,11 @@ async function performLogout(req: Request) {
         await sessionRepo.revokeSession(tokenHash, "USER_LOGOUT");
       }
     } catch (err) {
-      console.warn("[VaahanSafe Logout] Session revocation in D1 skipped or failed:", err);
+      console.warn("[VaahanSafe Logout] Session revocation unavailable:", err);
     }
   })();
 
-  // Guarantee logout response returns in under 1s even if external D1 or CLI is lagging
-  await Promise.race([
-    revokePromise,
-    new Promise((resolve) => setTimeout(resolve, 1000)),
-  ]);
+  await revokePromise;
 
   // 2. Resolve authoritative base URL behind reverse proxies and Vercel Edge
   const url = new URL(req.url);
@@ -69,6 +68,8 @@ async function performLogout(req: Request) {
     secure: isProduction,
     sameSite: "lax",
   });
+  response.cookies.set("vs_google_link", "", { path: "/auth/callback", maxAge: 0 });
+  response.cookies.set("vs_google_return", "", { path: "/auth/callback", maxAge: 0 });
 
   return response;
 }

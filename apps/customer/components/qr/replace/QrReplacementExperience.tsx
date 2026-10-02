@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useCustomerRouter } from "@/lib/use-customer-router";
 import { VaahanIcon } from "@vaahansafe/icons";
 import { submitQrReplacementAction } from "@/app/(app)/qr/actions";
 import {
@@ -13,7 +13,7 @@ import {
   PackageCheck,
   ArrowRight,
   Sparkles,
-} from "lucide-react";
+} from "@/components/ui/icons";
 import type { QrReplacementData } from "@/lib/qr-types";
 import {
   Select,
@@ -33,7 +33,7 @@ export function QrReplacementExperience({
   data,
   preselectedStickerId,
 }: QrReplacementExperienceProps) {
-  const router = useRouter();
+  const router = useCustomerRouter();
 
   const [selectedStickerId, setSelectedStickerId] = React.useState<string>(
     preselectedStickerId || data.eligibleStickers[0]?.id || ""
@@ -67,6 +67,7 @@ export function QrReplacementExperience({
       });
 
       if (res.success && res.requestId) {
+        router.refresh();
         setSuccessResult({
           requestId: res.requestId,
           vehiclePlate: selectedSticker?.vehiclePlate || "Vehicle",

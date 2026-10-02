@@ -1,9 +1,9 @@
 "use client"
 
 import * as React from "react"
-import Link from "next/link"
+import { CustomerLink as Link } from "@/components/query/CustomerLink";
 import { usePathname } from "next/navigation"
-import { ChevronRight, type LucideIcon } from "lucide-react"
+import { ChevronRight, type CustomerIcon } from "@/components/ui/icons"
 
 import {
   Collapsible,
@@ -35,7 +35,7 @@ export interface NavSubItem {
 export interface NavMainItem {
   title: string
   url: string
-  icon?: LucideIcon | React.ComponentType<{ className?: string }>
+  icon?: CustomerIcon | React.ComponentType<{ className?: string }>
   isActive?: boolean
   badge?: string
   isLifecycleRail?: boolean

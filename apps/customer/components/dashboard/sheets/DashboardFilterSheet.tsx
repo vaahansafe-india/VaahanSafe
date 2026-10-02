@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useSearchParams, usePathname } from "next/navigation";
+import { useCustomerRouter } from "@/lib/use-customer-router";
 import { VaahanIcon } from "@vaahansafe/icons";
 import {
   Sheet,
@@ -27,7 +28,7 @@ export function DashboardFilterSheet({
   activeVehicle,
   filterState,
 }: DashboardFilterSheetProps) {
-  const router = useRouter();
+  const router = useCustomerRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
 
@@ -66,7 +67,7 @@ export function DashboardFilterSheet({
 
     const query = params.toString();
     router.push(query ? `${pathname}?${query}` : pathname, { scroll: false });
-    router.refresh();
+
     onOpenChange(false);
   };
 
@@ -77,7 +78,7 @@ export function DashboardFilterSheet({
     params.delete("qr");
     const query = params.toString();
     router.push(query ? `${pathname}?${query}` : pathname, { scroll: false });
-    router.refresh();
+
     onOpenChange(false);
   };
 

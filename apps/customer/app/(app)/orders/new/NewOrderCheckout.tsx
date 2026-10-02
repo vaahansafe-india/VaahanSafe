@@ -15,7 +15,7 @@ import {
   LocateFixed,
   Navigation,
   Loader2,
-} from "lucide-react";
+} from "@/components/ui/icons";
 import { SearchableCombobox } from "@/components/ui/searchable-combobox";
 import {
   getIndianStates,
@@ -327,7 +327,7 @@ export function NewOrderCheckout({
       {/* Razorpay Standard Checkout SDK */}
       <Script
         src="https://checkout.razorpay.com/v1/checkout.js"
-        strategy="lazyOnload"
+        strategy="afterInteractive"
       />
 
       <div className="space-y-8 pb-16">

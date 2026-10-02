@@ -20,6 +20,7 @@ public_html/
 # Build artifacts
 dist/
 build/
+*.tsbuildinfo
 
 # Cloudflare / Wrangler local state
 .wrangler/
@@ -45,8 +46,10 @@ yarn-error.log*
 # Scratch & Temporary local files
 scratch/
 brand-icon-preview.png
+WHATSAPP_TEMPLATES_GUIDE.md
 *.docx
 ~$*
+
 
 # System & IDE
 .DS_Store

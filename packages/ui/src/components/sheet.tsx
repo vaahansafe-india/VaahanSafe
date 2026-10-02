@@ -16,9 +16,10 @@ const SheetOverlay = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof SheetPrimitive.Overlay>
 >(({ className, ...props }, ref) => (
   <SheetPrimitive.Overlay
+    data-ui="sheet-overlay"
     className={cn(
       "fixed inset-0 z-50 bg-black/60 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
-      className
+      className,
     )}
     {...props}
     ref={ref}
@@ -42,11 +43,12 @@ const sheetVariants = cva(
     defaultVariants: {
       side: "right",
     },
-  }
+  },
 );
 
 interface SheetContentProps
-  extends React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content>,
+  extends
+    React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content>,
     VariantProps<typeof sheetVariants> {}
 
 const SheetContent = React.forwardRef<
@@ -57,11 +59,14 @@ const SheetContent = React.forwardRef<
     <SheetOverlay />
     <SheetPrimitive.Content
       ref={ref}
+      data-ui="sheet-content"
+      data-side={side}
       className={cn(sheetVariants({ side }), className)}
       {...props}
     >
       {children}
       <SheetPrimitive.Close
+        data-ui="surface-close"
         className={cn(
           "absolute right-4 top-4 sm:right-5 sm:top-5 z-50",
           "flex h-9 w-9 items-center justify-center",
@@ -72,7 +77,7 @@ const SheetContent = React.forwardRef<
           "active:scale-95",
           "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
           "disabled:pointer-events-none",
-          "dark:border-border dark:bg-muted/70 dark:text-muted-foreground dark:hover:border-primary/40 dark:hover:bg-primary/15 dark:hover:text-foreground"
+          "dark:border-border dark:bg-muted/70 dark:text-muted-foreground dark:hover:border-primary/40 dark:hover:bg-primary/15 dark:hover:text-foreground",
         )}
       >
         <VaahanIcon name="close" size={15} />
@@ -88,9 +93,10 @@ const SheetHeader = ({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
+    data-ui="sheet-header"
     className={cn(
       "flex flex-col space-y-2 text-center sm:text-left",
-      className
+      className,
     )}
     {...props}
   />
@@ -102,9 +108,10 @@ const SheetFooter = ({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
+    data-ui="sheet-footer"
     className={cn(
       "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
-      className
+      className,
     )}
     {...props}
   />
@@ -117,6 +124,7 @@ const SheetTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <SheetPrimitive.Title
     ref={ref}
+    data-ui="sheet-title"
     className={cn("text-lg font-semibold text-foreground", className)}
     {...props}
   />
@@ -129,6 +137,7 @@ const SheetDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <SheetPrimitive.Description
     ref={ref}
+    data-ui="sheet-description"
     className={cn("text-sm text-muted-foreground", className)}
     {...props}
   />

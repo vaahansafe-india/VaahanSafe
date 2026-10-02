@@ -16,7 +16,7 @@ import {
   Smartphone,
   Car,
   QrCode,
-} from "lucide-react";
+} from "@/components/ui/icons";
 import type { QrRegistryItemData } from "@/lib/qr-types";
 import { cn } from "@vaahansafe/ui/lib/utils";
 

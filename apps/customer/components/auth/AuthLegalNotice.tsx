@@ -1,26 +1,24 @@
 import * as React from "react";
 import { DOMAINS } from "@vaahansafe/config";
-import { VaahanIcon } from "@vaahansafe/icons";
 
 interface AuthLegalNoticeProps {
   type: "in-card" | "outside-card";
 }
 
 export function AuthLegalNotice({ type }: AuthLegalNoticeProps) {
-  const webUrl = DOMAINS.web || "https://vaahansafe.com";
-  const termsUrl = `${webUrl}/terms`;
-  const privacyUrl = `${webUrl}/privacy`;
-  const helpUrl = `${webUrl}/how-it-works`;
+  const termsUrl = `${DOMAINS.web || "https://vaahansafe.com"}/terms`;
+  const privacyUrl = `${DOMAINS.web || "https://vaahansafe.com"}/privacy`;
+  const helpUrl = `${DOMAINS.web || "https://vaahansafe.com"}/help`;
 
   if (type === "in-card") {
     return (
-      <p className="text-center text-[11px] sm:text-xs leading-relaxed text-muted-foreground">
+      <p className="text-xs leading-relaxed text-[#77736c]">
         By continuing, you agree to the VaahanSafe{" "}
         <a
           href={termsUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-foreground underline decoration-border underline-offset-2 hover:text-[#cc785c]"
+          className="font-medium text-[#44413c] underline decoration-[#c9bfb4] underline-offset-2 hover:text-[#a9583e]"
         >
           Terms of Service
         </a>{" "}
@@ -29,7 +27,7 @@ export function AuthLegalNotice({ type }: AuthLegalNoticeProps) {
           href={privacyUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-foreground underline decoration-border underline-offset-2 hover:text-[#cc785c]"
+          className="font-medium text-[#44413c] underline decoration-[#c9bfb4] underline-offset-2 hover:text-[#a9583e]"
         >
           Privacy Policy
         </a>
@@ -39,29 +37,19 @@ export function AuthLegalNotice({ type }: AuthLegalNoticeProps) {
   }
 
   return (
-    <footer className="mt-3.5 sm:mt-5 flex flex-col items-center gap-1.5 sm:gap-2 text-center select-none">
-      {/* Subtle brand identifier */}
-      <div className="font-mono text-[8.5px] sm:text-[9px] uppercase tracking-[0.22em] text-muted-foreground/80">
-        VAAHANSAFE / VEHICLE SAFETY IDENTITY
-      </div>
-
-      {/* External reference navigation */}
-      <div className="flex items-center gap-3 text-xs text-muted-foreground">
-        <a
-          href={webUrl}
-          className="inline-flex items-center gap-1.5 font-mono text-[9.5px] sm:text-[10px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-[#cc785c]"
-        >
-          <VaahanIcon name="arrow-left" size={11} aria-hidden="true" />
-          <span>Back to VaahanSafe</span>
-        </a>
-        <span className="text-border">•</span>
+    <footer className="flex items-center justify-between gap-4 border-t border-[#e2dcd2] py-[clamp(12px,2vh,24px)] text-[11px] text-[#77736c]">
+      <span>© VaahanSafe</span>
+      <div className="flex items-center gap-4">
         <a
           href={helpUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="font-mono text-[9.5px] sm:text-[10px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-[#cc785c]"
+          className="font-medium text-[#615f59] hover:text-[#a9583e]"
         >
           Help
+        </a>
+        <a href={privacyUrl} target="_blank" rel="noopener noreferrer" className="font-medium text-[#615f59] hover:text-[#a9583e]">
+          Privacy
         </a>
       </div>
     </footer>

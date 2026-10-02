@@ -9,6 +9,9 @@
 import type { DatabaseClient, D1DatabaseBinding } from "./d1";
 import { D1DatabaseAdapter } from "./d1";
 import { CloudflareD1HttpClient } from "./cloudflare-d1-http";
+import { SupabaseDatabaseAdapter } from "./supabase-adapter";
+import { SupabaseUserRepository, SupabaseAuthIdentityRepository, SupabaseSessionRepository } from "../repositories/supabase-auth.repository";
+import type { UserRepository, AuthIdentityRepository, SessionRepository } from "@vaahansafe/types";
 import { D1UserRepository } from "../repositories/user.repository";
 import { D1AuthIdentityRepository } from "../repositories/auth-identity.repository";
 import { D1SessionRepository } from "../repositories/session.repository";
@@ -29,40 +32,28 @@ import { D1QrActivationChallengeRepository } from "../repositories/qr-activation
 let defaultDatabaseClient: DatabaseClient | null = null;
 
 export function getAuthoritativeDatabaseClient(
-  binding?: D1DatabaseBinding
+  _binding?: D1DatabaseBinding
 ): DatabaseClient {
-  if (binding && typeof binding.prepare === "function") {
-    return new D1DatabaseAdapter(binding);
-  }
-
-  const env = (
-    typeof process !== "undefined" ? process.env : {}
-  ) as Record<string, unknown>;
-  const envBinding = env.DB as D1DatabaseBinding | undefined;
-  if (envBinding && typeof envBinding.prepare === "function") {
-    return new D1DatabaseAdapter(envBinding);
-  }
-
   if (!defaultDatabaseClient) {
-    defaultDatabaseClient = new CloudflareD1HttpClient();
+    defaultDatabaseClient = new SupabaseDatabaseAdapter();
   }
   return defaultDatabaseClient;
 }
 
-export function getUserRepository(client?: DatabaseClient): D1UserRepository {
-  return new D1UserRepository(client || getAuthoritativeDatabaseClient());
+export function getUserRepository(client?: DatabaseClient): UserRepository {
+  return client && !(client instanceof SupabaseDatabaseAdapter) ? new D1UserRepository(client) : new SupabaseUserRepository();
 }
 
 export function getAuthIdentityRepository(
   client?: DatabaseClient
-): D1AuthIdentityRepository {
-  return new D1AuthIdentityRepository(client || getAuthoritativeDatabaseClient());
+): AuthIdentityRepository {
+  return client && !(client instanceof SupabaseDatabaseAdapter) ? new D1AuthIdentityRepository(client) : new SupabaseAuthIdentityRepository();
 }
 
 export function getSessionRepository(
   client?: DatabaseClient
-): D1SessionRepository {
-  return new D1SessionRepository(client || getAuthoritativeDatabaseClient());
+): SessionRepository {
+  return client && !(client instanceof SupabaseDatabaseAdapter) ? new D1SessionRepository(client) : new SupabaseSessionRepository();
 }
 
 export function getVehicleRepository(
@@ -113,4 +104,3 @@ export function getQrActivationAttemptRepository(client?: DatabaseClient): D1QrA
 export function getQrActivationChallengeRepository(client?: DatabaseClient): D1QrActivationChallengeRepository {
   return new D1QrActivationChallengeRepository(client || getAuthoritativeDatabaseClient());
 }
-

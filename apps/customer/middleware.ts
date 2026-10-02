@@ -9,7 +9,9 @@ export function middleware(request: NextRequest) {
   if (
     pathname.startsWith("/_next") ||
     pathname.startsWith("/api/auth") ||
+    pathname === "/auth/callback" ||
     pathname.startsWith("/images") ||
+    pathname.startsWith("/fonts/") ||
     pathname.match(/\.(png|jpg|jpeg|svg|webp|ico|txt)$/) ||
     pathname === "/favicon.ico" ||
     pathname === "/robots.txt"
@@ -19,8 +21,8 @@ export function middleware(request: NextRequest) {
 
   const sessionToken = request.cookies.get(CUSTOMER_SESSION_COOKIE_NAME)?.value;
 
-  // The login route is always accessible; validity is verified authoritatively by the page
-  if (pathname === "/login") {
+  // The login and help routes are accessible publicly; validity is verified authoritatively by the page
+  if (pathname === "/login" || pathname === "/help") {
     return NextResponse.next();
   }
 
@@ -49,6 +51,6 @@ export const config = {
      * 4. /images (product and marketing assets)
      * 5. /favicon.ico, /robots.txt, static files (*.jpg, *.png, etc.)
      */
-    "/((?!api/auth|_next/static|_next/image|images|favicon.ico|robots.txt|.*\\.(?:png|jpg|jpeg|svg|webp|ico)$).*)",
+    "/((?!api/auth|_next/static|_next/image|images|fonts/|favicon.ico|robots.txt|.*\\.(?:png|jpg|jpeg|svg|webp|ico)$).*)",
   ],
 };

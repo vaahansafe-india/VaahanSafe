@@ -100,7 +100,7 @@ export async function POST(req: Request) {
       }
     }
 
-    // Issue Secure Session Token in Cloudflare D1
+    // Issue Secure Session Token in Supabase Database
     const { rawToken } = await issueSession(userId, sessionRepo, {
       userAgent: req.headers.get("user-agent") || undefined,
       ipAddress:

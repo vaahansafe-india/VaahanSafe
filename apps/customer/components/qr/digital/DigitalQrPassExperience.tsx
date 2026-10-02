@@ -16,15 +16,21 @@ import {
   ArrowRight,
   Download,
   FileCheck2,
-} from "lucide-react";
+} from "@/components/ui/icons";
 import type { QrDigitalPassData } from "@/lib/qr-types";
-import { downloadPlacardPdf } from "@/lib/pdf/generate-placard-pdf";
+
+async function downloadPlacardPdf(data: NonNullable<QrDigitalPassData>) {
+  const pdf = await import("@/lib/pdf/generate-placard-pdf");
+  return pdf.downloadPlacardPdf(data);
+}
 
 interface DigitalQrPassExperienceProps {
   data: QrDigitalPassData | null;
 }
 
-export function DigitalQrPassExperience({ data }: DigitalQrPassExperienceProps) {
+export function DigitalQrPassExperience({
+  data,
+}: DigitalQrPassExperienceProps) {
   const [copied, setCopied] = React.useState(false);
   const [isGeneratingPdf, setIsGeneratingPdf] = React.useState(false);
   const [pdfDownloaded, setPdfDownloaded] = React.useState(false);
@@ -55,7 +61,7 @@ export function DigitalQrPassExperience({ data }: DigitalQrPassExperienceProps) 
       setIsGeneratingPdf(true);
       // Attempt server-authoritative download route first
       const res = await fetch(
-        `/api/qr/placard?id=${encodeURIComponent(data.publicId)}`
+        `/api/qr/placard?id=${encodeURIComponent(data.publicId)}`,
       );
       if (res.ok) {
         const blob = await res.blob();
@@ -112,7 +118,9 @@ export function DigitalQrPassExperience({ data }: DigitalQrPassExperienceProps) 
             Digital QR Pass
           </h1>
           <p className="mt-1.5 max-w-2xl text-xs sm:text-sm text-muted-foreground">
-            A smartphone-accessible verifiable vehicle safety identity pass for your phone lock screen, Apple/Google Wallet, and printed temporary placards.
+            A smartphone-accessible verifiable vehicle safety identity pass for
+            your phone lock screen, Apple/Google Wallet, and printed temporary
+            placards.
           </p>
         </div>
 
@@ -127,7 +135,9 @@ export function DigitalQrPassExperience({ data }: DigitalQrPassExperienceProps) 
               No Activated QR Sticker Found
             </h2>
             <p className="mt-2 text-xs sm:text-sm text-muted-foreground max-w-md mx-auto">
-              Digital QR passes require at least one registered vehicle with an activated physical safety sticker. Once paired, your verifiable pass will be automatically rendered here.
+              Digital QR passes require at least one registered vehicle with an
+              activated physical safety sticker. Once paired, your verifiable
+              pass will be automatically rendered here.
             </p>
           </div>
 
@@ -179,10 +189,13 @@ export function DigitalQrPassExperience({ data }: DigitalQrPassExperienceProps) 
             </h1>
             <p className="mt-1.5 max-w-2xl text-xs sm:text-sm text-muted-foreground leading-relaxed">
               Verifiable digital pass for vehicle{" "}
-              <span className="font-mono font-bold text-foreground">{vehicle.plate}</span>. Scan with any phone camera to trigger anonymous alerts or view safety profile.
+              <span className="font-mono font-bold text-foreground">
+                {vehicle.plate}
+              </span>
+              . Scan with any phone camera to trigger anonymous alerts or view
+              safety profile.
             </p>
           </div>
-
         </div>
 
         {/* Responsive Grid: Stacks on medium/half-screen (col-1), 2-col on XL (xl:col-12) */}
@@ -301,7 +314,9 @@ export function DigitalQrPassExperience({ data }: DigitalQrPassExperienceProps) 
                 Official QR Public Link
               </h3>
               <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                This is the secure production URL opened when someone scans your sticker. It masks your personal phone number while enabling immediate WhatsApp and SMS relays.
+                This is the secure production URL opened when someone scans your
+                sticker. It masks your personal phone number while enabling
+                immediate WhatsApp and SMS relays.
               </p>
 
               {/* Responsive URL copy container */}
@@ -322,7 +337,11 @@ export function DigitalQrPassExperience({ data }: DigitalQrPassExperienceProps) 
                   onClick={handleCopyLink}
                   className="flex h-9 items-center justify-center gap-1.5 rounded-lg bg-muted hover:bg-muted/80 px-3.5 font-mono text-xs font-semibold text-foreground transition-colors shrink-0 whitespace-nowrap"
                 >
-                  {copied ? <Check className="size-3 text-emerald-500" /> : <Copy className="size-3" />}
+                  {copied ? (
+                    <Check className="size-3 text-emerald-500" />
+                  ) : (
+                    <Copy className="size-3" />
+                  )}
                   <span>{copied ? "Copied!" : "Copy"}</span>
                 </button>
               </div>
@@ -359,22 +378,37 @@ export function DigitalQrPassExperience({ data }: DigitalQrPassExperienceProps) 
               </h3>
 
               <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                Download the publication-grade A4 safety identity placard. Designed as an integrated physical sheet with high-density vector typography, precision alignment marks, owner-controlled safety details, and a quiet-zone-compliant QR matrix.
+                Download the publication-grade A4 safety identity placard.
+                Designed as an integrated physical sheet with high-density
+                vector typography, precision alignment marks, owner-controlled
+                safety details, and a quiet-zone-compliant QR matrix.
               </p>
 
               {/* Feature specs badges */}
               <div className="grid grid-cols-3 gap-2 pt-1 pb-1">
                 <div className="rounded-xl border border-border/80 bg-background/80 p-2.5 text-center">
-                  <div className="font-mono text-[10px] font-bold text-foreground">A4 ADAPTIVE</div>
-                  <div className="text-[10px] text-muted-foreground">Standard Paper</div>
+                  <div className="font-mono text-[10px] font-bold text-foreground">
+                    A4 ADAPTIVE
+                  </div>
+                  <div className="text-[10px] text-muted-foreground">
+                    Standard Paper
+                  </div>
                 </div>
                 <div className="rounded-xl border border-border/80 bg-background/80 p-2.5 text-center">
-                  <div className="font-mono text-[10px] font-bold text-[#cc785c]">1200 DPI</div>
-                  <div className="text-[10px] text-muted-foreground">High-Res Matrix</div>
+                  <div className="font-mono text-[10px] font-bold text-[#cc785c]">
+                    1200 DPI
+                  </div>
+                  <div className="text-[10px] text-muted-foreground">
+                    High-Res Matrix
+                  </div>
                 </div>
                 <div className="rounded-xl border border-border/80 bg-background/80 p-2.5 text-center">
-                  <div className="font-mono text-[10px] font-bold text-emerald-600 dark:text-emerald-400">QUIET ZONE</div>
-                  <div className="text-[10px] text-muted-foreground">Reliable Scan</div>
+                  <div className="font-mono text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                    QUIET ZONE
+                  </div>
+                  <div className="text-[10px] text-muted-foreground">
+                    Reliable Scan
+                  </div>
                 </div>
               </div>
 
@@ -423,15 +457,24 @@ export function DigitalQrPassExperience({ data }: DigitalQrPassExperienceProps) 
               <div className="space-y-2.5 text-xs sm:text-sm text-muted-foreground leading-relaxed">
                 <div className="flex items-start gap-2.5">
                   <span className="size-1.5 rounded-full bg-emerald-500 mt-2 shrink-0" />
-                  <span>Only information intentionally configured by you is visible upon scan.</span>
+                  <span>
+                    Only information intentionally configured by you is visible
+                    upon scan.
+                  </span>
                 </div>
                 <div className="flex items-start gap-2.5">
                   <span className="size-1.5 rounded-full bg-emerald-500 mt-2 shrink-0" />
-                  <span>Contact options route through owner-controlled relays without exposing direct private lines.</span>
+                  <span>
+                    Contact options route through owner-controlled relays
+                    without exposing direct private lines.
+                  </span>
                 </div>
                 <div className="flex items-start gap-2.5">
                   <span className="size-1.5 rounded-full bg-emerald-500 mt-2 shrink-0" />
-                  <span>Optional medical notes and blood group assist emergency helpers when seconds matter.</span>
+                  <span>
+                    Optional medical notes and blood group assist emergency
+                    helpers when seconds matter.
+                  </span>
                 </div>
               </div>
             </div>
@@ -443,20 +486,36 @@ export function DigitalQrPassExperience({ data }: DigitalQrPassExperienceProps) 
       {/* PRINT-ONLY PLACARD SHEET (Aligned with PDF Design System)     */}
       {/* ------------------------------------------------------------- */}
       <div className="hidden print:block font-sans text-[#141413] bg-[#faf9f5] p-8 m-0 w-full max-w-2xl mx-auto min-h-screen">
-        <style dangerouslySetInnerHTML={{ __html: `@page { size: A4 portrait; margin: 10mm; }` }} />
-        
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `@page { size: A4 portrait; margin: 10mm; }`,
+          }}
+        />
+
         {/* Registration Corner Marks */}
         <div className="relative border border-[#e6dfd8] p-8 space-y-6 bg-white rounded-lg shadow-none">
-          <div className="absolute top-2 left-3 font-mono text-[8px] text-[#8e8b82]">A/01</div>
-          <div className="absolute top-2 right-3 font-mono text-[8px] text-[#8e8b82]">A/02</div>
-          <div className="absolute bottom-2 left-3 font-mono text-[8px] text-[#8e8b82]">B/03</div>
-          <div className="absolute bottom-2 right-3 font-mono text-[8px] text-[#8e8b82]">B/04</div>
+          <div className="absolute top-2 left-3 font-mono text-[8px] text-[#8e8b82]">
+            A/01
+          </div>
+          <div className="absolute top-2 right-3 font-mono text-[8px] text-[#8e8b82]">
+            A/02
+          </div>
+          <div className="absolute bottom-2 left-3 font-mono text-[8px] text-[#8e8b82]">
+            B/03
+          </div>
+          <div className="absolute bottom-2 right-3 font-mono text-[8px] text-[#8e8b82]">
+            B/04
+          </div>
 
           {/* Header */}
           <div className="flex items-center justify-between border-b border-[#e6dfd8] pb-3">
             <div className="flex items-center gap-2">
-              <span className="font-bold text-sm tracking-wider text-[#141413]">VAAHANSAFE</span>
-              <span className="font-mono text-[10px] text-[#6c6a64]">/ VEHICLE SAFETY IDENTITY</span>
+              <span className="font-bold text-sm tracking-wider text-[#141413]">
+                VAAHANSAFE
+              </span>
+              <span className="font-mono text-[10px] text-[#6c6a64]">
+                / VEHICLE SAFETY IDENTITY
+              </span>
             </div>
             <div className="flex items-center gap-1.5 font-mono text-[10px] font-bold text-[#141413]">
               <span className="size-2 rounded-full bg-[#5db872]" />
@@ -474,12 +533,15 @@ export function DigitalQrPassExperience({ data }: DigitalQrPassExperienceProps) 
                 THIS VEHICLE CARRIES A VAAHANSAFE SAFETY IDENTITY.
               </h2>
               <p className="text-xs text-[#3d3d3a] leading-relaxed pt-1">
-                Scan the QR to open the vehicle owner&apos;s controlled public safety view.
+                Scan the QR to open the vehicle owner&apos;s controlled public
+                safety view.
               </p>
             </div>
 
             <div className="col-span-5 flex flex-col items-center justify-center p-3 border border-[#e6dfd8] rounded-md bg-[#faf9f5]">
-              <div className="font-mono text-[8px] font-bold text-[#a9583e] mb-1.5">QR / 02</div>
+              <div className="font-mono text-[8px] font-bold text-[#a9583e] mb-1.5">
+                QR / 02
+              </div>
               <QrFrame
                 publicId={publicId}
                 visibleCode={visibleCode}
@@ -506,7 +568,9 @@ export function DigitalQrPassExperience({ data }: DigitalQrPassExperienceProps) 
 
           {/* Vehicle Section */}
           <div className="border-t border-[#e6dfd8] pt-3">
-            <div className="font-mono text-[9px] font-bold text-[#a9583e] uppercase">VEHICLE / 03</div>
+            <div className="font-mono text-[9px] font-bold text-[#a9583e] uppercase">
+              VEHICLE / 03
+            </div>
             <div className="flex items-center justify-between pt-1">
               <div className="font-bold text-base text-[#141413]">
                 {vehicle.make} {vehicle.model}
@@ -522,7 +586,9 @@ export function DigitalQrPassExperience({ data }: DigitalQrPassExperienceProps) 
 
           {/* Safety View Summary */}
           <div className="border-t border-[#e6dfd8] pt-3">
-            <div className="font-mono text-[9px] font-bold text-[#a9583e] uppercase">SAFETY VIEW / 04</div>
+            <div className="font-mono text-[9px] font-bold text-[#a9583e] uppercase">
+              SAFETY VIEW / 04
+            </div>
             <div className="divide-y divide-[#e6dfd8]/60 pt-1 text-xs">
               <div className="flex justify-between py-1.5">
                 <span className="text-[#3d3d3a]">Emergency contacts</span>
@@ -540,32 +606,43 @@ export function DigitalQrPassExperience({ data }: DigitalQrPassExperienceProps) 
               </div>
               <div className="flex justify-between py-1.5">
                 <span className="text-[#3d3d3a]">Public safety view</span>
-                <span className="font-bold text-[#141413]">Owner controlled</span>
+                <span className="font-bold text-[#141413]">
+                  Owner controlled
+                </span>
               </div>
             </div>
             <div className="text-[9px] text-[#6c6a64] pt-1.5">
-              Only information intentionally included in the public safety view should be shown after scanning.
+              Only information intentionally included in the public safety view
+              should be shown after scanning.
             </div>
           </div>
 
           {/* How To Use */}
           <div className="border-t border-[#e6dfd8] pt-3">
-            <div className="font-mono text-[9px] font-bold text-[#a9583e] uppercase">HOW TO USE / 05</div>
+            <div className="font-mono text-[9px] font-bold text-[#a9583e] uppercase">
+              HOW TO USE / 05
+            </div>
             <div className="grid grid-cols-3 gap-3 pt-2 text-[10px]">
               <div>
                 <span className="font-mono font-bold text-[#cc785c]">01 </span>
                 <span className="font-bold text-[#141413]">SCAN</span>
-                <p className="text-[#6c6a64] pt-0.5 text-[9px]">Scan the QR using a compatible phone camera.</p>
+                <p className="text-[#6c6a64] pt-0.5 text-[9px]">
+                  Scan the QR using a compatible phone camera.
+                </p>
               </div>
               <div>
                 <span className="font-mono font-bold text-[#cc785c]">02 </span>
                 <span className="font-bold text-[#141413]">OPEN</span>
-                <p className="text-[#6c6a64] pt-0.5 text-[9px]">Open the VaahanSafe public safety view.</p>
+                <p className="text-[#6c6a64] pt-0.5 text-[9px]">
+                  Open the VaahanSafe public safety view.
+                </p>
               </div>
               <div>
                 <span className="font-mono font-bold text-[#cc785c]">03 </span>
                 <span className="font-bold text-[#141413]">CONNECT</span>
-                <p className="text-[#6c6a64] pt-0.5 text-[9px]">Use only the contact options made available in that view.</p>
+                <p className="text-[#6c6a64] pt-0.5 text-[9px]">
+                  Use only the contact options made available in that view.
+                </p>
               </div>
             </div>
           </div>
@@ -573,12 +650,19 @@ export function DigitalQrPassExperience({ data }: DigitalQrPassExperienceProps) 
           {/* Legal Footer */}
           <div className="border-t border-[#e6dfd8] pt-3 flex items-start justify-between text-[8px] text-[#6c6a64]">
             <div className="space-y-0.5 max-w-sm">
-              <div className="font-mono font-bold text-[#141413]">VAAHANSAFE / {visibleCode}</div>
-              <div>VaahanSafe is a connection tool. It is not an emergency service, government identity document, or medical record.</div>
+              <div className="font-mono font-bold text-[#141413]">
+                VAAHANSAFE / {visibleCode}
+              </div>
+              <div>
+                VaahanSafe is a connection tool. It is not an emergency service,
+                government identity document, or medical record.
+              </div>
             </div>
             <div className="text-right font-mono">
               <div>vaahansafe.com</div>
-              <div className="text-[7.5px] uppercase pt-0.5">SCAN THE QR FOR CURRENT INFORMATION</div>
+              <div className="text-[7.5px] uppercase pt-0.5">
+                SCAN THE QR FOR CURRENT INFORMATION
+              </div>
             </div>
           </div>
         </div>

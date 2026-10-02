@@ -146,8 +146,7 @@ export function QrScanDistribution({ data, onSelectQr }: QrScanDistributionProps
                 dataKey="scanCount"
                 fill="#CC785C"
                 radius={[0, 4, 4, 0]}
-                isAnimationActive={true}
-                animationDuration={600}
+                isAnimationActive={false}
                 onClick={(item: any) => {
                   if (item?.rawPublicId) onSelectQr?.(item.rawPublicId);
                 }}

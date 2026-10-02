@@ -1,10 +1,11 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
+import { CustomerLink as Link } from "@/components/query/CustomerLink";
 import { usePathname } from "next/navigation";
 import { VaahanIcon } from "@vaahansafe/icons";
-import { ThemeToggle } from "@vaahansafe/ui/theme";
+import { Alert, AlertDescription } from "@vaahansafe/ui";
+import { Button } from "@/components/ui/button";
 import { AppSidebar } from "@/components/app-sidebar";
 import {
   SidebarProvider,
@@ -26,6 +27,9 @@ interface CustomerAppShellProps {
   userName?: string;
   userEmail?: string;
   phoneVerified?: boolean;
+  googleVerified?: boolean;
+  serviceUnavailable?: boolean;
+  shellPending?: boolean;
   vehicles?: Array<{
     id: string;
     registrationNumber: string;
@@ -43,7 +47,10 @@ function getBreadcrumbs(pathname: string): { label: string; href?: string }[] {
   }
   if (pathname.startsWith("/vehicles")) {
     if (pathname === "/vehicles/new") {
-      return [{ label: "Vehicles", href: "/vehicles" }, { label: "Add Vehicle" }];
+      return [
+        { label: "Vehicles", href: "/vehicles" },
+        { label: "Add Vehicle" },
+      ];
     }
     return [{ label: "Vehicle Identity" }, { label: "Vehicles" }];
   }
@@ -57,10 +64,7 @@ function getBreadcrumbs(pathname: string): { label: string; href?: string }[] {
       replace: "Replace QR",
     };
     if (subRoute && subLabels[subRoute]) {
-      return [
-        { label: "My QR", href: "/qr" },
-        { label: subLabels[subRoute]! },
-      ];
+      return [{ label: "My QR", href: "/qr" }, { label: subLabels[subRoute]! }];
     }
     return [{ label: "Vehicle Identity" }, { label: "My QR" }];
   }
@@ -84,10 +88,16 @@ function getBreadcrumbs(pathname: string): { label: string; href?: string }[] {
   }
   if (pathname.startsWith("/settings")) {
     if (pathname === "/settings/profile") {
-      return [{ label: "Settings", href: "/settings" }, { label: "Personal Profile" }];
+      return [
+        { label: "Settings", href: "/settings" },
+        { label: "Personal Profile" },
+      ];
     }
     if (pathname === "/settings/security") {
-      return [{ label: "Settings", href: "/settings" }, { label: "Security & Sessions" }];
+      return [
+        { label: "Settings", href: "/settings" },
+        { label: "Security & Sessions" },
+      ];
     }
     return [{ label: "Account" }, { label: "Settings" }];
   }
@@ -99,6 +109,9 @@ export function CustomerAppShell({
   userName,
   userEmail,
   phoneVerified = false,
+  googleVerified = false,
+  serviceUnavailable = false,
+  shellPending = false,
   vehicles = [],
   unreadNotificationCount = 0,
   children,
@@ -108,7 +121,7 @@ export function CustomerAppShell({
   const activeVehicle = vehicles[0];
 
   return (
-    <SidebarProvider defaultOpen={true}>
+    <SidebarProvider defaultOpen={true} className="customer-paper">
       {/* 01. Sidebar */}
       <AppSidebar
         className="print:hidden"
@@ -122,36 +135,43 @@ export function CustomerAppShell({
       />
 
       {/* 02. Inset Canvas */}
-      <SidebarInset className="bg-background flex flex-col min-h-[100dvh] min-w-0 w-full max-w-full overflow-x-clip">
-        {/* Contextual Fixed Top Bar with SidebarTrigger, Separator, Breadcrumb & ThemeToggle */}
-        <header className="sticky top-0 z-40 flex h-14 w-full shrink-0 items-center justify-between gap-2.5 sm:gap-3 border-b border-border bg-background/95 px-3.5 backdrop-blur-md sm:px-6 print:hidden">
+      <SidebarInset className="bg-transparent flex flex-col min-h-[100dvh] min-w-0 w-full max-w-full overflow-x-clip">
+        {/* Navigation and account actions stay aligned with the page canvas. */}
+        <header className="sticky top-0 z-40 flex h-14 w-full shrink-0 items-center justify-between gap-2 sm:gap-3 border-b border-border bg-background/95 px-3.5 backdrop-blur-md sm:px-6 lg:px-8 print:hidden">
           <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-1 overflow-hidden">
-            <SidebarTrigger className="-ml-1 text-muted-foreground hover:text-foreground hover:bg-accent shrink-0" />
-            <Separator orientation="vertical" className="mr-1.5 sm:mr-2 h-4 bg-border shrink-0" />
+            <SidebarTrigger className="-ml-1 size-8 shrink-0 text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors" />
+            <Separator
+              orientation="vertical"
+              className="mr-1.5 sm:mr-2 h-4 bg-border shrink-0"
+            />
             <Breadcrumb className="min-w-0 flex-1 overflow-hidden">
               <BreadcrumbList className="flex-nowrap overflow-hidden text-xs sm:text-sm">
                 {breadcrumbs.map((crumb, idx) => {
                   const isLast = idx === breadcrumbs.length - 1;
                   return (
                     <React.Fragment key={crumb.label}>
-                      <BreadcrumbItem className="min-w-0 truncate">
+                      <BreadcrumbItem
+                        className={`min-w-0 truncate ${!isLast ? "hidden sm:inline-flex" : ""}`}
+                      >
                         {isLast ? (
                           <BreadcrumbPage className="font-medium text-foreground truncate">
                             {crumb.label}
                           </BreadcrumbPage>
                         ) : crumb.href ? (
                           <BreadcrumbLink
-                            href={crumb.href}
+                            asChild
                             className="text-muted-foreground hover:text-[#cc785c] transition-colors truncate"
                           >
-                            {crumb.label}
+                            <Link href={crumb.href}>{crumb.label}</Link>
                           </BreadcrumbLink>
                         ) : (
-                          <span className="text-muted-foreground truncate">{crumb.label}</span>
+                          <span className="text-muted-foreground truncate">
+                            {crumb.label}
+                          </span>
                         )}
                       </BreadcrumbItem>
                       {!isLast && (
-                        <BreadcrumbSeparator className="text-muted-foreground shrink-0" />
+                        <BreadcrumbSeparator className="hidden sm:block text-muted-foreground shrink-0" />
                       )}
                     </React.Fragment>
                   );
@@ -164,48 +184,114 @@ export function CustomerAppShell({
           <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
             {/* Active Vehicle Context */}
             {vehicles.length > 0 && activeVehicle ? (
-              <div className="hidden sm:flex h-8 items-center gap-2 rounded-lg border border-border bg-muted/40 px-3 shrink-0">
-                <span className="text-[#cc785c]">
-                  <VaahanIcon name="vehicle" size={13} aria-hidden="true" />
-                </span>
-                <span className="font-mono text-xs font-bold uppercase text-foreground leading-none">
-                  {activeVehicle.registrationNumber}
-                </span>
-              </div>
-            ) : (
-              <Link
-                href="/vehicles"
-                className="hidden sm:inline-flex h-8 items-center gap-1.5 rounded-lg border border-dashed border-[#cc785c]/60 bg-[#cc785c]/5 px-3 text-xs font-medium text-[#cc785c] hover:bg-[#cc785c]/10 transition-colors shrink-0"
+              <Button
+                asChild
+                variant="outline"
+                className="hidden h-9 min-w-0 gap-2 bg-card px-3 sm:inline-flex"
               >
-                <span className="font-mono text-xs font-bold leading-none">+</span>
-                <span>Link Vehicle</span>
-              </Link>
-            )}
+                <Link href="/vehicles" title="Manage your vehicles">
+                  <VaahanIcon
+                    name="vehicle"
+                    size={16}
+                    className="text-[#a9583e]"
+                    aria-hidden="true"
+                  />
+                  <span className="max-w-40 truncate font-mono text-xs font-semibold uppercase">
+                    {activeVehicle.registrationNumber}
+                  </span>
+                </Link>
+              </Button>
+            ) : !shellPending && !serviceUnavailable ? (
+              <Button
+                asChild
+                variant="outline"
+                className="h-9 w-9 border-[#d8d0c5] bg-card p-0 text-[#a9583e] sm:w-auto sm:gap-2 sm:px-3"
+              >
+                <Link
+                  href="/vehicles/new"
+                  aria-label="Add vehicle"
+                  title="Add vehicle"
+                >
+                  <VaahanIcon name="plus" size={16} aria-hidden="true" />
+                  <span className="hidden sm:inline">Add vehicle</span>
+                </Link>
+              </Button>
+            ) : null}
 
             {/* Notification Bell */}
-            <Link
-              href="/notifications"
-              aria-label={`Notifications${unreadNotificationCount > 0 ? `, ${unreadNotificationCount} unread` : ""}`}
-              className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border bg-background text-muted-foreground hover:border-[#cc785c] hover:text-[#cc785c] transition-colors"
+            <Button
+              asChild
+              variant="outline"
+              size="icon"
+              className="relative size-9 shrink-0 bg-card text-muted-foreground hover:border-[#a9583e] hover:text-[#a9583e]"
             >
-              <VaahanIcon name="notification" size={15} aria-hidden="true" />
-              {unreadNotificationCount > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-[#cc785c] px-1 font-mono text-[8px] font-bold text-white shadow-xs">
-                  {unreadNotificationCount}
-                </span>
-              )}
-            </Link>
-
-            {/* Theme Toggle (Dark & Light) */}
-            <ThemeToggle className="h-8 w-8 shrink-0 rounded-lg border border-border bg-background text-muted-foreground hover:border-[#cc785c] hover:text-[#cc785c] transition-colors" />
+              <Link
+                href="/notifications"
+                aria-label={`Notifications${unreadNotificationCount > 0 ? `, ${unreadNotificationCount} unread` : ""}`}
+                title="Notifications"
+              >
+                <VaahanIcon name="notification" size={16} aria-hidden="true" />
+                {unreadNotificationCount > 0 && (
+                  <span
+                    aria-hidden="true"
+                    className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#a9583e] px-1 font-mono text-[9px] font-bold text-white"
+                  >
+                    {unreadNotificationCount > 99
+                      ? "99+"
+                      : unreadNotificationCount}
+                  </span>
+                )}
+              </Link>
+            </Button>
           </div>
         </header>
 
         {/* Dynamic Page Content inside Inset Canvas */}
         <div
           id="main-app-content"
-          className="flex-1 p-3.5 sm:p-6 lg:p-8 w-full min-w-0 max-w-full pb-20 md:pb-8 overflow-x-clip print:p-0 print:m-0"
+          className="flex-1 p-4 sm:p-6 lg:p-8 w-full min-w-0 max-w-full pb-20 md:pb-8 overflow-x-clip print:p-0 print:m-0"
         >
+          {serviceUnavailable && (
+            <div
+              role="alert"
+              className="mb-6 border-l-2 border-[#a9583e] bg-[#f1ece3] px-4 py-3 text-sm text-[#615f59]"
+            >
+              Some account information couldn't load. Please refresh to try
+              again.
+            </div>
+          )}
+          {(!phoneVerified || !googleVerified) && (
+            <Alert
+              role="status"
+              className="mb-6 flex flex-wrap items-center justify-between gap-3 border-[#d8d0c5] bg-[#faf9f5]/70 px-4 py-3"
+            >
+              <div className="flex min-w-0 flex-1 items-center gap-3">
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[#f3e5da] text-[#a9583e]">
+                  <VaahanIcon
+                    name={!phoneVerified ? "mobile" : "google"}
+                    size={19}
+                  />
+                </span>
+                <AlertDescription className="text-sm text-[#615f59]">
+                  {!phoneVerified
+                    ? "Add a verified mobile number when you're ready."
+                    : "Connect Google for another way to sign in."}
+                </AlertDescription>
+              </div>
+              <Button
+                asChild
+                variant="outline"
+                className="h-11 shrink-0 border-[#d8d0c5] bg-transparent text-[#a9583e]"
+              >
+                <Link
+                  href={`/onboarding/verification?returnUrl=${encodeURIComponent(pathname)}`}
+                >
+                  {!phoneVerified ? "Verify mobile" : "Connect Google"}
+                  <VaahanIcon name="arrow-right" size={15} />
+                </Link>
+              </Button>
+            </Alert>
+          )}
           {children}
         </div>
       </SidebarInset>

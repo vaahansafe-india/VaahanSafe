@@ -3,7 +3,7 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
-import { PanelLeft } from "lucide-react"
+import { PanelLeft } from "@/components/ui/icons"
 
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@vaahansafe/ui/lib/utils"
@@ -204,7 +204,7 @@ const Sidebar = React.forwardRef<
           <SheetContent
             data-sidebar="sidebar"
             data-mobile="true"
-            className="w-[--sidebar-width] bg-sidebar bg-[hsl(var(--sidebar-background))] bg-[#fafafa] dark:bg-[#09090b] p-0 text-sidebar-foreground border-r border-sidebar-border shadow-2xl [&>button]:hidden"
+            className="w-[--sidebar-width] bg-sidebar bg-[hsl(var(--sidebar-background))] dark:bg-[#09090b] p-0 text-sidebar-foreground border-r border-sidebar-border [&>button]:hidden"
             style={
               {
                 "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
@@ -216,7 +216,7 @@ const Sidebar = React.forwardRef<
               <SheetTitle>Sidebar</SheetTitle>
               <SheetDescription>Displays the mobile sidebar.</SheetDescription>
             </SheetHeader>
-            <div className="flex h-full w-full flex-col bg-sidebar bg-[hsl(var(--sidebar-background))] bg-[#fafafa] dark:bg-[#09090b] text-sidebar-foreground">{children}</div>
+            <div className="flex h-full w-full flex-col bg-sidebar text-sidebar-foreground">{children}</div>
           </SheetContent>
         </Sheet>
       )

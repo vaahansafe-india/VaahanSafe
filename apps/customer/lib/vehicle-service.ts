@@ -105,12 +105,57 @@ function maskPhone(phone: string): string {
   return "••••••••";
 }
 
+export const VEHICLE_REGISTRY_QUERY = `SELECT v.id, v.user_id, v.registration_number, v.registration_number_normalized,
+       v.vehicle_type, v.make, v.model, v.variant, v.year, v.color, v.status, v.created_at, v.updated_at,
+       qr.record AS qr, profile.record AS profile, COALESCE(contacts.records, '[]'::json) AS contacts
+FROM vehicles v
+LEFT JOIN LATERAL (
+  SELECT row_to_json(found) AS record FROM (
+    SELECT s.id, s.public_id, s.visible_code, s.batch_id, s.status, s.activated_at, a.assigned_at,
+           r.id AS replacement_id, r.status AS replacement_status, r.reason AS replacement_reason
+    FROM qr_assignments a
+    JOIN qr_stickers s ON s.id = a.qr_id
+    LEFT JOIN LATERAL (
+      SELECT id, status, reason FROM replacement_requests
+      WHERE (old_qr_sticker_id = s.id OR vehicle_id = a.vehicle_id)
+        AND status NOT IN ('REJECTED', 'COMPLETED', 'CANCELLED')
+      ORDER BY created_at DESC LIMIT 1
+    ) r ON true
+    WHERE a.vehicle_id = v.id AND a.ended_at IS NULL
+    ORDER BY a.assigned_at DESC LIMIT 1
+  ) found
+) qr ON true
+LEFT JOIN LATERAL (
+  SELECT p.id, row_to_json(p) AS record FROM emergency_profiles p
+  WHERE p.vehicle_id = v.id AND p.status = 'ACTIVE'
+  ORDER BY p.created_at DESC LIMIT 1
+) profile ON true
+LEFT JOIN LATERAL (
+  SELECT json_agg(c ORDER BY c.priority, c.created_at) AS records
+  FROM emergency_contacts c
+  WHERE c.emergency_profile_id = profile.id AND c.is_enabled = 1
+) contacts ON true
+WHERE v.user_id = ? AND v.status != 'DELETED'
+ORDER BY v.created_at DESC`;
+
+interface RegistryVehicleRow extends DbVehicleRow {
+  qr:
+    | (DbQrRow & {
+        replacement_id?: string | null;
+        replacement_status?: string | null;
+        replacement_reason?: string | null;
+      })
+    | null;
+  profile: DbProfileRow | null;
+  contacts: DbContactRow[];
+}
+
 /**
  * Retrieves the complete authorized Vehicle Registry for the authenticated user
  */
 export async function getVehicleRegistry(
   userId: string,
-  filterParams?: Partial<VehicleFilterState>
+  filterParams?: Partial<VehicleFilterState>,
 ): Promise<{
   items: VehicleRegistryItem[];
   totalCount: number;
@@ -118,180 +163,138 @@ export async function getVehicleRegistry(
 }> {
   const db = getAuthoritativeDatabaseClient();
 
-  // 1. Authoritative query of vehicles owned by this user
-  let vehicleRows: DbVehicleRow[] = [];
-  try {
-    vehicleRows = await db.query<DbVehicleRow>(
-      `SELECT id, user_id, registration_number, registration_number_normalized,
-              vehicle_type, make, model, variant, year, color, status, created_at, updated_at
-       FROM vehicles
-       WHERE user_id = ? AND status != 'DELETED'
-       ORDER BY created_at DESC`,
-      [userId]
-    );
-  } catch (err) {
-    console.warn("[VehicleService] Failed to query user vehicles:", err);
-  }
-
-  const items: VehicleRegistryItem[] = await Promise.all(
-    vehicleRows.map(async (v) => {
-      // 2. Parallel queries for QR assignment and emergency profile
-      const [qrRowResult, profileRowResult] = await Promise.allSettled([
-        db.queryFirst<
-          DbQrRow & {
-            replacement_id?: string | null;
-            replacement_status?: string | null;
-            replacement_reason?: string | null;
-          }
-        >(
-          `SELECT s.id, s.public_id, s.visible_code, s.batch_id, s.status, s.activated_at, a.assigned_at,
-                  r.id as replacement_id, r.status as replacement_status, r.reason as replacement_reason
-           FROM qr_stickers s
-           INNER JOIN qr_assignments a ON s.id = a.qr_id
-           LEFT JOIN replacement_requests r ON (r.old_qr_sticker_id = s.id OR r.vehicle_id = a.vehicle_id)
-             AND r.status NOT IN ('REJECTED', 'COMPLETED', 'CANCELLED')
-           WHERE a.vehicle_id = ? AND a.ended_at IS NULL
-           LIMIT 1`,
-          [v.id]
-        ),
-        db.queryFirst<DbProfileRow>(
-          `SELECT id, vehicle_id, display_name, blood_group, medical_notes, public_vehicle_details,
-                  show_owner_name, show_blood_group, show_medical_notes, show_vehicle_details, status, created_at, updated_at
-           FROM emergency_profiles
-           WHERE vehicle_id = ? AND status = 'ACTIVE'
-           LIMIT 1`,
-          [v.id]
-        ),
-      ]);
-
-      const qrRow = qrRowResult.status === "fulfilled" ? qrRowResult.value : null;
-      const profileRow = profileRowResult.status === "fulfilled" ? profileRowResult.value : null;
-
-      // 3. Query emergency contacts if profile exists
-      let contactRows: DbContactRow[] = [];
-      if (profileRow) {
-        try {
-          contactRows = await db.query<DbContactRow>(
-            `SELECT id, emergency_profile_id, name, relationship_label, phone, priority, is_enabled, allow_call, allow_message, created_at
-             FROM emergency_contacts
-             WHERE emergency_profile_id = ? AND is_enabled = 1
-             ORDER BY priority ASC`,
-            [profileRow.id]
-          );
-        } catch (err) {
-          console.warn(`[VehicleService] Contacts query failed for profile ${profileRow.id}:`, err);
-        }
-      }
-
-      // 4. Derive deterministic readiness & attention items
-      const attentionItems: VehicleAttentionItem[] = [];
-
-      let qrNode: ReadinessNodeState = "ready";
-      let safetyNode: ReadinessNodeState = "ready";
-      let contactNode: ReadinessNodeState = "ready";
-
-      if (!qrRow) {
-        qrNode = "not_configured";
-        attentionItems.push({
-          id: `att-qr-${v.id}`,
-          severity: "AMBER",
-          title: "QR Sticker Not Connected",
-          description: "Link a physical VaahanSafe safety sticker or activate a retail pack.",
-          actionLabel: "Connect QR",
-          actionTarget: "qr",
-        });
-      } else if (qrRow.status !== "ACTIVATED" && qrRow.status !== "ACTIVE") {
-        qrNode = "attention";
-        attentionItems.push({
-          id: `att-qr-stat-${v.id}`,
-          severity: "AMBER",
-          title: "QR Activation Pending",
-          description: `Sticker status is ${qrRow.status}. Complete activation to verify emergency relay.`,
-          actionLabel: "Verify QR",
-          actionTarget: "qr",
-        });
-      }
-
-      if (!profileRow) {
-        safetyNode = "not_configured";
-        attentionItems.push({
-          id: `att-prof-${v.id}`,
-          severity: "AMBER",
-          title: "Safety View Incomplete",
-          description: "Configure what first responders and finders see upon scanning.",
-          actionLabel: "Configure Safety",
-          actionTarget: "safety",
-        });
-      }
-
-      if (contactRows.length === 0) {
-        contactNode = "attention";
-        attentionItems.push({
-          id: `att-cnt-${v.id}`,
-          severity: "RED",
-          title: "Emergency Contact Missing",
-          description: "Add at least one priority contact for instant Golden Hour SMS alerts.",
-          actionLabel: "Add Contact",
-          actionTarget: "contact",
-        });
-      }
-
-      const isReady = attentionItems.length === 0;
-      const maskedReg = maskVehicleRegistration(v.registration_number, { mode: "PARTIAL" });
-      const identityCode = qrRow ? `VS-${qrRow.public_id}` : `VS-REG-${v.id.slice(-6).toUpperCase()}`;
-
-      return {
-        id: v.id,
-        registrationNumber: v.registration_number,
-        registrationNumberNormalized: v.registration_number_normalized,
-        registrationNumberMasked: maskedReg,
-        make: v.make,
-        model: v.model,
-        variant: v.variant || undefined,
-        year: v.year || undefined,
-        color: v.color || undefined,
-        type: (v.vehicle_type as VehicleCategory) || "CAR",
-        status: v.status,
-        createdAt: v.created_at,
-        identityId: identityCode,
-        qr: {
-          hasQr: Boolean(qrRow),
-          publicId: qrRow?.public_id,
-          status: (qrRow?.status as QrStatus) || "UNLINKED",
-          assignedAt: qrRow?.assigned_at || undefined,
-          replacementPending: Boolean(qrRow?.replacement_id),
-          replacementStatus: qrRow?.replacement_status || undefined,
-          replacementReason: qrRow?.replacement_reason || undefined,
-        },
-        safety: {
-          isConfigured: Boolean(profileRow),
-          status: profileRow ? "CONFIGURED" : "NEEDS_SETUP",
-          showOwnerName: profileRow ? profileRow.show_owner_name === 1 : true,
-          showBloodGroup: profileRow ? profileRow.show_blood_group === 1 : true,
-          showMedicalNotes: profileRow ? profileRow.show_medical_notes === 1 : false,
-          showVehicleDetails: profileRow ? profileRow.show_vehicle_details === 1 : true,
-          bloodGroup: profileRow?.blood_group,
-          medicalNotes: profileRow?.medical_notes,
-        },
-        contacts: {
-          count: contactRows.length,
-          primaryName: contactRows[0]?.name,
-          primaryRelationship: contactRows[0]?.relationship_label,
-        },
-        readiness: {
-          isReady,
-          vehicleNode: "ready",
-          identityNode: "ready",
-          qrNode,
-          safetyNode,
-          contactNode,
-        },
-        attention: attentionItems,
-      };
-    })
+  // One owner-scoped database round trip for the entire registry.
+  const vehicleRows = await db.query<RegistryVehicleRow>(
+    VEHICLE_REGISTRY_QUERY,
+    [userId],
   );
+  const items: VehicleRegistryItem[] = vehicleRows.map((v) => {
+    const qrRow = v.qr;
+    const profileRow = v.profile;
+    const contactRows = v.contacts || [];
 
-  const totalAttentionCount = items.reduce((acc, item) => acc + item.attention.length, 0);
+    // 4. Derive deterministic readiness & attention items
+    const attentionItems: VehicleAttentionItem[] = [];
+
+    let qrNode: ReadinessNodeState = "ready";
+    let safetyNode: ReadinessNodeState = "ready";
+    let contactNode: ReadinessNodeState = "ready";
+
+    if (!qrRow) {
+      qrNode = "not_configured";
+      attentionItems.push({
+        id: `att-qr-${v.id}`,
+        severity: "AMBER",
+        title: "QR Sticker Not Connected",
+        description:
+          "Link a physical VaahanSafe safety sticker or activate a retail pack.",
+        actionLabel: "Connect QR",
+        actionTarget: "qr",
+      });
+    } else if (qrRow.status !== "ACTIVATED" && qrRow.status !== "ACTIVE") {
+      qrNode = "attention";
+      attentionItems.push({
+        id: `att-qr-stat-${v.id}`,
+        severity: "AMBER",
+        title: "QR Activation Pending",
+        description: `Sticker status is ${qrRow.status}. Complete activation to verify emergency relay.`,
+        actionLabel: "Verify QR",
+        actionTarget: "qr",
+      });
+    }
+
+    if (!profileRow) {
+      safetyNode = "not_configured";
+      attentionItems.push({
+        id: `att-prof-${v.id}`,
+        severity: "AMBER",
+        title: "Safety View Incomplete",
+        description:
+          "Configure what first responders and finders see upon scanning.",
+        actionLabel: "Configure Safety",
+        actionTarget: "safety",
+      });
+    }
+
+    if (contactRows.length === 0) {
+      contactNode = "attention";
+      attentionItems.push({
+        id: `att-cnt-${v.id}`,
+        severity: "RED",
+        title: "Emergency Contact Missing",
+        description:
+          "Add at least one priority contact for instant Golden Hour SMS alerts.",
+        actionLabel: "Add Contact",
+        actionTarget: "contact",
+      });
+    }
+
+    const isReady = attentionItems.length === 0;
+    const maskedReg = maskVehicleRegistration(v.registration_number, {
+      mode: "PARTIAL",
+    });
+    const identityCode = qrRow
+      ? `VS-${qrRow.public_id}`
+      : `VS-REG-${v.id.slice(-6).toUpperCase()}`;
+
+    return {
+      id: v.id,
+      registrationNumber: v.registration_number,
+      registrationNumberNormalized: v.registration_number_normalized,
+      registrationNumberMasked: maskedReg,
+      make: v.make,
+      model: v.model,
+      variant: v.variant || undefined,
+      year: v.year || undefined,
+      color: v.color || undefined,
+      type: (v.vehicle_type as VehicleCategory) || "CAR",
+      status: v.status,
+      createdAt: v.created_at,
+      identityId: identityCode,
+      qr: {
+        hasQr: Boolean(qrRow),
+        publicId: qrRow?.public_id,
+        status: (qrRow?.status as QrStatus) || "UNLINKED",
+        assignedAt: qrRow?.assigned_at || undefined,
+        replacementPending: Boolean(qrRow?.replacement_id),
+        replacementStatus: qrRow?.replacement_status || undefined,
+        replacementReason: qrRow?.replacement_reason || undefined,
+      },
+      safety: {
+        isConfigured: Boolean(profileRow),
+        status: profileRow ? "CONFIGURED" : "NEEDS_SETUP",
+        showOwnerName: profileRow ? profileRow.show_owner_name === 1 : true,
+        showBloodGroup: profileRow ? profileRow.show_blood_group === 1 : true,
+        showMedicalNotes: profileRow
+          ? profileRow.show_medical_notes === 1
+          : false,
+        showVehicleDetails: profileRow
+          ? profileRow.show_vehicle_details === 1
+          : true,
+        bloodGroup: profileRow?.blood_group,
+        medicalNotes: profileRow?.medical_notes,
+      },
+      contacts: {
+        count: contactRows.length,
+        primaryName: contactRows[0]?.name,
+        primaryRelationship: contactRows[0]?.relationship_label,
+      },
+      readiness: {
+        isReady,
+        vehicleNode: "ready",
+        identityNode: "ready",
+        qrNode,
+        safetyNode,
+        contactNode,
+      },
+      attention: attentionItems,
+    };
+  });
+
+  const totalAttentionCount = items.reduce(
+    (acc, item) => acc + item.attention.length,
+    0,
+  );
 
   // 6. Apply filter parameters
   let filtered = items;
@@ -304,7 +307,7 @@ export async function getVehicleRegistry(
         item.model.toLowerCase().includes(q) ||
         item.registrationNumber.toLowerCase().includes(q) ||
         item.registrationNumberNormalized.toLowerCase().includes(q) ||
-        item.identityId.toLowerCase().includes(q)
+        item.identityId.toLowerCase().includes(q),
     );
   }
 
@@ -318,27 +321,34 @@ export async function getVehicleRegistry(
       filtered = filtered.filter(
         (item) =>
           item.qr.hasQr &&
-          (item.qr.status === "ACTIVE" || item.qr.status === "ACTIVATED")
+          (item.qr.status === "ACTIVE" || item.qr.status === "ACTIVATED"),
       );
     } else if (filterParams.qrStatus === "UNLINKED") {
       filtered = filtered.filter(
-        (item) => !item.qr.hasQr || item.qr.status === "UNLINKED"
+        (item) => !item.qr.hasQr || item.qr.status === "UNLINKED",
       );
     }
   }
 
   if (filterParams?.safetyStatus && filterParams.safetyStatus !== "ALL") {
-    filtered = filtered.filter((item) => item.safety.status === filterParams.safetyStatus);
+    filtered = filtered.filter(
+      (item) => item.safety.status === filterParams.safetyStatus,
+    );
   }
 
   // 7. Apply sorting
   if (filterParams?.sort === "NAME") {
-    filtered.sort((a, b) => `${a.make} ${a.model}`.localeCompare(`${b.make} ${b.model}`));
+    filtered.sort((a, b) =>
+      `${a.make} ${a.model}`.localeCompare(`${b.make} ${b.model}`),
+    );
   } else if (filterParams?.sort === "ATTENTION") {
     filtered.sort((a, b) => b.attention.length - a.attention.length);
   } else {
     // Default RECENT: newest first
-    filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    filtered.sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
   }
 
   return {
@@ -353,7 +363,7 @@ export async function getVehicleRegistry(
  */
 export async function getVehicleDossier(
   userId: string,
-  vehicleId: string
+  vehicleId: string,
 ): Promise<VehicleDossierData | null> {
   const db = getAuthoritativeDatabaseClient();
 
@@ -363,7 +373,7 @@ export async function getVehicleDossier(
             vehicle_type, make, model, variant, year, color, status, created_at, updated_at
      FROM vehicles
      WHERE id = ? AND user_id = ? AND status != 'DELETED'`,
-    [vehicleId, userId]
+    [vehicleId, userId],
   );
 
   if (!v) {
@@ -386,7 +396,7 @@ export async function getVehicleDossier(
        AND r.status NOT IN ('REJECTED', 'COMPLETED', 'CANCELLED')
      WHERE a.vehicle_id = ? AND a.ended_at IS NULL
      LIMIT 1`,
-    [v.id]
+    [v.id],
   );
 
   // 3. Emergency Profile
@@ -396,7 +406,7 @@ export async function getVehicleDossier(
      FROM emergency_profiles
      WHERE vehicle_id = ? AND status = 'ACTIVE'
      LIMIT 1`,
-    [v.id]
+    [v.id],
   );
 
   // 4. Emergency Contacts
@@ -407,7 +417,7 @@ export async function getVehicleDossier(
        FROM emergency_contacts
        WHERE emergency_profile_id = ?
        ORDER BY priority ASC`,
-      [profileRow.id]
+      [profileRow.id],
     );
   }
 
@@ -420,7 +430,7 @@ export async function getVehicleDossier(
        WHERE qr_id = ?
        ORDER BY created_at DESC
        LIMIT 5`,
-      [qrRow.id]
+      [qrRow.id],
     );
   }
 
@@ -433,7 +443,7 @@ export async function getVehicleDossier(
        WHERE qr_id = ?
        ORDER BY created_at DESC
        LIMIT 5`,
-      [qrRow.id]
+      [qrRow.id],
     );
   }
 
@@ -462,7 +472,8 @@ export async function getVehicleDossier(
     milestones.push({
       id: `ms-prof-${profileRow.id}`,
       title: "Emergency Profile Configured",
-      description: "Public safety projection rules and finder emergency visibility set",
+      description:
+        "Public safety projection rules and finder emergency visibility set",
       timestamp: profileRow.created_at,
       type: "SAFETY_CONFIGURED",
     });
@@ -489,7 +500,9 @@ export async function getVehicleDossier(
   }
 
   // Sort milestones chronologically (latest first)
-  milestones.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  milestones.sort(
+    (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
+  );
 
   // 8. Derive attention items
   const attentionItems: VehicleAttentionItem[] = [];
@@ -503,7 +516,8 @@ export async function getVehicleDossier(
       id: `att-qr-${v.id}`,
       severity: "AMBER",
       title: "QR Sticker Not Connected",
-      description: "Link a physical VaahanSafe safety sticker or activate a retail pack.",
+      description:
+        "Link a physical VaahanSafe safety sticker or activate a retail pack.",
       actionLabel: "Connect QR",
       actionTarget: "qr",
     });
@@ -525,7 +539,8 @@ export async function getVehicleDossier(
       id: `att-prof-${v.id}`,
       severity: "AMBER",
       title: "Safety View Incomplete",
-      description: "Configure what first responders and finders see upon scanning.",
+      description:
+        "Configure what first responders and finders see upon scanning.",
       actionLabel: "Configure Safety",
       actionTarget: "safety",
     });
@@ -537,27 +552,34 @@ export async function getVehicleDossier(
       id: `att-cnt-${v.id}`,
       severity: "RED",
       title: "Emergency Contact Missing",
-      description: "Add at least one priority contact for instant Golden Hour SMS alerts.",
+      description:
+        "Add at least one priority contact for instant Golden Hour SMS alerts.",
       actionLabel: "Add Contact",
       actionTarget: "contact",
     });
   }
 
   const isReady = attentionItems.length === 0;
-  const maskedReg = maskVehicleRegistration(v.registration_number, { mode: "PARTIAL" });
-  const identityCode = qrRow ? `VS-${qrRow.public_id}` : `VS-REG-${v.id.slice(-6).toUpperCase()}`;
+  const maskedReg = maskVehicleRegistration(v.registration_number, {
+    mode: "PARTIAL",
+  });
+  const identityCode = qrRow
+    ? `VS-${qrRow.public_id}`
+    : `VS-REG-${v.id.slice(-6).toUpperCase()}`;
 
-  const contactsDetail: VehicleEmergencyContactDetail[] = contactRows.map((c) => ({
-    id: c.id,
-    name: c.name,
-    relationship: c.relationship_label,
-    phone: c.phone,
-    phoneMasked: maskPhone(c.phone),
-    priority: c.priority,
-    isEnabled: c.is_enabled === 1,
-    allowCall: c.allow_call === 1,
-    allowMessage: c.allow_message === 1,
-  }));
+  const contactsDetail: VehicleEmergencyContactDetail[] = contactRows.map(
+    (c) => ({
+      id: c.id,
+      name: c.name,
+      relationship: c.relationship_label,
+      phone: c.phone,
+      phoneMasked: maskPhone(c.phone),
+      priority: c.priority,
+      isEnabled: c.is_enabled === 1,
+      allowCall: c.allow_call === 1,
+      allowMessage: c.allow_message === 1,
+    }),
+  );
 
   const scansDetail: VehicleScanEventItem[] = scanRows.map((s) => ({
     id: s.id,
@@ -597,8 +619,12 @@ export async function getVehicleDossier(
       status: profileRow ? "CONFIGURED" : "NEEDS_SETUP",
       showOwnerName: profileRow ? profileRow.show_owner_name === 1 : true,
       showBloodGroup: profileRow ? profileRow.show_blood_group === 1 : true,
-      showMedicalNotes: profileRow ? profileRow.show_medical_notes === 1 : false,
-      showVehicleDetails: profileRow ? profileRow.show_vehicle_details === 1 : true,
+      showMedicalNotes: profileRow
+        ? profileRow.show_medical_notes === 1
+        : false,
+      showVehicleDetails: profileRow
+        ? profileRow.show_vehicle_details === 1
+        : true,
       bloodGroup: profileRow?.blood_group,
       medicalNotes: profileRow?.medical_notes,
     },

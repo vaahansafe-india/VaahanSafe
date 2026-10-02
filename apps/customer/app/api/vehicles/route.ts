@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedCustomer } from "@/lib/session";
-import { getAuthoritativeDatabaseClient } from "@vaahansafe/database";
+import { getAuthoritativeDatabaseClient, createInAppNotification } from "@vaahansafe/database";
 import {
   generateVehicleId,
   normalizeRegistrationNumber,
@@ -106,6 +106,18 @@ export async function POST(req: NextRequest) {
         params: [profileId, vehicleId, auth.user.name || null, now, now],
       },
     ]);
+
+    // In-App Notification: Vehicle Registered
+    await createInAppNotification({
+      userId: auth.user.id,
+      eventType: "VEHICLE_ADDED",
+      category: "ACCOUNT",
+      title: `Vehicle Registered: ${registrationNumber.trim().toUpperCase()}`,
+      body: `${make.trim()} ${model.trim()} (${registrationNumber.trim().toUpperCase()}) was registered to your VaahanSafe account. Attach a QR safety identity sticker to activate emergency routing.`,
+      actionType: "VIEW_QR",
+      actionTarget: vehicleId,
+      db,
+    });
 
     const created = await db.queryFirst<{
       id: string;

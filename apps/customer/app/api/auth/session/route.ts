@@ -1,56 +1,12 @@
 import { NextResponse } from "next/server";
-import { parseSessionCookie, validateSessionToken } from "@vaahansafe/auth";
-import { getSessionRepository, getUserRepository } from "@vaahansafe/database";
+import { getAuthenticatedCustomer } from "@/lib/session";
 
-export async function GET(req: Request) {
+export async function GET() {
   try {
-    const cookieHeader = req.headers.get("cookie");
-    const sessionToken = parseSessionCookie(cookieHeader);
-
-    if (!sessionToken) {
-      return NextResponse.json({
-        authenticated: false,
-        user: null,
-      });
-    }
-
-    const sessionRepo = getSessionRepository();
-    const userRepo = getUserRepository();
-
-    const session = await validateSessionToken(sessionToken, sessionRepo);
-    if (!session) {
-      return NextResponse.json({
-        authenticated: false,
-        user: null,
-      });
-    }
-
-    const user = await userRepo.findById(session.userId);
-    if (!user) {
-      return NextResponse.json({
-        authenticated: false,
-        user: null,
-      });
-    }
-
-    return NextResponse.json({
-      authenticated: true,
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        phone: user.phone,
-        role: user.role,
-        onboardingState: user.onboardingState,
-        status: user.status,
-        phoneVerified: !!user.phone,
-      },
-    });
-  } catch (err) {
-    console.error("[VaahanSafe] Session validation error:", err);
-    return NextResponse.json({
-      authenticated: false,
-      user: null,
-    });
+    const auth = await getAuthenticatedCustomer();
+    return NextResponse.json({ authenticated: Boolean(auth), user: auth ? { ...auth.user, phoneVerified: auth.phoneVerified, googleVerified: auth.googleVerified } : null }, { headers: { "Cache-Control": "no-store" } });
+  } catch (error) {
+    console.error("[Customer] Session service unavailable", error);
+    return NextResponse.json({ error: "We couldn't check your sign-in right now. Please try again." }, { status: 503, headers: { "Cache-Control": "no-store" } });
   }
 }

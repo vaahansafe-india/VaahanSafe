@@ -22,7 +22,7 @@ export function HowItWorks() {
       tag: "RESOLVE",
       title: "Authoritative Edge Verification",
       desc: "VaahanSafe's Cloudflare runtime resolves the opaque ID, validates lifecycle state, and enforces active service entitlement.",
-      meta: "Cloudflare D1 & Rules",
+      meta: "Supabase & Edge Security",
     },
     {
       num: "04",

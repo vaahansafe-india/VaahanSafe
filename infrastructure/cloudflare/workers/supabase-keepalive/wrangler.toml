@@ -1,0 +1,18 @@
+name = "vaahansafe-supabase-keepalive"
+account_id = "980cb7ee6eaacd3746d51f46bd62217a"
+main = "src/index.ts"
+compatibility_date = "2026-09-01"
+compatibility_flags = ["nodejs_compat"]
+workers_dev = true
+
+
+[vars]
+SUPABASE_URL = "https://zpjwrptrqgpeyvlvscpv.supabase.co"
+SUPABASE_PUBLISHABLE_KEY = "sb_publishable_b2gKJgEfWgdR99PqkQ5z2g_JOa7lfk4"
+
+# Set SUPABASE_SECRET_KEY with `wrangler secret put` before deployment.
+
+# Scheduled Cron Trigger: Fires every 10 minutes to prevent Supabase 7-day inactivity pause
+# and record live latency telemetry for the VaahanSafe Status Page.
+[triggers]
+crons = ["*/10 * * * *"]

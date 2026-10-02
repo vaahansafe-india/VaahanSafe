@@ -1,10 +1,13 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import { useCustomerRouter } from "@/lib/use-customer-router";
 import { VaahanIcon } from "@vaahansafe/icons";
 import { Dialog, DialogContent } from "@vaahansafe/ui";
-import type { DashboardVehicle, DashboardQrSticker } from "@/lib/dashboard-types";
+import type {
+  DashboardVehicle,
+  DashboardQrSticker,
+} from "@/lib/dashboard-types";
 
 interface CommandPaletteProps {
   open: boolean;
@@ -27,7 +30,7 @@ export function CommandPalette({
   onOpenSafetySheet,
   onOpenContactsSheet,
 }: CommandPaletteProps) {
-  const router = useRouter();
+  const router = useCustomerRouter();
   const [search, setSearch] = React.useState("");
   const [selectedIndex, setSelectedIndex] = React.useState(0);
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -65,105 +68,112 @@ export function CommandPalette({
         action();
       }, 80);
     },
-    [onOpenChange]
+    [onOpenChange],
   );
 
-  const commands = React.useMemo(() => [
-    // Contextual Actions for Active Vehicle
-    ...(activeVehicle
-      ? [
-          {
-            id: "inspect-vehicle",
-            category: "Active Vehicle",
-            title: `Manage ${activeVehicle.registrationNumber}`,
-            subtitle: `${activeVehicle.make} ${activeVehicle.model}`,
-            icon: "vehicle" as const,
-            action: onOpenVehicleSheet,
-          },
-          {
-            id: "inspect-qr",
-            category: "Active Vehicle",
-            title: qrSticker ? `Inspect QR ${qrSticker.visibleCode}` : "Activate QR Sticker",
-            subtitle: qrSticker ? `Status: ${qrSticker.status}` : "Bind a safety sticker to this vehicle",
-            icon: "qr" as const,
-            action: onOpenQrSheet,
-          },
-          {
-            id: "edit-safety",
-            category: "Active Vehicle",
-            title: "Configure Public Safety View",
-            subtitle: "Manage what passerby responders see on scan",
-            icon: "shield" as const,
-            action: onOpenSafetySheet,
-          },
-          {
-            id: "edit-contacts",
-            category: "Active Vehicle",
-            title: "Manage Emergency Contacts",
-            subtitle: "Priority phone recipients for incident alerts",
-            icon: "phone" as const,
-            action: onOpenContactsSheet,
-          },
-        ]
-      : []),
-    // Global Navigation
-    {
-      id: "nav-vehicles",
-      category: "Navigation",
-      title: "All Vehicles",
-      subtitle: "View and manage vehicle fleet",
-      icon: "vehicle" as const,
-      action: () => router.push("/vehicles"),
-    },
-    {
-      id: "nav-qr",
-      category: "Navigation",
-      title: "My QR Hub",
-      subtitle: "Active stickers, replacements, and batches",
-      icon: "qr" as const,
-      action: () => router.push("/qr"),
-    },
-    {
-      id: "nav-contacts",
-      category: "Navigation",
-      title: "Emergency Contacts",
-      subtitle: "Alert priority settings",
-      icon: "phone" as const,
-      action: () => router.push("/emergency-contacts"),
-    },
-    {
-      id: "nav-buy-qr",
-      category: "Commerce",
-      title: "Order New QR Sticker",
-      subtitle: "Doorstep delivery across India",
-      icon: "cart" as const,
-      action: () => router.push("/qr/buy"),
-    },
-    {
-      id: "nav-activate",
-      category: "Activation",
-      title: "Activate Retail QR Kit",
-      subtitle: "Pair physical packaging code",
-      icon: "scanner" as const,
-      action: () => router.push("/qr/activate"),
-    },
-    {
-      id: "nav-sub",
-      category: "Billing",
-      title: "Subscription & Protection Plan",
-      subtitle: "Review vehicle coverage entitlements",
-      icon: "receipt" as const,
-      action: () => router.push("/subscription"),
-    },
-  ], [
-    activeVehicle,
-    qrSticker,
-    onOpenVehicleSheet,
-    onOpenQrSheet,
-    onOpenSafetySheet,
-    onOpenContactsSheet,
-    router,
-  ]);
+  const commands = React.useMemo(
+    () => [
+      // Contextual Actions for Active Vehicle
+      ...(activeVehicle
+        ? [
+            {
+              id: "inspect-vehicle",
+              category: "Active Vehicle",
+              title: `Manage ${activeVehicle.registrationNumber}`,
+              subtitle: `${activeVehicle.make} ${activeVehicle.model}`,
+              icon: "vehicle" as const,
+              action: onOpenVehicleSheet,
+            },
+            {
+              id: "inspect-qr",
+              category: "Active Vehicle",
+              title: qrSticker
+                ? `Inspect QR ${qrSticker.visibleCode}`
+                : "Activate QR Sticker",
+              subtitle: qrSticker
+                ? `Status: ${qrSticker.status}`
+                : "Bind a safety sticker to this vehicle",
+              icon: "qr" as const,
+              action: onOpenQrSheet,
+            },
+            {
+              id: "edit-safety",
+              category: "Active Vehicle",
+              title: "Configure Public Safety View",
+              subtitle: "Manage what passerby responders see on scan",
+              icon: "shield" as const,
+              action: onOpenSafetySheet,
+            },
+            {
+              id: "edit-contacts",
+              category: "Active Vehicle",
+              title: "Manage Emergency Contacts",
+              subtitle: "Priority phone recipients for incident alerts",
+              icon: "phone" as const,
+              action: onOpenContactsSheet,
+            },
+          ]
+        : []),
+      // Global Navigation
+      {
+        id: "nav-vehicles",
+        category: "Navigation",
+        title: "All Vehicles",
+        subtitle: "View and manage vehicle fleet",
+        icon: "vehicle" as const,
+        action: () => router.push("/vehicles"),
+      },
+      {
+        id: "nav-qr",
+        category: "Navigation",
+        title: "My QR Hub",
+        subtitle: "Active stickers, replacements, and batches",
+        icon: "qr" as const,
+        action: () => router.push("/qr"),
+      },
+      {
+        id: "nav-contacts",
+        category: "Navigation",
+        title: "Emergency Contacts",
+        subtitle: "Alert priority settings",
+        icon: "phone" as const,
+        action: () => router.push("/emergency-contacts"),
+      },
+      {
+        id: "nav-buy-qr",
+        category: "Commerce",
+        title: "Order New QR Sticker",
+        subtitle: "Doorstep delivery across India",
+        icon: "cart" as const,
+        action: () => router.push("/qr/buy"),
+      },
+      {
+        id: "nav-activate",
+        category: "Activation",
+        title: "Activate Retail QR Kit",
+        subtitle: "Pair physical packaging code",
+        icon: "scanner" as const,
+        action: () => router.push("/qr/activate"),
+      },
+      {
+        id: "nav-sub",
+        category: "Billing",
+        title: "Subscription & Protection Plan",
+        subtitle: "Review vehicle coverage entitlements",
+        icon: "receipt" as const,
+        action: () => router.push("/subscription"),
+      },
+    ],
+    [
+      activeVehicle,
+      qrSticker,
+      onOpenVehicleSheet,
+      onOpenQrSheet,
+      onOpenSafetySheet,
+      onOpenContactsSheet,
+      router,
+    ],
+  );
 
   const filteredCommands = React.useMemo(() => {
     if (!search.trim()) return commands;
@@ -172,7 +182,7 @@ export function CommandPalette({
       (c) =>
         c.title.toLowerCase().includes(q) ||
         c.subtitle.toLowerCase().includes(q) ||
-        c.category.toLowerCase().includes(q)
+        c.category.toLowerCase().includes(q),
     );
   }, [commands, search]);
 
@@ -196,14 +206,14 @@ export function CommandPalette({
     if (e.key === "ArrowDown") {
       e.preventDefault();
       setSelectedIndex((prev) =>
-        filteredCommands.length > 0 ? (prev + 1) % filteredCommands.length : 0
+        filteredCommands.length > 0 ? (prev + 1) % filteredCommands.length : 0,
       );
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
       setSelectedIndex((prev) =>
         filteredCommands.length > 0
           ? (prev - 1 + filteredCommands.length) % filteredCommands.length
-          : 0
+          : 0,
       );
     } else if (e.key === "Enter") {
       e.preventDefault();
@@ -219,10 +229,14 @@ export function CommandPalette({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[calc(100vw-2rem)] sm:max-w-xl p-0 overflow-hidden border-border bg-card shadow-2xl [&>button.absolute]:hidden">
+      <DialogContent className="customer-command-dialog w-[calc(100vw-2rem)] sm:max-w-xl p-0 overflow-hidden border-border bg-card shadow-2xl [&>button.absolute]:hidden">
         {/* Search Bar Header */}
         <div className="flex items-center gap-3 border-b border-border px-4 py-3">
-          <VaahanIcon name="search" size={17} className="text-[#cc785c] shrink-0" />
+          <VaahanIcon
+            name="search"
+            size={17}
+            className="text-[#cc785c] shrink-0"
+          />
           <input
             ref={inputRef}
             type="text"
@@ -236,7 +250,7 @@ export function CommandPalette({
           <button
             type="button"
             onClick={() => onOpenChange(false)}
-            className="shrink-0 rounded border border-border bg-muted px-2 py-0.5 font-mono text-[10px] text-muted-foreground transition-colors hover:bg-muted/80 hover:text-foreground"
+            className="flex size-11 shrink-0 items-center justify-center rounded border border-border bg-muted font-mono text-[10px] text-muted-foreground transition-colors hover:bg-muted/80 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             title="Press ESC or click to close"
           >
             ESC
@@ -313,4 +327,3 @@ export function CommandPalette({
     </Dialog>
   );
 }
-

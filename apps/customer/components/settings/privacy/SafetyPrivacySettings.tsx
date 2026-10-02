@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useCustomerRouter } from "@/lib/use-customer-router";
 import { VaahanIcon } from "@vaahansafe/icons";
 import { Button, Switch } from "@vaahansafe/ui";
 import { SettingsSection } from "../primitives/SettingsSection";
@@ -16,6 +17,7 @@ interface SafetyPrivacySettingsProps {
 }
 
 export function SafetyPrivacySettings({ data }: SafetyPrivacySettingsProps) {
+  const router = useCustomerRouter();
   const profile = data.privacy;
   const [isPreviewOpen, setIsPreviewOpen] = React.useState(false);
 
@@ -41,6 +43,7 @@ export function SafetyPrivacySettings({ data }: SafetyPrivacySettingsProps) {
     });
 
     if (res.success) {
+      router.refresh();
       toast.success("Privacy preference updated.");
     } else {
       setSettings((prev) => ({ ...prev, [key]: currentValue }));

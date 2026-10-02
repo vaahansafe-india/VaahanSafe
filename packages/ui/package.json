@@ -16,7 +16,11 @@
     "./brand": "./src/brand/index.ts",
     "./identity": "./src/identity/index.ts",
     "./lib/utils": "./src/lib/utils.ts",
+    "./lib/client": "./src/lib/client.ts",
+    "./lib/server": "./src/lib/server.ts",
+    "./lib/middleware": "./src/lib/middleware.ts",
     "./styles/globals.css": "./src/styles/globals.css",
+    "./styles/core.css": "./src/styles/core.css",
     "./brand/styles.css": "./src/brand/brand-motion.css"
   },
   "dependencies": {

@@ -2,8 +2,9 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useCustomerRouter } from "@/lib/use-customer-router";
 import { toast } from "sonner";
+import { Check } from "@/components/ui/icons";
 import { VaahanIcon, type VaahanIconName } from "@vaahansafe/icons";
 import { Button } from "@vaahansafe/ui";
 import {
@@ -53,7 +54,7 @@ const CATEGORIES: CategoryOption[] = [
 ];
 
 export function AddVehicleForm() {
-  const router = useRouter();
+  const router = useCustomerRouter();
 
   const [step, setStep] = React.useState<1 | 2 | 3 | 4>(1);
 
@@ -481,7 +482,7 @@ export function AddVehicleForm() {
         {step === 4 && createdVehicle && (
           <div className="text-center py-4 space-y-6">
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#5db8a6]/15 text-[#5db8a6]">
-              <span className="text-2xl font-bold">&check;</span>
+              <Check className="h-7 w-7 stroke-[2.5]" />
             </div>
 
             <div>

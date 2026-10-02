@@ -114,8 +114,7 @@ export function TemporalScanField({ data }: TemporalScanFieldProps) {
                   dataKey="scanCount"
                   fill="#CC785C"
                   radius={[2, 2, 0, 0]}
-                  isAnimationActive={true}
-                  animationDuration={600}
+                  isAnimationActive={false}
                 />
               </BarChart>
             </ResponsiveContainer>

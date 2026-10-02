@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
-import { getAuthenticatedCustomer } from "@/lib/session";
-import { getActivateQrData } from "@/lib/qr-service";
-import { RetailScratchActivation } from "@/components/qr/activate/RetailScratchActivation";
+import { Suspense } from "react";
+import { CustomerPageView } from "./CustomerPageView";
+import { CustomerPageLoading } from "@/components/query/CustomerPageState";
 
 export const metadata: Metadata = {
   title: "Activate Retail QR — VaahanSafe Automotive Safety",
@@ -10,14 +9,6 @@ export const metadata: Metadata = {
     "Link a retail scratch card or dealer sticker pack to your vehicle safety identity.",
 };
 
-export default async function ActivateQrPage() {
-  const auth = await getAuthenticatedCustomer();
-
-  if (!auth) {
-    redirect("/login");
-  }
-
-  const data = await getActivateQrData(auth.user.id);
-
-  return <RetailScratchActivation data={data} />;
+export default function CustomerPage() {
+  return <Suspense fallback={<CustomerPageLoading />}><CustomerPageView /></Suspense>;
 }

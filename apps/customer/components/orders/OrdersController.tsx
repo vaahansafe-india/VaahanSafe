@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useMemo, useTransition } from "react";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useCustomerRouter } from "@/lib/use-customer-router";
 import type { OrdersPageData, OrderListItem, OrderFilterState } from "@/lib/orders-types";
 import { OrdersHero } from "./OrdersHero";
 import { OrderStatusTabs } from "./OrderStatusTabs";
@@ -20,7 +21,7 @@ interface OrdersControllerProps {
 }
 
 export function OrdersController({ initialData }: OrdersControllerProps) {
-  const router = useRouter();
+  const router = useCustomerRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [, startTransition] = useTransition();

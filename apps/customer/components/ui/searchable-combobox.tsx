@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Search, ChevronDown, Check, X } from "lucide-react";
+import { Search, ChevronDown, Check, X } from "@/components/ui/icons";
 import { cn } from "@vaahansafe/ui/lib/utils";
 
 export interface ComboboxOption {

@@ -11,6 +11,7 @@ const nextConfig: NextConfig = {
     "@vaahansafe/security",
     "@vaahansafe/observability",
     "@vaahansafe/qr-core",
+    "@vaahansafe/database",
   ],
   webpack: (config, { isServer }) => {
     if (!isServer) {

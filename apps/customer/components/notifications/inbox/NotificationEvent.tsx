@@ -172,7 +172,7 @@ export function NotificationEvent({
           <a
             href={notification.actionHref}
             onClick={(e) => e.stopPropagation()}
-            className="hidden sm:inline-flex items-center gap-1 rounded-xl border border-border bg-background px-2.5 py-1.5 font-mono text-xs font-semibold text-foreground transition-colors hover:border-[#cc785c] hover:text-[#cc785c]"
+            className="hidden sm:inline-flex items-center gap-1 rounded-[4px] border border-border bg-background px-2.5 py-1.5 font-mono text-xs font-semibold text-foreground transition-colors hover:border-[#cc785c] hover:text-[#cc785c]"
           >
             <span>{notification.actionLabel}</span>
           </a>
@@ -182,17 +182,17 @@ export function NotificationEvent({
           <DropdownMenuTrigger asChild>
             <button
               type="button"
-              className="flex h-8 w-8 items-center justify-center rounded-xl border border-border bg-background text-muted-foreground transition-colors hover:text-foreground shrink-0"
+              className="flex h-8 w-8 items-center justify-center rounded-[4px] border border-border bg-background text-muted-foreground transition-colors hover:text-foreground shrink-0"
               aria-label="More notification actions"
             >
               <VaahanIcon name="more" size={14} />
             </button>
           </DropdownMenuTrigger>
 
-          <DropdownMenuContent align="end" className="w-48 rounded-2xl p-1.5">
+          <DropdownMenuContent align="end" className="w-48 rounded-[4px] p-1">
             <DropdownMenuItem
               onClick={() => onOpenDetails(notification)}
-              className="gap-2 text-xs font-medium cursor-pointer"
+              className="gap-2 text-xs font-medium cursor-pointer rounded-[3px]"
             >
               <VaahanIcon name="eye" size={14} />
               <span>View Details</span>
@@ -200,7 +200,7 @@ export function NotificationEvent({
 
             <DropdownMenuItem
               onClick={() => onToggleRead(notification)}
-              className="gap-2 text-xs font-medium cursor-pointer"
+              className="gap-2 text-xs font-medium cursor-pointer rounded-[3px]"
             >
               <VaahanIcon name={notification.isRead ? "eye-off" : "check"} size={14} />
               <span>{notification.isRead ? "Mark as Unread" : "Mark as Read"}</span>
@@ -208,7 +208,7 @@ export function NotificationEvent({
 
             <DropdownMenuItem
               onClick={() => onArchive(notification)}
-              className="gap-2 text-xs font-medium cursor-pointer text-muted-foreground hover:text-foreground"
+              className="gap-2 text-xs font-medium cursor-pointer text-muted-foreground hover:text-foreground rounded-[3px]"
             >
               <VaahanIcon name="document" size={14} />
               <span>{notification.isArchived ? "Move to Inbox" : "Archive"}</span>

@@ -14,5 +14,8 @@
     "utils": "@vaahansafe/ui/lib/utils",
     "ui": "@vaahansafe/ui/components"
   },
-  "iconLibrary": "hugeicons"
+  "iconLibrary": "hugeicons",
+  "registries": {
+    "@supabase": "https://supabase.com/ui/r/{name}.json"
+  }
 }

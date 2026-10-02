@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import Link from "next/link"
+import { CustomerLink as Link } from "@/components/query/CustomerLink";
 import {
   LayoutDashboard,
   Car,
@@ -16,7 +16,7 @@ import {
   ScanLine,
   Smartphone,
   RotateCcw,
-} from "lucide-react"
+} from "@/components/ui/icons"
 
 import { VaahanSafeLogo, VaahanSafeMark } from "@vaahansafe/ui/brand"
 import { NavMain, type NavMainItem } from "@/components/nav-main"

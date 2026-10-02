@@ -5,8 +5,6 @@ import {
   handleMobileEntry,
   verifyMobileForGoogleUser,
   issueSession,
-  validateSessionToken,
-  parseSessionCookie,
   serializeSessionCookie,
 } from "@vaahansafe/auth";
 import {
@@ -14,7 +12,10 @@ import {
   getAuthIdentityRepository,
   getSessionRepository,
   getNotificationRepositories,
+  getSupabaseAdminClient,
 } from "@vaahansafe/database";
+import { getAuthenticatedCustomer } from "@/lib/session";
+import { safeReturnUrl } from "@/lib/auth-navigation";
 
 export async function POST(req: Request) {
   try {
@@ -22,7 +23,7 @@ export async function POST(req: Request) {
     const rawPhone = body?.phone;
     const rawOtp = body?.otp;
 
-    if (!rawPhone || !rawOtp) {
+    if (!rawPhone || typeof rawOtp !== "string" || !/^\d{6}$/.test(rawOtp)) {
       return NextResponse.json(
         { success: false, error: "Mobile number and verification code are required." },
         { status: 400 }
@@ -64,12 +65,8 @@ export async function POST(req: Request) {
     const notifRepos = getNotificationRepositories();
 
     // Check if user already has an active session (e.g. Google-first user completing phone verification)
-    const cookieHeader = req.headers.get("cookie");
-    const existingRawToken = parseSessionCookie(cookieHeader);
-    let activeSession = null;
-    if (existingRawToken) {
-      activeSession = await validateSessionToken(existingRawToken, sessionRepo);
-    }
+    const auth = await getAuthenticatedCustomer();
+    const activeSession = auth?.session;
 
     let userId: string;
     let nextStep: string;
@@ -103,6 +100,11 @@ export async function POST(req: Request) {
       userRecord = mobileResult.user;
       nextStep = mobileResult.nextStep;
     }
+
+    if (!userRecord || userRecord.status !== "ACTIVE") throw new Error("Account unavailable");
+    const { error: verificationError } = await getSupabaseAdminClient().from("users")
+      .update({ phone_verified_at: new Date().toISOString() }).eq("id", userId);
+    if (verificationError) throw verificationError;
 
     // If user has an email, dispatch welcome / phone verified email with VERIFIED status
     if (userRecord && userRecord.email) {
@@ -149,7 +151,7 @@ export async function POST(req: Request) {
           category: "SECURITY",
           priority: "NORMAL",
           title: "Mobile Number Verified",
-          bodySafe: `Your mobile number ${normalizedE164} is verified. Instant emergency alerts are now active for this account.`,
+          bodySafe: "Your mobile number is verified. You can manage your contact preferences in settings.",
           actionType: "NONE",
           createdAt: now,
         });
@@ -173,16 +175,20 @@ export async function POST(req: Request) {
       }
     }
 
-    // Issue Secure Session Token in Cloudflare D1
+    // Issue a real revocable session in Supabase Postgres.
     const { rawToken } = await issueSession(userId, sessionRepo, {
       userAgent: req.headers.get("user-agent") || undefined,
       ipAddress: req.headers.get("cf-connecting-ip") || req.headers.get("x-forwarded-for") || undefined,
     });
     const sessionCookieHeader = serializeSessionCookie(rawToken);
 
+    const googleVerified = (await identityRepo.findByUserId(userId)).some(identity => identity.provider === "GOOGLE" && identity.verifiedAt);
+    const returnUrl = safeReturnUrl(body.returnUrl);
+    const redirectTo = googleVerified || activeSession ? returnUrl : `/onboarding/verification?returnUrl=${encodeURIComponent(returnUrl)}`;
     const response = NextResponse.json({
       success: true,
       nextStep,
+      redirectTo,
     });
 
     response.headers.set("Set-Cookie", sessionCookieHeader);

@@ -1,14 +1,13 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import dynamic from "next/dynamic";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useCustomerRouter } from "@/lib/use-customer-router";
 import { toast } from "sonner";
 
 import { ScanHistoryHeader } from "./ScanHistoryHeader";
 import { ScanSignalRail } from "./signals/ScanSignalRail";
-import { ScanRhythmChart } from "./charts/ScanRhythmChart";
-import { TemporalScanField } from "./charts/TemporalScanField";
-import { QrScanDistribution } from "./charts/QrScanDistribution";
 import { ScanEventRegistry } from "./registry/ScanEventRegistry";
 
 import { ScanDetailSheet } from "./sheets/ScanDetailSheet";
@@ -25,23 +24,64 @@ import type {
   ScanRhythmPoint,
 } from "@/lib/scan-history-types";
 
+function ChartLoading() {
+  return (
+    <div
+      role="status"
+      className="flex min-h-64 items-center justify-center border border-border bg-card text-sm text-muted-foreground"
+    >
+      Loading chart…
+    </div>
+  );
+}
+
+// Load the chart engine only when the account has scan data to visualize.
+const ScanRhythmChart = dynamic(
+  () => import("./charts/ScanRhythmChart").then((m) => m.ScanRhythmChart),
+  { ssr: false, loading: ChartLoading },
+);
+const TemporalScanField = dynamic(
+  () => import("./charts/TemporalScanField").then((m) => m.TemporalScanField),
+  { ssr: false, loading: ChartLoading },
+);
+const QrScanDistribution = dynamic(
+  () => import("./charts/QrScanDistribution").then((m) => m.QrScanDistribution),
+  { ssr: false, loading: ChartLoading },
+);
+
 interface ScanHistoryControllerProps {
   initialData: ScanHistoryOverview;
 }
 
-export function ScanHistoryController({ initialData }: ScanHistoryControllerProps) {
-  const router = useRouter();
+export function ScanHistoryController({
+  initialData,
+}: ScanHistoryControllerProps) {
+  const router = useCustomerRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
   // 1. URL search parameters sync
-  const initialPeriod = (searchParams.get("period") as ScanPeriodFilter) || initialData.appliedFilters.period || "30D";
-  const initialVehicle = searchParams.get("vehicle") || initialData.appliedFilters.vehicleId || "all";
-  const initialQr = searchParams.get("qr") || initialData.appliedFilters.qrPublicId || "all";
-  const initialType = (searchParams.get("type") as any) || initialData.appliedFilters.eventType || "all";
-  const initialDevice = (searchParams.get("device") as any) || initialData.appliedFilters.deviceCategory || "all";
-  const initialSearch = searchParams.get("search") || initialData.appliedFilters.search || "";
+  const initialPeriod =
+    (searchParams.get("period") as ScanPeriodFilter) ||
+    initialData.appliedFilters.period ||
+    "30D";
+  const initialVehicle =
+    searchParams.get("vehicle") ||
+    initialData.appliedFilters.vehicleId ||
+    "all";
+  const initialQr =
+    searchParams.get("qr") || initialData.appliedFilters.qrPublicId || "all";
+  const initialType =
+    (searchParams.get("type") as any) ||
+    initialData.appliedFilters.eventType ||
+    "all";
+  const initialDevice =
+    (searchParams.get("device") as any) ||
+    initialData.appliedFilters.deviceCategory ||
+    "all";
+  const initialSearch =
+    searchParams.get("search") || initialData.appliedFilters.search || "";
 
   const [filters, setFilters] = useState<ScanHistoryFilterState>({
     period: initialPeriod,
@@ -53,7 +93,9 @@ export function ScanHistoryController({ initialData }: ScanHistoryControllerProp
   });
 
   // Modal / Sheet / Drawer States
-  const [selectedEvent, setSelectedEvent] = useState<ScanEventItem | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<ScanEventItem | null>(
+    null,
+  );
   const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
   const [isPrivacyDialogOpen, setIsPrivacyDialogOpen] = useState(false);
@@ -63,15 +105,21 @@ export function ScanHistoryController({ initialData }: ScanHistoryControllerProp
   const updateUrlParams = (newFilters: ScanHistoryFilterState) => {
     const params = new URLSearchParams();
     if (newFilters.period !== "30D") params.set("period", newFilters.period);
-    if (newFilters.vehicleId !== "all") params.set("vehicle", newFilters.vehicleId);
-    if (newFilters.qrPublicId !== "all") params.set("qr", newFilters.qrPublicId);
-    if (newFilters.eventType !== "all") params.set("type", newFilters.eventType);
-    if (newFilters.deviceCategory !== "all") params.set("device", newFilters.deviceCategory);
+    if (newFilters.vehicleId !== "all")
+      params.set("vehicle", newFilters.vehicleId);
+    if (newFilters.qrPublicId !== "all")
+      params.set("qr", newFilters.qrPublicId);
+    if (newFilters.eventType !== "all")
+      params.set("type", newFilters.eventType);
+    if (newFilters.deviceCategory !== "all")
+      params.set("device", newFilters.deviceCategory);
     if (newFilters.search) params.set("search", newFilters.search);
 
     const queryString = params.toString();
     startTransition(() => {
-      router.replace(`${pathname}${queryString ? `?${queryString}` : ""}`, { scroll: false });
+      router.replace(`${pathname}${queryString ? `?${queryString}` : ""}`, {
+        scroll: false,
+      });
     });
   };
 
@@ -102,12 +150,12 @@ export function ScanHistoryController({ initialData }: ScanHistoryControllerProp
 
   const handleRefresh = () => {
     setIsRefreshing(true);
-    startTransition(() => {
-      router.refresh();
-      setTimeout(() => {
+    startTransition(async () => {
+      try {
+        await router.refresh();
+      } finally {
         setIsRefreshing(false);
-        toast.success("Scan history updated from Cloudflare telemetry.");
-      }, 400);
+      }
     });
   };
 
@@ -188,7 +236,9 @@ export function ScanHistoryController({ initialData }: ScanHistoryControllerProp
       <ScanRhythmChart
         data={initialData.rhythmSeries}
         period={filters.period}
-        onPeriodChange={(newPeriod) => handleFilterChange({ period: newPeriod })}
+        onPeriodChange={(newPeriod) =>
+          handleFilterChange({ period: newPeriod })
+        }
         onSelectPoint={handleSelectRhythmPoint}
       />
 

@@ -45,7 +45,7 @@ export function ContactFilters({
         <DropdownMenuTrigger asChild>
           <button
             type="button"
-            className={`inline-flex h-10 items-center gap-1.5 rounded-xl border px-3 font-mono text-xs transition-colors ${
+            className={`inline-flex h-10 items-center gap-1.5 rounded-[4px] border px-3 font-mono text-xs transition-colors ${
               filters.role !== "all"
                 ? "border-[#cc785c] bg-[#cc785c]/10 text-[#cc785c]"
                 : "border-input bg-background text-foreground hover:bg-muted/40"
@@ -56,7 +56,7 @@ export function ContactFilters({
             <VaahanIcon name="chevron-down" size={12} className="opacity-70" />
           </button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-48 max-h-64 overflow-y-auto rounded-xl p-1">
+        <DropdownMenuContent align="start" className="w-48 max-h-64 overflow-y-auto rounded-[4px] p-1">
           <DropdownMenuItem
             onClick={() => onFilterChange({ ...filters, role: "all" })}
             className="text-xs cursor-pointer"
@@ -84,7 +84,7 @@ export function ContactFilters({
           <DropdownMenuTrigger asChild>
             <button
               type="button"
-              className={`inline-flex h-10 items-center gap-1.5 rounded-xl border px-3 font-mono text-xs transition-colors ${
+              className={`inline-flex h-10 items-center gap-1.5 rounded-[4px] border px-3 font-mono text-xs transition-colors ${
                 filters.vehicleId !== "all"
                   ? "border-[#cc785c] bg-[#cc785c]/10 text-[#cc785c]"
                   : "border-input bg-background text-foreground hover:bg-muted/40"
@@ -97,7 +97,7 @@ export function ContactFilters({
               <VaahanIcon name="chevron-down" size={12} className="opacity-70" />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-56 rounded-xl p-1">
+          <DropdownMenuContent align="start" className="w-56 rounded-[4px] p-1">
             <DropdownMenuItem
               onClick={() => onFilterChange({ ...filters, vehicleId: "all" })}
               className="text-xs cursor-pointer"
@@ -125,7 +125,7 @@ export function ContactFilters({
         <DropdownMenuTrigger asChild>
           <button
             type="button"
-            className={`inline-flex h-10 items-center gap-1.5 rounded-xl border px-3 font-mono text-xs transition-colors ${
+            className={`inline-flex h-10 items-center gap-1.5 rounded-[4px] border px-3 font-mono text-xs transition-colors ${
               filters.visibility !== "all"
                 ? "border-[#cc785c] bg-[#cc785c]/10 text-[#cc785c]"
                 : "border-input bg-background text-foreground hover:bg-muted/40"
@@ -138,7 +138,7 @@ export function ContactFilters({
             <VaahanIcon name="chevron-down" size={12} className="opacity-70" />
           </button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-44 rounded-xl p-1">
+        <DropdownMenuContent align="start" className="w-44 rounded-[4px] p-1">
           <DropdownMenuItem
             onClick={() => onFilterChange({ ...filters, visibility: "all" })}
             className="text-xs cursor-pointer"
@@ -170,7 +170,7 @@ export function ContactFilters({
       <button
         type="button"
         onClick={onOpenFilterSheet}
-        className={`inline-flex h-10 items-center gap-1.5 rounded-xl border px-3 font-mono text-xs transition-colors ${
+        className={`inline-flex h-10 items-center gap-1.5 rounded-[4px] border px-3 font-mono text-xs transition-colors ${
           activeFiltersCount > 0
             ? "border-[#cc785c] bg-[#cc785c]/10 text-[#cc785c]"
             : "border-input bg-background text-foreground hover:bg-muted/40"

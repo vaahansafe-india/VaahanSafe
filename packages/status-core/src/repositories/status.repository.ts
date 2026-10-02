@@ -72,8 +72,8 @@ interface DbServiceEventRow {
 }
 
 /**
- * Baseline customer journey services used if D1 is cold or unreachable.
- * Ensures status.vaahansafe.com is autonomous and resilient.
+ * Service catalog used when the database is unavailable. Health remains unknown
+ * until a real probe succeeds; a missing data source is never operational.
  */
 export const BASELINE_SERVICES: PublicStatusServiceDto[] = JOURNEY_STAGES.map((j, idx) => ({
   publicId: `vs_srv_${j.serviceSlug.replace(/-/g, "_")}`,
@@ -81,7 +81,7 @@ export const BASELINE_SERVICES: PublicStatusServiceDto[] = JOURNEY_STAGES.map((j
   name: j.defaultServiceName,
   description: j.description,
   journeyStage: j.stage,
-  state: "OPERATIONAL",
+  state: "UNKNOWN",
   displayOrder: idx + 1,
 }));
 

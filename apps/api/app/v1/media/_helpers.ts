@@ -5,7 +5,7 @@
  * local development, testing, and edge runtime execution.
  */
 
-import { D1DatabaseAdapter, D1MediaAssetRepository } from "@vaahansafe/database";
+import { D1DatabaseAdapter, D1MediaAssetRepository, getAuthoritativeDatabaseClient } from "@vaahansafe/database";
 import type { D1DatabaseBinding } from "@vaahansafe/database";
 import { R2ObjectStore, MemoryObjectStore } from "@vaahansafe/storage";
 import type { ObjectStore, MediaAssetRepository, CloudflareR2Bucket } from "@vaahansafe/storage";
@@ -40,11 +40,7 @@ export function getMediaAssetRepository(): MediaAssetRepository {
     return new D1MediaAssetRepository(client);
   }
 
-  // Fallback memory repository for test double
-  if (!localMediaRepo) {
-    localMediaRepo = new MockMediaAssetRepository();
-  }
-  return localMediaRepo;
+  return new D1MediaAssetRepository(getAuthoritativeDatabaseClient());
 }
 
 /**

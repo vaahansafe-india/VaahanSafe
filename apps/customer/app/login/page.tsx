@@ -3,6 +3,7 @@ import * as React from "react";
 import { redirect } from "next/navigation";
 import { AuthShell } from "../../components/auth/AuthShell";
 import { getAuthenticatedCustomer } from "../../lib/session";
+import { safeReturnUrl } from "@/lib/auth-navigation";
 
 export const metadata: Metadata = {
   title: "Sign in — VaahanSafe",
@@ -21,14 +22,13 @@ interface LoginPageProps {
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = searchParams ? await searchParams : undefined;
-  const returnUrl = params?.returnUrl || "/dashboard";
+  const returnUrl = safeReturnUrl(params?.returnUrl);
 
-  // If user already has an authoritatively valid session in Cloudflare D1, forward to dashboard
+  // An already validated Supabase server session can enter the account.
   const auth = await getAuthenticatedCustomer();
   if (auth) {
-    redirect(returnUrl.startsWith("/") ? returnUrl : "/dashboard");
+    redirect(returnUrl);
   }
 
   return <AuthShell returnUrl={returnUrl} />;
 }
-

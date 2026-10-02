@@ -1,7 +1,7 @@
 "use server";
 
 import { getAuthenticatedCustomer } from "@/lib/session";
-import { getAuthoritativeDatabaseClient } from "@vaahansafe/database";
+import { getAuthoritativeDatabaseClient, createInAppNotification } from "@vaahansafe/database";
 import { getPaymentGateway } from "@vaahansafe/payments";
 
 export interface CheckoutAddressInput {
@@ -258,6 +258,18 @@ export async function createOrderAndPaymentSession(
         product.price_minor,
       ]
     );
+
+    // In-App Notification: Order Placed
+    await createInAppNotification({
+      userId: auth.user.id,
+      eventType: "ORDER_CREATED",
+      category: "COMMERCE",
+      title: `Order Placed: ${orderNumber}`,
+      body: `Your order for the VaahanSafe Automotive Safety Kit has been created. Complete payment to initiate secure UV sticker production and dispatch.`,
+      actionType: "VIEW_ORDER",
+      actionTarget: orderId,
+      db,
+    });
 
     // 7. Request Authoritative Payment Order from Payment Gateway
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3001";

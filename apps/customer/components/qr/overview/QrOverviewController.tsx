@@ -16,7 +16,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { VaahanIcon } from "@vaahansafe/icons";
-import { AlertTriangle, Copy } from "lucide-react";
+import { AlertTriangle, Copy } from "@/components/ui/icons";
 import type { QrOverviewData, QrSignalRailStates } from "@/lib/qr-types";
 
 interface QrOverviewControllerProps {

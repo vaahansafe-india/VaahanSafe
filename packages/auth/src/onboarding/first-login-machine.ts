@@ -125,7 +125,7 @@ export async function handleMobileEntry(
   }
 
   // New User Creation
-  const newUserId = `usr_${crypto.randomUUID().replace(/-/g, "").slice(0, 16)}`;
+  const newUserId = crypto.randomUUID();
   const createdUser = await userRepo.save({
     id: newUserId,
     phone: normalized,
@@ -213,7 +213,7 @@ export async function handleGoogleEntry(
   }
 
   // New Google user created
-  const newUserId = `usr_${crypto.randomUUID().replace(/-/g, "").slice(0, 16)}`;
+  const newUserId = crypto.randomUUID();
   const createdUser = await userRepo.save({
     id: newUserId,
     email: normalizedEmail,

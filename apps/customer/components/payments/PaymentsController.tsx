@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useMemo, useTransition } from "react";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useCustomerRouter } from "@/lib/use-customer-router";
 import { toast } from "sonner";
 import { VaahanIcon } from "@vaahansafe/icons";
 import { Button } from "@vaahansafe/ui";
@@ -36,7 +37,7 @@ interface PaymentsControllerProps {
 }
 
 export function PaymentsController({ initialData }: PaymentsControllerProps) {
-  const router = useRouter();
+  const router = useCustomerRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [, startTransition] = useTransition();

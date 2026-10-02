@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useCustomerRouter } from "@/lib/use-customer-router";
 import { toast } from "sonner";
 import type {
   NotificationItem,
@@ -38,7 +39,7 @@ interface NotificationCenterControllerProps {
 export function NotificationCenterController({
   initialData,
 }: NotificationCenterControllerProps) {
-  const router = useRouter();
+  const router = useCustomerRouter();
   const searchParams = useSearchParams();
 
   // Local state initialized from server data
@@ -147,6 +148,7 @@ export function NotificationCenterController({
         ? await markNotificationAsUnreadAction(item.id)
         : await markNotificationAsReadAction(item.id);
 
+      if (res.success) router.refresh();
       if (!res.success) {
         toast.error("Couldn't update read status. Please try again.");
         setData((prev) => ({ ...prev, notifications: previousNotifications }));
@@ -175,14 +177,15 @@ export function NotificationCenterController({
         : await archiveNotificationAction(item.id);
 
       if (res.success) {
+        router.refresh();
         toast.success(isCurrentlyArchived ? "Notification moved to inbox" : "Notification archived", {
           action: {
             label: "Undo",
             onClick: () => {
               if (isCurrentlyArchived) {
-                archiveNotificationAction(item.id);
+                void archiveNotificationAction(item.id).then(() => router.refresh());
               } else {
-                unarchiveNotificationAction(item.id);
+                void unarchiveNotificationAction(item.id).then(() => router.refresh());
               }
             },
           },

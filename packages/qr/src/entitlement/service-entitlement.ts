@@ -311,6 +311,39 @@ export async function fulfillPaidOnlineOrder(
     [epId, vehicleId, now, now]
   );
 
+  // 7. Emit in-app notification: QR Activated
+  const notifId = `notif_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+  const notifIntentId = `intent_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+  try {
+    await db.execute(
+      `INSERT INTO notification_intents (
+         id, event_type, recipient_user_id, category, priority,
+         template_key, template_version, payload_json, source_type,
+         source_id, dedupe_key, status, created_at, dispatched_at
+       ) VALUES (?, 'QR_ACTIVATED', ?, 'SAFETY', 'HIGH', 'QR_ACTIVATED_V1', 1, '{}', 'SYSTEM', ?, ?, 'PROCESSED', ?, ?)
+       ON CONFLICT(dedupe_key) DO NOTHING`,
+      [notifIntentId, userId, notifId, `dedupe_qr_act_${qrStickerId}`, now, now]
+    );
+
+    await db.execute(
+      `INSERT INTO notifications (
+         id, user_id, intent_id, event_type, category, priority,
+         title, body_safe, action_type, action_target, read_at, archived_at, created_at
+       ) VALUES (?, ?, ?, 'QR_ACTIVATED', 'SAFETY', 'HIGH', ?, ?, 'VIEW_QR', ?, NULL, NULL, ?)`,
+      [
+        notifId,
+        userId,
+        notifIntentId,
+        "QR Sticker Activated",
+        `Sticker ${visibleCode} is now active and paired with your vehicle. Your digital wallet pass and emergency safety card are live.`,
+        publicId,
+        now,
+      ]
+    );
+  } catch (err) {
+    console.warn("[fulfillPaidOnlineOrder] Warning recording notification:", err);
+  }
+
   return {
     success: true,
     qrStickerId,

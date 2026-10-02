@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useSearchParams, usePathname } from "next/navigation";
+import { useCustomerRouter } from "@/lib/use-customer-router";
 import { VaahanIcon } from "@vaahansafe/icons";
 import type { DashboardFilterState } from "@/lib/dashboard-types";
 
@@ -14,7 +15,7 @@ export function DashboardFilters({
   filterState,
   onOpenDetailedFilters,
 }: DashboardFiltersProps) {
-  const router = useRouter();
+  const router = useCustomerRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const [isPending, startTransition] = React.useTransition();
@@ -30,7 +31,7 @@ export function DashboardFilters({
       }
       const query = params.toString();
       router.push(query ? `${pathname}?${query}` : pathname, { scroll: false });
-      router.refresh();
+
     });
   };
 
@@ -42,7 +43,7 @@ export function DashboardFilters({
       params.delete("type");
       const query = params.toString();
       router.push(query ? `${pathname}?${query}` : pathname, { scroll: false });
-      router.refresh();
+
     });
   };
 

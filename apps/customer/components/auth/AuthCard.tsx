@@ -5,8 +5,8 @@ import { AuthBrand } from "./AuthBrand";
 import { GoogleSignInButton } from "./GoogleSignInButton";
 import { MobileSignInForm } from "./MobileSignInForm";
 import { OtpVerificationForm } from "./OtpVerificationForm";
-import { AuthProgressRail } from "./AuthProgressRail";
 import { AuthLegalNotice } from "./AuthLegalNotice";
+import { safeReturnUrl } from "@/lib/auth-navigation";
 
 export type AuthState = "sign-in" | "sending-otp" | "verify-otp" | "verifying" | "authenticated";
 
@@ -85,7 +85,7 @@ export function AuthCard({
       const res = await fetch("/api/auth/verify-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: phoneNumber, otp }),
+        body: JSON.stringify({ phone: phoneNumber, otp, returnUrl: safeReturnUrl(returnUrl) }),
       });
 
       const data = await res.json();
@@ -100,10 +100,8 @@ export function AuthCard({
       setState("authenticated");
 
       // Redirect to customer dashboard
-      const targetDestination =
-        returnUrl && returnUrl !== "/" && returnUrl !== "/login"
-          ? returnUrl
-          : "/dashboard";
+      const targetDestination = typeof data.redirectTo === "string" && data.redirectTo.startsWith("/onboarding/verification?")
+        ? data.redirectTo : safeReturnUrl(data.redirectTo || returnUrl);
 
       // Subtle pause for tactile confirmation
       setTimeout(() => {
@@ -118,13 +116,17 @@ export function AuthCard({
   // Resend OTP Handler
   const handleResendOtp = async () => {
     try {
-      await fetch("/api/auth/send-otp", {
+      const response = await fetch("/api/auth/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phone: phoneNumber }),
       });
+      const data = await response.json();
+      if (!response.ok || !data.success) throw new Error("Resend unavailable");
+      setErrorMessage(null);
     } catch {
       setErrorMessage("Could not resend code right now. Try again in a moment.");
+      throw new Error("Resend unavailable");
     }
   };
 
@@ -142,13 +144,7 @@ export function AuthCard({
     <div
       role="region"
       aria-label="Customer authentication"
-      className="
-        relative z-10 w-full
-        max-w-[430px]
-        rounded-2xl border border-border
-        bg-card p-4 sm:p-7 sm:px-8 shadow-sm
-        transition-all duration-300
-      "
+      className="w-full"
     >
       {/* 01. Brand Header */}
       <AuthBrand
@@ -159,19 +155,16 @@ export function AuthCard({
 
       {/* 01.1 Google Account Connected indicator in onboarding mode */}
       {mode === "onboarding" && (
-        <div className="mt-4 flex items-center justify-between rounded-xl border border-[#5db872]/25 bg-[#5db872]/10 px-3.5 py-2.5">
+        <div className="mt-[clamp(12px,2vh,28px)] flex items-center justify-between gap-3 border-l-2 border-[#325763] bg-[#f5f0e8] px-4 py-2.5">
           <div className="flex items-center gap-2 text-xs">
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#5db872] opacity-75"></span>
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-[#5db872]"></span>
-            </span>
-            <span className="font-mono text-[11px] font-medium text-foreground">
+            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#325763]" />
+            <span className="break-all text-xs font-medium text-[#1b1c1a]">
               {userEmail ? `Google: ${userEmail}` : "Google Account Connected"}
             </span>
           </div>
           <a
             href="/api/auth/logout"
-            className="font-mono text-[10px] text-muted-foreground underline transition-colors hover:text-foreground"
+            className="shrink-0 text-xs text-[#a9583e] underline underline-offset-4 hover:text-[#1b1c1a]"
           >
             Switch
           </a>
@@ -183,30 +176,27 @@ export function AuthCard({
         <div
           role="status"
           aria-live="polite"
-          className="my-8 flex flex-col items-center justify-center py-6 text-center"
+          className="mt-6 border-t border-[#e2dcd2] py-5"
         >
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#5db872]/15 text-[#5db872]">
-            <span className="h-3 w-3 rounded-full bg-[#5db872] animate-ping" />
+          <div className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-[#325763]">
+            Identity verified
           </div>
-          <div className="mt-4 font-mono text-xs uppercase tracking-[0.2em] text-[#5db872]">
-            ● Identity Verified
-          </div>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Opening your vehicle identity...
+          <p className="mt-3 font-serif text-3xl text-[#1b1c1a]">
+            Opening your account…
           </p>
         </div>
       ) : (
         <>
           {/* 03. Dynamic State: Sign In Form or OTP Form */}
-          <div className="mt-4 sm:mt-5">
+          <div className="mt-[clamp(16px,3vh,36px)]">
             {state === "sign-in" || state === "sending-otp" ? (
-              <div className="space-y-4">
+              <div>
                 {mode !== "onboarding" && (
                   <GoogleSignInButton
                     isLoading={isGoogleLoading}
                     onClick={() => {
                       setGoogleLoading(true);
-                      window.location.href = "/api/auth/google";
+                      window.location.href = `/api/auth/google?returnUrl=${encodeURIComponent(safeReturnUrl(returnUrl))}`;
                     }}
                   />
                 )}
@@ -222,10 +212,10 @@ export function AuthCard({
                 {mode === "onboarding" && (
                   <div className="pt-1 text-center">
                     <a
-                      href={returnUrl && returnUrl !== "/" ? returnUrl : "/dashboard"}
-                      className="inline-flex items-center gap-1.5 font-mono text-[11px] text-muted-foreground underline decoration-dotted underline-offset-4 transition-colors hover:text-foreground"
+                      href={safeReturnUrl(returnUrl)}
+                      className="inline-flex items-center gap-1.5 text-xs text-[#615f59] underline underline-offset-4 transition-colors hover:text-[#a9583e]"
                     >
-                      Skip for now and continue to Dashboard →
+                      Later — continue to your account →
                     </a>
                   </div>
                 )}
@@ -242,16 +232,8 @@ export function AuthCard({
             )}
           </div>
 
-          {/* 04. In-Card Footer: Legal Notice & Signature Progress Rail */}
-          <div className="mt-4 sm:mt-5 space-y-2.5 sm:space-y-3 border-t border-[#f0eae1] pt-3 sm:pt-3.5 dark:border-white/[0.06]">
+          <div className="mt-[clamp(16px,3vh,32px)] border-t border-[#e2dcd2] pt-[clamp(10px,2vh,20px)]">
             <AuthLegalNotice type="in-card" />
-            <AuthProgressRail
-              currentStage={
-                state === "verify-otp" || state === "verifying"
-                  ? "verify-otp"
-                  : "sign-in"
-              }
-            />
           </div>
         </>
       )}

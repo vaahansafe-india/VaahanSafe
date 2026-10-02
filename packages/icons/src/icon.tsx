@@ -50,6 +50,7 @@ export function VaahanIcon({
       aria-hidden={isAriaHidden}
     >
       <HugeiconsIcon
+        className="max-h-full max-w-full"
         icon={iconData}
         size={typeof size === "string" ? parseInt(size, 10) || 20 : size}
         color={color}

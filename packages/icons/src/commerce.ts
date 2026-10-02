@@ -6,6 +6,8 @@ import {
   Wallet01Icon,
   Dollar01Icon,
   PackageIcon,
+  PackageCheckIcon,
+  RupeeIcon,
 } from "@hugeicons/core-free-icons";
 
 export const commerceIcons = {
@@ -14,12 +16,13 @@ export const commerceIcons = {
   invoice: Invoice01Icon,
   receipt: Invoice01Icon,
   package: PackageIcon,
+  "package-check": PackageCheckIcon,
   cart: ShoppingCart01Icon,
   "shopping-cart": ShoppingCart01Icon,
   tag: Tag01Icon,
   wallet: Wallet01Icon,
   currency: Dollar01Icon,
-  "currency-rupee": Dollar01Icon,
+  "currency-rupee": RupeeIcon,
 } as const;
 
 export type CommerceIconName = keyof typeof commerceIcons;

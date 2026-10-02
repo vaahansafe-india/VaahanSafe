@@ -170,8 +170,7 @@ export function ScanRhythmChart({
                     stroke: "hsl(var(--card))",
                     strokeWidth: 2,
                   }}
-                  isAnimationActive={true}
-                  animationDuration={800}
+                  isAnimationActive={false}
                 />
               </AreaChart>
             </ResponsiveContainer>

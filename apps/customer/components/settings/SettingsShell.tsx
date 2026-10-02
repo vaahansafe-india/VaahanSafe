@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useCustomerRouter } from "@/lib/use-customer-router";
 import { SettingsNavigation } from "./SettingsNavigation";
 import { SettingsMobileIndex } from "./SettingsMobileIndex";
 import { SettingsMobileHeader } from "./SettingsMobileHeader";
@@ -27,7 +28,7 @@ export function SettingsShell({
   initialData,
   defaultCategory = "profile",
 }: SettingsShellProps) {
-  const router = useRouter();
+  const router = useCustomerRouter();
   const searchParams = useSearchParams();
 
   // Read initial category from query param if provided

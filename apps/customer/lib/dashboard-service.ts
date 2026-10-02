@@ -133,18 +133,13 @@ export async function getDashboardOverview(
   };
 
   // 1. Fetch user vehicles
-  let vehicleRows: DbVehicleRow[] = [];
-  try {
-    vehicleRows = await db.query<DbVehicleRow>(
+  const vehicleRows = await db.query<DbVehicleRow>(
       `SELECT id, registration_number, make, model, vehicle_type, status, created_at
        FROM vehicles
-       WHERE user_id = ?
+       WHERE user_id = ? AND status != 'DELETED'
        ORDER BY created_at ASC`,
       [user.id]
     );
-  } catch (err) {
-    console.warn("[DashboardService] Failed to query user vehicles:", err);
-  }
 
   const vehicles: DashboardVehicle[] = vehicleRows.map((v) => ({
     id: v.id,
@@ -350,10 +345,14 @@ export async function getDashboardOverview(
   const targetQrId = filterState.qrId || qrSticker?.id;
 
   if (targetQrId) {
-    const scanParams: unknown[] = [targetQrId];
+    const scanParams: unknown[] = [targetQrId, activeVehicle.id, user.id];
     let scanSql = `SELECT id, scan_type, result, city, state, created_at
                    FROM qr_scan_events
-                   WHERE qr_id = ?`;
+                   WHERE qr_id = ? AND EXISTS (
+                     SELECT 1 FROM qr_assignments a JOIN vehicles v ON v.id = a.vehicle_id
+                     WHERE a.qr_id = qr_scan_events.qr_id AND a.vehicle_id = ? AND v.user_id = ?
+                       AND a.ended_at IS NULL AND v.status != 'DELETED'
+                   )`;
 
     if (dateFilterCutoff) {
       scanSql += ` AND created_at >= ?`;

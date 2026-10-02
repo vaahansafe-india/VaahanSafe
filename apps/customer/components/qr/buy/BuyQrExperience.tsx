@@ -1,10 +1,11 @@
 "use client";
 
 import * as React from "react";
+import { useCustomerRouter } from "@/lib/use-customer-router";
 import Link from "next/link";
 import { VaahanIcon } from "@vaahansafe/icons";
 import { PhysicalQrObject } from "../primitives/PhysicalQrObject";
-import { Check, ShieldCheck, Truck, Sparkles } from "lucide-react";
+import { Check, ShieldCheck, Truck, Sparkles } from "@/components/ui/icons";
 import type { QrBuyOffering } from "@/lib/qr-types";
 import { cn } from "@vaahansafe/ui/lib/utils";
 
@@ -13,6 +14,7 @@ interface BuyQrExperienceProps {
 }
 
 export function BuyQrExperience({ data }: BuyQrExperienceProps) {
+  const router = useCustomerRouter();
   const [selectedVehicleId, setSelectedVehicleId] = React.useState(
     data.eligibleVehicles[0]?.id || ""
   );
@@ -23,7 +25,7 @@ export function BuyQrExperience({ data }: BuyQrExperienceProps) {
   const handleCheckout = () => {
     setIsSubmitting(true);
     const checkoutUrl = `/orders/new?product=${encodeURIComponent(data.productCode)}&vehicle=${encodeURIComponent(selectedVehicleId || "")}`;
-    window.location.href = checkoutUrl;
+    router.push(checkoutUrl);
   };
 
   return (

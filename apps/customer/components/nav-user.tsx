@@ -1,13 +1,14 @@
 "use client"
 
 import * as React from "react"
-import Link from "next/link"
+import { useQueryClient } from "@tanstack/react-query";
+import { CustomerLink as Link } from "@/components/query/CustomerLink";
 import {
   ChevronsUpDown,
   LogOut,
   Shield,
   User as UserIcon,
-} from "lucide-react"
+} from "@/components/ui/icons"
 
 import { IdentityAvatar } from "@vaahansafe/ui"
 
@@ -38,12 +39,15 @@ interface NavUserProps {
 }
 
 export function NavUser({ user }: NavUserProps) {
+  const queryClient = useQueryClient();
   const { isMobile } = useSidebar()
   const [isSigningOut, setIsSigningOut] = React.useState(false)
 
   const handleSignOut = React.useCallback(async () => {
     if (isSigningOut) return
     setIsSigningOut(true)
+    await queryClient.cancelQueries();
+    queryClient.clear();
 
     try {
       // Clear non-HttpOnly client cookies immediately as an initial precaution
@@ -65,7 +69,7 @@ export function NavUser({ user }: NavUserProps) {
       // Authoritative hard redirect to /login to ensure clean state
       window.location.href = "/login"
     }
-  }, [isSigningOut])
+  }, [isSigningOut, queryClient])
 
   const displayName =
     user?.name?.trim() ||
@@ -89,7 +93,7 @@ export function NavUser({ user }: NavUserProps) {
             <SidebarMenuButton
               size="lg"
               tooltip={displayName}
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground border border-transparent hover:border-sidebar-border transition-all rounded-xl p-2 group-data-[collapsible=icon]:!size-8 group-data-[collapsible=icon]:!p-0 group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:items-center"
+              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground border border-transparent hover:border-sidebar-border transition-all rounded-[4px] p-2 group-data-[collapsible=icon]:!size-8 group-data-[collapsible=icon]:!p-0 group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:items-center"
             >
               {/* Deterministic VaahanSafe Identity Glyph Avatar */}
               <IdentityAvatar
@@ -127,7 +131,7 @@ export function NavUser({ user }: NavUserProps) {
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-[--radix-dropdown-menu-trigger-width] min-w-64 rounded-xl border border-border bg-popover p-1 text-popover-foreground shadow-2xl"
+            className="w-[--radix-dropdown-menu-trigger-width] min-w-64 rounded-[4px] border border-border bg-popover p-1 text-popover-foreground shadow-2xl"
             side={isMobile ? "bottom" : "right"}
             align="end"
             sideOffset={6}
@@ -168,13 +172,13 @@ export function NavUser({ user }: NavUserProps) {
             </DropdownMenuLabel>
             <DropdownMenuSeparator className="bg-border" />
             <DropdownMenuGroup>
-              <DropdownMenuItem asChild className="focus:bg-accent focus:text-accent-foreground cursor-pointer">
+              <DropdownMenuItem asChild className="focus:bg-accent focus:text-accent-foreground cursor-pointer rounded-[3px]">
                 <Link href="/settings/profile" className="flex items-center gap-2">
                   <UserIcon className="size-4 text-[#cc785c]" />
                   <span>Profile Settings</span>
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild className="focus:bg-accent focus:text-accent-foreground cursor-pointer">
+              <DropdownMenuItem asChild className="focus:bg-accent focus:text-accent-foreground cursor-pointer rounded-[3px]">
                 <Link href="/settings/security" className="flex items-center gap-2">
                   <Shield className="size-4 text-muted-foreground" />
                   <span>Security & Sessions</span>
@@ -188,7 +192,7 @@ export function NavUser({ user }: NavUserProps) {
                 handleSignOut()
               }}
               disabled={isSigningOut}
-              className="focus:bg-destructive/10 focus:text-destructive text-destructive cursor-pointer"
+              className="focus:bg-destructive/10 focus:text-destructive text-destructive cursor-pointer rounded-[3px]"
             >
               <div className="flex w-full items-center gap-2 py-0.5 text-xs font-medium">
                 {isSigningOut ? (

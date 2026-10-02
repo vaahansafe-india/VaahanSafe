@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import { useCustomerRouter } from "@/lib/use-customer-router";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -32,7 +32,7 @@ export function RemoveVehicleAlert({
   vehicle,
   onSuccess,
 }: RemoveVehicleAlertProps) {
-  const router = useRouter();
+  const router = useCustomerRouter();
   const [isDeleting, setIsDeleting] = React.useState(false);
 
   if (!vehicle) return null;

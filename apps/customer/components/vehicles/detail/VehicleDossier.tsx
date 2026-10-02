@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useCustomerRouter } from "@/lib/use-customer-router";
 import { VaahanIcon } from "@vaahansafe/icons";
 import { VehicleIdentityHero } from "./VehicleIdentityHero";
 import { VehicleFactStrip } from "./VehicleFactStrip";
@@ -22,7 +22,7 @@ interface VehicleDossierProps {
 }
 
 export function VehicleDossier({ vehicle }: VehicleDossierProps) {
-  const router = useRouter();
+  const router = useCustomerRouter();
 
   // Active sheets & alerts state
   const [isDetailsOpen, setIsDetailsOpen] = React.useState(false);

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { VaahanIcon } from "@vaahansafe/icons";
+import { AuthLoader } from "./AuthLoader";
 
 interface OtpVerificationFormProps {
   isLoading?: boolean;
@@ -12,274 +12,63 @@ interface OtpVerificationFormProps {
   onClearError?: () => void;
 }
 
-const OTP_LENGTH = 6;
-const COOLDOWN_SECONDS = 30;
-
-export function OtpVerificationForm({
-  isLoading = false,
-  onVerifyOtp,
-  onResendOtp,
-  onChangeNumber,
-  errorMessage,
-  onClearError,
-}: OtpVerificationFormProps) {
-  const [digits, setDigits] = React.useState<string[]>(Array(OTP_LENGTH).fill(""));
-  const [cooldown, setCooldown] = React.useState(COOLDOWN_SECONDS);
-  const [isResending, setIsResending] = React.useState(false);
-  const inputRefs = React.useRef<(HTMLInputElement | null)[]>([]);
-
-  // Cooldown countdown timer
+export function OtpVerificationForm({ isLoading = false, onVerifyOtp, onResendOtp, onChangeNumber, errorMessage, onClearError }: OtpVerificationFormProps) {
+  const [code, setCode] = React.useState("");
+  const [focused, setFocused] = React.useState(false);
+  const [cooldown, setCooldown] = React.useState(30);
+  const [resending, setResending] = React.useState(false);
+  const inputRef = React.useRef<HTMLInputElement>(null);
+  const submitting = React.useRef(false);
   React.useEffect(() => {
     if (cooldown <= 0) return;
-    const timer = setInterval(() => {
-      setCooldown((prev) => (prev > 0 ? prev - 1 : 0));
-    }, 1000);
-    return () => clearInterval(timer);
+    const timer = setTimeout(() => setCooldown(value => value - 1), 1000);
+    return () => clearTimeout(timer);
   }, [cooldown]);
 
-  // Focus the first empty input on mount
-  React.useEffect(() => {
-    const firstEmpty = digits.findIndex((d) => !d);
-    const targetIdx = firstEmpty === -1 ? 0 : firstEmpty;
-    inputRefs.current[targetIdx]?.focus();
-  }, []);
+  async function submit(event: React.FormEvent) {
+    event.preventDefault();
+    if (code.length !== 6 || isLoading || submitting.current) return;
+    submitting.current = true;
+    try { await onVerifyOtp(code); } finally { submitting.current = false; }
+  }
 
-  const handleChange = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
-    if (errorMessage && onClearError) {
-      onClearError();
-    }
-
-    const val = e.target.value.replace(/\D/g, "");
-    if (!val) {
-      // Clear current digit
-      const nextDigits = [...digits];
-      nextDigits[index] = "";
-      setDigits(nextDigits);
-      return;
-    }
-
-    // Handle single digit or multiple digits (typing quickly)
-    const nextDigits = [...digits];
-    const incomingChars = val.split("");
-    for (let i = 0; i < incomingChars.length && index + i < OTP_LENGTH; i++) {
-      const char = incomingChars[i];
-      if (char !== undefined) {
-        nextDigits[index + i] = char;
-      }
-    }
-    setDigits(nextDigits);
-
-    // Auto-advance focus
-    const nextIndex = Math.min(index + incomingChars.length, OTP_LENGTH - 1);
-    inputRefs.current[nextIndex]?.focus();
-
-    // If all digits filled, auto-submit
-    if (nextDigits.every((d) => d !== "") && nextDigits.length === OTP_LENGTH) {
-      onVerifyOtp(nextDigits.join(""));
-    }
-  };
-
-  const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Backspace") {
-      if (!digits[index] && index > 0) {
-        // Move to previous and clear
-        const nextDigits = [...digits];
-        nextDigits[index - 1] = "";
-        setDigits(nextDigits);
-        inputRefs.current[index - 1]?.focus();
-      } else {
-        const nextDigits = [...digits];
-        nextDigits[index] = "";
-        setDigits(nextDigits);
-      }
-    } else if (e.key === "ArrowLeft" && index > 0) {
-      inputRefs.current[index - 1]?.focus();
-    } else if (e.key === "ArrowRight" && index < OTP_LENGTH - 1) {
-      inputRefs.current[index + 1]?.focus();
-    }
-  };
-
-  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
-    e.preventDefault();
-    if (errorMessage && onClearError) {
-      onClearError();
-    }
-
-    const pastedData = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, OTP_LENGTH);
-    if (!pastedData) return;
-
-    const nextDigits = [...digits];
-    for (let i = 0; i < pastedData.length; i++) {
-      const char = pastedData[i];
-      if (char !== undefined) {
-        nextDigits[i] = char;
-      }
-    }
-    setDigits(nextDigits);
-
-    const focusIdx = Math.min(pastedData.length, OTP_LENGTH - 1);
-    inputRefs.current[focusIdx]?.focus();
-
-    if (pastedData.length === OTP_LENGTH) {
-      onVerifyOtp(pastedData);
-    }
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const otpCode = digits.join("");
-    if (otpCode.length === OTP_LENGTH) {
-      onVerifyOtp(otpCode);
-    }
-  };
-
-  const handleResend = async () => {
-    if (cooldown > 0 || isResending) return;
-    setIsResending(true);
+  async function resend() {
+    if (cooldown || resending || isLoading) return;
+    setResending(true);
     try {
       await onResendOtp();
-      setCooldown(COOLDOWN_SECONDS);
-      setDigits(Array(OTP_LENGTH).fill(""));
-      inputRefs.current[0]?.focus();
-    } finally {
-      setIsResending(false);
-    }
-  };
+      setCode(""); setCooldown(30); inputRef.current?.focus();
+    } catch {
+      // The parent displays the recoverable provider error.
+    } finally { setResending(false); }
+  }
 
-  const isComplete = digits.every((d) => d.length === 1);
-
-  return (
-    <form onSubmit={handleSubmit} noValidate className="w-full">
-      {/* Visual Instruction Label */}
-      <div className="mb-4 flex items-center justify-between">
-        <label
-          htmlFor="otp-digit-0"
-          className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground"
-        >
-          6-Digit verification code
-        </label>
-        <button
-          type="button"
-          onClick={onChangeNumber}
-          className="font-mono text-[9px] uppercase tracking-wider text-[#cc785c] hover:underline"
-        >
-          Change number
-        </button>
+  return <form onSubmit={submit} className="w-full">
+    <div className="mb-3 flex items-center justify-between gap-2">
+      <label htmlFor="verification-code" className="text-sm font-semibold text-[#1b1c1a]">Verification code</label>
+      <button type="button" onClick={onChangeNumber} disabled={isLoading || resending} className="text-xs text-[#a9583e] underline-offset-4 hover:underline disabled:opacity-50">Change number</button>
+    </div>
+    <div className="relative">
+      {/* One native input supports SMS autofill, paste and normal cursor editing. */}
+      <input ref={inputRef} id="verification-code" name="otp" type="text" inputMode="numeric" autoComplete="one-time-code" autoFocus
+        maxLength={6} pattern="[0-9]{6}" value={code} disabled={isLoading || resending}
+        onChange={event => { setCode(event.target.value.replace(/\D/g, "").slice(0, 6)); onClearError?.(); }}
+        onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
+        aria-invalid={Boolean(errorMessage)} aria-describedby={errorMessage ? "otp-error" : "otp-hint"}
+        className="absolute inset-0 z-10 h-full w-full cursor-text text-base opacity-0 disabled:cursor-wait" />
+      <div aria-hidden="true" className="grid grid-cols-6 gap-2">
+        {Array.from({ length: 6 }, (_, index) => <span key={index}
+          className={`flex h-12 min-w-0 items-center justify-center rounded-[3px] border bg-white font-mono text-2xl font-semibold text-[#1b1c1a] sm:h-14 ${errorMessage ? "border-[#c64545]" : focused && index === Math.min(code.length, 5) ? "border-[#a9583e] ring-2 ring-[#cc785c]/20" : code[index] ? "border-[#cc785c]" : "border-[#d8d0c5]"}`}>{code[index] || ""}</span>)}
       </div>
-
-      {/* 01. Six Individual Digit Input Boxes */}
-      <div
-        className="flex items-center justify-between gap-1 xs:gap-1.5 sm:gap-2"
-        role="group"
-        aria-labelledby="otp-group-label"
-      >
-        <span id="otp-group-label" className="sr-only">
-          Enter 6 digit verification code
-        </span>
-        {digits.map((digit, idx) => (
-          <input
-            key={idx}
-            ref={(el) => {
-              inputRefs.current[idx] = el;
-            }}
-            id={`otp-digit-${idx}`}
-            type="text"
-            inputMode="numeric"
-            autoComplete={idx === 0 ? "one-time-code" : "off"}
-            pattern="[0-9]*"
-            maxLength={1}
-            value={digit}
-            onChange={(e) => handleChange(idx, e)}
-            onKeyDown={(e) => handleKeyDown(idx, e)}
-            onPaste={handlePaste}
-            disabled={isLoading}
-            aria-label={`Digit ${idx + 1} of 6`}
-            aria-invalid={Boolean(errorMessage)}
-            className={`
-              h-10.5 w-9 xs:h-11 xs:w-10 sm:h-11 sm:w-11 text-center
-              rounded-lg border bg-background
-              font-mono text-lg xs:text-xl font-bold text-foreground
-              shadow-2xs transition-all duration-150
-              focus:outline-none focus:ring-2
-              disabled:cursor-not-allowed disabled:opacity-50
-              ${
-                errorMessage
-                  ? "border-[#c64545] focus:border-[#c64545] focus:ring-[#c64545]/25"
-                  : digit
-                    ? "border-[#cc785c] focus:border-[#cc785c] focus:ring-[#cc785c]/30"
-                    : "border-border focus:border-[#cc785c] focus:ring-[#cc785c]/30"
-              }
-            `}
-          />
-        ))}
-      </div>
-
-      {/* Inline Error State */}
-      {errorMessage && (
-        <p
-          role="alert"
-          aria-live="polite"
-          className="mt-3 flex items-center gap-1.5 text-xs text-[#c64545]"
-        >
-          <VaahanIcon name="error" size={13} className="shrink-0" aria-hidden="true" />
-          <span>{errorMessage}</span>
-        </p>
-      )}
-
-      {/* 02. Verify Action Button */}
-      <div className="mt-3.5">
-        <button
-          type="submit"
-          disabled={isLoading || !isComplete}
-          aria-busy={isLoading}
-          className="
-            group flex h-11 w-full items-center justify-center gap-2
-            rounded-lg bg-[#cc785c] px-4
-            font-mono text-xs font-semibold uppercase tracking-[0.14em] text-white
-            shadow-xs transition-all duration-200
-            hover:bg-[#a9583e] hover:shadow-sm
-            active:scale-[0.99]
-            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#cc785c]/45 focus-visible:ring-offset-2
-            disabled:cursor-not-allowed disabled:opacity-50
-          "
-        >
-          {isLoading ? (
-            <>
-              <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-              <span>Verifying code...</span>
-            </>
-          ) : (
-            <>
-              <span>Verify & Continue</span>
-              <VaahanIcon
-                name="arrow-right"
-                size={13}
-                className="transition-transform duration-200 group-hover:translate-x-1 motion-reduce:transform-none"
-                aria-hidden="true"
-              />
-            </>
-          )}
-        </button>
-      </div>
-
-      {/* 03. Resend Code & Cooldown */}
-      <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
-        <span>Didn&apos;t receive code?</span>
-        {cooldown > 0 ? (
-          <span className="font-mono text-[11px] text-muted-foreground">
-            Resend in 0:{cooldown < 10 ? `0${cooldown}` : cooldown}
-          </span>
-        ) : (
-          <button
-            type="button"
-            onClick={handleResend}
-            disabled={isResending || isLoading}
-            className="font-mono text-xs font-medium text-[#cc785c] hover:underline focus:outline-none disabled:opacity-50"
-          >
-            {isResending ? "Sending..." : "Resend code"}
-          </button>
-        )}
-      </div>
-    </form>
-  );
+    </div>
+    {errorMessage ? <p id="otp-error" role="alert" className="mt-3 text-xs leading-relaxed text-[#b13c3c]">{errorMessage}</p>
+      : <p id="otp-hint" className="mt-3 text-xs text-[#77736c]">Enter or paste the six-digit SMS code.</p>}
+    <button type="submit" disabled={isLoading || resending || code.length !== 6} aria-busy={isLoading}
+      className="mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-[3px] bg-[#252320] text-sm font-semibold text-[#faf9f5] hover:bg-[#3a3833] focus-visible:ring-2 focus-visible:ring-[#cc785c] disabled:cursor-not-allowed disabled:opacity-50">{isLoading ? <><AuthLoader /><span>Verifying…</span></> : "Verify & continue →"}</button>
+    <div className="mt-4 flex items-center justify-between gap-2 text-xs text-[#615f59]">
+      <span>Didn't receive a code?</span>
+      {cooldown > 0 ? <span className="font-mono">Resend in 0:{String(cooldown).padStart(2, "0")}</span>
+        : <button type="button" onClick={resend} disabled={resending || isLoading} aria-busy={resending} className="inline-flex items-center gap-2 text-[#a9583e] hover:underline disabled:opacity-50">{resending ? <><AuthLoader /><span>Sending…</span></> : "Resend code"}</button>}
+    </div>
+  </form>;
 }

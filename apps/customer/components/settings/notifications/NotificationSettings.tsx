@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useCustomerRouter } from "@/lib/use-customer-router";
 import { Switch } from "@vaahansafe/ui";
 import { SettingsSection } from "../primitives/SettingsSection";
 import { SettingStatus } from "../primitives/SettingStatus";
@@ -18,6 +19,7 @@ interface NotificationSettingsProps {
 }
 
 export function NotificationSettings({ data }: NotificationSettingsProps) {
+  const router = useCustomerRouter();
   const [categories, setCategories] = React.useState<NotificationCategoryConfig[]>(
     data.notifications
   );
@@ -49,6 +51,7 @@ export function NotificationSettings({ data }: NotificationSettingsProps) {
     const res = await updateNotificationPrefAction(categoryKey, channel, nextValue);
 
     if (res.success) {
+      router.refresh();
       toast.success("Notification preference updated.");
     } else {
       // Rollback on failure

@@ -58,7 +58,11 @@ export class D1UserRepository implements UserRepository {
   }
 
   async save(user: Partial<User> & { id: string }): Promise<User> {
-    const existing = await this.findById(user.id);
+    const existingById = await this.findById(user.id);
+    const existingByEmail = user.email ? await this.findByEmail(user.email) : null;
+    const existingByPhone = user.phone ? await this.findByPhone(user.phone) : null;
+    const existing = existingById || existingByEmail || existingByPhone;
+    const targetId = existing ? existing.id : user.id;
     const now = new Date().toISOString();
 
     if (existing) {
@@ -82,7 +86,7 @@ export class D1UserRepository implements UserRepository {
           user.termsAcceptedAt ?? null,
           user.privacyAcceptedAt ?? null,
           now,
-          user.id,
+          targetId,
         ]
       );
     } else {
@@ -90,7 +94,7 @@ export class D1UserRepository implements UserRepository {
         `INSERT INTO users (id, primary_phone, primary_email, full_name, onboarding_status, status, terms_accepted_at, privacy_accepted_at, created_at, updated_at)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
-          user.id,
+          targetId,
           user.phone ?? null,
           user.email ?? null,
           user.name ?? null,
@@ -104,9 +108,9 @@ export class D1UserRepository implements UserRepository {
       );
     }
 
-    const updated = await this.findById(user.id);
+    const updated = await this.findById(targetId);
     if (!updated) {
-      throw new Error(`Failed to save user ${user.id}`);
+      throw new Error(`Failed to save user ${targetId}`);
     }
     return updated;
   }
