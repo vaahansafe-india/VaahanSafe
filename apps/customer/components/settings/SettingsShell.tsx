@@ -11,7 +11,6 @@ import { SettingsSearch } from "./SettingsSearch";
 import { ProfileSettings } from "./profile/ProfileSettings";
 import { AccountSettings } from "./account/AccountSettings";
 import { NotificationSettings } from "./notifications/NotificationSettings";
-import { AppearanceSettings } from "./appearance/AppearanceSettings";
 import { SafetyPrivacySettings } from "./privacy/SafetyPrivacySettings";
 import { VehiclePreferences } from "./vehicles/VehiclePreferences";
 import { SecuritySettings } from "./security/SecuritySettings";
@@ -56,7 +55,6 @@ export function SettingsShell({
     profile: "Profile",
     account: "Account",
     notifications: "Notifications",
-    appearance: "Appearance",
     privacy: "Safety & Privacy",
     vehicles: "Vehicle Preferences",
     security: "Security & Sessions",
@@ -72,8 +70,6 @@ export function SettingsShell({
         return <AccountSettings data={initialData} />;
       case "notifications":
         return <NotificationSettings data={initialData} />;
-      case "appearance":
-        return <AppearanceSettings />;
       case "privacy":
         return <SafetyPrivacySettings data={initialData} />;
       case "vehicles":

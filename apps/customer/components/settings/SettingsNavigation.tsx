@@ -28,7 +28,6 @@ const NAV_GROUPS: NavGroup[] = [
     label: "Preferences",
     items: [
       { id: "notifications", label: "Notifications", icon: "notification" },
-      { id: "appearance", label: "Appearance", icon: "palette" },
     ],
   },
   {

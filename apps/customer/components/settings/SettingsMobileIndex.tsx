@@ -30,7 +30,6 @@ const MOBILE_GROUPS: MobileNavGroup[] = [
     label: "Preferences",
     items: [
       { id: "notifications", label: "Notifications", description: "Channel delivery preferences", icon: "notification" },
-      { id: "appearance", label: "Appearance", description: "Color theme & motion", icon: "palette" },
     ],
   },
   {

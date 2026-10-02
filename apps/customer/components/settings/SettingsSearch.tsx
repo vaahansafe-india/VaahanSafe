@@ -50,13 +50,6 @@ const SEARCH_INDEX: SearchIndexItem[] = [
     keywords: "notifications whatsapp email in-app alerts updates dispatch",
   },
   {
-    title: "Color Theme & Motion",
-    category: "appearance",
-    categoryLabel: "Appearance",
-    icon: "palette",
-    keywords: "theme dark light appearance contrast reduce motion",
-  },
-  {
     title: "Public Safety View & Privacy Controls",
     category: "privacy",
     categoryLabel: "Safety & Privacy",

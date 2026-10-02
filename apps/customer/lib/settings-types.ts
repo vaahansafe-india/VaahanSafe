@@ -7,7 +7,6 @@ export type SettingsCategory =
   | "profile"
   | "account"
   | "notifications"
-  | "appearance"
   | "privacy"
   | "vehicles"
   | "security"
