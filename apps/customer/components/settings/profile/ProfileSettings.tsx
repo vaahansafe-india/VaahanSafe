@@ -81,7 +81,7 @@ export function ProfileSettings({ data }: ProfileSettingsProps) {
             type="button"
             size="sm"
             onClick={() => setIsMobileDialogOpen(true)}
-            className="bg-[#cc785c] hover:bg-[#b8674d] text-white text-xs h-8 px-4 shrink-0 self-start sm:self-center font-medium shadow-xs"
+            className="bg-[#cc785c] hover:bg-[#b8674d] text-white text-xs h-9 px-4 shrink-0 w-full sm:w-auto font-medium shadow-xs"
           >
             Verify Mobile &rarr;
           </Button>

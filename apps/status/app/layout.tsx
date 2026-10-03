@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "@vaahansafe/ui/styles/globals.css";
+import "./status-paper.css";
 import { ThemeProvider } from "@vaahansafe/ui/theme";
 import { Toaster } from "@vaahansafe/ui";
 import { NetworkStatusProvider } from "../components/status/NetworkStatusProvider";
@@ -49,10 +50,10 @@ export default function StatusRootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className="min-h-screen overflow-x-clip bg-[#faf9f5] font-sans antialiased text-[#141413] dark:bg-[#181715] dark:text-[#faf9f5]"
+        className="status-paper min-h-screen overflow-x-clip bg-[#faf9f5] font-sans antialiased text-[#141413] dark:bg-[#181715] dark:text-[#faf9f5]"
         suppressHydrationWarning
       >
-        <ThemeProvider>
+        <ThemeProvider defaultTheme="light">
           <NetworkStatusProvider>
             {children}
             <Toaster />

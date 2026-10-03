@@ -263,16 +263,16 @@ export function CustomerAppShell({
           {(!phoneVerified || !googleVerified) && (
             <Alert
               role="status"
-              className="mb-6 flex flex-wrap items-center justify-between gap-3 border-[#d8d0c5] bg-[#faf9f5]/70 px-4 py-3"
+              className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 sm:gap-4 rounded-xl border border-[#d8d0c5] bg-[#faf9f5]/70 p-3.5 sm:px-4 sm:py-3 shadow-2xs"
             >
-              <div className="flex min-w-0 flex-1 items-center gap-3">
+              <div className="flex min-w-0 items-center gap-3 w-full sm:w-auto sm:flex-1">
                 <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[#f3e5da] text-[#a9583e]">
                   <VaahanIcon
                     name={!phoneVerified ? "mobile" : "google"}
                     size={19}
                   />
                 </span>
-                <AlertDescription className="text-sm text-[#615f59]">
+                <AlertDescription className="text-sm font-medium text-[#615f59] leading-snug break-words">
                   {!phoneVerified
                     ? "Add a verified mobile number when you're ready."
                     : "Connect Google for another way to sign in."}
@@ -281,12 +281,12 @@ export function CustomerAppShell({
               <Button
                 asChild
                 variant="outline"
-                className="h-11 shrink-0 border-[#d8d0c5] bg-transparent text-[#a9583e]"
+                className="h-10 sm:h-11 w-full sm:w-auto shrink-0 border-[#d8d0c5] bg-transparent text-[#a9583e] hover:bg-[#f3e5da]/40 hover:text-[#8e3f28] gap-1.5 font-medium transition-colors justify-center"
               >
                 <Link
                   href={`/onboarding/verification?returnUrl=${encodeURIComponent(pathname)}`}
                 >
-                  {!phoneVerified ? "Verify mobile" : "Connect Google"}
+                  <span>{!phoneVerified ? "Verify mobile" : "Connect Google"}</span>
                   <VaahanIcon name="arrow-right" size={15} />
                 </Link>
               </Button>

@@ -9,7 +9,6 @@ import type {
   PublicIncidentDto,
   PublicMaintenanceDto,
   PublicServiceHistoryDto,
-  PublicServiceHistoryDay,
 } from "../dto/public-status";
 import { JOURNEY_STAGES } from "../domain/journey";
 import { formatIstTimestamp } from "../services/aggregate-status";
@@ -62,13 +61,19 @@ interface DbMaintenanceRow {
   affected_service_slugs?: string;
 }
 
-interface DbServiceEventRow {
-  id: string;
-  service_id: string;
-  state: string;
-  summary: string | null;
-  started_at: string;
-  ended_at: string | null;
+interface DbProbeDayRow {
+  service_slug: string;
+  day: string;
+  checks: number;
+  successful_checks: number;
+  degraded_checks: number;
+  failed_checks: number;
+}
+
+function istDate(value: Date): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Kolkata", year: "numeric", month: "2-digit", day: "2-digit",
+  }).format(value);
 }
 
 /**
@@ -191,7 +196,7 @@ export class StatusRepository {
    * Retrieves a single incident by its public slug.
    */
   async getIncidentBySlug(slug: string): Promise<PublicIncidentDto | null> {
-    if (!this.db) return null;
+    if (!this.db) throw new Error("Status database is unavailable");
 
     try {
       const row = await this.db.queryFirst<DbIncidentRow>(
@@ -247,7 +252,7 @@ export class StatusRepository {
         updates,
       };
     } catch {
-      return null;
+      throw new Error("Incident report could not be loaded");
     }
   }
 
@@ -255,7 +260,7 @@ export class StatusRepository {
    * Retrieves resolved incident history.
    */
   async getIncidentHistory(limit = 20): Promise<PublicIncidentDto[]> {
-    if (!this.db) return [];
+    if (!this.db) throw new Error("Status database is unavailable");
 
     try {
       const incidentRows = await this.db.query<DbIncidentRow>(
@@ -321,7 +326,7 @@ export class StatusRepository {
 
       return incidents;
     } catch {
-      return [];
+      throw new Error("Incident archive could not be loaded");
     }
   }
 
@@ -362,35 +367,98 @@ export class StatusRepository {
     }
   }
 
-  /**
-   * Generates factual temporal reliability rails for a service.
-   * Invariant: Only returns genuine recorded days, no fake 99.99% percentages.
-   */
-  async getServiceHistory(serviceSlug: string, daysCount = 30): Promise<PublicServiceHistoryDto> {
-    const now = new Date();
-    const days: PublicServiceHistoryDay[] = [];
+  async getResolvedIncidentCount30D(now = new Date()): Promise<number | null> {
+    if (!this.db) return null;
+    try {
+      const since = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      const row = await this.db.queryFirst<{ count: number }>(
+        `SELECT COUNT(*) AS count FROM status_incidents
+         WHERE state = 'RESOLVED' AND julianday(resolved_at) >= julianday(?)
+           AND julianday(resolved_at) <= julianday(?)`,
+        [since.toISOString(), now.toISOString()]
+      );
+      return row ? Number(row.count) : null;
+    } catch {
+      return null;
+    }
+  }
 
-    // Construct genuine date entries
-    for (let i = daysCount - 1; i >= 0; i--) {
-      const d = new Date(now.getTime() - i * 86400000);
-      const dateStr = d.toISOString().split("T")[0] ?? "";
+  /** Real scheduled checks only; a missing day remains UNKNOWN. */
+  async getServiceHistories(serviceSlugs: string[], daysCount = 90, now = new Date()): Promise<PublicServiceHistoryDto[]> {
+    const count = Math.max(1, Math.min(90, Math.trunc(daysCount)));
+    const today = istDate(now);
+    const first = new Date(`${today}T00:00:00+05:30`);
+    first.setUTCDate(first.getUTCDate() - (count - 1));
+    const startDate = istDate(first);
+    const dates = Array.from({ length: count }, (_, index) => {
+      const date = new Date(first);
+      date.setUTCDate(date.getUTCDate() + index);
+      return istDate(date);
+    });
 
-      days.push({
-        date: dateStr,
-        state: "OPERATIONAL",
-        hasIncident: false,
-      });
+    let rows: DbProbeDayRow[] = [];
+    let sourceAvailable = Boolean(this.db);
+    if (this.db) {
+      try {
+        const table = await this.db.queryFirst<{ name: string }>(
+          "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'status_probe_samples'"
+        );
+        sourceAvailable = Boolean(table);
+        if (sourceAvailable) rows = await this.db.query<DbProbeDayRow>(
+          `SELECT s.slug AS service_slug,
+                  date(p.checked_at, '+5 hours', '+30 minutes') AS day,
+                  COUNT(*) AS checks,
+                  SUM(CASE WHEN p.result = 'UP' THEN 1 ELSE 0 END) AS successful_checks,
+                  SUM(CASE WHEN p.result = 'DEGRADED' THEN 1 ELSE 0 END) AS degraded_checks,
+                  SUM(CASE WHEN p.result = 'DOWN' THEN 1 ELSE 0 END) AS failed_checks
+             FROM status_probe_samples p
+             JOIN status_services s ON s.id = p.service_id
+            WHERE p.checked_at >= ? AND s.is_public = 1
+            GROUP BY s.slug, date(p.checked_at, '+5 hours', '+30 minutes')
+            ORDER BY day ASC`,
+          [first.toISOString()]
+        );
+      } catch {
+        sourceAvailable = false;
+      }
     }
 
-    const startDate = days[0]?.date ?? "";
-    const endDate = days[days.length - 1]?.date ?? "";
+    const bySlug = new Map<string, Map<string, DbProbeDayRow>>();
+    for (const row of rows) {
+      if (!bySlug.has(row.service_slug)) bySlug.set(row.service_slug, new Map());
+      bySlug.get(row.service_slug)!.set(row.day, row);
+    }
 
-    return {
-      serviceSlug,
-      recordedDaysCount: days.length,
-      startDate,
-      endDate,
-      days,
-    };
+    return serviceSlugs.map((serviceSlug) => {
+      const recorded = bySlug.get(serviceSlug);
+      const days = dates.map((date) => {
+        const row = recorded?.get(date);
+        const checks = Number(row?.checks ?? 0);
+        const successfulChecks = Number(row?.successful_checks ?? 0);
+        const degradedChecks = Number(row?.degraded_checks ?? 0);
+        const failedChecks = Number(row?.failed_checks ?? 0);
+        return {
+          date,
+          state: checks === 0 ? "UNKNOWN" as const
+            : failedChecks > 0 ? "MAJOR OUTAGE" as const
+            : degradedChecks > 0 ? "DEGRADED" as const
+            : "OPERATIONAL" as const,
+          checks, successfulChecks, degradedChecks, failedChecks,
+        };
+      });
+      const totalChecks = days.reduce((sum, day) => sum + day.checks, 0);
+      const successfulChecks = days.reduce((sum, day) => sum + day.successfulChecks, 0);
+      return {
+        serviceSlug, sourceAvailable,
+        recordedDaysCount: days.filter((day) => day.checks > 0).length,
+        startDate, endDate: today, totalChecks, successfulChecks,
+        observedSuccessPercent: totalChecks > 0 ? Math.round(successfulChecks / totalChecks * 10000) / 100 : null,
+        days,
+      };
+    });
+  }
+
+  async getServiceHistory(serviceSlug: string, daysCount = 90): Promise<PublicServiceHistoryDto> {
+    return (await this.getServiceHistories([serviceSlug], daysCount))[0]!;
   }
 }

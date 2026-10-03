@@ -1,0 +1,49 @@
+/* Match the web and customer paper surfaces while keeping the status palette local. */
+.status-paper {
+  --background: 48 33% 97%;
+  --foreground: 90 4% 11%;
+  --card: 48 33% 98%;
+  --card-foreground: 90 4% 11%;
+  --muted: 38 28% 93%;
+  --muted-foreground: 40 3% 37%;
+  --border: 36 20% 81%;
+  --primary: 16 46% 45%;
+  --radius: 4px;
+  background-color: #faf9f5;
+  background-image: url("/images/paper-texture.webp");
+  background-size: 512px 512px;
+}
+
+.status-paper .status-canvas {
+  background: transparent;
+}
+
+.status-paper header,
+.status-paper footer {
+  background-image: url("/images/paper-texture.webp");
+  background-size: 512px 512px;
+}
+
+.status-paper #status-mobile-menu {
+  background-image: url("/images/paper-texture.webp");
+  background-size: 512px 512px;
+}
+
+.status-paper :is(.rounded, .rounded-sm, .rounded-md, .rounded-lg, .rounded-xl, .rounded-2xl, .rounded-3xl) {
+  border-radius: 4px;
+}
+
+.status-paper [class*="shadow"] {
+  box-shadow: none;
+}
+
+.dark .status-paper {
+  background-color: #181715;
+  background-image: none;
+}
+
+.dark .status-paper header,
+.dark .status-paper footer,
+.dark .status-paper #status-mobile-menu {
+  background-image: none;
+}

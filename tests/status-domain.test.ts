@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import {
   JOURNEY_STAGES,
   SERVICE_STATE_CONFIG,
@@ -6,8 +6,9 @@ import {
   formatIstTimestamp,
   StatusRepository,
   BASELINE_SERVICES,
+  getPublicSystemStatus,
   PublicStatusServiceDto,
-} from "@vaahansafe/status-core";
+} from "@vaahansafe/status-core/server";
 
 describe("VaahanSafe Status Domain & System Pulse Evaluation", () => {
   // --------------------------------------------------------------------------
@@ -151,15 +152,56 @@ describe("VaahanSafe Status Domain & System Pulse Evaluation", () => {
       ]);
     });
 
-    it("Generates 30 factual recorded days without synthetic uptime percentages", async () => {
+    it("does not invent operational days without complete observations", async () => {
       const repo = new StatusRepository();
-      const history = await repo.getServiceHistory("vehicle-qr-access", 30);
+      const history = (await repo.getServiceHistories(["vehicle-qr-access"], 90, new Date("2026-10-03T12:00:00Z")))[0]!;
 
       expect(history.serviceSlug).toBe("vehicle-qr-access");
-      expect(history.recordedDaysCount).toBe(30);
-      expect(history.days.length).toBe(30);
-      // Invariant: no fake percentages
-      expect((history as any).uptimePercentage).toBeUndefined();
+      expect(history.recordedDaysCount).toBe(0);
+      expect(history.sourceAvailable).toBe(false);
+      expect(history.days).toHaveLength(90);
+      expect(history.days.every((day) => day.state === "UNKNOWN" && day.checks === 0)).toBe(true);
+      expect(history.observedSuccessPercent).toBeNull();
+    });
+
+    it("aggregates only recorded checks into IST days and keeps missing days unknown", async () => {
+      const repo = new StatusRepository({
+        query: async () => [{
+          service_slug: "website", day: "2026-10-03", checks: 3,
+          successful_checks: 2, degraded_checks: 1, failed_checks: 0,
+        }],
+        queryFirst: async () => ({ name: "status_probe_samples" }),
+      });
+      const history = (await repo.getServiceHistories(["website"], 3, new Date("2026-10-03T12:00:00Z")))[0]!;
+      expect(history.days.map((day) => day.state)).toEqual(["UNKNOWN", "UNKNOWN", "DEGRADED"]);
+      expect(history.totalChecks).toBe(3);
+      expect(history.observedSuccessPercent).toBe(66.67);
+      expect(history.recordedDaysCount).toBe(1);
+    });
+
+    it("does not report an unreadable incident archive as an empty archive", async () => {
+      await expect(new StatusRepository().getIncidentHistory()).rejects.toThrow("unavailable");
+      await expect(new StatusRepository().getIncidentBySlug("report")).rejects.toThrow("unavailable");
+    });
+
+    it("reflects a published critical incident even when its seeded service state is operational", async () => {
+      const envNames = ["STATUS_WEB_HEALTH_URL", "STATUS_APP_HEALTH_URL", "STATUS_ACTIVATE_HEALTH_URL", "STATUS_QR_HEALTH_URL", "STATUS_PAYMENTS_HEALTH_URL", "STATUS_NOTIFICATIONS_HEALTH_URL", "SUPABASE_URL", "SUPABASE_PUBLISHABLE_KEY"];
+      for (const name of envNames) vi.stubEnv(name, "");
+      try {
+        const status = await getPublicSystemStatus({
+          query: async (sql: string) => sql.includes("FROM status_incidents i") ? [{
+            id: "inc_1", public_id: "vs_inc_1", slug: "incident", title: "QR incident",
+            summary: "QR access interrupted", state: "INVESTIGATING", impact: "CRITICAL",
+            started_at: "2026-10-03T12:00:00Z", resolved_at: null,
+            affected_service_slugs: "vehicle-qr-access",
+          }] : [],
+          queryFirst: async () => null,
+        });
+        expect(status.services.find((service) => service.slug === "vehicle-qr-access")?.state).toBe("MAJOR OUTAGE");
+        expect(status.overallState).toBe("MAJOR OUTAGE");
+      } finally {
+        vi.unstubAllEnvs();
+      }
     });
   });
 });

@@ -5,10 +5,23 @@ compatibility_date = "2026-09-01"
 compatibility_flags = ["nodejs_compat"]
 workers_dev = true
 
+[[d1_databases]]
+binding = "STATUS_DB"
+database_name = "vaahansafe-prod-db"
+database_id = "ed46249f-2967-4cd4-8807-75e1421d1754"
+migrations_dir = "../../../../database/migrations"
+
 
 [vars]
 SUPABASE_URL = "https://zpjwrptrqgpeyvlvscpv.supabase.co"
 SUPABASE_PUBLISHABLE_KEY = "sb_publishable_b2gKJgEfWgdR99PqkQ5z2g_JOa7lfk4"
+STATUS_WEB_HEALTH_URL = "https://www.vaahansafe.com/"
+STATUS_APP_HEALTH_URL = "https://app.vaahansafe.com/api/auth/session"
+STATUS_ACTIVATE_HEALTH_URL = "https://activate.vaahansafe.com/"
+STATUS_QR_HEALTH_URL = "https://qr.vaahansafe.com/"
+
+# Set STATUS_PAYMENTS_HEALTH_URL and STATUS_NOTIFICATIONS_HEALTH_URL only
+# after dedicated public capability checks exist. Unconfigured services remain unknown.
 
 # Set SUPABASE_SECRET_KEY with `wrangler secret put` before deployment.
 

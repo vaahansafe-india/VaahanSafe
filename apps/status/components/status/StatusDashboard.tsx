@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import dynamic from "next/dynamic";
 import type { PublicSystemStatusDto, PublicStatusServiceDto } from "@vaahansafe/status-core";
 import { StatusHeader } from "./shell/StatusHeader";
 import { StatusFooter } from "./shell/StatusFooter";
@@ -8,10 +9,17 @@ import { CurrentSystemStatement } from "./current/CurrentSystemStatement";
 import { SystemPulse } from "./pulse/SystemPulse";
 import { ImpactField } from "./incidents/ImpactField";
 import { ServiceRegistry } from "./services/ServiceRegistry";
-import { ReliabilityField } from "./history/ReliabilityField";
 import { IncidentHistory } from "./incidents/IncidentHistory";
 import { UpcomingMaintenance } from "./maintenance/UpcomingMaintenance";
 import { ReliabilityPrinciple } from "./principle/ReliabilityPrinciple";
+import { InfrastructureMonitor } from "./infrastructure/InfrastructureMonitor";
+const HeartbeatCharts = dynamic(
+  () => import("./infrastructure/HeartbeatCharts").then((module) => module.HeartbeatCharts),
+  {
+    ssr: false,
+    loading: () => <div className="min-h-[370px] border-t border-[#d8d0c5] py-5 dark:border-[#37342e]"><p className="text-sm text-[#696157] dark:text-[#b2aba0]">Loading recorded heartbeat charts…</p></div>,
+  }
+);
 
 interface StatusDashboardProps {
   initialStatus: PublicSystemStatusDto;
@@ -26,11 +34,16 @@ export function StatusDashboard({ initialStatus }: StatusDashboardProps) {
     generatedAtFormatted: "",
     isStale: true,
     services: [],
+    serviceHistories: [],
     activeIncidents: [],
     activeMaintenance: [],
-    historySummary: { recordedDays: 30, resolvedIncidentCount30D: 0 }
+    historySummary: { recordedDays: 0, resolvedIncidentCount30D: null }
   });
   const [selectedServiceSlug, setSelectedServiceSlug] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    setStatus(initialStatus);
+  }, [initialStatus]);
 
   const activeIncidents = status?.activeIncidents || [];
   const activeIncident = activeIncidents[0] || null;
@@ -53,7 +66,7 @@ export function StatusDashboard({ initialStatus }: StatusDashboardProps) {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#faf9f5] text-[#141413] antialiased selection:bg-[#cc785c]/20 selection:text-[#141413] dark:bg-[#181715] dark:text-[#faf9f5]">
+    <div className="status-canvas flex min-h-screen flex-col text-[#24221e] antialiased selection:bg-[#cc785c]/20 selection:text-[#141413] dark:text-[#faf9f5]">
       {/* 1. Status Header */}
       <StatusHeader
         statusLabel={overallState}
@@ -71,22 +84,9 @@ export function StatusDashboard({ initialStatus }: StatusDashboardProps) {
             generatedAtFormatted={status.generatedAtFormatted}
           />
 
-          <section className="rounded-2xl border border-[#e6dfd8] bg-[#faf9f5] p-5 dark:border-[#2e2b27] dark:bg-[#181715]" aria-label="Supabase database monitor">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <h2 className="font-serif text-lg">Supabase database</h2>
-                <p className="text-xs text-[#6c6a64] dark:text-[#a09d96]">Cloudflare scheduled probe · latest recorded database check</p>
-              </div>
-              <span className="font-mono text-xs font-semibold" role="status">
-                {status.databaseHeartbeat?.status ?? "UNKNOWN"}
-              </span>
-            </div>
-            <p className="mt-3 text-xs text-[#6c6a64] dark:text-[#a09d96]">
-              {status.databaseHeartbeat?.checkedAt
-                ? `Last successful check: ${new Date(status.databaseHeartbeat.checkedAt).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })} IST`
-                : "No successful scheduled check has been recorded yet."}
-            </p>
-          </section>
+          <InfrastructureMonitor heartbeat={status.databaseHeartbeat} />
+
+          <HeartbeatCharts samples={status.databaseHeartbeat?.samples ?? []} generatedAt={status.generatedAt} dataReadable={status.databaseHeartbeat?.databaseStatus === "OPERATIONAL"} />
 
           {/* Signature System Pulse Topology */}
           <SystemPulse
@@ -107,10 +107,7 @@ export function StatusDashboard({ initialStatus }: StatusDashboardProps) {
           <UpcomingMaintenance maintenance={activeMaintenance} />
 
           {/* Service Registry (01-06 Full-Width Capability Matrix) */}
-          <ServiceRegistry services={services} />
-
-          {/* Reliability Field (Recorded Day Rails) */}
-          <ReliabilityField services={services} />
+          <ServiceRegistry services={services} histories={status.serviceHistories ?? []} />
 
           {/* Active / Recorded Incidents */}
           <IncidentHistory incidents={status.activeIncidents} />

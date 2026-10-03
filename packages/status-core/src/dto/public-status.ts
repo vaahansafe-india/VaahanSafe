@@ -56,24 +56,37 @@ export interface PublicMaintenanceDto {
 export interface PublicServiceHistoryDay {
   date: string; // YYYY-MM-DD
   state: ServiceState;
-  hasIncident: boolean;
-  incidentTitle?: string;
-  incidentDurationMinutes?: number;
+  checks: number;
+  successfulChecks: number;
+  degradedChecks: number;
+  failedChecks: number;
 }
 
 export interface PublicServiceHistoryDto {
   serviceSlug: string;
+  sourceAvailable: boolean;
   recordedDaysCount: number;
   startDate: string;
   endDate: string;
+  totalChecks: number;
+  successfulChecks: number;
+  observedSuccessPercent: number | null;
   days: PublicServiceHistoryDay[];
 }
 
 export interface PublicSystemStatusDto {
   databaseHeartbeat?: {
     status: ServiceState;
+    databaseStatus: ServiceState;
+    cronStatus: ServiceState;
     checkedAt: string | null;
     latencyMs: number | null;
+    scheduledLatencyMs: number | null;
+    samples: Array<{
+      checkedAt: string;
+      status: "OPERATIONAL" | "DEGRADED" | "DOWN";
+      latencyMs: number;
+    }>;
   };
   overallState: ServiceState;
   headline: string;
@@ -82,10 +95,11 @@ export interface PublicSystemStatusDto {
   generatedAtFormatted: string;
   isStale: boolean;
   services: PublicStatusServiceDto[];
+  serviceHistories: PublicServiceHistoryDto[];
   activeIncidents: PublicIncidentDto[];
   activeMaintenance: PublicMaintenanceDto[];
   historySummary: {
     recordedDays: number;
-    resolvedIncidentCount30D: number;
+    resolvedIncidentCount30D: number | null;
   };
 }

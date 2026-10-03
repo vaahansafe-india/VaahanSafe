@@ -72,13 +72,13 @@ export function ServiceDetailSheet({
             <div className="rounded-lg bg-[#f5f0e8]/60 p-2.5 dark:bg-[#1f1e1b]/60">
               <div className="text-[9px] text-[#8e8b82]">PROBE ROUNDTRIP</div>
               <div className="text-sm font-semibold text-[#141413] dark:text-[#faf9f5]">
-                {service.latencyMs ? `${service.latencyMs} ms` : "Nominal (<50ms)"}
+                {service.latencyMs != null ? `${service.latencyMs} ms` : "Not measured"}
               </div>
             </div>
             <div className="rounded-lg bg-[#f5f0e8]/60 p-2.5 dark:bg-[#1f1e1b]/60">
               <div className="text-[9px] text-[#8e8b82]">EDGE RESULT</div>
-              <div className="text-sm font-semibold text-[#5db872]">
-                {service.probeStatus || "HTTP 200 OK"}
+              <div className="text-sm font-semibold text-[#141413] dark:text-[#faf9f5]">
+                {service.probeStatus || "No live result"}
               </div>
             </div>
           </div>
@@ -108,7 +108,7 @@ export function ServiceDetailSheet({
             OBSERVABILITY POLICY
           </div>
           <p className="font-sans text-xs leading-relaxed text-[#6c6a64] dark:text-[#a09d96]">
-            Service status reflects real, verified customer-facing capability. Live automated edge probes running continuously across Indian edge PoPs feed telemetry into Cloudflare D1.
+            The live result is a current endpoint check. Historical marks appear only when the scheduled Cloudflare Worker records a completed check in D1. An unrecorded period remains unknown.
           </p>
         </div>
       </SheetContent>

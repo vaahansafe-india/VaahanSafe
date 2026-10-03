@@ -19,11 +19,11 @@ type Section = {
   }[];
 };
 
-export function LegalDocument({ title, subtitle, status, updated, sections, overview }: { title: string; subtitle: string; status: string; updated: string; sections: readonly Section[]; overview?: { text: string; points: readonly string[] } }) {
-  return <div className="vs-page">
+export function LegalDocument({ title, subtitle, status, updated, sections, overview, variant }: { title: string; subtitle: string; status: string; updated: string; sections: readonly Section[]; overview?: { text: string; points: readonly string[] }; variant?: "privacy" }) {
+  return <div className={`vs-page${variant === "privacy" ? " vs-privacy-document" : ""}`}>
     <SiteHeader />
     <main id="main-content" className="vs-page-main">
-      <section className="vs-page-hero"><div className="vs-container"><span className="vs-kicker">POLICIES / {status === "ACTIVE" ? "CURRENT" : "DRAFT FOR LEGAL REVIEW"}</span><h1>{title}</h1><p>{subtitle}</p><small className="vs-legal-date">Last updated: {updated}</small></div></section>
+      <section className="vs-page-hero"><div className="vs-container"><span className="vs-kicker">POLICIES / {status === "ACTIVE" ? "CURRENT" : "DRAFT FOR LEGAL REVIEW"}</span><h1>{title}</h1><p>{subtitle}</p>{variant === "privacy" ? <div className="vs-privacy-meta" aria-label="Document details"><span>01 / POLICY DOCUMENT</span><span>{status === "ACTIVE" ? "CURRENT EDITION" : "DRAFT FOR LEGAL REVIEW"}</span><span>UPDATED {updated.toUpperCase()}</span></div> : <small className="vs-legal-date">Last updated: {updated}</small>}</div></section>
       <div className="vs-container vs-legal-layout">
         <aside aria-label="On this page"><strong>ON THIS PAGE</strong>{overview && <a href="#policy-overview">In plain language</a>}{sections.map(section => <a key={section.id} href={`#${section.id}`}>{section.index} {section.shortTitle}</a>)}</aside>
         <div className="vs-legal-article">

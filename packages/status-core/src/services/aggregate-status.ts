@@ -61,7 +61,7 @@ export function deriveOverallStatus(
     return {
       overallState: "DEGRADED",
       headline: "Some VaahanSafe services are experiencing disruption.",
-      description: `Elevated latency or delayed processing observed for ${degradedServices}. Responders and users may experience intermittent delays.`,
+      description: `Automated checks could not confirm normal operation for ${degradedServices}. Availability or response times may be affected.`,
     };
   }
 

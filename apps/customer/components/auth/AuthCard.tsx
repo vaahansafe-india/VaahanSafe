@@ -40,8 +40,8 @@ export function AuthCard({
           setErrorMessage("We couldn't verify your Google account. Please try again.");
         } else if (err === "identity_missing") {
           setErrorMessage("Your Google account did not return an email. Please try again.");
-        } else if (err === "auth_failed") {
-          setErrorMessage("Authentication service unavailable. Please check your network or try again.");
+        } else if (err === "auth_failed" || err === "auth_unconfigured") {
+          setErrorMessage("We couldn't complete sign-in right now. Please try again.");
         }
       }
     }
@@ -209,16 +209,6 @@ export function AuthCard({
                   showDivider={mode !== "onboarding"}
                 />
 
-                {mode === "onboarding" && (
-                  <div className="pt-1 text-center">
-                    <a
-                      href={safeReturnUrl(returnUrl)}
-                      className="inline-flex items-center gap-1.5 text-xs text-[#615f59] underline underline-offset-4 transition-colors hover:text-[#a9583e]"
-                    >
-                      Later — continue to your account →
-                    </a>
-                  </div>
-                )}
               </div>
             ) : (
               <OtpVerificationForm
@@ -231,6 +221,17 @@ export function AuthCard({
               />
             )}
           </div>
+
+          {mode === "onboarding" && (
+            <div className="pt-3 text-center">
+              <a
+                href={safeReturnUrl(returnUrl)}
+                className="inline-flex min-h-11 items-center gap-1.5 text-sm text-[#615f59] underline underline-offset-4 transition-colors hover:text-[#a9583e] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#cc785c] focus-visible:ring-offset-2"
+              >
+                Verify later — continue to your account →
+              </a>
+            </div>
+          )}
 
           <div className="mt-[clamp(16px,3vh,32px)] border-t border-[#e2dcd2] pt-[clamp(10px,2vh,20px)]">
             <AuthLegalNotice type="in-card" />

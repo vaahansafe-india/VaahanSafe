@@ -2,7 +2,7 @@ import * as React from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { StatusRepository } from "@vaahansafe/status-core";
+import { getStatusDatabaseClient, StatusRepository } from "@vaahansafe/status-core/server";
 import { StatusHeader } from "../../../components/status/shell/StatusHeader";
 import { StatusFooter } from "../../../components/status/shell/StatusFooter";
 import { IncidentTimeline } from "../../../components/status/incidents/IncidentTimeline";
@@ -17,7 +17,7 @@ export async function generateMetadata({
   params,
 }: IncidentPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const repo = new StatusRepository();
+  const repo = new StatusRepository(getStatusDatabaseClient());
   const incident = await repo.getIncidentBySlug(slug);
 
   if (!incident) {
@@ -37,7 +37,7 @@ export async function generateMetadata({
 
 export default async function IncidentPage({ params }: IncidentPageProps) {
   const { slug } = await params;
-  const repo = new StatusRepository();
+  const repo = new StatusRepository(getStatusDatabaseClient());
   const incident = await repo.getIncidentBySlug(slug);
 
   if (!incident) {

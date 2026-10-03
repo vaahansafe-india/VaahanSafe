@@ -75,15 +75,11 @@ describe("VaahanSafe Status — Public Projection, System Pulse & Zero-Leak Inva
       expect(content).toContain("LATEST UPDATE");
     });
 
-    it("ReliabilityField.tsx avoids synthetic 99.99% percentages and provides accessible text summary", () => {
-      const historyPath = path.join(statusAppDir, "components/status/history/ReliabilityField.tsx");
-      expect(fs.existsSync(historyPath)).toBe(true);
-
-      const content = fs.readFileSync(historyPath, "utf-8");
-      expect(content).toContain("RELIABILITY / RECORDED HISTORY");
-      expect(content).toContain("NO SYNTHETIC RATINGS");
-      expect(content).toContain("sr-only"); // Accessible summary
-      expect(content).not.toContain("99.99%");
+    it("does not render synthetic daily reliability history", () => {
+      const dashboard = fs.readFileSync(path.join(statusAppDir, "components/status/StatusDashboard.tsx"), "utf-8");
+      const historyPage = fs.readFileSync(path.join(statusAppDir, "app/history/page.tsx"), "utf-8");
+      expect(dashboard).not.toContain("ReliabilityField");
+      expect(historyPage).not.toContain("ReliabilityField");
     });
   });
 

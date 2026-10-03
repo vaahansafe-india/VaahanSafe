@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { getWebUrl } from "@vaahansafe/config";
@@ -22,6 +23,7 @@ export function StatusHeader({ statusLabel, isDegradedOrOutage }: StatusHeaderPr
     rawWebUrl === "https://vaahansafe.com" ? "https://www.vaahansafe.com" : rawWebUrl;
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const menuButtonRef = React.useRef<HTMLButtonElement>(null);
 
   // Close menu on route change
   React.useEffect(() => {
@@ -37,6 +39,39 @@ export function StatusHeader({ statusLabel, isDegradedOrOutage }: StatusHeaderPr
     }
     return () => {
       document.body.style.overflow = "";
+    };
+  }, [mobileMenuOpen]);
+
+  React.useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const menu = document.getElementById("status-mobile-menu");
+    const links = Array.from(menu?.querySelectorAll<HTMLAnchorElement>("a") ?? []);
+    links[0]?.focus();
+    const handleKeys = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setMobileMenuOpen(false);
+        menuButtonRef.current?.focus();
+      }
+      if (event.key === "Tab" && links.length) {
+        const first = links[0]!;
+        const last = links[links.length - 1]!;
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      }
+    };
+    const closeOnDesktop = () => {
+      if (window.innerWidth >= 768) setMobileMenuOpen(false);
+    };
+    window.addEventListener("keydown", handleKeys);
+    window.addEventListener("resize", closeOnDesktop);
+    return () => {
+      window.removeEventListener("keydown", handleKeys);
+      window.removeEventListener("resize", closeOnDesktop);
     };
   }, [mobileMenuOpen]);
 
@@ -59,9 +94,11 @@ export function StatusHeader({ statusLabel, isDegradedOrOutage }: StatusHeaderPr
                 className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full ring-2 ring-white dark:ring-[#181715] ${
                   isDegradedOrOutage
                     ? "bg-[#c64545] animate-pulse"
-                    : "bg-[#5db872]"
+                    : statusLabel === "OPERATIONAL"
+                      ? "bg-[#5db872]"
+                      : "bg-[#8e8b82]"
                 }`}
-                title={isDegradedOrOutage ? "Degraded or Outage" : "Operational"}
+                title={statusLabel ?? "Condition unconfirmed"}
               />
             </div>
 
@@ -121,10 +158,12 @@ export function StatusHeader({ statusLabel, isDegradedOrOutage }: StatusHeaderPr
 
           {/* Mobile Hamburger Menu Button */}
           <button
+            ref={menuButtonRef}
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="flex md:hidden h-8 w-8 items-center justify-center rounded-lg border border-[#e6dfd8] text-[#141413] hover:bg-[#f5f0e8] dark:border-[#2e2b27] dark:text-[#faf9f5] dark:hover:bg-[#1f1e1b] transition-colors"
             aria-expanded={mobileMenuOpen}
+            aria-controls="status-mobile-menu"
             aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
           >
             {mobileMenuOpen ? (
@@ -141,8 +180,8 @@ export function StatusHeader({ statusLabel, isDegradedOrOutage }: StatusHeaderPr
       </div>
 
       {/* Mobile Drawer Overlay */}
-      {mobileMenuOpen && (
-        <div className="md:hidden fixed inset-x-0 top-14 bottom-0 z-40 bg-[#faf9f5]/98 dark:bg-[#181715]/98 backdrop-blur-lg border-b border-[#e6dfd8] dark:border-[#2e2b27] px-6 py-8 animate-in fade-in slide-in-from-top-2 duration-200 overflow-y-auto">
+      {mobileMenuOpen && createPortal(
+        <div id="status-mobile-menu" role="dialog" aria-modal="true" aria-label="Status navigation" className="md:hidden fixed inset-x-0 top-14 bottom-0 z-40 bg-[#faf9f5] dark:bg-[#181715] border-b border-[#e6dfd8] dark:border-[#2e2b27] px-6 py-8 animate-in fade-in slide-in-from-top-2 duration-200 overflow-y-auto">
           <div className="flex flex-col gap-6">
             <div className="font-mono text-[9px] uppercase tracking-[0.24em] text-[#cc785c] font-semibold">
               NAVIGATION &bull; STATUS PORTAL
@@ -196,7 +235,8 @@ export function StatusHeader({ statusLabel, isDegradedOrOutage }: StatusHeaderPr
               <div>CLOUDFLARE EDGE &bull; REAL LIVE TELEMETRY</div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </header>
   );

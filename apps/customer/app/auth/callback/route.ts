@@ -86,7 +86,7 @@ export async function GET(request: NextRequest) {
       picture?: string;
     };
 
-    if (!profile.sub || !profile.email) {
+    if (!profile.sub || !profile.email || profile.email_verified !== true) {
       throw new Error("Verified Google identity missing required fields");
     }
 
@@ -107,7 +107,11 @@ export async function GET(request: NextRequest) {
       throw new Error("Google identity belongs to another account");
     }
 
-    let user = await users.findById(linkSession?.userId || existingIdentity?.userId || "");
+    // New Google users have no internal ID yet. An empty ID is invalid for
+    // the production UUID column and must never be sent to the repository.
+    const knownUserId = linkSession?.userId || existingIdentity?.userId;
+    let user = knownUserId ? await users.findById(knownUserId) : null;
+    if (knownUserId && !user) throw new Error("Identity account unavailable");
     const emailOwner = await users.findByEmail(email);
 
     if (linkSession && emailOwner && emailOwner.id !== linkSession.userId) {
@@ -120,7 +124,7 @@ export async function GET(request: NextRequest) {
       id: user?.id || crypto.randomUUID(),
       email,
       name: user?.name || profile.name || "",
-      ...(user ? {} : { role: "CUSTOMER" as const, status: "ACTIVE" as const, onboardingState: "AUTHENTICATED" as const }),
+      ...(user ? {} : { role: "CUSTOMER" as const, status: "ACTIVE" as const, onboardingState: "PHONE_REQUIRED" as const }),
     });
 
     await identities.linkIdentity({
@@ -157,7 +161,7 @@ export async function GET(request: NextRequest) {
       identity => identity.provider === "PHONE" && identity.providerSubject === user.phone && identity.verifiedAt
     );
     const returnUrl = safeReturnUrl(request.cookies.get("vs_google_return")?.value);
-    const target = phoneVerified ? returnUrl : `/onboarding/verification?returnUrl=${encodeURIComponent(returnUrl)}`;
+    const target = phoneVerified ? returnUrl : `/onboarding/phone?returnUrl=${encodeURIComponent(returnUrl)}`;
 
     const { rawToken } = await issueSession(user.id, sessions, {
       userAgent: request.headers.get("user-agent") || undefined,
