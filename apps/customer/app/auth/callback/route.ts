@@ -120,7 +120,6 @@ export async function GET(request: NextRequest) {
       id: user?.id || crypto.randomUUID(),
       email,
       name: user?.name || profile.name || "",
-      avatarUrl: user?.avatarUrl || profile.picture || undefined,
       ...(user ? {} : { role: "CUSTOMER" as const, status: "ACTIVE" as const, onboardingState: "AUTHENTICATED" as const }),
     });
 
