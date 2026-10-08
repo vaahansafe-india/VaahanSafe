@@ -64,6 +64,19 @@ describe("Provider-owned WhatsApp OTP", () => {
       false,
     );
   });
+  it("logs a safe rejection category without the provider's sensitive message", async () => {
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({
+      message: "Invalid authentication for private-credential phone 919876543210 code 675829",
+    }), { status: 403, headers: { "Content-Type": "application/json" } })));
+    try {
+      await expect(adapter().send({ phone, channel: "WHATSAPP" })).rejects.toThrow("provider unavailable");
+      expect(log).toHaveBeenCalledWith("[MSG91 OTP] Request rejected", {
+        method: "sendOtp", status: 403, code: "PROVIDER_ERROR", category: "AUTH_REJECTED", responseFormat: "JSON",
+      });
+      expect(JSON.stringify(log.mock.calls)).not.toMatch(/private-credential|919876543210|675829/);
+    } finally { log.mockRestore(); }
+  });
   it("validates the access token with MSG91 and binds the resulting phone", async () => {
     const fetch = vi
       .fn()

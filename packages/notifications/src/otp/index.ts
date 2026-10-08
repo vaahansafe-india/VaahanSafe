@@ -63,9 +63,17 @@ export class Msg91OtpAdapter implements IOtpService {
       );
       if (!response.ok) {
         // Log operational metadata only: never payloads, phone numbers or codes.
-        const rejected = await response.json().catch(() => ({})) as { code?: unknown };
+        const rejected = await response.json().catch(() => ({})) as { code?: unknown; message?: unknown };
         const code = String(rejected.code || "");
-        console.error("[MSG91 OTP] Request rejected", { method, status: response.status, code: /^[a-zA-Z0-9_-]{1,32}$/.test(code) ? code : "PROVIDER_ERROR" });
+        const message = typeof rejected.message === "string" ? rejected.message : "";
+        const category = /captcha/i.test(message) ? "CAPTCHA_REQUIRED"
+          : /whitelist|ip.*(?:blocked|restricted|denied)/i.test(message) ? "IP_RESTRICTED"
+          : /invalid.*auth|auth.*(?:invalid|fail)|unauthori[sz]ed/i.test(message) ? "AUTH_REJECTED"
+          : /disabled/i.test(message) ? "SERVICE_DISABLED" : "UNCLASSIFIED";
+        const contentType = response.headers.get("content-type") || "";
+        console.error("[MSG91 OTP] Request rejected", { method, status: response.status,
+          code: /^[a-zA-Z0-9_-]{1,32}$/.test(code) ? code : "PROVIDER_ERROR", category,
+          responseFormat: /json/i.test(contentType) ? "JSON" : /html/i.test(contentType) ? "HTML" : "OTHER" });
         throw new Error("OTP provider request failed");
       }
       return (await response.json()) as {
