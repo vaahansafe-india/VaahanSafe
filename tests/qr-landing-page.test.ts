@@ -28,22 +28,19 @@ describe("VaahanSafe QR Landing Page Architecture & Route Isolation (qr.vaahansa
       const rootContent = fs.readFileSync(rootPagePath, "utf8");
       expect(rootContent).toContain("LandingExperience");
 
-      const experienceContent = fs.readFileSync(path.join(landingDir, "LandingExperience.tsx"), "utf8");
+      const experienceContent = fs.readFileSync(
+        path.join(landingDir, "LandingExperience.tsx"),
+        "utf8",
+      );
       expect(experienceContent).toContain("QrLandingHeader");
       expect(experienceContent).toContain("IdentityHero");
-      expect(experienceContent).toContain("IdentityPath");
       expect(experienceContent).toContain("HowItWorks");
       expect(experienceContent).toContain("PublicViewDemo");
       expect(experienceContent).toContain("PrivacyChapter");
       expect(experienceContent).toContain("QrLifecycleSection");
-      expect(experienceContent).toContain("StickerAnatomy");
-      expect(experienceContent).toContain("ScanSituations");
       expect(experienceContent).toContain("ActivationHandoff");
-      expect(experienceContent).toContain("QrPrinciples");
       expect(experienceContent).toContain("QrFaq");
-      expect(experienceContent).toContain("FinalIdentityStatement");
       expect(experienceContent).toContain("QrLandingFooter");
-      expect(experienceContent).toContain("VaahanScannerModal");
     });
   });
 
@@ -71,29 +68,41 @@ describe("VaahanSafe QR Landing Page Architecture & Route Isolation (qr.vaahansa
   // --------------------------------------------------------------------------
   describe("Narrative Copy, Identity Statements & Demo Security", () => {
     it("IdentityHero contains the signature editorial statement and system label", () => {
-      const heroContent = fs.readFileSync(path.join(landingDir, "IdentityHero.tsx"), "utf8");
+      const heroContent = fs.readFileSync(
+        path.join(landingDir, "IdentityHero.tsx"),
+        "utf8",
+      );
       expect(heroContent).toContain("Your vehicle");
       expect(heroContent).toContain("safety identity");
-      expect(heroContent).toContain("VaahanSafe / Public QR System");
+      expect(heroContent).toContain("No app or account needed");
     });
 
     it("PhysicalQrArtifact displays explicit DEMO label and registration marks", () => {
-      const artifactContent = fs.readFileSync(path.join(landingDir, "PhysicalQrArtifact.tsx"), "utf8");
+      const artifactContent = fs.readFileSync(
+        path.join(landingDir, "PhysicalQrArtifact.tsx"),
+        "utf8",
+      );
       expect(artifactContent).toContain("DEMO / NON-FUNCTIONAL");
       expect(artifactContent).toContain("VS-7F3K-9021");
       expect(artifactContent).toContain("Physical Vehicle");
       expect(artifactContent).toContain("Public Safety View");
     });
 
-    it("PublicViewDemo action is non-functional and protects against arbitrary dialing", () => {
-      const demoContent = fs.readFileSync(path.join(landingDir, "PublicViewDemo.tsx"), "utf8");
-      expect(demoContent).toContain("Demonstration only. No phone call placed.");
-      expect(demoContent).toContain("PUBLIC VIEW / DEMONSTRATION");
-      expect(demoContent).not.toMatch(/href="tel:[^+]/); // No fake unformatted tel: links
+    it("Safety view explanation does not contain fictional records or call actions", () => {
+      const content = fs.readFileSync(
+        path.join(landingDir, "PublicViewDemo.tsx"),
+        "utf8",
+      );
+      expect(content).not.toContain("VS-7F3K-9021");
+      expect(content).not.toContain("tel:");
+      expect(content).toContain("owner has approved");
     });
 
     it("ProjectionBoundaryDiagram visualizes private account storage vs public projection", () => {
-      const diagramContent = fs.readFileSync(path.join(landingDir, "ProjectionBoundaryDiagram.tsx"), "utf8");
+      const diagramContent = fs.readFileSync(
+        path.join(landingDir, "ProjectionBoundaryDiagram.tsx"),
+        "utf8",
+      );
       expect(diagramContent).toContain("Only the approved public view");
       expect(diagramContent).toContain("is returned to a scan");
       expect(diagramContent).toContain("Approved Safety View");
@@ -102,23 +111,31 @@ describe("VaahanSafe QR Landing Page Architecture & Route Isolation (qr.vaahansa
       expect(diagramContent).toContain("BLOCKED");
     });
 
-    it("PrivacyChapter uses signature dark #181715 container and clear editorial headline", () => {
-      const privacyContent = fs.readFileSync(path.join(landingDir, "PrivacyChapter.tsx"), "utf8");
-      expect(privacyContent).toContain("#181715");
-      expect(privacyContent).toContain("A QR can be public.");
-      expect(privacyContent).toContain("Your whole identity");
+    it("PrivacyChapter explains controlled sharing with transparent artwork", () => {
+      const privacyContent = fs.readFileSync(
+        path.join(landingDir, "PrivacyChapter.tsx"),
+        "utf8",
+      );
+      expect(privacyContent).toContain("qr-privacy-concept.webp");
+      expect(privacyContent).toContain("Public QR.");
+      expect(privacyContent).toContain("Personal boundaries.");
     });
 
     it("QrLifecycleSection explains the 4 safe public states without internal logistics", () => {
-      const lifecycleContent = fs.readFileSync(path.join(landingDir, "QrLifecycleSection.tsx"), "utf8");
-      expect(lifecycleContent).toContain("READY TO ACTIVATE");
-      expect(lifecycleContent).toContain("ACTIVE");
-      expect(lifecycleContent).toContain("REPLACED");
-      expect(lifecycleContent).toContain("UNAVAILABLE");
+      const lifecycleContent = fs.readFileSync(
+        path.join(landingDir, "QrLifecycleSection.tsx"),
+        "utf8",
+      );
+      expect(lifecycleContent).toContain("Ready to activate");
+      expect(lifecycleContent).toContain("Safety view enabled");
+      expect(lifecycleContent).toContain("Replaced or unavailable");
     });
 
     it("StickerAnatomy provides 5 clear annotations of the physical sticker", () => {
-      const anatomyContent = fs.readFileSync(path.join(landingDir, "StickerAnatomy.tsx"), "utf8");
+      const anatomyContent = fs.readFileSync(
+        path.join(landingDir, "StickerAnatomy.tsx"),
+        "utf8",
+      );
       expect(anatomyContent).toContain("Opaque Resolver Matrix");
       expect(anatomyContent).toContain("Visible VaahanSafe ID");
       expect(anatomyContent).toContain("VaahanSafe Identity Emblem");
@@ -128,32 +145,52 @@ describe("VaahanSafe QR Landing Page Architecture & Route Isolation (qr.vaahansa
     });
 
     it("ActivationHandoff links to official activate.vaahansafe.com domain", () => {
-      const handoffContent = fs.readFileSync(path.join(landingDir, "ActivationHandoff.tsx"), "utf8");
+      const handoffContent = fs.readFileSync(
+        path.join(landingDir, "ActivationHandoff.tsx"),
+        "utf8",
+      );
       expect(handoffContent).toContain("getActivateUrl");
-      expect(handoffContent).toContain("One Physical QR");
-      expect(handoffContent).toContain("One Controlled Vehicle Identity");
+      expect(handoffContent).toContain("Verify your mobile");
+      expect(handoffContent).toContain("activation proof");
     });
 
     it("QrPrinciples lists all 5 non-negotiable safety principles", () => {
-      const principlesContent = fs.readFileSync(path.join(landingDir, "QrPrinciples.tsx"), "utf8");
+      const principlesContent = fs.readFileSync(
+        path.join(landingDir, "QrPrinciples.tsx"),
+        "utf8",
+      );
       expect(principlesContent).toContain("Scan does not mean ownership");
-      expect(principlesContent).toContain("Public ID is not an activation secret");
-      expect(principlesContent).toContain("Private data stays behind the projection");
+      expect(principlesContent).toContain(
+        "Public ID is not an activation secret",
+      );
+      expect(principlesContent).toContain(
+        "Private data stays behind the projection",
+      );
       expect(principlesContent).toContain("An old QR can be cleanly retired");
-      expect(principlesContent).toContain("The QR is an information & connection tool");
+      expect(principlesContent).toContain(
+        "The QR is an information & connection tool",
+      );
     });
 
-    it("QrFaq provides 8 accessible accordion FAQ items", () => {
-      const faqContent = fs.readFileSync(path.join(landingDir, "QrFaq.tsx"), "utf8");
-      expect(faqContent).toContain("Accordion");
-      expect(faqContent).toContain("faq-1");
-      expect(faqContent).toContain("faq-8");
-      expect(faqContent).toContain("Does someone need a VaahanSafe account or app to scan it?");
-      expect(faqContent).toContain("Does VaahanSafe replace official emergency services?");
+    it("QrFaq uses native accessible disclosure controls", () => {
+      const faqContent = fs.readFileSync(
+        path.join(landingDir, "QrFaq.tsx"),
+        "utf8",
+      );
+      expect(faqContent).toContain("<details");
+      expect(faqContent).toContain("<summary>");
+      expect(faqContent).toContain("questions.map");
+      expect(faqContent).toContain("Do I need an account to scan a QR?");
+      expect(faqContent).toContain(
+        "Does VaahanSafe replace emergency services?",
+      );
     });
 
     it("QrLandingFooter contains the mandatory official 112 / 108 emergency service disclaimer", () => {
-      const footerContent = fs.readFileSync(path.join(landingDir, "QrLandingFooter.tsx"), "utf8");
+      const footerContent = fs.readFileSync(
+        path.join(landingDir, "QrLandingFooter.tsx"),
+        "utf8",
+      );
       expect(footerContent).toContain("Emergency Service Notice");
       expect(footerContent).toContain("112 / 108");
       expect(footerContent).toContain("VaahanSafe Platform");

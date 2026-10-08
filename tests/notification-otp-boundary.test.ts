@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import {
   NOTIFICATION_EVENT_TYPES,
   NotificationQueueMessageV1Schema,
@@ -6,13 +6,17 @@ import {
   Msg91OtpAdapter,
 } from "@vaahansafe/notifications";
 
+afterEach(() => vi.unstubAllGlobals());
 describe("OTP Boundary & Privacy Isolation", () => {
   it("Scenario D: NOTIFICATION_QUEUE down; OTP architecture remains separate and operational", async () => {
     // 1. Simulate NOTIFICATION_QUEUE is completely unavailable/offline
     const isNotificationQueueOnline = false;
 
     // 2. Auth OTP path uses synchronous OTP service directly
-    const otpService = new Msg91OtpAdapter("test_auth_key", "test_template");
+    vi.stubGlobal("fetch", vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ type: "success", request_id: "provider-reference" })))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ type: "success", message: "OTP verified successfully" }))));
+    const otpService = new Msg91OtpAdapter("credential-fixture", "approved-template-fixture");
     const sendResult = await otpService.send({ phone: "+919876543210" });
 
     // OTP succeeds synchronously without touching NOTIFICATION_QUEUE

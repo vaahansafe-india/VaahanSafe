@@ -1,35 +1,39 @@
 "use client";
-
-import * as React from "react";
+import { useEffect, useRef } from "react";
 
 export function ReadingProgressBar() {
-  const [progress, setProgress] = React.useState(0);
-
-  React.useEffect(() => {
-    const handleScroll = () => {
-      const totalHeight =
-        document.documentElement.scrollHeight - window.innerHeight;
-      if (totalHeight <= 0) {
-        setProgress(0);
-        return;
-      }
-      const currentScroll = window.scrollY;
-      const currentProgress = (currentScroll / totalHeight) * 100;
-      setProgress(Math.min(100, Math.max(0, currentProgress)));
+  const progressRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    let frame = 0;
+    function update() {
+      const total = document.documentElement.scrollHeight - window.innerHeight;
+      const progress =
+        total > 0 ? Math.min(1, Math.max(0, window.scrollY / total)) : 0;
+      if (progressRef.current)
+        progressRef.current.style.transform = `scaleX(${progress})`;
+      frame = 0;
+    }
+    function schedule() {
+      if (!frame) frame = requestAnimationFrame(update);
+    }
+    update();
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    return () => {
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+      cancelAnimationFrame(frame);
     };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
   return (
     <div
       aria-hidden="true"
-      className="fixed top-0 left-0 right-0 z-50 h-[3px] bg-transparent pointer-events-none"
+      className="pointer-events-none fixed inset-x-0 top-0 z-50 h-[2px]"
     >
       <div
-        className="h-full bg-[#cc785c] transition-all duration-75 ease-out"
-        style={{ width: `${progress}%` }}
+        ref={progressRef}
+        className="h-full origin-left bg-[var(--journal-accent)]"
+        style={{ transform: "scaleX(0)" }}
       />
     </div>
   );

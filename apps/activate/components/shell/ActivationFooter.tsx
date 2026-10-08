@@ -3,8 +3,8 @@ import Link from "next/link";
 
 export function ActivationFooter() {
   return (
-    <footer className="w-full border-t border-border bg-background/80 py-5 transition-colors">
-      <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 px-4 text-xs text-muted-foreground sm:flex-row sm:px-6 lg:px-8">
+    <footer className="w-full border-t border-border bg-background/75 py-6 transition-colors">
+      <div className="activation-frame flex flex-col items-center justify-between gap-4 text-xs text-muted-foreground sm:flex-row">
         {/* Brand context label */}
         <div className="flex items-center gap-2 font-mono text-[11px] text-muted-foreground">
           <span className="font-bold text-foreground">VAAHANSAFE</span>

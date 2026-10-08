@@ -1,33 +1,44 @@
-import React from "react";
-import { ProjectionBoundaryDiagram } from "./ProjectionBoundaryDiagram";
-
+import Image from "next/image";
 export function PrivacyChapter() {
   return (
-    <section id="privacy" className="w-full py-16 sm:py-24 bg-[#181715] text-[#FAF9F5] border-b border-border/40">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-12">
-        {/* Editorial Statement */}
-        <div className="max-w-3xl space-y-4">
-          <div className="inline-flex items-center gap-2">
-            <span className="size-2 rounded-full bg-[#CC785C]" />
-            <span className="font-mono text-xs uppercase tracking-widest text-[#CC785C] font-semibold">
-              Privacy / Projection Architecture
-            </span>
-          </div>
-
-          <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-normal tracking-tight text-[#FAF9F5] leading-[1.12]">
-            A QR can be public. <br />
-            <span className="italic text-[#CC785C]">Your whole identity doesn&apos;t have to be.</span>
+    <section id="privacy" className="qr-section">
+      <div className="qr-container qr-split">
+        <figure>
+          <Image
+            src="/images/qr-privacy-concept.webp"
+            alt="Illustration of a windshield QR, a phone, and a shield representing controlled access to safety information"
+            width={1400}
+            height={933}
+            sizes="(max-width: 767px) calc(100vw - 32px), 45vw"
+            className="qr-hero-art"
+          />
+        </figure>
+        <div>
+          <p className="qr-label">02 / Thoughtfully shared</p>
+          <h2 className="qr-section-title mt-3">
+            Public QR.
+            <br />
+            <em>Personal boundaries.</em>
           </h2>
-
-          <p className="text-sm sm:text-base text-[#FAF9F5]/70 leading-relaxed font-sans max-w-2xl">
-            Most QR codes either dump raw phone numbers into plain text or expose full user profiles.
-            VaahanSafe uses server-side whitelisting to expose only the specific safety details you authorize.
+          <p className="qr-muted mt-5 leading-relaxed">
+            The sticker opens a limited safety view. The owner controls which
+            supported details appear, and the server checks whether the QR’s
+            safety service is enabled.
           </p>
-        </div>
-
-        {/* Boundary Diagram Embedded in Dark Section */}
-        <div className="pt-2 text-foreground">
-          <ProjectionBoundaryDiagram />
+          <ul className="qr-detail-list">
+            <li>
+              <span aria-hidden="true">01</span>Only owner-approved safety
+              details are shown.
+            </li>
+            <li>
+              <span aria-hidden="true">02</span>Account credentials, billing
+              details and home addresses stay private.
+            </li>
+            <li>
+              <span aria-hidden="true">03</span>Scanning a sticker does not give
+              ownership or activate it.
+            </li>
+          </ul>
         </div>
       </div>
     </section>

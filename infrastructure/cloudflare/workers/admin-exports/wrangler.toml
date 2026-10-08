@@ -1,0 +1,14 @@
+name = "vaahansafe-admin-exports"
+main = "src/index.ts"
+compatibility_date = "2026-09-01"
+workers_dev = false
+preview_urls = false
+
+[triggers]
+crons = ["* * * * *"]
+
+[[r2_buckets]]
+binding = "EXPORT_STORAGE"
+bucket_name = "vaahansafe-prod-exports"
+
+# Secrets: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY. Never place credentials here.

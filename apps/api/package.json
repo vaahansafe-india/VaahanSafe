@@ -12,8 +12,10 @@
   },
   "dependencies": {
     "@vaahansafe/auth": "*",
+    "@vaahansafe/commerce": "*",
     "@vaahansafe/config": "*",
     "@vaahansafe/database": "*",
+    "@vaahansafe/notifications": "*",
     "@vaahansafe/observability": "*",
     "@vaahansafe/payments": "*",
     "@vaahansafe/qr-core": "*",

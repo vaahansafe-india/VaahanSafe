@@ -5,12 +5,14 @@ import { Input, Button } from "@vaahansafe/ui/components";
 import { VaahanIcon } from "@vaahansafe/icons";
 import { MobileOtpStep } from "./MobileOtpStep";
 import type { ActivationSessionUserDto } from "@/lib/types";
+import { useOtpAvailability } from "@vaahansafe/ui/lib/use-otp-availability";
 
 interface ActivationAuthProps {
   onAuthenticated: (user: ActivationSessionUserDto) => void;
 }
 
 export function ActivationAuth({ onAuthenticated }: ActivationAuthProps) {
+  const availability = useOtpAvailability("/api/activate/auth/send-otp");
   const [step, setStep] = useState<"phone" | "otp">("phone");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [maskedPhone, setMaskedPhone] = useState("");
@@ -32,11 +34,11 @@ export function ActivationAuth({ onAuthenticated }: ActivationAuthProps) {
       const res = await fetch("/api/activate/auth/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: digitsOnly }),
+        body: JSON.stringify({ phone: digitsOnly, channel: "WHATSAPP" }),
       });
 
       const data = await res.json();
-      if (data.success) {
+      if (res.ok && data.success) {
         setMaskedPhone(data.maskedPhone || `+91 ••••• ${digitsOnly.slice(-4)}`);
         setStep("otp");
       } else {
@@ -61,7 +63,7 @@ export function ActivationAuth({ onAuthenticated }: ActivationAuthProps) {
       });
 
       const data = await res.json();
-      if (data.success && data.user) {
+      if (res.ok && data.success && data.user) {
         onAuthenticated(data.user);
       } else {
         setError(data.error || "That code couldn't be verified. Check the code and try again.");
@@ -78,11 +80,12 @@ export function ActivationAuth({ onAuthenticated }: ActivationAuthProps) {
     const res = await fetch("/api/activate/auth/send-otp", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ phone: phoneNumber }),
+      body: JSON.stringify({ phone: phoneNumber, channel: "WHATSAPP" }),
     });
     const data = await res.json();
-    if (!data.success) {
+    if (!res.ok || !data.success) {
       setError(data.error || "Failed to resend code.");
+      throw new Error("Resend unavailable");
     }
   };
 
@@ -90,12 +93,12 @@ export function ActivationAuth({ onAuthenticated }: ActivationAuthProps) {
     <div className="space-y-6">
       {/* Header */}
       <div className="space-y-2">
-        <h1 className="font-serif text-3xl sm:text-4xl text-foreground font-normal tracking-tight">
+        <h2 className="font-serif text-3xl sm:text-4xl text-foreground font-normal tracking-tight">
           Verify Your Mobile Number
-        </h1>
+        </h2>
 
         <p className="text-xs sm:text-sm text-muted-foreground max-w-lg leading-relaxed">
-          Enter your 10-digit mobile number to verify your account via SMS OTP. Scanners will never see this number.
+          Enter your WhatsApp mobile number. We&apos;ll send a six-digit code to verify your account. Scanners will never see this number.
         </p>
       </div>
 
@@ -129,7 +132,7 @@ export function ActivationAuth({ onAuthenticated }: ActivationAuthProps) {
                 disabled={isLoading}
                 autoFocus
                 autoComplete="tel"
-                className="h-13 pl-20 pr-4 font-mono text-base tracking-wider rounded-lg border-border bg-background focus-visible:ring-primary"
+                className="h-13 pl-20 pr-4 font-mono text-base tracking-wider rounded-sm border-border bg-background focus-visible:ring-primary"
               />
             </div>
 
@@ -143,8 +146,8 @@ export function ActivationAuth({ onAuthenticated }: ActivationAuthProps) {
 
           <Button
             type="submit"
-            disabled={isLoading || phoneNumber.length < 10}
-            className="w-full h-12 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-semibold transition-colors shadow-sm disabled:opacity-50"
+            disabled={isLoading || phoneNumber.length < 10 || availability.loading || !availability.channels.WHATSAPP}
+            className="w-full h-12 rounded-sm bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-semibold transition-colors shadow-sm disabled:opacity-50"
           >
             {isLoading ? (
               <div className="flex items-center gap-2">
@@ -160,7 +163,12 @@ export function ActivationAuth({ onAuthenticated }: ActivationAuthProps) {
           </Button>
 
           <p className="border-t border-border pt-3 text-[11px] font-mono text-muted-foreground">
-            We will text a one-time verification code to this number.
+            {availability.loading ? "Checking verification availability…" : availability.channels.WHATSAPP
+              ? "Your private WhatsApp code expires in five minutes. Never share it with anyone."
+              : "Mobile verification is temporarily unavailable. Please try again later."}
+            {!availability.loading && !availability.channels.WHATSAPP && (
+              <button type="button" onClick={() => void availability.refresh()} className="ml-2 underline underline-offset-4">Check again</button>
+            )}
           </p>
         </form>
       ) : (

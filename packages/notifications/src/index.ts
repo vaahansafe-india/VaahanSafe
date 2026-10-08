@@ -20,3 +20,4 @@ export * from "./adapters";
 export * from "./errors";
 export * from "./otp";
 export * from "./email";
+export * from "./whatsapp";

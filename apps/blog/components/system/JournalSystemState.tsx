@@ -27,13 +27,16 @@ export function JournalSystemState({
   headerStatusLabel,
 }: JournalSystemStateProps) {
   return (
-    <div className="flex min-h-screen w-full flex-col bg-[#faf9f5] text-[#141413] antialiased selection:bg-[#cc785c]/20 selection:text-[#141413] dark:bg-[#181715] dark:text-[#faf9f5]">
+    <div className="flex min-h-screen w-full flex-col">
       {/* 1. Minimal Publication Masthead */}
-      <SystemStateHeader statusLabel={headerStatusLabel || stateLabel.split("•")[0]?.trim()} />
+      <SystemStateHeader
+        statusLabel={headerStatusLabel || stateLabel.split("•")[0]?.trim()}
+      />
 
       {/* 2. Main Center Editorial Layout */}
       <main
         id="main-content"
+        tabIndex={-1}
         className="flex flex-1 items-center justify-center px-4 py-16 sm:px-6 sm:py-24 lg:px-8"
       >
         <div className="w-full max-w-2xl space-y-8">
@@ -77,20 +80,29 @@ export function JournalSystemState({
           {actions && <div className="pt-4">{actions}</div>}
 
           {/* Optional Content Inset (e.g. recent safe stories for 404) */}
-          {children && <div className="pt-6 border-t border-[#e6dfd8] dark:border-[#2e2b27]">{children}</div>}
+          {children && (
+            <div className="pt-6 border-t border-[#e6dfd8] dark:border-[#2e2b27]">
+              {children}
+            </div>
+          )}
         </div>
       </main>
 
       {/* 3. Minimal Technical Footer */}
       <footer className="w-full border-t border-[#e6dfd8] py-4 dark:border-[#2e2b27]">
         <div className="mx-auto flex max-w-[1240px] flex-wrap items-center justify-between gap-4 px-4 sm:px-6 lg:px-8 font-mono text-[9px] uppercase tracking-wider text-[#8e8b82] dark:text-[#77736d]">
-          <div>VAAHANSAFE JOURNAL &bull; CALM SYSTEM ARCHITECTURE</div>
+          <div>
+            VAAHANSAFE JOURNAL &bull; VEHICLE SAFETY, IDENTITY &amp; PRIVACY
+          </div>
           <div className="flex items-center gap-3">
             <Link href="/" className="hover:text-[#cc785c] transition-colors">
               Journal Home
             </Link>
             <span>&bull;</span>
-            <Link href="/guides" className="hover:text-[#cc785c] transition-colors">
+            <Link
+              href="/guides"
+              className="hover:text-[#cc785c] transition-colors"
+            >
               Guides
             </Link>
             <span>&bull;</span>

@@ -6,12 +6,14 @@ import {
   verifyMobileForGoogleUser,
   issueSession,
   serializeSessionCookie,
+  OtpRequestGuard,
 } from "@vaahansafe/auth";
 import {
   getUserRepository,
   getAuthIdentityRepository,
   getSessionRepository,
   getNotificationRepositories,
+  getCloudflareDatabaseClient,
   getSupabaseAdminClient,
 } from "@vaahansafe/database";
 import { getAuthenticatedCustomer } from "@/lib/session";
@@ -47,7 +49,8 @@ export async function POST(req: Request) {
 
     // Verify OTP via MSG91
     const otpService = new Msg91OtpAdapter();
-    const verifyResult = await otpService.verify(normalizedE164, rawOtp);
+    const verifyResult = await new OtpRequestGuard(getCloudflareDatabaseClient(), "CUSTOMER")
+      .verify(normalizedE164, req, (challenge) => otpService.verify(normalizedE164, rawOtp, challenge.requestId, challenge.channel));
 
     if (!verifyResult.success) {
       return NextResponse.json(

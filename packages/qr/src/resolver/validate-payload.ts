@@ -42,6 +42,14 @@ const ALLOWED_HOSTS = new Set([
  * Parses and validates an untrusted QR string scanned by the camera or manual entry.
  * Guarantees that only valid VaahanSafe identities on the approved domain are accepted.
  */
+function normalizeScannedId(value: string): string {
+  const upper = value.toUpperCase();
+  // Canonical printed 8-character support codes insert a separator after four characters.
+  if (/^VS-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(upper))
+    return upper.slice(3).replace(/-/g, "");
+  return upper.replace(/^VS-/, "");
+}
+
 export function parseVaahanSafeQrPayload(raw: string): QrPayloadParseResult {
   if (!raw || typeof raw !== "string") {
     return { valid: false, rawPayload: "", reason: "EMPTY_PAYLOAD" };
@@ -54,7 +62,7 @@ export function parseVaahanSafeQrPayload(raw: string): QrPayloadParseResult {
 
   // 1. Direct Alphanumeric Identifier fallback (e.g. VS-7F3K-9021 or 7F3K9021)
   if (!trimmed.includes("://") && !trimmed.includes("/")) {
-    const cleanId = trimmed.toUpperCase().replace(/^VS-/, "");
+    const cleanId = normalizeScannedId(trimmed);
     if (isValidPublicIdFormat(cleanId)) {
       return { valid: true, publicId: cleanId, rawPayload: trimmed };
     }
@@ -70,8 +78,14 @@ export function parseVaahanSafeQrPayload(raw: string): QrPayloadParseResult {
   }
 
   // 3. Protocol Validation
-  const isLocal = parsedUrl.hostname === "localhost" || parsedUrl.hostname === "127.0.0.1" || parsedUrl.hostname === "0.0.0.0";
-  if (parsedUrl.protocol !== "https:" && !(isLocal && parsedUrl.protocol === "http:")) {
+  const isLocal =
+    parsedUrl.hostname === "localhost" ||
+    parsedUrl.hostname === "127.0.0.1" ||
+    parsedUrl.hostname === "0.0.0.0";
+  if (
+    parsedUrl.protocol !== "https:" &&
+    !(isLocal && parsedUrl.protocol === "http:")
+  ) {
     return { valid: false, rawPayload: trimmed, reason: "INVALID_PROTOCOL" };
   }
 
@@ -89,8 +103,13 @@ export function parseVaahanSafeQrPayload(raw: string): QrPayloadParseResult {
     return { valid: false, rawPayload: trimmed, reason: "INVALID_PATH" };
   }
 
-  const rawId = decodeURIComponent(segments[0]);
-  const cleanId = rawId.toUpperCase().replace(/^VS-/, "");
+  let rawId: string;
+  try {
+    rawId = decodeURIComponent(segments[0]);
+  } catch {
+    return { valid: false, rawPayload: trimmed, reason: "MALFORMED_PUBLIC_ID" };
+  }
+  const cleanId = normalizeScannedId(rawId);
 
   if (!isValidPublicIdFormat(cleanId)) {
     return { valid: false, rawPayload: trimmed, reason: "MALFORMED_PUBLIC_ID" };

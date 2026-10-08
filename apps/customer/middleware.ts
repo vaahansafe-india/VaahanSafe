@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { CUSTOMER_SESSION_COOKIE_NAME } from "@vaahansafe/auth";
+import { isDiscoveryPath } from "@vaahansafe/config";
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -14,7 +15,7 @@ export function middleware(request: NextRequest) {
     pathname.startsWith("/fonts/") ||
     pathname.match(/\.(png|jpg|jpeg|svg|webp|ico|txt)$/) ||
     pathname === "/favicon.ico" ||
-    pathname === "/robots.txt"
+    isDiscoveryPath(pathname)
   ) {
     return NextResponse.next();
   }

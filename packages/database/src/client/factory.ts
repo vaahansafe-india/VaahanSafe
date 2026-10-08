@@ -31,11 +31,33 @@ import { D1QrActivationChallengeRepository } from "../repositories/qr-activation
 
 let defaultDatabaseClient: DatabaseClient | null = null;
 
+/** Explicit D1-only resolver for authentication and provider operations. */
+export function getCloudflareDatabaseClient(binding?: D1DatabaseBinding): DatabaseClient {
+  const runtimeBinding = binding || (process.env as unknown as { DB?: D1DatabaseBinding }).DB;
+  if (runtimeBinding && typeof runtimeBinding.prepare === "function") {
+    return new D1DatabaseAdapter(runtimeBinding);
+  }
+  return new CloudflareD1HttpClient();
+}
+
 export function getAuthoritativeDatabaseClient(
-  _binding?: D1DatabaseBinding
+  binding?: D1DatabaseBinding
 ): DatabaseClient {
+  if (binding && typeof binding.prepare === "function") {
+    return new D1DatabaseAdapter(binding);
+  }
   if (!defaultDatabaseClient) {
-    defaultDatabaseClient = new SupabaseDatabaseAdapter();
+    if (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY) {
+      defaultDatabaseClient = new SupabaseDatabaseAdapter();
+    } else if (process.env.CLOUDFLARE_API_TOKEN && process.env.CLOUDFLARE_D1_DATABASE_ID) {
+      defaultDatabaseClient = new CloudflareD1HttpClient();
+    } else {
+      try {
+        defaultDatabaseClient = new SupabaseDatabaseAdapter();
+      } catch {
+        defaultDatabaseClient = new CloudflareD1HttpClient();
+      }
+    }
   }
   return defaultDatabaseClient;
 }

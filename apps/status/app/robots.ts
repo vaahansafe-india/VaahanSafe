@@ -1,10 +1,7 @@
-import type { MetadataRoute } from "next";
+import { discoveryRobots } from "@vaahansafe/config";
 
-export default function robots(): MetadataRoute.Robots {
-  return {
-    rules: {
-      userAgent: "*",
-      allow: "/",
-    },
-  };
+export const dynamic = "force-static";
+
+export default function robots() {
+  return discoveryRobots("status");
 }

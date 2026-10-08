@@ -44,3 +44,4 @@ export * from "./onboarding/first-login-machine";
 export * from "./linking/account-linking";
 export * from "./guards/route-guards";
 export * from "./stepup/step-up";
+export * from "./otp/request-guard";

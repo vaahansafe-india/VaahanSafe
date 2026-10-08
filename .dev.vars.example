@@ -22,8 +22,13 @@ CASHFREE_WEBHOOK_SECRET=placeholder_cashfree_sandbox_webhook_secret
 # Messaging & Alerts (MSG91 Test Configuration)
 MSG91_AUTH_KEY=placeholder_msg91_sandbox_auth_key
 MSG91_OTP_TEMPLATE_ID=placeholder_msg91_otp_template_id
+MSG91_WHATSAPP_OTP_WIDGET_ID=placeholder_whatsapp_primary_otp_widget_id
 MSG91_SENDER_ID=VHNSTG
 
 # Transactional Email (Sandbox / Mock)
 EMAIL_PROVIDER_API_KEY=placeholder_email_sandbox_key
 EMAIL_FROM_ADDRESS=support@vaahansafe.com
+MSG91_WHATSAPP_NUMBER=918639785897
+MSG91_WHATSAPP_NAMESPACE=28fc896d_7967_4778_9854_11a598207d4e
+OTP_REQUEST_HASH_SECRET=
+

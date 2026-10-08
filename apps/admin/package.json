@@ -13,11 +13,16 @@
   "dependencies": {
     "@vaahansafe/auth": "*",
     "@vaahansafe/config": "*",
+    "@vaahansafe/content": "*",
+    "@vaahansafe/database": "*",
     "@vaahansafe/icons": "*",
+    "@vaahansafe/notifications": "^1.0.0",
     "@vaahansafe/observability": "*",
+    "@vaahansafe/storage": "*",
     "@vaahansafe/types": "*",
     "@vaahansafe/ui": "*",
     "@vaahansafe/validation": "*",
+    "aos": "2.3.4",
     "next": "^15.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

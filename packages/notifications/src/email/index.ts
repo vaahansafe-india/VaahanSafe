@@ -44,8 +44,7 @@ export class SmtpEmailAdapter implements IEmailService {
   async sendEmail(options: SendEmailOptions): Promise<{ success: boolean; messageId?: string; error?: string }> {
     try {
       if (!this.transporter) {
-        console.warn("[SmtpEmailAdapter] SMTP credentials not set. Simulating email dispatch to:", options.to);
-        return { success: true, messageId: `mock_${Date.now()}` };
+        return { success: false, error: "EMAIL_CONFIGURATION_MISSING" };
       }
 
       const info = await this.transporter.sendMail({

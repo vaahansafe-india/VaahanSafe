@@ -1,6 +1,6 @@
 import * as React from "react";
 import Link from "next/link";
-import { Button } from "@vaahansafe/ui";
+import { Button } from "@vaahansafe/ui/components/button";
 
 interface ActionItem {
   label: string;
@@ -22,12 +22,12 @@ export function SystemStateActions({
 }: SystemStateActionsProps) {
   return (
     <div className={`flex flex-wrap items-center gap-4 ${className}`}>
-      {primary && (
-        primary.href ? (
+      {primary &&
+        (primary.href ? (
           primary.external ? (
             <Button
               asChild
-              className="h-11 rounded-full bg-[#141413] px-6 font-sans text-xs font-medium text-[#faf9f5] hover:bg-[#3d3d3a] dark:bg-[#faf9f5] dark:text-[#141413] dark:hover:bg-[#e6dfd8] transition-colors"
+              className="h-11 rounded-sm bg-[#141413] px-6 font-sans text-sm font-medium text-[#faf9f5] hover:bg-[#3d3d3a] dark:bg-[#faf9f5] dark:text-[#141413] dark:hover:bg-[#e6dfd8] transition-colors"
             >
               <a href={primary.href} target="_blank" rel="noopener noreferrer">
                 {primary.label}
@@ -36,7 +36,7 @@ export function SystemStateActions({
           ) : (
             <Button
               asChild
-              className="h-11 rounded-full bg-[#141413] px-6 font-sans text-xs font-medium text-[#faf9f5] hover:bg-[#3d3d3a] dark:bg-[#faf9f5] dark:text-[#141413] dark:hover:bg-[#e6dfd8] transition-colors"
+              className="h-11 rounded-sm bg-[#141413] px-6 font-sans text-sm font-medium text-[#faf9f5] hover:bg-[#3d3d3a] dark:bg-[#faf9f5] dark:text-[#141413] dark:hover:bg-[#e6dfd8] transition-colors"
             >
               <Link href={primary.href}>{primary.label}</Link>
             </Button>
@@ -45,15 +45,14 @@ export function SystemStateActions({
           <Button
             type="button"
             onClick={primary.onClick}
-            className="h-11 rounded-full bg-[#141413] px-6 font-sans text-xs font-medium text-[#faf9f5] hover:bg-[#3d3d3a] dark:bg-[#faf9f5] dark:text-[#141413] dark:hover:bg-[#e6dfd8] transition-colors"
+            className="h-11 rounded-sm bg-[#141413] px-6 font-sans text-sm font-medium text-[#faf9f5] hover:bg-[#3d3d3a] dark:bg-[#faf9f5] dark:text-[#141413] dark:hover:bg-[#e6dfd8] transition-colors"
           >
             {primary.label}
           </Button>
-        )
-      )}
+        ))}
 
-      {secondary && (
-        secondary.href ? (
+      {secondary &&
+        (secondary.href ? (
           secondary.external ? (
             <a
               href={secondary.href}
@@ -79,8 +78,7 @@ export function SystemStateActions({
           >
             {secondary.label}
           </button>
-        )
-      )}
+        ))}
     </div>
   );
 }

@@ -2,8 +2,8 @@
  * Canonical Notification Template Registry
  *
  * Centralized, versioned repository of approved messaging templates for VaahanSafe.
- * INVARIANT: Provider template IDs and messaging structures are mapped centrally here,
- * never scattered through UI or business domain components.
+ * INVARIANT: Provider template IDs, Meta language codes, and messaging structures
+ * are mapped centrally here, never scattered through UI or business domain components.
  */
 
 import { TemplateDefinition } from "./definition";
@@ -44,8 +44,9 @@ export const ACCOUNT_WELCOME_V1: TemplateDefinition<AccountWelcomeVariables> = {
   }),
   renderWhatsApp: (v) => ({
     templateName: "vhn_welcome_v1",
+    languageCode: "en",
     parameters: {
-      name: v.displayName,
+      1: v.displayName,
     },
   }),
   renderEmail: (v) => {
@@ -76,9 +77,10 @@ export const QR_ACTIVATED_V1: TemplateDefinition<QrActivatedVariables> = {
   }),
   renderWhatsApp: (v) => ({
     templateName: "vhn_qr_activated_v1",
+    languageCode: "en_US",
     parameters: {
-      public_id: v.publicId,
-      vehicle_reg: v.vehicleRegMasked,
+      1: v.publicId,
+      2: v.vehicleRegMasked,
     },
   }),
   renderEmail: (v) => {
@@ -111,9 +113,10 @@ export const PAYMENT_SUCCESS_V1: TemplateDefinition<PaymentSuccessVariables> = {
   }),
   renderWhatsApp: (v) => ({
     templateName: "vhn_payment_success_v1",
+    languageCode: "en",
     parameters: {
-      order_number: v.orderNumber,
-      amount: v.amountDisplay,
+      1: v.amountDisplay,
+      2: v.orderNumber,
     },
   }),
   renderEmail: (v) => {
@@ -147,9 +150,10 @@ export const SUBSCRIPTION_RENEWED_V1: TemplateDefinition<SubscriptionRenewedVari
   }),
   renderWhatsApp: (v) => ({
     templateName: "vhn_sub_renewed_v1",
+    languageCode: "en",
     parameters: {
-      plan_name: v.planName,
-      next_date: v.nextBillingDate,
+      1: v.planName,
+      2: v.nextBillingDate,
     },
   }),
   renderEmail: (v) => {
@@ -181,8 +185,9 @@ export const SUBSCRIPTION_RENEWAL_FAILED_V1: TemplateDefinition<SubscriptionRene
   }),
   renderWhatsApp: (v) => ({
     templateName: "vhn_sub_failed_v1",
+    languageCode: "en",
     parameters: {
-      plan_name: v.planName,
+      1: v.planName,
     },
   }),
   renderEmail: (v) => {
@@ -213,9 +218,10 @@ export const SHIPMENT_UPDATE_V1: TemplateDefinition<ShipmentUpdateVariables> = {
   }),
   renderWhatsApp: (v) => ({
     templateName: "vhn_shipment_update_v1",
+    languageCode: "en",
     parameters: {
-      status: v.status,
-      tracking: v.trackingNumber || "N/A",
+      1: v.status,
+      2: v.trackingNumber || "N/A",
     },
   }),
   renderEmail: (v) => {
@@ -247,8 +253,9 @@ export const REPLACEMENT_APPROVED_V1: TemplateDefinition<ReplacementApprovedVari
   }),
   renderWhatsApp: (v) => ({
     templateName: "vhn_replace_approved_v1",
+    languageCode: "en",
     parameters: {
-      original_id: v.originalPublicId,
+      1: v.originalPublicId,
     },
   }),
   renderEmail: (v) => {
@@ -277,10 +284,13 @@ export const EMERGENCY_SCAN_ALERT_V1: TemplateDefinition<EmergencyScanAlertVaria
     actionType: "VIEW_QR",
   }),
   renderWhatsApp: (v) => ({
-    templateName: "vhn_qr_scan_alert_v1",
+    // v1 falsely claims emergency contacts were notified by a scan.
+    // The safe v2 notice was approved in MSG91 on 8 October 2026.
+    templateName: "vhn_qr_scan_notice_v2",
+    languageCode: "en_US",
     parameters: {
-      vehicle_reg: v.vehicleMaskedReg,
-      scanned_at: v.scannedAtFormatted,
+      1: v.vehicleMaskedReg,
+      2: v.scannedAtFormatted,
     },
   }),
   renderEmail: (v) => {
@@ -315,9 +325,10 @@ export const SECURITY_CHANGED_V1: TemplateDefinition<SecurityChangedVariables> =
   }),
   renderWhatsApp: (v) => ({
     templateName: "vhn_security_alert_v1",
+    languageCode: "en",
     parameters: {
-      change_type: v.changeType,
-      occurred_at: v.occurredAt,
+      1: v.changeType,
+      2: v.occurredAt,
     },
   }),
   renderEmail: (v) => {
@@ -352,9 +363,10 @@ export const SUPPORT_UPDATE_V1: TemplateDefinition<SupportUpdateVariables> = {
   }),
   renderWhatsApp: (v) => ({
     templateName: "vhn_support_update_v1",
+    languageCode: "en",
     parameters: {
-      ticket_id: v.ticketId,
-      status: v.status,
+      1: v.ticketId,
+      2: v.status,
     },
   }),
   renderEmail: (v) => {

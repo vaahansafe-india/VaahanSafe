@@ -16,7 +16,7 @@ export function AuthBrand({ view, maskedPhone, mode = "login" }: AuthBrandProps)
         {mode === "onboarding" ? "Complete your account" : "Customer account"}
       </p>
       <h1 className="mt-[clamp(10px,2vh,20px)] font-serif text-[clamp(2.8rem,7vh,4.8rem)] font-medium leading-[0.92] tracking-[-0.04em] text-[#1b1c1a]">
-        {isOtp ? "Check your messages." : mode === "onboarding" ? "Verify your mobile." : "Welcome back."}
+        {isOtp ? "Check your messages." : mode === "onboarding" ? "Verify your mobile." : "Welcome to VaahanSafe."}
       </h1>
       <p className="mt-[clamp(10px,2vh,20px)] max-w-[390px] text-sm leading-[1.6] text-[#615f59]">
         {isOtp ? (
@@ -24,7 +24,7 @@ export function AuthBrand({ view, maskedPhone, mode = "login" }: AuthBrandProps)
         ) : mode === "onboarding" ? (
           "Verify your Indian mobile number to receive vehicle safety and emergency scan alerts."
         ) : (
-          "Sign in to manage your vehicle safety identity."
+          "Sign in to access and manage your vehicle identity."
         )}
       </p>
     </div>

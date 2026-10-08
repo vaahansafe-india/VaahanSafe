@@ -1,143 +1,56 @@
 import type { MetadataRoute } from "next";
+import {
+  canIndexSurface,
+  discoveryOrigin,
+  validDiscoveryDate,
+} from "@vaahansafe/config";
+import { OFFICIAL_GUIDES } from "../lib/documents/official-guides";
 
 export const dynamic = "force-static";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://vaahansafe.com";
-  const lastModified = new Date();
-
+  if (!canIndexSurface("web")) return [];
+  const origin = discoveryOrigin("web");
+  const paths = [
+    "",
+    "product",
+    "about",
+    "contact",
+    "how-it-works",
+    "safety",
+    "pricing",
+    "gallery",
+    "privacy",
+    "terms",
+    "refund-policy",
+    "shipping-replacement",
+    "safety-disclaimer",
+    "shipping-policy",
+    "subscription-terms",
+    "cookie-policy",
+    "disclaimer",
+    "tour",
+    "help",
+    "help/replacement",
+    "help/activation",
+    "documents",
+  ];
   return [
-    {
-      url: baseUrl,
-      lastModified,
-      changeFrequency: "weekly",
-      priority: 1.0,
-    },
-    ...["product", "about", "contact", "design-system", "shipping-policy", "subscription-terms", "cookie-policy", "disclaimer"].map((path) => ({
-      url: `${baseUrl}/${path}`,
-      lastModified,
-      changeFrequency: "monthly" as const,
-      priority: path === "product" ? 0.9 : 0.6,
+    ...paths.map((path) => ({
+      url: `${origin}/${path}`,
+      changeFrequency: path === "" ? ("weekly" as const) : ("monthly" as const),
+      priority:
+        path === ""
+          ? 1
+          : ["product", "how-it-works", "safety", "pricing"].includes(path)
+            ? 0.9
+            : 0.6,
     })),
-    {
-      url: `${baseUrl}/how-it-works`,
-      lastModified,
-      changeFrequency: "weekly",
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/safety`,
-      lastModified,
-      changeFrequency: "weekly",
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/pricing`,
-      lastModified,
-      changeFrequency: "weekly",
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/gallery`,
-      lastModified,
-      changeFrequency: "weekly",
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/privacy`,
-      lastModified,
-      changeFrequency: "monthly",
+    ...OFFICIAL_GUIDES.map((guide) => ({
+      url: `${origin}/documents/${encodeURIComponent(guide.slug)}`,
+      lastModified: validDiscoveryDate(guide.updatedAt),
+      changeFrequency: "monthly" as const,
       priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/terms`,
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/refund-policy`,
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/shipping-replacement`,
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/safety-disclaimer`,
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/help`,
-      lastModified,
-      changeFrequency: "weekly",
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/documents`,
-      lastModified,
-      changeFrequency: "weekly",
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/documents/product-guide`,
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/documents/quick-start`,
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/documents/activation`,
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/documents/qr-placement`,
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/documents/safety`,
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/documents/privacy`,
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/documents/plans-orders-support`,
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/help/replacement`,
-      lastModified,
-      changeFrequency: "weekly",
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/help/activation`,
-      lastModified,
-      changeFrequency: "weekly",
-      priority: 0.8,
-    },
+    })),
   ];
 }

@@ -44,6 +44,7 @@ const KNOWN_ERROR_CLASSIFICATIONS: Record<string, FailureCategory> = {
  * Classifies an error code or message into RETRYABLE vs PERMANENT.
  */
 export function classifyError(errorCode: string): FailureCategory {
+  if (errorCode === "MSG91_SERVICE_UNAVAILABLE") return "RETRYABLE";
   if (KNOWN_ERROR_CLASSIFICATIONS[errorCode]) {
     return KNOWN_ERROR_CLASSIFICATIONS[errorCode];
   }

@@ -2,7 +2,8 @@ import React from "react";
 import Link from "next/link";
 import { VaahanIcon } from "@vaahansafe/icons";
 import { VaahanSafeLogo } from "@vaahansafe/ui/brand";
-import { Badge } from "@vaahansafe/ui/components";
+import { Badge } from "@vaahansafe/ui/components/badge";
+import { getWebUrl } from "@vaahansafe/config";
 
 export function ResolverHeader() {
   return (
@@ -22,13 +23,13 @@ export function ResolverHeader() {
           variant="outline"
           className="font-mono text-[9px] sm:text-[10px] uppercase tracking-wider text-muted-foreground border-border px-2 py-0.5 whitespace-nowrap shrink-0"
         >
-          <span className="hidden sm:inline">Public </span>Resolver
+          Safety view
         </Badge>
         <a
-          href="https://vaahansafe.com/help"
+          href={`${getWebUrl()}/help`}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-xs text-muted-foreground hover:text-foreground transition-colors p-1.5 rounded-md hover:bg-muted/50 inline-flex items-center justify-center shrink-0"
+          className="text-xs text-muted-foreground hover:text-foreground transition-colors size-11 rounded-sm hover:bg-muted/50 inline-flex items-center justify-center shrink-0"
           aria-label="VaahanSafe Safety & Help Support"
           title="Safety & Help Support"
         >

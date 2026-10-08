@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "@vaahansafe/ui/styles/globals.css";
 import "./activate.css";
 import { ThemeProvider } from "@vaahansafe/ui/theme";
+import { ActivationQueryProvider } from "@/components/ActivationQueryProvider";
 
 export const metadata: Metadata = {
   title: "Activate QR | VaahanSafe",
@@ -38,16 +39,16 @@ export default function ActivateRootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="min-h-screen bg-background font-sans antialiased text-foreground selection:bg-primary/20 selection:text-primary">
+      <body className="activation-paper min-h-screen antialiased selection:bg-primary/20 selection:text-primary">
         {/* WCAG 2.2 AA Skip Navigation Landmark */}
         <a
           href="#main-content"
-          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md focus:shadow-md focus:font-semibold focus:outline-none focus:ring-2 focus:ring-ring"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-sm focus:shadow-md focus:font-semibold focus:outline-none focus:ring-2 focus:ring-ring"
         >
           Skip to main content
         </a>
         <ThemeProvider>
-          {children}
+          <ActivationQueryProvider>{children}</ActivationQueryProvider>
         </ThemeProvider>
       </body>
     </html>

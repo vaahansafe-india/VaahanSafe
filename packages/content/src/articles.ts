@@ -19,7 +19,14 @@ export const PUBLISHED_ARTICLES: readonly BlogPost[] = [
     readingTimeMinutes: 8,
     wordCount: 2250,
     isFeatured: true,
-    featuredImageUrl: "/images/editorial/vehicle-placement-hero.jpg",
+    featuredImageUrl: "/images/editorial/vaahansafe-qr-safety-scan.webp",
+    heroMedia: {
+      src: "/images/editorial/vaahansafe-qr-safety-scan.webp",
+      alt: "A passerby scans a VaahanSafe QR sticker on the passenger-side windshield of a safely parked car.",
+      caption: "VaahanSafe QR safety identity — concept artwork.",
+      aspectRatio: "16/10",
+      focalPoint: { x: 60, y: 65 },
+    },
     author: {
       name: "Dr. Ananya Sharma",
       role: "Road Safety Research Lead, VaahanSafe",

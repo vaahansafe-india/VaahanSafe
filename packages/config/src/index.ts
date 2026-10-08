@@ -7,6 +7,7 @@ export * from "./client";
 export * from "./server";
 export * from "./cloudflare-env";
 export * from "./bindings";
+export * from "./discovery";
 
 
 
@@ -69,6 +70,9 @@ export const serverEnvSchema = z.object({
   SESSION_SECRET: z.string().min(16).optional(),
   MSG91_AUTH_KEY: z.string().optional(),
   MSG91_OTP_TEMPLATE_ID: z.string().optional(),
+  MSG91_WHATSAPP_OTP_WIDGET_ID: z.string().optional(),
+  MSG91_WHATSAPP_NUMBER: z.string().optional(),
+  MSG91_WHATSAPP_NAMESPACE: z.string().optional(),
   PAYMENT_PROVIDER: z.enum(["razorpay", "cashfree"]).default("razorpay"),
   RAZORPAY_MODE: z.enum(["test", "live"]).default("test"),
   RAZORPAY_KEY_ID: z.string().optional(),

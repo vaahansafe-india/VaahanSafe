@@ -388,24 +388,13 @@ export async function getActivationSession(
     }
   }
 
-  // 3. Resolve eligible vehicle count for authenticated user
-  let eligibleVehiclesCount = 0;
-  if (authenticatedUser) {
-    const countRow = await db.queryFirst<{ count: number }>(
-      `SELECT COUNT(*) as count FROM vehicles WHERE user_id = ? AND status != 'DELETED'`,
-      [authenticatedUser.id]
-    );
-    eligibleVehiclesCount = countRow?.count ?? 0;
-  }
-
-  // 4. Derive current canonical ceremony stage
+  // 3. Derive current canonical ceremony stage. Vehicle eligibility is fetched
+  // only when the vehicle step mounts, avoiding an unnecessary database count.
   let stage: ActivationStage = "RECOGNIZE";
   if (!challengeDto) {
     stage = "RECOGNIZE";
   } else if (!authenticatedUser || !authenticatedUser.phoneVerified) {
     stage = "IDENTITY";
-  } else if (eligibleVehiclesCount === 0) {
-    stage = "VEHICLE";
   } else {
     stage = "VEHICLE";
   }
@@ -414,7 +403,6 @@ export async function getActivationSession(
     stage,
     challenge: challengeDto,
     user: authenticatedUser,
-    eligibleVehiclesCount,
   };
 }
 
@@ -561,9 +549,8 @@ export async function activateRetailQr(params: {
   const now = new Date().toISOString();
 
   await db.batch([
-    // The first insert is the claim. Database unique indexes on the current QR and
-    // vehicle assignments serialize competing requests. Every later write depends
-    // on this exact assignment existing in the same atomic transaction.
+    // Lock the sticker and vehicle before the claim. The partial unique indexes
+    // in the Supabase migration remain the final double-claim boundary.
     {
       sql: `INSERT INTO qr_assignments (id, qr_id, vehicle_id, user_id, assignment_type, assigned_at, created_at)
             SELECT ?, s.id, v.id, u.id, 'INITIAL', ?, ?
@@ -576,7 +563,8 @@ export async function activateRetailQr(params: {
               AND ch.id = ? AND ch.consumed_at IS NULL AND datetime(ch.expires_at) > datetime('now')
               AND (ch.user_id IS NULL OR ch.user_id = u.id)
               AND u.primary_phone IS NOT NULL AND u.onboarding_status != 'PHONE_REQUIRED'
-              AND NOT EXISTS (SELECT 1 FROM qr_assignments a WHERE a.vehicle_id = v.id AND a.ended_at IS NULL)`,
+              AND NOT EXISTS (SELECT 1 FROM qr_assignments a WHERE a.vehicle_id = v.id AND a.ended_at IS NULL)
+            FOR UPDATE OF s, v`,
       params: [assignmentId, now, now, vehicle.id, user.id, sticker.id, challenge.id],
     },
     {

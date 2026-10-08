@@ -6,6 +6,7 @@ import {
 } from "@vaahansafe/content";
 import { ArticleCallout } from "./ArticleCallout";
 import { VaahanIcon } from "@vaahansafe/icons";
+import { EditorialMedia } from "../journal/media/EditorialMedia";
 
 interface ArticleBodyProps {
   sections: readonly ArticleSection[];
@@ -32,11 +33,9 @@ export function ArticleBody({
   return (
     <div className="space-y-10 font-sans">
       {/* 1. Lead Intro Blockquote */}
-      <blockquote className="relative rounded-2xl border-l-4 border-[#cc785c] bg-[#f5f0e8]/60 p-6 sm:p-8 text-lg sm:text-xl font-serif italic text-[#141413] dark:bg-[#1f1e1b]/60 dark:text-[#faf9f5] leading-relaxed shadow-xs">
-        <span className="text-[#cc785c] text-3xl sm:text-4xl font-serif leading-none mr-1">“</span>
+      <p className="border-l-2 border-[var(--journal-accent)] pl-5 font-serif text-xl leading-8 sm:text-2xl sm:leading-9">
         {intro}
-        <span className="text-[#cc785c] text-3xl sm:text-4xl font-serif leading-none ml-1">”</span>
-      </blockquote>
+      </p>
 
       {/* 2. Key Takeaways & Actionable Protocol Box */}
       {keyTakeaways && keyTakeaways.length > 0 && (
@@ -48,7 +47,7 @@ export function ArticleBody({
             <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#cc785c] text-white text-[10px]">
               ✓
             </span>
-            <span>EXECUTIVE SUMMARY &bull; KEY ACTIONABLE TAKEAWAYS</span>
+            <span>At a glance</span>
           </div>
           <ul className="space-y-2.5 text-sm sm:text-[15px] leading-relaxed text-[#252523] dark:text-[#e6e4df]">
             {keyTakeaways.map((takeaway, idx) => (
@@ -114,9 +113,9 @@ export function ArticleBody({
                       </div>
                       <div className="space-y-1.5 flex-1">
                         <div className="flex flex-wrap items-center gap-2">
-                          <h4 className="font-sans font-semibold text-base text-[#141413] dark:text-[#faf9f5]">
+                          <h3 className="font-sans font-semibold text-base text-[#141413] dark:text-[#faf9f5]">
                             {st.title}
-                          </h4>
+                          </h3>
                           {st.badge && (
                             <span className="rounded bg-[#cc785c]/10 px-2 py-0.5 font-mono text-[9px] uppercase tracking-wider text-[#cc785c]">
                               {st.badge}
@@ -144,15 +143,23 @@ export function ArticleBody({
                         {sub.title}
                       </h3>
                       {sub.paragraphs.map((subP, subPIdx) => (
-                        <p key={subPIdx} className="text-sm sm:text-base text-[#3d3d3a] dark:text-[#a09d96]">
+                        <p
+                          key={subPIdx}
+                          className="text-sm sm:text-base text-[#3d3d3a] dark:text-[#a09d96]"
+                        >
                           {subP}
                         </p>
                       ))}
                       {sub.bullets && sub.bullets.length > 0 && (
                         <ul className="space-y-1.5 pl-2 text-sm text-[#6c6a64] dark:text-[#a09d96]">
                           {sub.bullets.map((sb, sbIdx) => (
-                            <li key={sbIdx} className="flex items-start gap-2.5">
-                              <span className="text-[#cc785c] font-bold">&bull;</span>
+                            <li
+                              key={sbIdx}
+                              className="flex items-start gap-2.5"
+                            >
+                              <span className="text-[#cc785c] font-bold">
+                                &bull;
+                              </span>
                               <span>{sb}</span>
                             </li>
                           ))}
@@ -165,17 +172,33 @@ export function ArticleBody({
 
               {/* Structured Comparison or Protocol Table */}
               {section.table && (
-                <div className="my-7 overflow-x-auto rounded-xl border border-[#e6dfd8] dark:border-[#2e2b27]">
+                <div
+                  tabIndex={0}
+                  role="region"
+                  aria-label={
+                    section.table.caption || "Article comparison table"
+                  }
+                  className="my-7 overflow-x-auto rounded-sm border border-[#e6dfd8] dark:border-[#2e2b27]"
+                >
                   {section.table.caption && (
                     <div className="border-b border-[#e6dfd8] bg-[#f5f0e8]/80 px-4 py-2.5 font-mono text-[11px] uppercase tracking-wider text-[#6c6a64] dark:border-[#2e2b27] dark:bg-[#1f1e1b] dark:text-[#a09d96]">
                       {section.table.caption}
                     </div>
                   )}
                   <table className="w-full text-left font-sans text-xs sm:text-sm">
+                    {section.table.caption && (
+                      <caption className="sr-only">
+                        {section.table.caption}
+                      </caption>
+                    )}
                     <thead>
                       <tr className="border-b border-[#e6dfd8] bg-[#f5f0e8]/50 font-medium text-[#141413] dark:border-[#2e2b27] dark:bg-[#1f1e1b]/50 dark:text-[#faf9f5]">
                         {section.table.headers.map((h, hIdx) => (
-                          <th key={hIdx} className="px-4 py-3 font-semibold">
+                          <th
+                            scope="col"
+                            key={hIdx}
+                            className="px-4 py-3 font-semibold"
+                          >
                             {h}
                           </th>
                         ))}
@@ -191,7 +214,9 @@ export function ArticleBody({
                             <td
                               key={cIdx}
                               className={`px-4 py-3 text-[#3d3d3a] dark:text-[#c4c0b8] ${
-                                cIdx === 0 ? "font-medium text-[#141413] dark:text-[#faf9f5]" : ""
+                                cIdx === 0
+                                  ? "font-medium text-[#141413] dark:text-[#faf9f5]"
+                                  : ""
                               }`}
                             >
                               {cell}
@@ -205,6 +230,21 @@ export function ArticleBody({
               )}
 
               {/* Callouts */}
+              {section.figure && (
+                <EditorialMedia
+                  src={section.figure.url}
+                  alt={section.figure.alt}
+                  caption={section.figure.caption}
+                  aspectRatio={section.figure.aspectRatio || "16/9"}
+                  role={section.figure.isDiagram ? "DIAGRAM" : "INLINE"}
+                  frame={
+                    section.figure.isDiagram
+                      ? "INSET_TECHNICAL"
+                      : "OFFSET_LANDSCAPE"
+                  }
+                  sizes="(min-width: 1100px) 740px, 92vw"
+                />
+              )}
               {section.callout && <ArticleCallout callout={section.callout} />}
 
               {/* Quotes */}
@@ -240,7 +280,9 @@ export function ArticleBody({
                 className="flex items-start gap-2.5 rounded-lg border border-[#e6dfd8]/60 bg-[#faf9f5]/80 p-3 dark:border-[#2e2b27] dark:bg-[#181715]/80"
               >
                 <span className="text-[#5db8a6] font-bold mt-0.5">✓</span>
-                <span className="text-[#3d3d3a] dark:text-[#c4c0b8]">{item}</span>
+                <span className="text-[#3d3d3a] dark:text-[#c4c0b8]">
+                  {item}
+                </span>
               </div>
             ))}
           </div>
@@ -255,14 +297,17 @@ export function ArticleBody({
         >
           <div className="flex items-center gap-2 font-mono text-[10.5px] uppercase tracking-[0.2em] font-bold text-[#8e8b82] dark:text-[#77736d]">
             <VaahanIcon name="info" size={14} />
-            <span>OPERATIONAL EDGE CASES &bull; FREQUENTLY ASKED QUESTIONS</span>
+            <span>Common questions</span>
           </div>
           <div className="space-y-3.5 divide-y divide-[#e6dfd8]/60 dark:divide-[#2e2b27]/60">
             {faq.map((item, idx) => (
-              <div key={idx} className={idx > 0 ? "pt-3.5 space-y-1.5" : "space-y-1.5"}>
-                <h4 className="font-serif text-base sm:text-lg font-medium text-[#141413] dark:text-[#faf9f5]">
+              <div
+                key={idx}
+                className={idx > 0 ? "pt-3.5 space-y-1.5" : "space-y-1.5"}
+              >
+                <h3 className="font-serif text-lg sm:text-xl font-medium text-[#141413] dark:text-[#faf9f5]">
                   {item.question}
-                </h4>
+                </h3>
                 <p className="text-xs sm:text-sm text-[#6c6a64] dark:text-[#a09d96] leading-relaxed">
                   {item.answer}
                 </p>
@@ -281,10 +326,10 @@ export function ArticleBody({
           <div className="flex items-center justify-between border-b border-[#e6dfd8]/60 pb-3 dark:border-[#2e2b27]/60">
             <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-[#cc785c] font-semibold">
               <VaahanIcon name="document" size={14} />
-              <span>STATUTORY REFERENCES &bull; VERIFIED LEGAL SOURCES ({references.length})</span>
+              <span>Sources &amp; further reading ({references.length})</span>
             </div>
             <span className="font-mono text-[9px] uppercase tracking-wider text-[#8e8b82]">
-              GOVT &amp; STANDARDS ARCHIVE
+              References
             </span>
           </div>
           <ul className="space-y-3 text-xs text-[#6c6a64] dark:text-[#a09d96] divide-y divide-[#e6dfd8]/60 dark:divide-[#2e2b27]/60">
@@ -303,9 +348,18 @@ export function ArticleBody({
                     </p>
                   )}
                 </div>
-                <span className="font-mono text-[10px] text-[#cc785c] shrink-0 font-medium">
-                  Source: {ref.source}
-                </span>
+                {ref.url ? (
+                  <a
+                    href={ref.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="journal-text-link shrink-0"
+                  >
+                    {ref.source} ↗
+                  </a>
+                ) : (
+                  <span className="journal-muted text-xs">{ref.source}</span>
+                )}
               </li>
             ))}
           </ul>

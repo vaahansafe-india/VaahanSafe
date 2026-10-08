@@ -110,7 +110,7 @@ export function IdentityBindingRail({
                   <span
                     aria-hidden="true"
                     className={`
-                      mx-1.5 h-0.5 min-w-2 flex-1 rounded-full transition-colors duration-300
+                      mx-1.5 h-px min-w-2 flex-1 transition-colors duration-300
                       sm:mx-2.5
                       ${index < currentIndex || currentStage === "ACTIVE" ? "bg-primary" : "bg-border"}
                     `}
@@ -129,7 +129,7 @@ export function IdentityBindingRail({
     <div className="relative space-y-6">
       {/* Active Code / Vehicle Badges if present */}
       {(recognizedCode || selectedVehicleRef) && (
-        <div className="space-y-2 rounded-xl border border-border/70 bg-card/60 p-3.5 text-xs shadow-2xs">
+        <div className="space-y-2 rounded-sm border border-border/70 bg-card/60 p-3.5 text-xs shadow-2xs">
           {recognizedCode && (
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">QR Sticker ID:</span>
@@ -213,7 +213,7 @@ export function IdentityBindingRail({
       </ol>
 
       {/* Privacy Guarantee Card */}
-      <div className="rounded-xl border border-border/80 bg-muted/30 p-3.5 space-y-1">
+      <div className="rounded-sm border border-border/80 bg-muted/30 p-3.5 space-y-1">
         <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
           <VaahanIcon name="shield" size={14} className="text-primary shrink-0" />
           <span>Privacy Protected</span>
@@ -237,7 +237,7 @@ function StageNode({
     return (
       <span
         aria-hidden="true"
-        className="relative z-10 mt-0.5 flex size-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground shadow-2xs"
+        className="relative z-10 mt-0.5 flex size-5 items-center justify-center rounded-sm bg-primary text-[10px] font-bold text-primary-foreground"
       >
         <VaahanIcon name="check" size={11} className="stroke-[2.5]" />
       </span>
@@ -248,9 +248,9 @@ function StageNode({
     return (
       <span
         aria-hidden="true"
-        className="relative z-10 mt-0.5 flex size-5 items-center justify-center rounded-full border-2 border-primary bg-background shadow-xs ring-4 ring-primary/20"
+        className="relative z-10 mt-0.5 flex size-5 items-center justify-center rounded-sm border-2 border-primary bg-background"
       >
-        <span className="size-2 rounded-full bg-primary" />
+        <span className="size-2 rounded-sm bg-primary" />
       </span>
     );
   }
@@ -258,9 +258,9 @@ function StageNode({
   return (
     <span
       aria-hidden="true"
-      className="relative z-10 mt-0.5 flex size-5 items-center justify-center rounded-full border border-border bg-background"
+      className="relative z-10 mt-0.5 flex size-5 items-center justify-center rounded-sm border border-border bg-background"
     >
-      <span className="size-1.5 rounded-full bg-border" />
+      <span className="size-1.5 rounded-sm bg-border" />
     </span>
   );
 }

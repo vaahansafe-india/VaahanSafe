@@ -20,6 +20,7 @@ export interface InAppRenderResult {
 export interface WhatsAppRenderResult {
   templateName: string;
   parameters: Record<string, string>;
+  languageCode?: string;
 }
 
 export interface EmailRenderResult {

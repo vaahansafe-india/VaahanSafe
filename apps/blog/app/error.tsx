@@ -30,7 +30,7 @@ export default function JournalError({ error, reset }: ErrorProps) {
           <br className="hidden sm:inline" /> complete this request.
         </>
       }
-      description="Something interrupted the request during processing. Your browser does not need to reload repeatedly. You may retry the operation or return to the Journal publication index."
+      description="We couldn’t load this page right now. Please try again, or return to the Journal to explore another story."
       railType="500"
       referenceId={error?.digest}
       actions={

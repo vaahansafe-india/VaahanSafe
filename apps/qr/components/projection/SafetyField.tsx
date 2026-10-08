@@ -1,5 +1,5 @@
 import React from "react";
-import { Badge } from "@vaahansafe/ui/components";
+import { Badge } from "@vaahansafe/ui/components/badge";
 
 export interface SafetyFieldProps {
   label: string;

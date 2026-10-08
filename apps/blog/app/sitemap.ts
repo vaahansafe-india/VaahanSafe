@@ -1,46 +1,38 @@
 import type { MetadataRoute } from "next";
-import { getPublishedArticles, JOURNAL_CATEGORIES } from "@vaahansafe/content";
+import {
+  canIndexSurface,
+  discoveryOrigin,
+  validDiscoveryDate,
+} from "@vaahansafe/config";
+import { getDiscoveryArticles } from "../lib/discovery";
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://blog.vaahansafe.com";
-  const articles = getPublishedArticles();
+export const dynamic = "force-dynamic";
 
-  const staticPages: MetadataRoute.Sitemap = [
-    {
-      url: `${baseUrl}/`,
-      lastModified: new Date(),
-      changeFrequency: "daily",
-      priority: 1.0,
-    },
-    {
-      url: `${baseUrl}/guides`,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/search`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.5,
-    },
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  if (!canIndexSurface("blog")) return [];
+  const origin = discoveryOrigin("blog");
+  const articles = await getDiscoveryArticles();
+  const categories = [
+    ...new Set(articles.map((article) => article.categorySlug).filter(Boolean)),
   ];
-
-  const categoryPages: MetadataRoute.Sitemap = JOURNAL_CATEGORIES.map(
-    (category) => ({
-      url: `${baseUrl}/category/${category.slug}`,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
+  return [
+    ...["", "guides"].map((path) => ({
+      url: `${origin}/${path}`,
+      changeFrequency: "weekly" as const,
+      priority: path ? 0.8 : 1,
+    })),
+    ...categories.map((slug) => ({
+      url: `${origin}/category/${encodeURIComponent(slug)}`,
+      changeFrequency: "weekly" as const,
+      priority: 0.7,
+    })),
+    ...articles.map((article) => ({
+      url: `${origin}/articles/${encodeURIComponent(article.slug)}`,
+      lastModified:
+        validDiscoveryDate(article.updatedAt) ??
+        validDiscoveryDate(article.publishedAt),
+      changeFrequency: "monthly" as const,
       priority: 0.8,
-    })
-  );
-
-  const articlePages: MetadataRoute.Sitemap = articles.map((article) => ({
-    url: `${baseUrl}/articles/${article.slug}`,
-    lastModified: new Date(article.publishedAt),
-    changeFrequency: "monthly",
-    priority: 0.85,
-  }));
-
-  return [...staticPages, ...categoryPages, ...articlePages];
+    })),
+  ];
 }

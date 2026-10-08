@@ -1,6 +1,26 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  experimental: {
+    optimizePackageImports: [
+      "@hugeicons/core-free-icons",
+      "@vaahansafe/icons",
+      "@vaahansafe/ui/brand",
+    ],
+  },
+  async headers() {
+    return [
+      {
+        source: "/fonts/:font*.woff2",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+    ];
+  },
   transpilePackages: [
     "@vaahansafe/ui",
     "@vaahansafe/icons",
@@ -29,4 +49,3 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
-

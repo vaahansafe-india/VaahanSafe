@@ -9,6 +9,7 @@ coverage/
 
 # Next.js
 .next/
+.next-dev/
 .next-brand-qa/
 .next-qa/
 out/
@@ -45,6 +46,8 @@ yarn-error.log*
 
 # Scratch & Temporary local files
 scratch/
+/output/admin-supabase-release/
+/output/admin-exports-dry-run/
 brand-icon-preview.png
 WHATSAPP_TEMPLATES_GUIDE.md
 *.docx

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { toast } from "@vaahansafe/ui";
+import { toast } from "sonner";
 
 interface NetworkStatusContextValue {
   isOnline: boolean;
@@ -21,13 +21,18 @@ interface NetworkStatusProviderProps {
   children: React.ReactNode;
 }
 
-export function NetworkStatusProvider({ children }: NetworkStatusProviderProps) {
+export function NetworkStatusProvider({
+  children,
+}: NetworkStatusProviderProps) {
   const [isOnline, setIsOnline] = React.useState(true);
   const [wasOffline, setWasOffline] = React.useState(false);
 
   React.useEffect(() => {
     // Initial check
-    if (typeof navigator !== "undefined" && typeof navigator.onLine === "boolean") {
+    if (
+      typeof navigator !== "undefined" &&
+      typeof navigator.onLine === "boolean"
+    ) {
       setIsOnline(navigator.onLine);
       if (!navigator.onLine) {
         setWasOffline(true);

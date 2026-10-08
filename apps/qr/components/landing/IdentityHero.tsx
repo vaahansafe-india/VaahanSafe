@@ -1,132 +1,120 @@
 "use client";
-
-import React, { useState } from "react";
+import { useState, type FormEvent } from "react";
+import dynamic from "next/dynamic";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { VaahanIcon } from "@vaahansafe/icons";
-import { parseVaahanSafeQrPayload } from "@vaahansafe/qr-core/client";
-
-interface IdentityHeroProps {
-  onOpenScanner?: () => void;
-}
-
-export function IdentityHero({ onOpenScanner }: IdentityHeroProps) {
+import { parseVaahanSafeQrPayload } from "@vaahansafe/qr-core/scanner";
+const VaahanScannerModal = dynamic(
+  () =>
+    import("../scanner/VaahanScannerModal").then(
+      (mod) => mod.VaahanScannerModal,
+    ),
+  { ssr: false },
+);
+export function IdentityHero() {
   const router = useRouter();
   const [lookupId, setLookupId] = useState("");
   const [inputError, setInputError] = useState<string | null>(null);
-
-  function handleLookupSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  const [scannerOpen, setScannerOpen] = useState(false);
+  function submit(event: FormEvent) {
+    event.preventDefault();
     const result = parseVaahanSafeQrPayload(lookupId);
-
     if (!result.valid || !result.publicId) {
-      setInputError("Enter a valid VaahanSafe ID (e.g. VS-7F3K-9021 or 7F3K9021)");
+      setInputError(
+        "Enter the VaahanSafe ID printed on the sticker, or its QR link.",
+      );
       return;
     }
-
     setInputError(null);
-    router.push(`/${result.publicId}`);
+    router.push(`/${encodeURIComponent(result.publicId)}`);
   }
-
   return (
-    <section className="relative w-full border-b border-border/80 bg-background overflow-hidden pt-12 pb-16 sm:pt-16 sm:pb-24 lg:pt-24 lg:pb-32">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="max-w-3xl mx-auto flex flex-col items-center text-center space-y-6 sm:space-y-8">
-          {/* Surface Indicator */}
-          <div className="inline-flex items-center gap-2">
-            <span className="size-2 rounded-full bg-primary" />
-            <span className="font-mono text-xs uppercase tracking-widest text-muted-foreground font-semibold">
-              VaahanSafe / Public QR System
-            </span>
-          </div>
-
-          {/* Centered Heading */}
-          <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-normal tracking-tight text-foreground leading-[1.08] text-center">
-            Your vehicle <br />
-            can carry a <br />
-            <span className="italic text-primary font-medium">safety identity.</span>
+    <>
+      <section className="qr-container qr-hero" aria-labelledby="qr-hero-title">
+        <div className="qr-hero-content w-full flex flex-col items-center text-center lg:items-start lg:text-left">
+          <p className="qr-label text-center lg:text-left text-[11px] sm:text-xs">Small sticker. A meaningful connection.</p>
+          <h1 id="qr-hero-title" className="qr-title mt-4 sm:mt-5 text-center lg:text-left text-balance">
+            Your vehicle.
+            <br />A <em className="text-primary font-normal italic">safety identity.</em>
           </h1>
-
-          {/* Centered Narrative */}
-          <p className="text-sm sm:text-base text-muted-foreground leading-relaxed max-w-xl font-sans text-center">
-            A VaahanSafe QR connects a physical vehicle to a controlled public safety
-            view &mdash; without turning the owner&apos;s private account into a public profile.
+          <p className="qr-muted mt-4 sm:mt-6 max-w-lg text-sm sm:text-base leading-relaxed mx-auto lg:mx-0 text-center lg:text-left text-balance">
+            A scan can help someone reach the people who matter. Open the
+            vehicle’s owner-approved safety information with a VaahanSafe QR.
           </p>
-
-          {/* Centered Scan-First CTAs */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2 w-full sm:w-auto">
-            {onOpenScanner ? (
-              <button
-                type="button"
-                onClick={onOpenScanner}
-                className="w-full sm:w-auto h-12 px-7 rounded-xl bg-primary text-primary-foreground font-semibold text-xs uppercase tracking-wider flex items-center justify-center gap-2.5 hover:bg-primary/90 active:scale-[0.99] transition-all shadow-md cursor-pointer"
-              >
-                <VaahanIcon name="qr" size={17} />
-                <span>Scan VaahanSafe QR</span>
-              </button>
-            ) : (
-              <a
-                href="#how-it-works"
-                className="w-full sm:w-auto h-12 px-6 rounded-xl bg-foreground text-background font-medium text-xs uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-foreground/90 active:scale-[0.99] transition-all shadow-xs"
-              >
-                <span>How it works</span>
-                <VaahanIcon name="chevron-down" size={14} />
-              </a>
-            )}
-
+          <div className="qr-hero-actions mt-6 sm:mt-7 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 w-full sm:w-auto">
             <button
-              type="button"
-              onClick={() => {
-                document.getElementById("hero-lookup-input")?.focus();
-              }}
-              className="w-full sm:w-auto h-12 px-5 rounded-xl bg-muted hover:bg-muted/80 text-foreground font-medium text-xs flex items-center justify-center gap-1.5 transition-colors border border-border cursor-pointer"
+              className="qr-button qr-button-primary w-full sm:w-auto justify-center"
+              onClick={() => setScannerOpen(true)}
             >
-              <span>Enter QR ID</span>
-              <VaahanIcon name="arrow-right" size={13} />
+              Scan a VaahanSafe QR <span aria-hidden="true">↗</span>
             </button>
-
-            <a
-              href="#how-it-works"
-              className="h-12 px-3 text-muted-foreground hover:text-foreground text-xs font-medium flex items-center justify-center gap-1 transition-colors"
-            >
-              <span>How it works ↓</span>
+            <a className="qr-text-link justify-center text-center py-1 sm:py-0" href="#how-it-works">
+              How it works <span aria-hidden="true">↓</span>
             </a>
           </div>
-
-          {/* Centered Direct ID Lookup Bar */}
-          <div className="pt-6 border-t border-border/60 max-w-md w-full mx-auto">
-            <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground block mb-2 text-center">
-              Have a sticker ID? Test resolution directly:
-            </span>
-            <form onSubmit={handleLookupSubmit} className="space-y-1.5">
-              <div className="flex items-center gap-2">
-                <input
-                  id="hero-lookup-input"
-                  type="text"
-                  value={lookupId}
-                  onChange={(e) => {
-                    setLookupId(e.target.value);
-                    if (inputError) setInputError(null);
-                  }}
-                  placeholder="e.g. VS-7F3K-9021 or 7F3K9021"
-                  className="flex-1 h-10 px-3 rounded-lg border border-border bg-card font-mono text-xs uppercase tracking-wider placeholder:normal-case placeholder:tracking-normal focus:outline-hidden focus:ring-2 focus:ring-primary/40 transition-all text-center sm:text-left"
-                  autoComplete="off"
-                  spellCheck={false}
-                />
-                <button
-                  type="submit"
-                  className="h-10 px-4 rounded-lg bg-muted hover:bg-muted/80 text-foreground font-semibold text-xs uppercase tracking-wider flex items-center gap-1 border border-border transition-colors shrink-0 cursor-pointer"
-                >
-                  <span>Resolve</span>
-                  <VaahanIcon name="arrow-right" size={12} />
-                </button>
-              </div>
-              {inputError && (
-                <p className="text-[11px] text-destructive text-center">{inputError}</p>
-              )}
-            </form>
-          </div>
+          <form className="qr-lookup w-full max-w-sm sm:max-w-md mx-auto lg:mx-0 text-left mt-6 sm:mt-8 pt-5 sm:pt-6 border-t border-[var(--qr-line)]" onSubmit={submit}>
+            <label htmlFor="hero-lookup-input" className="text-xs sm:text-sm font-medium block text-center lg:text-left">
+              Or enter the ID on your sticker
+            </label>
+            <div className="qr-lookup-row flex gap-2 mt-2">
+              <input
+                id="hero-lookup-input"
+                value={lookupId}
+                onChange={(event) => {
+                  setLookupId(event.target.value);
+                  setInputError(null);
+                }}
+                placeholder="VaahanSafe ID or QR link"
+                autoComplete="off"
+                spellCheck={false}
+                aria-invalid={Boolean(inputError)}
+                aria-describedby={inputError ? "lookup-error" : "lookup-help"}
+              />
+              <button
+                type="submit"
+                className="qr-button shrink-0"
+                aria-label="Open safety information"
+              >
+                Open <span aria-hidden="true">→</span>
+              </button>
+            </div>
+            {inputError ? (
+              <p
+                id="lookup-error"
+                role="alert"
+                className="mt-2 text-xs sm:text-sm text-destructive text-center lg:text-left"
+              >
+                {inputError}
+              </p>
+            ) : (
+              <p id="lookup-help" className="qr-muted mt-2 text-[11px] sm:text-xs text-center lg:text-left">
+                No app or account needed to view an enabled QR.
+              </p>
+            )}
+          </form>
         </div>
-      </div>
-    </section>
+        <figure className="qr-hero-figure">
+          <Image
+            src="/images/qr-scan-concept.webp"
+            alt="Illustration of a passerby scanning a VaahanSafe windshield sticker with a phone"
+            width={1400}
+            height={933}
+            sizes="(max-width: 767px) calc(100vw - 32px), (max-width: 1304px) 55vw, 650px"
+            priority
+            className="qr-hero-art"
+          />
+          <figcaption>
+            <span>A connection built for everyday journeys.</span>
+            <span aria-hidden="true">01 / Scan</span>
+          </figcaption>
+        </figure>
+      </section>
+      {scannerOpen && (
+        <VaahanScannerModal
+          isOpen={scannerOpen}
+          onClose={() => setScannerOpen(false)}
+        />
+      )}
+    </>
   );
 }

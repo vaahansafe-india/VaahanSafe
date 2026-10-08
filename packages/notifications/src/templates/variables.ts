@@ -14,7 +14,7 @@ export const AccountWelcomeVariablesSchema = z.object({
 export type AccountWelcomeVariables = z.infer<typeof AccountWelcomeVariablesSchema>;
 
 export const QrActivatedVariablesSchema = z.object({
-  publicId: z.string().min(4).max(16),
+  publicId: z.string().min(6).max(64),
   vehicleRegMasked: z.string().min(1).max(20),
   vehicleNickname: z.string().max(50).optional(),
 });

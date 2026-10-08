@@ -8,12 +8,14 @@ import {
   validateSessionToken,
   parseSessionCookie,
   serializeSessionCookie,
+  OtpRequestGuard,
 } from "@vaahansafe/auth";
 import {
   getUserRepository,
   getAuthIdentityRepository,
   getSessionRepository,
   getQrActivationChallengeRepository,
+  getCloudflareDatabaseClient,
 } from "@vaahansafe/database";
 import { parseCookie, hashToken, ACTIVATION_CHALLENGE_COOKIE_NAME } from "@/lib/crypto-helpers";
 
@@ -43,7 +45,8 @@ export async function POST(req: Request) {
 
     // Verify OTP via MSG91
     const otpService = new Msg91OtpAdapter();
-    const verifyResult = await otpService.verify(normalizedE164, rawOtp);
+    const verifyResult = await new OtpRequestGuard(getCloudflareDatabaseClient(), "ACTIVATE")
+      .verify(normalizedE164, req, (challenge) => otpService.verify(normalizedE164, rawOtp, challenge.requestId, challenge.channel));
 
     if (!verifyResult.success) {
       return NextResponse.json(

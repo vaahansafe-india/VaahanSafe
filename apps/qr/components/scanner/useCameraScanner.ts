@@ -1,7 +1,10 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { parseVaahanSafeQrPayload, type QrPayloadParseResult } from "@vaahansafe/qr-core/client";
+import {
+  parseVaahanSafeQrPayload,
+  type QrPayloadParseResult,
+} from "@vaahansafe/qr-core/scanner";
 import type { ScannerState, CameraFacingMode } from "./types";
 
 interface UseCameraScannerOptions {
@@ -9,7 +12,10 @@ interface UseCameraScannerOptions {
   active: boolean;
 }
 
-export function useCameraScanner({ onSuccess, active }: UseCameraScannerOptions) {
+export function useCameraScanner({
+  onSuccess,
+  active,
+}: UseCameraScannerOptions) {
   const [state, setState] = useState<ScannerState>("IDLE");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [facingMode, setFacingMode] = useState<CameraFacingMode>("environment");
@@ -64,7 +70,8 @@ export function useCameraScanner({ onSuccess, active }: UseCameraScannerOptions)
       if (isLocked.current) return;
 
       setState("DETECTED");
-      const result: QrPayloadParseResult = parseVaahanSafeQrPayload(decodedText);
+      const result: QrPayloadParseResult =
+        parseVaahanSafeQrPayload(decodedText);
 
       if (result.valid && result.publicId) {
         isLocked.current = true;
@@ -83,7 +90,7 @@ export function useCameraScanner({ onSuccess, active }: UseCameraScannerOptions)
         }, 2200);
       }
     },
-    [stopTracks]
+    [stopTracks],
   );
 
   // Frame processing loop using BarcodeDetector or in-memory canvas jsqr
@@ -162,9 +169,14 @@ export function useCameraScanner({ onSuccess, active }: UseCameraScannerOptions)
             if (ctx) {
               ctx.drawImage(video, 0, 0, width, height);
               const imageData = ctx.getImageData(0, 0, width, height);
-              const code = jsQRModule(imageData.data, imageData.width, imageData.height, {
-                inversionAttempts: "dontInvert",
-              });
+              const code = jsQRModule(
+                imageData.data,
+                imageData.width,
+                imageData.height,
+                {
+                  inversionAttempts: "dontInvert",
+                },
+              );
               if (code && code.data) {
                 handleDecodedString(code.data);
                 return;
@@ -280,7 +292,7 @@ export function useCameraScanner({ onSuccess, active }: UseCameraScannerOptions)
       } else {
         setState("ERROR");
         setErrorMessage(
-          err?.message || "Could not start camera stream. Please try again."
+          err?.message || "Could not start camera stream. Please try again.",
         );
       }
     } finally {
@@ -327,7 +339,10 @@ export function useCameraScanner({ onSuccess, active }: UseCameraScannerOptions)
             try {
               let decodedText: string | null = null;
 
-              if (typeof window !== "undefined" && "BarcodeDetector" in window) {
+              if (
+                typeof window !== "undefined" &&
+                "BarcodeDetector" in window
+              ) {
                 try {
                   const detector = new (window as any).BarcodeDetector({
                     formats: ["qr_code"],
@@ -348,9 +363,18 @@ export function useCameraScanner({ onSuccess, active }: UseCameraScannerOptions)
                 const ctx = canvas.getContext("2d");
                 if (ctx) {
                   ctx.drawImage(img, 0, 0);
-                  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                  const imageData = ctx.getImageData(
+                    0,
+                    0,
+                    canvas.width,
+                    canvas.height,
+                  );
                   const { default: jsQR } = await import("jsqr");
-                  const code = jsQR(imageData.data, imageData.width, imageData.height);
+                  const code = jsQR(
+                    imageData.data,
+                    imageData.width,
+                    imageData.height,
+                  );
                   if (code) {
                     decodedText = code.data;
                   }
@@ -373,7 +397,7 @@ export function useCameraScanner({ onSuccess, active }: UseCameraScannerOptions)
         setState("ERROR");
       }
     },
-    [handleDecodedString]
+    [handleDecodedString],
   );
 
   // Lifecycle control: strictly depends ONLY on active status and facingMode
@@ -408,7 +432,10 @@ export function useCameraScanner({ onSuccess, active }: UseCameraScannerOptions)
     if (typeof document !== "undefined") {
       document.addEventListener("visibilitychange", handleVisibilityChange);
       return () => {
-        document.removeEventListener("visibilitychange", handleVisibilityChange);
+        document.removeEventListener(
+          "visibilitychange",
+          handleVisibilityChange,
+        );
       };
     }
   }, [active, startScanner, stopTracks]);
