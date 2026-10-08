@@ -14,7 +14,7 @@ export default async function VerificationChoicePage({ searchParams }: { searchP
     ? `/onboarding/phone?returnUrl=${encodeURIComponent(returnUrl)}`
     : `/api/auth/google?link=1&returnUrl=${encodeURIComponent(returnUrl)}`;
   return <AuthShell>
-    <p className="font-mono text-[10px] uppercase tracking-[0.17em] text-[#325763]">You're signed in</p>
+    <p className="font-mono text-[10px] uppercase tracking-[0.17em] text-[#325763]">You&apos;re signed in</p>
     <h1 className="mt-4 font-serif text-5xl leading-none tracking-tight text-[#1b1c1a]">A little more<br /><em className="text-[#a9583e]">peace of mind.</em></h1>
     <p className="mt-5 text-sm leading-relaxed text-[#615f59]">{needsPhone
       ? "Verify your mobile number with an SMS code for another way to sign in and receive the contact alerts you choose."

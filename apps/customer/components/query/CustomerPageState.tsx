@@ -22,7 +22,7 @@ export function CustomerPageError({ retry }: { retry: () => void }) {
       <span className="mb-4 inline-flex rounded-xl bg-[#f3e5da] p-3 text-[#a9583e]">
         <VaahanIcon name="warning" size={28} />
       </span>
-      <h1 className="font-serif text-3xl">We couldn't load this page.</h1>
+      <h1 className="font-serif text-3xl">We couldn&apos;t load this page.</h1>
       <p className="mt-3 text-sm text-muted-foreground">
         Please try again in a moment.
       </p>
