@@ -8,7 +8,7 @@
 | **Execution** | Synchronous HTTP request to MSG91 | Asynchronous via Cloudflare Queue |
 | **Latency SLA** | < 1 second | 5–60 seconds |
 | **Queue Target** | None (NEVER enters queue) | `NOTIFICATION_QUEUE` |
-| **Persistence** | Hash only (`StepUpChallenge`), NEVER plaintext | D1 `notification_intents` (payloads) |
+| **Persistence** | Supabase `auth_otp_requests`: phone/IP/cookie hashes and provider reference; codes remain at MSG91 | Existing `notification_intents` (payloads) |
 | **Dead-Letter** | NEVER dead-lettered | Transitions to DLQ on exhaustion |
 | **In-App Presence** | None (never displayed in notification center) | Displayed in Notification Center |
 
@@ -16,7 +16,7 @@
 
 ## 2. Invariant Proofs
 
-See [MSG91 integration and live audit](msg91-integration.md) for configured provider contracts, channel blockers, D1 request security and release requirements.
+See [WhatsApp OTP](whatsapp-otp.md) for configured provider contracts, channel blockers, Supabase request security and release requirements.
 
 1. **Queue Outage Proof**: If `NOTIFICATION_QUEUE` is down or congested, the login flow continues without disruption because auth interacts directly and synchronously with MSG91 OTP endpoints.
 2. **Privacy Proof**: Plaintext OTP is never stored in `notification_intents`, `notifications`, `notification_deliveries`, or logs.

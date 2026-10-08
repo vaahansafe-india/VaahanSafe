@@ -61,7 +61,13 @@ export class Msg91OtpAdapter implements IOtpService {
           signal: AbortSignal.timeout(10000),
         },
       );
-      if (!response.ok) throw new Error("OTP provider request failed");
+      if (!response.ok) {
+        // Log operational metadata only: never payloads, phone numbers or codes.
+        const rejected = await response.json().catch(() => ({})) as { code?: unknown };
+        const code = String(rejected.code || "");
+        console.error("[MSG91 OTP] Request rejected", { method, status: response.status, code: /^[a-zA-Z0-9_-]{1,32}$/.test(code) ? code : "PROVIDER_ERROR" });
+        throw new Error("OTP provider request failed");
+      }
       return (await response.json()) as {
         type?: string;
         message?: unknown;

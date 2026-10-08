@@ -4,40 +4,50 @@ afterEach(() => vi.unstubAllEnvs());
 const phone = "+919876543210";
 function setup() {
   vi.stubEnv("SESSION_SECRET", "unit-test-security-key-at-least-16");
-  const db = { execute: vi.fn().mockResolvedValue({success:true,rowsAffected:1}), queryFirst: vi.fn() };
-  return { db, guard: new OtpRequestGuard(db,"CUSTOMER"), request: new Request("https://app.vaahansafe.com/api/auth/send-otp",{headers:{"cf-connecting-ip":"192.0.2.1"}}) };
+  const store = { reserve: vi.fn().mockResolvedValue(true), finishDispatch: vi.fn().mockResolvedValue(true), claimVerification: vi.fn(), finishVerification: vi.fn().mockResolvedValue(true) };
+  return { store, guard: new OtpRequestGuard(store,"CUSTOMER"), request: new Request("https://app.vaahansafe.com/api/auth/send-otp",{headers:{"cf-connecting-ip":"192.0.2.1"}}) };
 }
-describe("D1-owned OTP request guard", () => {
-  it("reserves atomically, stores hashes and applies shared phone and IP limits", async () => {
-    const {guard,db,request}=setup();
-    const result = await guard.reserve(phone,request);
+describe("server-owned OTP request guard", () => {
+  it("stores only hashes and issues a secure, HttpOnly challenge cookie", async () => {
+    const {guard,store,request}=setup();
+    const result = await guard.reserve(phone,request,"WHATSAPP");
     expect(result.token).toHaveLength(72);
-    const [sql,params]=db.execute.mock.calls[0];
-    expect(sql).toContain("NOT EXISTS"); expect(sql).toContain("< 5"); expect(sql).toContain("< 20");
-    expect(params).not.toContain(phone); expect(params).not.toContain("192.0.2.1"); expect(params).not.toContain(result.token);
+    const stored=store.reserve.mock.calls[0][0];
+    expect(stored).toMatchObject({surface:"CUSTOMER",channel:"WHATSAPP"});
+    for(const key of ["tokenHash","phoneHash","ipHash"]) expect(stored[key]).toMatch(/^[a-f0-9]{64}$/);
+    expect(JSON.stringify(stored)).not.toContain(phone);
+    expect(JSON.stringify(stored)).not.toContain(result.token);
     expect(serializeOtpCookie("CUSTOMER",result.token,request)).toContain("HttpOnly; SameSite=Lax; Path=/; Max-Age=300; Secure");
   });
-  it("rejects concurrent reservation and uncertain row counts", async () => {
-    const {guard,db,request}=setup(); db.execute.mockResolvedValue({success:true,rowsAffected:0});
+  it("fails closed when rate limits deny a reservation or storage is unavailable", async () => {
+    const {guard,store,request}=setup(); store.reserve.mockResolvedValueOnce(false).mockRejectedValueOnce(new Error("Database unavailable"));
     await expect(guard.reserve(phone,request)).rejects.toMatchObject({status:429});
+    await expect(guard.reserve(phone,request)).rejects.toThrow("Database unavailable");
   });
   it("never calls MSG91 without a matching server challenge", async () => {
     const {guard,request}=setup(); const verify=vi.fn();
     expect(await guard.verify(phone,request,verify)).toEqual({success:false}); expect(verify).not.toHaveBeenCalled();
   });
-  it("claims and consumes a challenge once without saving the code", async () => {
-    const {guard,db,request}=setup(); const {token}=await guard.reserve(phone,request);
-    db.queryFirst.mockResolvedValueOnce({id:"otp-request",channel:"SMS",provider_request_id:"provider-reference"}).mockResolvedValueOnce(null);
+  it("claims and consumes a challenge once using the stored provider reference", async () => {
+    const {guard,store,request}=setup(); const {token}=await guard.reserve(phone,request);
+    store.claimVerification.mockResolvedValueOnce({id:"otp-request",channel:"WHATSAPP",provider_request_id:"provider-reference"}).mockResolvedValueOnce(null);
     const verificationRequest=new Request(request.url,{headers:{cookie:`vs_customer_otp=${token}`}});
     const verify=vi.fn().mockResolvedValue({success:true});
     expect(await guard.verify(phone,verificationRequest,verify)).toEqual({success:true});
     expect(await guard.verify(phone,verificationRequest,verify)).toEqual({success:false}); expect(verify).toHaveBeenCalledTimes(1);
-    expect(db.execute.mock.calls.at(-1)?.[1][0]).toBe("VERIFIED");
+    expect(verify).toHaveBeenCalledWith({channel:"WHATSAPP",requestId:"provider-reference"});
+    expect(store.finishVerification).toHaveBeenLastCalledWith("otp-request",true);
   });
   it("restores retryable challenge state on provider failure", async () => {
-    const {guard,db,request}=setup(); const {token}=await guard.reserve(phone,request);
-    db.queryFirst.mockResolvedValue({id:"otp-request",channel:"SMS",provider_request_id:"provider-reference"});
+    const {guard,store,request}=setup(); const {token}=await guard.reserve(phone,request);
+    store.claimVerification.mockResolvedValue({id:"otp-request",channel:"SMS",provider_request_id:"provider-reference"});
     await expect(guard.verify(phone,new Request(request.url,{headers:{cookie:`vs_customer_otp=${token}`}}),async()=>{throw new Error("provider unavailable");})).rejects.toThrow();
-    expect(db.execute.mock.calls.at(-1)?.[1][0]).toBe("SENT");
+    expect(store.finishVerification).toHaveBeenLastCalledWith("otp-request",false);
+  });
+  it("uses the platform-verified Vercel IP and ignores user forwarded headers", async()=>{
+    const {guard,store,request}=setup(); vi.stubEnv("VERCEL","1");
+    await guard.reserve(phone,new Request(request.url,{headers:{"x-vercel-forwarded-for":"192.0.2.2","cf-connecting-ip":"192.0.2.10","x-forwarded-for":"192.0.2.11"}}));
+    await guard.reserve(phone,new Request(request.url,{headers:{"x-vercel-forwarded-for":"192.0.2.2","cf-connecting-ip":"192.0.2.20","x-forwarded-for":"192.0.2.21"}}));
+    expect(store.reserve.mock.calls[0][0].ipHash).toBe(store.reserve.mock.calls[1][0].ipHash);
   });
 });

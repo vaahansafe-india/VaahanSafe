@@ -16,18 +16,28 @@ OTP, provider request reference, nor verified access token is returned to the UI
 The SMS path remains separate and requires an actual approved
 `MSG91_OTP_TEMPLATE_ID`; it is never an implicit delivery fallback.
 
-Sending calls the provider's `widget/sendOtp` API. D1 retains the channel and
-provider request ID on the existing hashed, cookie-bound challenge. Verification
+Sending calls the provider's `widget/sendOtp` API. Supabase retains the channel and
+provider request ID on a hashed, cookie-bound challenge. Verification
 uses that server reference with `widget/verifyOtp`, then validates the returned
 access token with `widget/verifyAccessToken`. The verified phone must exactly
 match the reserved challenge. Invisible verification and ambiguous success
 responses are rejected.
 
 The provider widget requires a minimum fifteen-minute expiry. VaahanSafe enforces
-a stricter five-minute expiry in D1 before contacting the verification provider,
+a stricter five-minute expiry in Supabase before contacting the verification provider,
 plus the existing shared send cooldown, phone/IP limits, five verification
-attempts, and atomic single consumption. No schema migration is needed: the
-existing `auth_otp_requests` table already supports both channels.
+attempts, and atomic single consumption. Migration `20261008205438_supabase_otp_challenges`
+creates `auth_otp_requests` and four typed, server-only RPCs. RLS is enabled;
+anonymous and authenticated browser roles cannot read the table or call the RPCs.
+Functions use `SECURITY INVOKER` and are granted only to `service_role`.
+Transaction advisory locks serialize phone/IP reservations across all surfaces.
+Configure the same `OTP_REQUEST_HASH_SECRET` in each server app; it keeps abuse
+limits consistent without sharing or changing session signing secrets.
+
+The owner requested Supabase for authentication persistence on 9 October 2026,
+overriding the older Cloudflare-only repository instruction. OTP sends and
+verification no longer call Cloudflare D1. Cloudflare monitoring and storage
+configuration is independent of authentication.
 
 As of 9 October 2026, the MSG91 widget mapping is saved and local configuration is
 updated. All 41 focused OTP checks and customer, activation, admin, and API

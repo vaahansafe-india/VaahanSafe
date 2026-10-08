@@ -118,8 +118,10 @@ describe("Provider-owned WhatsApp OTP", () => {
   it("uses the channel and reference stored on the server rather than client claims", async () => {
     vi.stubEnv("SESSION_SECRET", "security-fixture-at-least-sixteen");
     const db = {
-      execute: vi.fn().mockResolvedValue({ success: true, rowsAffected: 1 }),
-      queryFirst: vi
+      reserve: vi.fn().mockResolvedValue(true),
+      finishDispatch: vi.fn().mockResolvedValue(true),
+      finishVerification: vi.fn().mockResolvedValue(true),
+      claimVerification: vi
         .fn()
         .mockResolvedValue({
           id: "challenge-fixture",
@@ -133,7 +135,7 @@ describe("Provider-owned WhatsApp OTP", () => {
       new Request("https://app.vaahansafe.com"),
       "WHATSAPP",
     );
-    expect(db.execute.mock.calls[0][1]).toContain("WHATSAPP");
+    expect(db.reserve.mock.calls[0][0].channel).toBe("WHATSAPP");
     const verify = vi.fn().mockResolvedValue({ success: true });
     expect(
       (
