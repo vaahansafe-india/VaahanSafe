@@ -36,10 +36,15 @@ export function AuthLegalNotice({ type }: AuthLegalNoticeProps) {
     );
   }
 
+  const webUrl = DOMAINS.web || "https://vaahansafe.com";
+
   return (
-    <footer className="flex items-center justify-between gap-4 border-t border-[#e2dcd2] py-[clamp(12px,2vh,24px)] text-[11px] text-[#77736c]">
-      <span>© VaahanSafe</span>
-      <div className="flex items-center gap-4">
+    <footer className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-[#e2dcd2] py-4 text-[11px] text-[#77736c]">
+      <span>© VaahanSafe · Vehicle safety identity</span>
+      <div className="flex flex-wrap items-center gap-4">
+        <a href={webUrl} className="font-medium text-[#615f59] hover:text-[#a9583e]">
+          Back to VaahanSafe
+        </a>
         <a
           href={helpUrl}
           target="_blank"

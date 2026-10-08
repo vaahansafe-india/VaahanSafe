@@ -20,7 +20,6 @@ export async function GET(req: Request) {
         stage: "RECOGNIZE",
         challenge: null,
         user: null,
-        eligibleVehiclesCount: 0,
       },
       { status: 500 }
     );

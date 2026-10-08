@@ -85,7 +85,7 @@ describe("Notification Domain Foundation", () => {
       expect(rendered.inApp.actionTarget).toBe("7F3K9021");
 
       expect(rendered.whatsApp.templateName).toBe("vhn_qr_activated_v1");
-      expect(rendered.whatsApp.parameters.public_id).toBe("7F3K9021");
+      expect(rendered.whatsApp.parameters["1"]).toBe("7F3K9021");
 
       expect(rendered.email.subject).toContain("DL-01-**-1234");
       expect(rendered.email.html).toContain("7F3K9021");
@@ -135,6 +135,14 @@ describe("Notification Domain Foundation", () => {
       expect(rendered.inApp.body).toContain("was scanned");
       expect(rendered.inApp.body).not.toContain("accident");
       expect(rendered.email.text).toContain("A scan alone does not indicate an accident");
+      expect(rendered.whatsApp.templateName).toBe("vhn_qr_scan_notice_v2");
+      expect(rendered.whatsApp.languageCode).toBe("en_US");
+      expect(rendered.whatsApp.parameters["1"]).toBe("KA-01-**-5678");
+      expect(rendered.whatsApp.parameters["2"]).toBe("10:30 AM IST");
+    });
+
+    it("excludes OTP from persistent notification templates", () => {
+      expect(() => getTemplateDefinition("AUTH_OTP_V1")).toThrow();
     });
   });
 });

@@ -66,9 +66,9 @@ export function VerifyPhysicalQr({
     <div className="space-y-6">
       {/* Header */}
       <div className="space-y-2">
-        <h1 className="font-serif text-3xl sm:text-4xl text-foreground font-normal tracking-tight">
+        <h2 className="font-serif text-3xl sm:text-4xl text-foreground font-normal tracking-tight">
           Enter Scratch Security Code
-        </h1>
+        </h2>
 
         <p className="text-xs sm:text-sm text-muted-foreground max-w-lg leading-relaxed">
           Scratch the silver security panel on your sticker packaging to reveal your 6-character code.
@@ -108,7 +108,7 @@ export function VerifyPhysicalQr({
         />
 
         {isLocked && (
-          <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3.5 text-xs text-amber-900 dark:text-amber-200 space-y-1">
+          <div className="rounded-sm border border-amber-500/30 bg-amber-500/10 p-3.5 text-xs text-amber-900 dark:text-amber-200 space-y-1">
             <div className="font-semibold flex items-center gap-2">
               <VaahanIcon name="lock" size={14} />
               <span>Temporary Verification Lock</span>
@@ -127,7 +127,7 @@ export function VerifyPhysicalQr({
         <Button
           type="submit"
           disabled={isLoading || isLocked || !scratchCode.trim()}
-          className="w-full h-12 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-semibold transition-colors shadow-sm disabled:opacity-50"
+          className="w-full h-12 rounded-sm bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-semibold transition-colors shadow-sm disabled:opacity-50"
         >
           {isLoading ? (
             <div className="flex items-center gap-2">

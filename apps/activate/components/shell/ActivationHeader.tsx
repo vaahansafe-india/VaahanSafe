@@ -22,19 +22,18 @@ export function ActivationHeader({ user }: ActivationHeaderProps) {
 
   return (
     <>
-      <header className="fixed inset-x-0 top-0 z-40 border-b border-border/70 bg-background/95 backdrop-blur-md">
+      <header className="sticky inset-x-0 top-0 z-40 border-b border-border bg-background/95 backdrop-blur-sm">
         <div
           className="
-            mx-auto flex h-16 w-full max-w-[1600px]
+            mx-auto flex h-14 sm:h-[72px] w-full max-w-[1288px]
             items-center justify-between
-            px-5 sm:px-7 md:px-10
-            lg:px-14 xl:px-20 2xl:px-24
+            px-3.5 sm:px-6 lg:px-8
           "
         >
           <Link
             href="/"
             className="
-              group flex min-w-0 items-center gap-3
+              group flex min-w-0 items-center gap-1.5 sm:gap-3
               rounded-sm
               focus-visible:outline-none
               focus-visible:ring-2
@@ -44,34 +43,34 @@ export function ActivationHeader({ user }: ActivationHeaderProps) {
             "
             aria-label="VaahanSafe Activate home"
           >
-            <VaahanSafeLogo size="sm" variant="brand" showTagline={false} className="shrink-0" />
+            <VaahanSafeLogo size="sm" variant="brand" showTagline={false} className="shrink-0 scale-90 sm:scale-100 origin-left" />
 
             <div className="flex min-w-0 items-center">
-              <span className="mx-2.5 h-3.5 w-px bg-border" />
+              <span className="mx-1.5 sm:mx-2.5 h-3.5 w-px bg-border shrink-0" />
 
-              <span className="rounded bg-primary/10 px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-primary">
-                Activate
+              <span className="font-mono text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider sm:tracking-[0.14em] text-primary whitespace-nowrap">
+                Retail activation
               </span>
             </div>
           </Link>
 
-          <div className="flex items-center gap-2 sm:gap-4">
+          <div className="flex items-center gap-1.5 sm:gap-4 shrink-0">
             <button
               type="button"
               onClick={() => setIsHelpOpen(true)}
               className="
-                hidden min-h-10 items-center px-2
+                inline-flex min-h-9 items-center px-2 py-1
                 text-xs font-medium text-muted-foreground
                 transition-colors hover:text-foreground
                 focus-visible:outline-none
                 focus-visible:ring-2 focus-visible:ring-ring
-                sm:inline-flex
               "
+              aria-label="Open activation help"
             >
               Help
             </button>
 
-            <ThemeToggle className="h-9 w-9 rounded-md border-border" />
+            <ThemeToggle className="h-9 w-9 sm:h-11 sm:w-11 rounded-sm border-border shrink-0" />
 
             {user && (
               <div className="hidden items-center gap-3 border-l border-border pl-4 md:flex">
@@ -99,7 +98,7 @@ export function ActivationHeader({ user }: ActivationHeaderProps) {
 
       {/* Help Modal — Responsive Contextual Guidance */}
       <Dialog open={isHelpOpen} onOpenChange={setIsHelpOpen}>
-        <DialogContent className="w-[calc(100vw-2rem)] sm:max-w-md max-h-[85vh] overflow-y-auto rounded-2xl p-5 sm:p-6 border border-border bg-background shadow-xl">
+        <DialogContent className="w-[calc(100vw-2rem)] sm:max-w-md max-h-[85vh] overflow-y-auto rounded-sm p-5 sm:p-6 border border-border bg-background shadow-xl">
           <DialogHeader className="pr-8 sm:pr-0">
             <DialogTitle className="text-base sm:text-lg font-bold tracking-tight">
               Activation help

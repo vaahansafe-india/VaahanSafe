@@ -55,7 +55,6 @@ export interface ActivationSessionDto {
   challenge: ActivationSessionChallengeDto | null;
   user: ActivationSessionUserDto | null;
   selectedVehicleId?: string | null;
-  eligibleVehiclesCount: number;
 }
 
 export interface EligibleVehicleDto {

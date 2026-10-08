@@ -25,6 +25,7 @@ export function AuthCard({
 }: AuthCardProps) {
   const [state, setState] = React.useState<AuthState>("sign-in");
   const [phoneNumber, setPhoneNumber] = React.useState("");
+  const [channel, setChannel] = React.useState<"WHATSAPP" | "SMS">("WHATSAPP");
   const [maskedPhone, setMaskedPhone] = React.useState("");
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
   const [googleLoading, setGoogleLoading] = React.useState(false);
@@ -48,16 +49,17 @@ export function AuthCard({
   }, []);
 
   // Send Mobile OTP Handler
-  const handleSendOtp = async (phone: string) => {
+  const handleSendOtp = async (phone: string, selectedChannel: "WHATSAPP" | "SMS" = "WHATSAPP") => {
     setState("sending-otp");
     setErrorMessage(null);
     setPhoneNumber(phone);
+    setChannel(selectedChannel);
 
     try {
       const res = await fetch("/api/auth/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone }),
+        body: JSON.stringify({ phone, channel: selectedChannel }),
       });
 
       const data = await res.json();
@@ -68,6 +70,9 @@ export function AuthCard({
         return;
       }
 
+      if (data.channel) {
+        setChannel(data.channel);
+      }
       setMaskedPhone(data.maskedPhone || `${phone.slice(0, 3)} ••••• ${phone.slice(-4)}`);
       setState("verify-otp");
     } catch {
@@ -114,21 +119,24 @@ export function AuthCard({
   };
 
   // Resend OTP Handler
-  const handleResendOtp = async () => {
+  const handleResendOtp = async (targetChannel?: "WHATSAPP" | "SMS") => {
+    const resendChan = targetChannel || channel;
     try {
       const response = await fetch("/api/auth/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: phoneNumber }),
+        body: JSON.stringify({ phone: phoneNumber, channel: resendChan }),
       });
       const data = await response.json();
       if (!response.ok || !data.success) throw new Error("Resend unavailable");
+      setChannel(data.channel || resendChan);
       setErrorMessage(null);
     } catch {
       setErrorMessage("Could not resend code right now. Try again in a moment.");
       throw new Error("Resend unavailable");
     }
   };
+
 
   // Switch back to mobile entry
   const handleChangeNumber = () => {
@@ -144,7 +152,7 @@ export function AuthCard({
     <div
       role="region"
       aria-label="Customer authentication"
-      className="w-full"
+      className="w-full max-w-[430px] rounded-2xl border-border bg-card"
     >
       {/* 01. Brand Header */}
       <AuthBrand
@@ -213,6 +221,8 @@ export function AuthCard({
             ) : (
               <OtpVerificationForm
                 isLoading={isOtpVerifying}
+                channel={channel}
+                maskedPhone={maskedPhone}
                 onVerifyOtp={handleVerifyOtp}
                 onResendOtp={handleResendOtp}
                 onChangeNumber={handleChangeNumber}

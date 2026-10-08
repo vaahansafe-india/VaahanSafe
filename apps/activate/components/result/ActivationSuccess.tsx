@@ -33,12 +33,12 @@ export function ActivationSuccess({
           </span>
         </div>
 
-        <h1 className="font-serif text-3xl sm:text-4xl text-foreground font-normal tracking-tight">
+        <h2 className="font-serif text-3xl sm:text-4xl text-foreground font-normal tracking-tight">
           Your QR is now connected.
-        </h1>
+        </h2>
 
         <p className="text-xs sm:text-sm text-muted-foreground max-w-lg leading-relaxed">
-          Your physical QR is connected to this vehicle. You can now preview the public safety view and manage the vehicle in your account.
+          Your physical QR is connected to this vehicle. Preview its public safety view, then review your emergency contacts in your account so alerts reach the right people.
         </p>
       </div>
 
@@ -78,7 +78,7 @@ export function ActivationSuccess({
             <div className="h-4 w-0.5 bg-emerald-500" />
             <span className="h-3.5 w-3.5 rounded-full bg-emerald-500 ring-4 ring-emerald-500/20" />
             <span className="font-mono text-[9px] uppercase tracking-widest text-emerald-600 dark:text-emerald-400 font-semibold">
-              Live Emergency Routing
+              Emergency Routing Enabled
             </span>
           </div>
         </div>
@@ -92,6 +92,10 @@ export function ActivationSuccess({
         </div>
       </div>
 
+      <p className="text-xs leading-5 text-muted-foreground">
+        Sticker activation enables QR safety services. Optional premium plan features follow your separate subscription status.
+      </p>
+
       {/* Action Controls */}
       <div className="space-y-3 pt-1">
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
@@ -99,7 +103,7 @@ export function ActivationSuccess({
             href={publicQrUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex-1 inline-flex items-center justify-center h-12 px-5 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-semibold uppercase tracking-wider transition-colors shadow-sm"
+            className="flex-1 inline-flex items-center justify-center h-12 px-5 rounded-sm bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-semibold uppercase tracking-wider transition-colors shadow-sm"
           >
             <span>Preview Public Safety View</span>
             <VaahanIcon name="external-link" size={14} className="ml-2" />
@@ -107,7 +111,7 @@ export function ActivationSuccess({
 
           <a
             href={customerVehiclesUrl}
-            className="flex-1 inline-flex items-center justify-center h-12 px-5 rounded-lg border border-border bg-background hover:bg-muted/40 text-foreground text-xs font-mono font-medium transition-colors"
+            className="flex-1 inline-flex items-center justify-center h-12 px-5 rounded-sm border border-border bg-background hover:bg-muted/40 text-foreground text-xs font-mono font-medium transition-colors"
           >
             <span>Manage Vehicle →</span>
           </a>

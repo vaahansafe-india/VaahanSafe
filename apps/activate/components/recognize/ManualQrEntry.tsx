@@ -43,12 +43,12 @@ export function ManualQrEntry({ initialValue = "", onSubmit, isLoading }: Manual
               setValue(e.target.value);
               if (error) setError(null);
             }}
-            placeholder="e.g. VS-7F3K-9021 or vs_99a8b7c6d5e4"
+            placeholder="Enter the ID printed on your sticker"
             disabled={isLoading}
             autoFocus
             autoComplete="off"
             spellCheck={false}
-            className="font-mono text-sm tracking-wider uppercase h-12 px-4 rounded-xl border-border bg-background focus-visible:ring-primary"
+            className="font-mono text-sm tracking-wider uppercase h-12 px-4 rounded-sm border-border bg-background focus-visible:ring-primary"
           />
           {value && !isLoading && (
             <button
@@ -77,7 +77,7 @@ export function ManualQrEntry({ initialValue = "", onSubmit, isLoading }: Manual
       <Button
         type="submit"
         disabled={isLoading || !value.trim()}
-        className="w-full h-12 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-medium text-sm transition-colors shadow-sm disabled:opacity-50"
+        className="w-full h-12 rounded-sm bg-primary hover:bg-primary/90 text-primary-foreground font-medium text-sm transition-colors shadow-sm disabled:opacity-50"
       >
         {isLoading ? (
           <div className="flex items-center gap-2">

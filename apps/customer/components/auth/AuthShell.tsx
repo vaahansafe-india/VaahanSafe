@@ -5,6 +5,7 @@ import { VaahanSafeLogo } from "@vaahansafe/ui/brand";
 import { AuthCard } from "./AuthCard";
 import { AuthLegalNotice } from "./AuthLegalNotice";
 import { AuthVisualPanel } from "./AuthVisualPanel";
+import { AuthIdentityField } from "./AuthIdentityField";
 
 interface AuthShellProps {
   returnUrl?: string;
@@ -26,10 +27,11 @@ export function AuthShell({
   return (
     <main
       id="main-content"
-      className="min-h-[100dvh] bg-[#faf9f5] text-[#1b1c1a] lg:h-[100dvh] lg:overflow-hidden"
+      className="relative min-h-[100dvh] bg-[#faf9f5] bg-background text-[#1b1c1a]"
       style={{ backgroundImage: "url('/images/auth/paper-texture.webp')", backgroundRepeat: "repeat", backgroundSize: "400px 400px" }}
     >
-      <div className="grid min-h-[100dvh] lg:h-full lg:grid-cols-[minmax(0,1fr)_minmax(480px,0.9fr)]">
+      <AuthIdentityField />
+      <div className="relative z-10 grid min-h-[100dvh] lg:grid-cols-[minmax(0,1fr)_minmax(480px,0.9fr)]">
         <AuthVisualPanel>
           <div className="relative z-10 max-w-[610px] px-10 pt-[clamp(36px,7vh,96px)] xl:px-16">
             <p className="mb-5 flex items-center gap-3 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-[#a9583e]">
@@ -51,8 +53,8 @@ export function AuthShell({
           </div>
         </AuthVisualPanel>
 
-        <div className="flex min-h-[100dvh] flex-col px-6 sm:px-10 lg:h-full lg:min-h-0 xl:px-16">
-          <header className="flex min-h-[clamp(64px,10vh,88px)] items-center justify-between gap-4 border-b border-[#e2dcd2]">
+        <div className="flex min-h-[100dvh] flex-col px-6 sm:px-10 xl:px-16">
+          <header className="flex min-h-[clamp(64px,10vh,88px)] shrink-0 items-center justify-between gap-4 border-b border-[#e2dcd2]">
             <a href={webUrl} aria-label="VaahanSafe home" className="inline-flex shrink-0 items-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#cc785c]">
               <VaahanSafeLogo size="md" variant="brand" showTagline={false} aria-hidden="true" />
             </a>
@@ -61,7 +63,7 @@ export function AuthShell({
             </a>
           </header>
 
-          <div className="flex min-h-0 flex-1 items-center justify-center py-[clamp(12px,3vh,40px)]">
+          <div className="flex flex-1 items-center justify-center py-8 xl:py-10">
             <div className="w-full max-w-[430px]">
               {children || <AuthCard returnUrl={returnUrl} mode={mode} userEmail={userEmail} userName={userName} />}
             </div>

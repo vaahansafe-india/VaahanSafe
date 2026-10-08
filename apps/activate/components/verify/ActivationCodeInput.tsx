@@ -57,7 +57,7 @@ export function ActivationCodeInput({
           autoCorrect="off"
           autoCapitalize="characters"
           spellCheck={false}
-          className="h-13 px-4 font-mono text-base sm:text-lg tracking-[0.3em] uppercase text-center rounded-lg border-border bg-background focus-visible:ring-[#cc785c]"
+          className="h-13 px-4 font-mono text-base sm:text-lg tracking-[0.3em] uppercase text-center rounded-sm border-border bg-background focus-visible:ring-[#cc785c]"
         />
       </div>
 

@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { ManualQrEntry } from "./ManualQrEntry";
 import { ActivationScanner } from "./ActivationScanner";
-import { Button } from "@vaahansafe/ui/components";
 import { VaahanIcon } from "@vaahansafe/icons";
 import type { RecognizeResultDto } from "@/lib/types";
 
@@ -60,70 +59,56 @@ export function RecognizeQr({ initialPublicId = "", onRecognized }: RecognizeQrP
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="space-y-2">
-        <h1 className="font-serif text-3xl sm:text-4xl text-foreground font-normal tracking-tight">
-          Activate your <span className="text-foreground">VaahanSafe QR</span>
-        </h1>
-
-        <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed w-full max-w-xl">
-          Link your physical QR sticker to your vehicle. Once active, emergency alerts and vehicle safety protection start working immediately.
+    <div className="space-y-7">
+      <div className="space-y-2.5">
+        <p className="activation-kicker">Identify your sticker</p>
+        <h2 className="max-w-2xl font-serif text-[clamp(2.4rem,5vw,4rem)] font-medium leading-[.98] tracking-[-.035em] text-foreground">
+          Start with the QR in your kit.
+        </h2>
+        <p className="max-w-xl text-sm leading-6 text-muted-foreground">
+          Scan the sticker or enter its printed VaahanSafe ID. This identifies the sticker; activation comes after the security code and vehicle checks.
         </p>
       </div>
 
-      {/* Segmented Control Tabs — Full Width on Mobile, Inline on Desktop */}
-      <div className="grid w-full grid-cols-2 p-1 rounded-xl bg-muted/60 border border-border sm:inline-flex sm:w-auto">
-        <button
-          type="button"
-          onClick={() => setTab("scan")}
-          className={`flex items-center justify-center gap-2 px-3 py-2.5 text-xs font-semibold rounded-lg transition-all ${
-            tab === "scan"
-              ? "bg-card text-foreground shadow-xs"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <VaahanIcon name="qr-scan" size={14} className={tab === "scan" ? "text-primary" : "text-muted-foreground"} />
-          <span className="truncate">Scan with Camera</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => setTab("manual")}
-          className={`flex items-center justify-center gap-2 px-3 py-2.5 text-xs font-semibold rounded-lg transition-all ${
-            tab === "manual"
-              ? "bg-card text-foreground shadow-xs"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <VaahanIcon name="edit" size={14} className={tab === "manual" ? "text-primary" : "text-muted-foreground"} />
-          <span className="truncate">Enter ID Manually</span>
-        </button>
-      </div>
-
-      {/* Main Interaction Area */}
-      {tab === "scan" && (
-        <div className="w-full space-y-4">
+      <div className="activation-form-sheet">
+        <div className="flex flex-wrap items-end justify-between gap-2 border-b border-border pb-4">
+          <p className="text-sm font-semibold text-foreground">How would you like to begin?</p>
+          <span className="font-mono text-[10px] uppercase tracking-[.14em] text-muted-foreground">Scan / Enter ID</span>
+        </div>
+        <div className="grid grid-cols-2 gap-2 border-b border-border py-3">
+          <button
+            type="button"
+            onClick={() => setTab("scan")}
+            aria-pressed={tab === "scan"}
+            className={`flex min-h-11 items-center justify-center gap-2 border px-2 text-xs font-semibold transition-colors ${tab === "scan" ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:text-foreground"}`}
+          >
+            <VaahanIcon name="qr-scan" size={15} /> Scan the QR
+          </button>
+          <button
+            type="button"
+            onClick={() => setTab("manual")}
+            aria-pressed={tab === "manual"}
+            className={`flex min-h-11 items-center justify-center gap-2 border px-2 text-xs font-semibold transition-colors ${tab === "manual" ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:text-foreground"}`}
+          >
+            <VaahanIcon name="edit" size={15} /> Enter ID
+          </button>
+        </div>
+        {tab === "scan" ? (
           <ActivationScanner
             onScanSuccess={(id) => handleRecognizeSubmit(id)}
             onFallbackToManual={() => setTab("manual")}
           />
-        </div>
-      )}
-
-      {tab === "manual" && (
-        <div className="w-full rounded-2xl border border-border bg-card p-5 sm:p-6 shadow-sm">
-          <ManualQrEntry
-            initialValue={initialPublicId}
-            onSubmit={handleRecognizeSubmit}
-            isLoading={isLoading}
-          />
-        </div>
-      )}
+        ) : (
+          <div className="py-5">
+            <ManualQrEntry initialValue={initialPublicId} onSubmit={handleRecognizeSubmit} isLoading={isLoading} />
+          </div>
+        )}
+      </div>
 
       {/* Error / Warning Notice */}
       {resultMessage && (
         <div
-          className={`rounded-lg border p-4 text-xs space-y-1 ${
+          className={`rounded-sm border p-4 text-xs space-y-1 ${
             resultMessage.type === "warning"
               ? "border-amber-500/30 bg-amber-500/10 text-amber-900 dark:text-amber-200"
               : "border-destructive/30 bg-destructive/10 text-destructive dark:text-red-400"

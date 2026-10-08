@@ -136,8 +136,13 @@ export class NotificationQueueConsumer {
       }
 
       // Idempotency: Skip if already delivered
-      if (delivery.status === "DELIVERED") {
-        channelResults[channel] = { status: "DELIVERED", providerMessageId: delivery.providerMessageId };
+      if (["DELIVERED", "SUPPRESSED", "FAILED_PERMANENT", "DEAD_LETTERED"].includes(delivery.status) ||
+          (delivery.status === "PROCESSING" && delivery.providerMessageId)) {
+        channelResults[channel] = { status: delivery.status, providerMessageId: delivery.providerMessageId };
+        continue;
+      }
+      if (delivery.nextAttemptAt && Date.parse(delivery.nextAttemptAt) > Date.now()) {
+        channelResults[channel] = { status: delivery.status };
         continue;
       }
 
@@ -149,6 +154,7 @@ export class NotificationQueueConsumer {
         if (channel === "IN_APP") {
           // In-App delivery (first-party D1 write)
           const inAppNotif = createNotification({
+            id: `notif_${intent.id}`,
             userId: intent.recipientUserId,
             intentId: intent.id,
             eventType: intent.eventType,
@@ -187,13 +193,14 @@ export class NotificationQueueConsumer {
             recipientPhone: resolvedDest.phone,
             templateName: rendered.whatsApp.templateName,
             parameters: rendered.whatsApp.parameters,
-            correlationId: intent.id,
+            languageCode: rendered.whatsApp.languageCode,
+            correlationId: delivery.id,
           });
 
           if (sendResult.success) {
-            await this.deps.deliveryRepo.updateStatus(delivery.id, "DELIVERED", {
+            // Provider acceptance is not delivery. MSG91 callbacks confirm delivery/read.
+            await this.deps.deliveryRepo.updateStatus(delivery.id, "PROCESSING", {
               providerMessageId: sendResult.providerMessageId,
-              deliveredAt: new Date().toISOString(),
               attemptCount: attemptNumber,
             });
 
@@ -209,7 +216,7 @@ export class NotificationQueueConsumer {
             );
 
             channelResults[channel] = {
-              status: "DELIVERED",
+              status: "PROCESSING",
               providerMessageId: sendResult.providerMessageId,
             };
           } else {

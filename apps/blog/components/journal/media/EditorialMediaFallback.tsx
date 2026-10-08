@@ -20,13 +20,16 @@ export function EditorialMediaFallback({
 
   // Deterministic category visual variants
   const isPrivacy = normCategory.includes("PRIVACY");
-  const isQrIdentity = normCategory.includes("QR") || normCategory.includes("IDENTITY");
-  const isVehicleSafety = normCategory.includes("SAFETY") || normCategory.includes("VEHICLE");
-  const isProduct = normCategory.includes("PRODUCT") || normCategory.includes("UPDATE");
+  const isQrIdentity =
+    normCategory.includes("QR") || normCategory.includes("IDENTITY");
+  const isVehicleSafety =
+    normCategory.includes("SAFETY") || normCategory.includes("VEHICLE");
+  const isProduct =
+    normCategory.includes("PRODUCT") || normCategory.includes("UPDATE");
 
   return (
     <div
-      className="relative flex w-full flex-col justify-between overflow-hidden border border-[#e6dfd8] bg-[#f5f0e8] p-6 sm:p-8 dark:border-[#2e2b27] dark:bg-[#1f1e1b] transition-colors"
+      className="journal-media relative flex w-full flex-col justify-between overflow-hidden bg-[#f5f0e8] p-6 sm:p-8 dark:bg-[#1f1e1b]"
       style={{ aspectRatio }}
       role="img"
       aria-label={`Editorial visual representation for ${category}`}
@@ -35,8 +38,18 @@ export function EditorialMediaFallback({
       <div className="pointer-events-none absolute inset-0 opacity-[0.04] dark:opacity-[0.07]">
         <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <pattern id="editorial-grid" width="32" height="32" patternUnits="userSpaceOnUse">
-              <path d="M 32 0 L 0 0 0 32" fill="none" stroke="currentColor" strokeWidth="1" />
+            <pattern
+              id="editorial-grid"
+              width="32"
+              height="32"
+              patternUnits="userSpaceOnUse"
+            >
+              <path
+                d="M 32 0 L 0 0 0 32"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1"
+              />
             </pattern>
           </defs>
           <rect width="100%" height="100%" fill="url(#editorial-grid)" />

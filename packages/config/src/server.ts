@@ -15,7 +15,10 @@ export const serverConfigSchema = z.object({
   // MSG91 Provider
   MSG91_AUTH_KEY: z.string().optional(),
   MSG91_OTP_TEMPLATE_ID: z.string().optional(),
+  MSG91_WHATSAPP_OTP_WIDGET_ID: z.string().optional(),
   MSG91_SENDER_ID: z.string().optional(),
+  MSG91_WHATSAPP_NUMBER: z.string().optional(),
+  MSG91_WHATSAPP_NAMESPACE: z.string().optional(),
 
   // Payment Provider Configuration
   PAYMENT_PROVIDER: z.enum(["razorpay", "cashfree"]).default("razorpay"),

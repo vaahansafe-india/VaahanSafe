@@ -47,16 +47,25 @@ describe("Authoritative Public QR Resolver (@vaahansafe/qr-core & apps/qr)", () 
       : path.resolve(__dirname, "../database/seeds/dev.sql");
     const devSeed = fs.readFileSync(seedPath, "utf8");
     db.exec(devSeed);
+    // Test fixtures must satisfy the same acquisition gate as production records.
+    db.exec(`INSERT INTO service_entitlements (id,user_id,vehicle_id,qr_sticker_id,capability,status,acquisition_source)
+      VALUES ('ent_test_safety','usr_demo_101','veh_demo_car','qr_active_001','SAFETY_VIEW_ACTIVE','ENABLED','RETAIL_ACTIVATION')`);
 
     client = {
       async query<T>(sql: string, params: unknown[] = []): Promise<T[]> {
         return db.prepare(sql).all(...params) as T[];
       },
-      async queryFirst<T>(sql: string, params: unknown[] = []): Promise<T | null> {
+      async queryFirst<T>(
+        sql: string,
+        params: unknown[] = [],
+      ): Promise<T | null> {
         const rows = db.prepare(sql).all(...params) as T[];
         return rows.length > 0 ? rows[0] : null;
       },
-      async execute(sql: string, params: unknown[] = []): Promise<{ success: boolean; rowsAffected?: number }> {
+      async execute(
+        sql: string,
+        params: unknown[] = [],
+      ): Promise<{ success: boolean; rowsAffected?: number }> {
         const result = db.prepare(sql).run(...params);
         return { success: true, rowsAffected: Number(result.changes) };
       },
@@ -156,7 +165,9 @@ describe("Authoritative Public QR Resolver (@vaahansafe/qr-core & apps/qr)", () 
     });
 
     it("resolves non-existent public ID to UNKNOWN", async () => {
-      const result = await resolvePublicQr("NON_EXISTENT_QR_99", { db: client });
+      const result = await resolvePublicQr("NON_EXISTENT_QR_99", {
+        db: client,
+      });
 
       expect(result.state).toBe("UNKNOWN");
       expect(result.profile).toBeUndefined();
@@ -185,13 +196,15 @@ describe("Authoritative Public QR Resolver (@vaahansafe/qr-core & apps/qr)", () 
       for (const val of forbiddenValues) {
         expect(
           serialized.includes(val),
-          `[PRIVACY INVARIANT VIOLATION] Private field "${val}" found in resolver output!`
+          `[PRIVACY INVARIANT VIOLATION] Private field "${val}" found in resolver output!`,
         ).toBe(false);
       }
 
       // Assert runtime projection checker passes
       expect(() =>
-        assertSafePublicProjection(result.profile as unknown as Record<string, unknown>)
+        assertSafePublicProjection(
+          result.profile as unknown as Record<string, unknown>,
+        ),
       ).not.toThrow();
 
       // Check forbidden keys directly
@@ -206,7 +219,7 @@ describe("Authoritative Public QR Resolver (@vaahansafe/qr-core & apps/qr)", () 
       await client.execute(
         `UPDATE emergency_profiles 
          SET show_owner_name = 0, show_blood_group = 0, show_medical_notes = 0
-         WHERE id = 'emp_demo_car'`
+         WHERE id = 'emp_demo_car'`,
       );
 
       const result = await resolvePublicQr("7F3K9021", { db: client });
@@ -219,14 +232,59 @@ describe("Authoritative Public QR Resolver (@vaahansafe/qr-core & apps/qr)", () 
     it("CRITICAL HARD GATE: blocks active profile if service entitlement is REVOKED or EXPIRED", async () => {
       // Insert a revoked entitlement
       await client.execute(
-        `INSERT INTO service_entitlements (
-           id, user_id, vehicle_id, qr_sticker_id, capability, status, acquisition_source
-         ) VALUES ('ent_revoked_1', 'usr_demo_101', 'veh_demo_car', 'qr_active_001', 'SAFETY_VIEW_ACTIVE', 'REVOKED', 'ONLINE_PURCHASE')`
+        `UPDATE service_entitlements SET status = 'REVOKED' WHERE id = 'ent_test_safety'`,
       );
 
       const result = await resolvePublicQr("7F3K9021", { db: client });
       expect(result.state).toBe("BLOCKED");
       expect(result.profile).toBeUndefined();
+    });
+
+    it("blocks an active binding without an explicit entitlement", async () => {
+      await client.execute(
+        "DELETE FROM service_entitlements WHERE id = 'ent_test_safety'",
+      );
+      const result = await resolvePublicQr("7F3K9021", { db: client });
+      expect(result.state).toBe("BLOCKED");
+      expect(result.profile).toBeUndefined();
+    });
+
+    it("propagates entitlement service failure instead of exposing a profile", async () => {
+      const unavailable: DatabaseClient = {
+        ...client,
+        async query<T>(sql: string, params?: unknown[]): Promise<T[]> {
+          if (sql.includes("service_entitlements"))
+            throw new Error("Entitlement service unavailable");
+          return client.query<T>(sql, params);
+        },
+      };
+      await expect(
+        resolvePublicQr("7F3K9021", { db: unavailable }),
+      ).rejects.toThrow("Entitlement service unavailable");
+    });
+
+    it("blocks expired and mismatched vehicle entitlements", async () => {
+      await client.execute(
+        "UPDATE service_entitlements SET expires_at = '2000-01-01T00:00:00Z' WHERE id = 'ent_test_safety'",
+      );
+      expect((await resolvePublicQr("7F3K9021", { db: client })).state).toBe(
+        "BLOCKED",
+      );
+      await client.execute(
+        "UPDATE service_entitlements SET expires_at = NULL, vehicle_id = 'veh_demo_bike' WHERE id = 'ent_test_safety'",
+      );
+      expect((await resolvePublicQr("7F3K9021", { db: client })).state).toBe(
+        "BLOCKED",
+      );
+    });
+
+    it("omits contacts that have not approved calling", async () => {
+      await client.execute(
+        "UPDATE emergency_contacts SET allow_call = 0 WHERE emergency_profile_id = 'emp_demo_car'",
+      );
+      const result = await resolvePublicQr("7F3K9021", { db: client });
+      expect(result.state).toBe("ACTIVE");
+      expect(result.profile?.approvedEmergencyContacts).toEqual([]);
     });
   });
 
@@ -240,13 +298,18 @@ describe("Authoritative Public QR Resolver (@vaahansafe/qr-core & apps/qr)", () 
           headers: new Headers({
             "cf-ipcity": "Mumbai",
             "cf-region": "Maharashtra",
-            "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)",
+            "user-agent":
+              "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)",
           }),
-        })
+        }),
       ).resolves.not.toThrow();
 
-      const events = await client.query<{ qr_id: string; result: string; city: string }>(
-        `SELECT qr_id, result, city FROM qr_scan_events WHERE qr_id = 'qr_active_001' AND city = 'Mumbai'`
+      const events = await client.query<{
+        qr_id: string;
+        result: string;
+        city: string;
+      }>(
+        `SELECT qr_id, result, city FROM qr_scan_events WHERE qr_id = 'qr_active_001' AND city = 'Mumbai'`,
       );
 
       expect(events.length).toBeGreaterThan(0);
@@ -255,7 +318,7 @@ describe("Authoritative Public QR Resolver (@vaahansafe/qr-core & apps/qr)", () 
 
     it("ignores prefetch requests from search engines and browsers", async () => {
       const before = await client.query<{ id: string }>(
-        `SELECT id FROM qr_scan_events WHERE qr_id = 'qr_active_001'`
+        `SELECT id FROM qr_scan_events WHERE qr_id = 'qr_active_001'`,
       );
 
       await recordPublicScanEventSafely({
@@ -269,7 +332,7 @@ describe("Authoritative Public QR Resolver (@vaahansafe/qr-core & apps/qr)", () 
       });
 
       const after = await client.query<{ id: string }>(
-        `SELECT id FROM qr_scan_events WHERE qr_id = 'qr_active_001'`
+        `SELECT id FROM qr_scan_events WHERE qr_id = 'qr_active_001'`,
       );
 
       expect(after.length).toBe(before.length);
@@ -288,7 +351,7 @@ describe("Authoritative Public QR Resolver (@vaahansafe/qr-core & apps/qr)", () 
           db: brokenClient,
           qrId: "qr_active_001",
           state: "ACTIVE",
-        })
+        }),
       ).resolves.not.toThrow();
     });
   });

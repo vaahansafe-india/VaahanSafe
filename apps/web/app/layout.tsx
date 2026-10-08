@@ -3,20 +3,21 @@ import "@vaahansafe/ui/styles/globals.css";
 import "./marketing.css";
 import "./editorial.css";
 import { ThemeProvider } from "@vaahansafe/ui/theme";
+import { discoveryOrigin } from "@vaahansafe/config";
 
 export const metadata: Metadata = {
   title: "VaahanSafe — QR-Based Vehicle Safety & Emergency Identification Platform",
   description:
     "A QR-based vehicle safety identity for Indian roads. Connect a physical sticker to the safety information and contact options you choose to share.",
-  metadataBase: new URL("https://vaahansafe.com"),
+  metadataBase: new URL(discoveryOrigin("web")),
   alternates: {
-    canonical: "https://vaahansafe.com",
+    canonical: discoveryOrigin("web"),
   },
   openGraph: {
     title: "VaahanSafe — Vehicle Safety Identity Platform",
     description:
       "A physical QR connects your vehicle to an owner-controlled safety view and available contact options.",
-    url: "https://vaahansafe.com",
+    url: discoveryOrigin("web"),
     siteName: "VaahanSafe",
     locale: "en_IN",
     type: "website",
@@ -40,6 +41,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="alternate" type="application/rss+xml" href="/rss.xml" title="VaahanSafe Journal" />
+      </head>
       <body className="min-h-screen bg-background font-sans antialiased text-foreground selection:bg-primary/20 selection:text-primary">
         {/* WCAG 2.2 AA Skip Navigation Link */}
         <a

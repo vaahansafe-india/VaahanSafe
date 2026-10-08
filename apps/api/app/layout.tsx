@@ -16,7 +16,17 @@ export default function ApiRootLayout({
 }) {
   return (
     <html lang="en">
-      <body style={{ fontFamily: "monospace", margin: 0, padding: "2rem", backgroundColor: "#0f172a", color: "#f8fafc" }}>
+      <body
+        style={{
+          fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+          margin: 0,
+          padding: "2.5rem 1.5rem",
+          backgroundColor: "#FAF9F5",
+          color: "#252320",
+          minHeight: "100vh",
+          WebkitFontSmoothing: "antialiased",
+        }}
+      >
         {children}
       </body>
     </html>

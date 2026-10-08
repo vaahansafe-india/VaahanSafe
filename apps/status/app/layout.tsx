@@ -49,6 +49,9 @@ export default function StatusRootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="alternate" type="application/rss+xml" href="/rss.xml" title="VaahanSafe Service Updates" />
+      </head>
       <body
         className="status-paper min-h-screen overflow-x-clip bg-[#faf9f5] font-sans antialiased text-[#141413] dark:bg-[#181715] dark:text-[#faf9f5]"
         suppressHydrationWarning

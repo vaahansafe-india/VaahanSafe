@@ -1,10 +1,11 @@
 import * as React from "react";
 import type { Metadata } from "next";
-import { getPublishedArticles, getJournalCategories } from "@vaahansafe/content";
 import { JournalHeader } from "../../components/journal/JournalHeader";
 import { JournalFooter } from "../../components/journal/JournalFooter";
 import { SearchClient } from "../../components/search/SearchClient";
+import { getLivePublishedArticles, getLiveCategories } from "../../lib/journal";
 
+export const revalidate = 60; // Refresh search index every 60s
 export const metadata: Metadata = {
   title: "Search the Journal — VaahanSafe",
   description:
@@ -14,25 +15,24 @@ export const metadata: Metadata = {
   },
 };
 
-export default function SearchPage() {
-  const articles = getPublishedArticles();
-  const categories = getJournalCategories();
+export default async function SearchPage() {
+  const [articles, categories] = await Promise.all([
+    getLivePublishedArticles(),
+    getLiveCategories(),
+  ]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#faf9f5] text-[#141413] antialiased selection:bg-[#cc785c]/20 selection:text-[#141413] dark:bg-[#181715] dark:text-[#faf9f5]">
+    <div className="min-h-screen flex flex-col">
       <JournalHeader />
 
-      <main id="main-content" className="flex-1 py-10 sm:py-16">
-        <div className="mx-auto max-w-[1240px] px-5 sm:px-8 lg:px-10 space-y-10">
+      <main id="main-content" tabIndex={-1} className="flex-1 py-10 sm:py-16">
+        <div className="journal-container space-y-10">
           <div className="space-y-3 max-w-2xl">
-            <div className="font-mono text-[9px] uppercase tracking-[0.24em] text-[#cc785c] font-semibold">
-              EXPLORE KNOWLEDGE
-            </div>
-            <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-normal tracking-tight text-[#141413] dark:text-[#faf9f5]">
-              Search the Journal
-            </h1>
-            <p className="text-sm sm:text-base text-[#6c6a64] dark:text-[#a09d96] font-sans">
-              Discover articles on highway first response, optical automotive glazing, and zero-exposure vehicle identity architecture.
+            <div className="journal-label">Find your next read</div>
+            <h1 className="journal-title">Search the Journal</h1>
+            <p className="journal-muted text-base leading-8">
+              A question about your vehicle, identity, or privacy? Start with a
+              topic or a few words.
             </p>
           </div>
 
@@ -43,10 +43,7 @@ export default function SearchPage() {
               </div>
             }
           >
-            <SearchClient
-              initialArticles={articles}
-              categories={categories}
-            />
+            <SearchClient initialArticles={articles} categories={categories} />
           </React.Suspense>
         </div>
       </main>

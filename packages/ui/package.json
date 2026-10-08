@@ -16,6 +16,7 @@
     "./brand": "./src/brand/index.ts",
     "./identity": "./src/identity/index.ts",
     "./lib/utils": "./src/lib/utils.ts",
+    "./lib/use-otp-availability": "./src/lib/use-otp-availability.ts",
     "./lib/client": "./src/lib/client.ts",
     "./lib/server": "./src/lib/server.ts",
     "./lib/middleware": "./src/lib/middleware.ts",

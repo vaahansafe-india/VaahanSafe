@@ -1,11 +1,18 @@
 import React from "react";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
-import { resolvePublicQr, recordPublicScanEventSafely } from "@vaahansafe/qr-core";
+import { after } from "next/server";
+import {
+  resolvePublicQr,
+  recordPublicScanEventSafely,
+} from "@vaahansafe/qr-core";
 import { getAuthoritativeDatabaseClient } from "@vaahansafe/database";
 import { ResolverShell } from "../../components/shell/ResolverShell";
 import { QrStateRouter } from "../../components/resolver/QrStateRouter";
 import { ResolverErrorState } from "../../components/states/ResolverErrorState";
+import { createSupabaseQrRepository } from "../../lib/supabase-resolver";
+
+export const dynamic = "force-dynamic";
 
 interface QrResolverPageProps {
   params: Promise<{
@@ -17,14 +24,17 @@ interface QrResolverPageProps {
  * Generic privacy-safe metadata for QR resolver routes (Rule 74)
  * NEVER leaks owner name, blood group, medical notes, or phone numbers in metadata/OG tags.
  */
-export async function generateMetadata({ params }: QrResolverPageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: QrResolverPageProps): Promise<Metadata> {
   const { publicId } = await params;
   const cleanId = typeof publicId === "string" ? publicId.trim() : "";
   const displayId = cleanId.startsWith("VS-") ? cleanId : `VS-${cleanId}`;
 
   return {
     title: `${displayId} — VaahanSafe Emergency Profile`,
-    description: "Verified public vehicle emergency identification and contact relay.",
+    description:
+      "Verified public vehicle emergency identification and contact relay.",
     robots: {
       index: false,
       follow: false,
@@ -32,28 +42,32 @@ export async function generateMetadata({ params }: QrResolverPageProps): Promise
   };
 }
 
-export default async function DynamicQrResolverPage({ params }: QrResolverPageProps) {
+export default async function DynamicQrResolverPage({
+  params,
+}: QrResolverPageProps) {
   const { publicId } = await params;
-  const db = getAuthoritativeDatabaseClient();
 
   try {
     // 1. Authoritative Domain Resolution (Rule 06, 07, 87)
-    const resolution = await resolvePublicQr(publicId, { db });
+    const resolution = await resolvePublicQr(publicId, {
+      repository: createSupabaseQrRepository(),
+    });
 
     // 2. Non-blocking Telemetry Logging (Rule 39, 40, 41)
-    try {
-      const reqHeaders = await headers();
-      await recordPublicScanEventSafely({
-        db,
-        qrId: resolution.qrId || publicId,
-        state: resolution.state,
-        headers: reqHeaders,
-      }).catch(() => {
-        // Absorbed by design
+    const reqHeaders = new Headers(await headers());
+    if (resolution.qrId)
+      after(async () => {
+        try {
+          await recordPublicScanEventSafely({
+            db: getAuthoritativeDatabaseClient(),
+            qrId: resolution.qrId!,
+            state: resolution.state,
+            headers: reqHeaders,
+          });
+        } catch {
+          console.warn("[VaahanSafe QR] Scan telemetry unavailable");
+        }
       });
-    } catch {
-      // Headers read error safely ignored
-    }
 
     // 3. Render State Router inside Dedicated Shell
     return (
@@ -64,7 +78,10 @@ export default async function DynamicQrResolverPage({ params }: QrResolverPagePr
   } catch (err) {
     // Database or infrastructure failure (Rule 52, 54)
     // NEVER show "QR NOT FOUND" on infrastructure interruption
-    console.error("[VaahanSafe QR Resolver Error]:", err);
+    console.error(
+      "[VaahanSafe QR Resolver Error]:",
+      err instanceof Error ? err.message : "SERVICE_UNAVAILABLE",
+    );
 
     return (
       <ResolverShell>

@@ -16,5 +16,7 @@
 
 ## 2. Invariant Proofs
 
+See [MSG91 integration and live audit](msg91-integration.md) for configured provider contracts, channel blockers, D1 request security and release requirements.
+
 1. **Queue Outage Proof**: If `NOTIFICATION_QUEUE` is down or congested, the login flow continues without disruption because auth interacts directly and synchronously with MSG91 OTP endpoints.
 2. **Privacy Proof**: Plaintext OTP is never stored in `notification_intents`, `notifications`, `notification_deliveries`, or logs.

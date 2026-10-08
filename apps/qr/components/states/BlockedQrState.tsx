@@ -1,6 +1,6 @@
 import React from "react";
 import { VaahanIcon } from "@vaahansafe/icons";
-import { Badge } from "@vaahansafe/ui/components";
+import { Badge } from "@vaahansafe/ui/components/badge";
 import { getWebUrl } from "@vaahansafe/config";
 
 export interface BlockedQrStateProps {

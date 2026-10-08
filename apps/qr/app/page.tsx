@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { LandingExperience } from "../components/landing/LandingExperience";
 
 export const metadata: Metadata = {
-  title: "VaahanSafe QR — Premium Camera Scanner & Vehicle Safety Identity",
+  title: "VaahanSafe QR — Vehicle Safety Identity",
   description:
     "Scan a VaahanSafe vehicle QR with your camera or resolve safety passes securely without exposing private account data.",
   robots: {

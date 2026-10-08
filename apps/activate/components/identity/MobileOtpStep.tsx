@@ -22,7 +22,7 @@ export function MobileOtpStep({
   error,
 }: MobileOtpStepProps) {
   const [otp, setOtp] = useState("");
-  const [countdown, setCountdown] = useState(30);
+  const [countdown, setCountdown] = useState(60);
   const [isResending, setIsResending] = useState(false);
 
   useEffect(() => {
@@ -49,7 +49,7 @@ export function MobileOtpStep({
     setIsResending(true);
     try {
       await onResend();
-      setCountdown(30);
+      setCountdown(60);
     } finally {
       setIsResending(false);
     }
@@ -57,7 +57,7 @@ export function MobileOtpStep({
 
   return (
     <form onSubmit={handleFormSubmit} className="space-y-5">
-      <div className="rounded-xl border border-border bg-muted/30 p-4 space-y-1">
+      <div className="rounded-sm border border-border bg-muted/30 p-4 space-y-1">
         <div className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
           Verification Code Sent To
         </div>
@@ -81,7 +81,7 @@ export function MobileOtpStep({
           htmlFor="otp-input"
           className="block text-xs font-mono font-medium text-foreground tracking-wide uppercase text-center"
         >
-          Enter 6-Digit SMS Code
+          Enter 6-Digit WhatsApp Code
         </label>
         <Input
           id="otp-input"
@@ -95,7 +95,7 @@ export function MobileOtpStep({
           disabled={isLoading}
           autoFocus
           autoComplete="one-time-code"
-          className="h-14 font-mono text-2xl tracking-[0.5em] text-center rounded-xl border-border bg-background focus-visible:ring-primary"
+          className="h-14 font-mono text-2xl tracking-[0.5em] text-center rounded-sm border-border bg-background focus-visible:ring-primary"
         />
 
         {error && (
@@ -109,12 +109,12 @@ export function MobileOtpStep({
       <Button
         type="submit"
         disabled={isLoading || otp.length < 6}
-        className="w-full h-12 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-sm transition-colors shadow-sm disabled:opacity-50"
+        className="w-full h-12 rounded-sm bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-sm transition-colors shadow-sm disabled:opacity-50"
       >
         {isLoading ? (
           <div className="flex items-center gap-2">
             <span className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-            <span>Verifying SMS Code...</span>
+            <span>Verifying WhatsApp Code...</span>
           </div>
         ) : (
           <div className="flex items-center gap-2">
@@ -135,7 +135,7 @@ export function MobileOtpStep({
             disabled={isResending || isLoading}
             className="font-medium text-primary hover:underline"
           >
-            {isResending ? "Sending code..." : "Resend Verification Code"}
+            {isResending ? "Sending code..." : "Resend via WhatsApp"}
           </button>
         )}
       </div>

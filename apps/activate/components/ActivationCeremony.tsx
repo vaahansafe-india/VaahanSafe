@@ -7,11 +7,13 @@ import React, {
   useRef,
   useState,
 } from "react";
+import { useQuery } from "@tanstack/react-query";
+import Image from "next/image";
 
 import { ActivationHeader } from "./shell/ActivationHeader";
 import { ActivationFooter } from "./shell/ActivationFooter";
 import { IdentityBindingRail } from "./progress/IdentityBindingRail";
-import { ActivationGrid } from "./visual-system/ActivationGrid";
+import { ActivationStageArtwork, ActivationVisualGuide } from "./ActivationVisuals";
 
 import { RecognizeQr } from "./recognize/RecognizeQr";
 import { VerifyPhysicalQr } from "./verify/VerifyPhysicalQr";
@@ -87,10 +89,25 @@ export function ActivationCeremony({
   const [activationResult, setActivationResult] =
     useState<ActivationCommitResultDto | null>(null);
 
-  const [isInitializing, setIsInitializing] = useState(true);
-  const [initializationError, setInitializationError] = useState(false);
-
   const stageHeadingRef = useRef<HTMLHeadingElement | null>(null);
+  const restoredSession = useRef(false);
+
+  const sessionQuery = useQuery<ActivationSessionDto>({
+    queryKey: ["activation", "session"],
+    queryFn: async ({ signal }) => {
+      const response = await fetch("/api/activate/session", {
+        cache: "no-store",
+        credentials: "include",
+        headers: { Accept: "application/json" },
+        signal,
+      });
+      if (!response.ok) throw new Error("ACTIVATION_SESSION_UNAVAILABLE");
+      return response.json() as Promise<ActivationSessionDto>;
+    },
+  });
+  const isInitializing = sessionQuery.isPending;
+  const initializationError = sessionQuery.isError;
+  const retrySession = sessionQuery.refetch;
 
   const stageMeta = STAGE_META[stage];
 
@@ -105,72 +122,17 @@ export function ActivationCeremony({
   /**
    * Restore only server-authoritative activation state.
    */
-  const restoreSession = useCallback(async (signal?: AbortSignal) => {
-    setInitializationError(false);
-
-    try {
-      const res = await fetch("/api/activate/session", {
-        method: "GET",
-        cache: "no-store",
-        credentials: "include",
-        headers: {
-          Accept: "application/json",
-        },
-        signal,
-      });
-
-      if (!res.ok) {
-        throw new Error("ACTIVATION_SESSION_UNAVAILABLE");
-      }
-
-      const data: ActivationSessionDto = await res.json();
-
-      if (signal?.aborted) return;
-
-      if (data.user) {
-        setUser(data.user);
-      }
-
-      if (data.challenge?.valid) {
-        setPublicId(data.challenge.publicId);
-
-        /**
-         * Only safe if visibleCode is explicitly a public/display reference.
-         */
-        setVisibleCode(data.challenge.visibleCode ?? "");
-
-        if (!data.user || !data.user.phoneVerified) {
-          setStage("IDENTITY");
-        } else {
-          setStage("VEHICLE");
-        }
-      }
-    } catch (error) {
-      if (signal?.aborted) return;
-
-      /**
-       * Replace this with your existing safe observability service.
-       * Never log OTPs, activation secrets or challenge payloads.
-       */
-      console.warn(
-        "[VaahanSafe Activate] Activation session restoration failed.",
-      );
-
-      setInitializationError(true);
-    } finally {
-      if (!signal?.aborted) {
-        setIsInitializing(false);
-      }
-    }
-  }, []);
-
   useEffect(() => {
-    const controller = new AbortController();
-
-    void restoreSession(controller.signal);
-
-    return () => controller.abort();
-  }, [restoreSession]);
+    const data = sessionQuery.data;
+    if (!data || restoredSession.current) return;
+    restoredSession.current = true;
+    setUser(data.user);
+    if (data.challenge?.valid) {
+      setPublicId(data.challenge.publicId);
+      setVisibleCode(data.challenge.visibleCode ?? "");
+      setStage(!data.user?.phoneVerified ? "IDENTITY" : "VEHICLE");
+    }
+  }, [sessionQuery.data]);
 
   /**
    * Move keyboard/screen-reader context to the newly rendered stage.
@@ -239,11 +201,8 @@ export function ActivationCeremony({
   );
 
   const handleRetryInitialization = useCallback(() => {
-    setIsInitializing(true);
-    setInitializationError(false);
-
-    void restoreSession();
-  }, [restoreSession]);
+    void retrySession();
+  }, [retrySession]);
 
   function renderCurrentStage() {
     switch (stage) {
@@ -314,25 +273,10 @@ export function ActivationCeremony({
   }
 
   return (
-    <div className="relative isolate flex min-h-dvh flex-col overflow-x-clip bg-background text-foreground">
-      {/* Decorative, deterministic, stage-aware topology */}
-      <ActivationGrid stage={stage} />
-
+    <div className="activation-app flex min-h-dvh flex-col text-foreground">
       <ActivationHeader user={user} />
-
-      <main
-        id="main-content"
-        className="
-          relative z-10 flex-1
-          px-3.5 pb-12 pt-20
-          sm:px-6 sm:pb-14 sm:pt-24
-          md:px-10
-          lg:px-14 lg:pb-16 lg:pt-28
-          xl:px-20
-          2xl:px-24
-        "
-      >
-        <div className="mx-auto w-full max-w-[1600px]">
+      <main id="main-content" className="activation-main flex-1">
+        <div className="activation-frame">
           {isInitializing ? (
             <ActivationInitializing />
           ) : initializationError ? (
@@ -341,55 +285,44 @@ export function ActivationCeremony({
             />
           ) : (
             <>
-              {/* Mobile / Tablet context */}
-              <div className="mb-6 lg:hidden">
-                <MobileStageContext
-                  stage={stage}
-                  step={stageMeta.step}
-                  stageLabel={stageMeta.label}
-                />
-
-                <div className="mt-4">
-                  <IdentityBindingRail
-                    variant="compact"
-                    currentStage={stage}
-                    recognizedCode={visibleCode}
-                    selectedVehicleRef={selectedVehicleDisplay}
-                  />
+              <header className="activation-hero">
+                <div className="activation-hero-copy">
+                  <p className="activation-kicker"><span>01 / 05</span> Retail QR activation</p>
+                  <h1 className="activation-hero-title">A small sticker.<br /><em>A safer journey.</em></h1>
+                  <p className="activation-hero-description">
+                    Connect your physical VaahanSafe QR to a vehicle you own. Each step is verified before its safety services become available.
+                  </p>
                 </div>
-              </div>
+                <figure className="activation-hero-figure">
+                  <Image
+                    src="/images/qr-kit-transparent.webp"
+                    alt="VaahanSafe sticker kit with a QR card and separate scratch proof card"
+                    width={1400}
+                    height={933}
+                    sizes="(max-width: 640px) 300px, (max-width: 860px) 360px, 530px"
+                    className="activation-kit-image"
+                    priority
+                  />
+                  <figcaption><span>Kit illustration · use your own sticker.</span><span>The scratch code proves possession.</span></figcaption>
+                </figure>
+              </header>
 
-              {/* Main activation workstation */}
-              <div
-                className="
-                  grid min-w-0 grid-cols-1
-                  lg:grid-cols-[minmax(0,1.45fr)_minmax(48px,.15fr)_minmax(300px,.75fr)]
-                  xl:grid-cols-[minmax(0,1.5fr)_minmax(64px,.18fr)_minmax(340px,.72fr)]
-                  2xl:grid-cols-[minmax(0,1.55fr)_80px_minmax(360px,.7fr)]
-                "
-              >
-                {/* Primary interaction */}
-                <section className="relative w-full min-w-0">
-                  {/* Desktop Step Indicator */}
-                  <div className="mb-6 hidden lg:flex lg:items-center lg:gap-3">
-                    <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 font-mono text-xs font-semibold text-primary">
-                      Step {stageMeta.step} of 5
-                    </span>
+              <nav className="activation-progress" aria-label="Activation progress">
+                <div className="activation-progress-heading">
+                  <span className="activation-kicker">Your activation path</span>
+                  <span className="activation-progress-current">Step {stageMeta.step} of 5 · {stageMeta.label}</span>
+                </div>
+                <IdentityBindingRail
+                  variant="compact"
+                  currentStage={stage}
+                  recognizedCode={visibleCode}
+                  selectedVehicleRef={selectedVehicleDisplay}
+                />
+              </nav>
 
-                    <span
-                      aria-hidden="true"
-                      className="h-px w-6 bg-border"
-                    />
-
-                    <span className="text-xs font-medium text-muted-foreground">
-                      {stageMeta.label}
-                    </span>
-                  </div>
-
-                  {/*
-                    Accessible stage anchor.
-                    Individual child screens keep their own visible H1.
-                  */}
+              <div className="activation-stage-layout">
+                <section className="activation-stage-content">
+                  <div className="activation-section-number">{String(stageMeta.step).padStart(2, "0")} <span>/</span> 05</div>
                   <h2
                     ref={stageHeadingRef}
                     tabIndex={-1}
@@ -397,82 +330,32 @@ export function ActivationCeremony({
                   >
                     Activation step {stageMeta.step}: {stageMeta.label}
                   </h2>
-
-                  <div className="relative w-full max-w-full lg:max-w-[760px]">
+                  <div className="activation-stage-inner">
                     {renderCurrentStage()}
                   </div>
                 </section>
-
-                {/* Subtle vertical divider between form and progress rail */}
-                <div
-                  aria-hidden="true"
-                  className="relative hidden lg:flex lg:justify-center"
-                >
-                  <div className="h-full w-px bg-border/40" />
-                </div>
-
-                {/* Activation progress panel */}
-                <aside
-                  aria-label="Activation progress"
-                  className="
-                    relative hidden min-w-0
-                    lg:block
-                    lg:sticky lg:top-24
-                    lg:self-start
-                  "
-                >
-                  <div className="mb-5 flex items-center justify-between gap-4 border-b border-border/50 pb-3">
-                    <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Activation Steps
-                    </span>
-
-                    <span className="font-mono text-xs font-semibold text-primary">
-                      Step {stageMeta.step} of 5
-                    </span>
-                  </div>
-
-                  <IdentityBindingRail
-                    variant="rail"
-                    currentStage={stage}
-                    recognizedCode={visibleCode}
-                    selectedVehicleRef={selectedVehicleDisplay}
-                  />
+                <aside className="activation-stage-aside" aria-label="Activation guidance">
+                  <ActivationStageArtwork stage={stage} />
+                  <p className="activation-kicker">Why this matters</p>
+                  <h2 className="font-serif text-3xl leading-tight">Your details stay yours.</h2>
+                  <p>A scan shares only the safety view you approve. Your mobile number and activation code stay private.</p>
+                  {(visibleCode || selectedVehicleDisplay) && (
+                    <dl className="activation-linked-details">
+                      {visibleCode && <><dt>Sticker ID</dt><dd>{visibleCode}</dd></>}
+                      {selectedVehicleDisplay && <><dt>Vehicle</dt><dd>{selectedVehicleDisplay}</dd></>}
+                    </dl>
+                  )}
+                  <div className="activation-aside-rule" />
+                  <span className="activation-aside-caption">The QR identifies the sticker. The scratch proof verifies possession. Your account connects it to a vehicle.</span>
                 </aside>
               </div>
+              <ActivationVisualGuide />
             </>
           )}
         </div>
       </main>
 
-      <div className="relative z-20">
-        <ActivationFooter />
-      </div>
-    </div>
-  );
-}
-
-function MobileStageContext({
-  step,
-  stageLabel,
-}: {
-  stage: ActivationStage;
-  step: number;
-  stageLabel: string;
-}) {
-  return (
-    <div className="flex items-center gap-2.5">
-      <span className="rounded-full bg-primary/10 px-2.5 py-0.5 font-mono text-xs font-semibold text-primary">
-        Step {step} of 5
-      </span>
-
-      <span
-        aria-hidden="true"
-        className="h-px min-w-4 flex-1 bg-border/60"
-      />
-
-      <span className="truncate text-xs font-medium text-muted-foreground">
-        {stageLabel}
-      </span>
+      <ActivationFooter />
     </div>
   );
 }
@@ -578,7 +461,7 @@ function ActivationInitializationError({
           onClick={onRetry}
           className="
             mt-8 inline-flex min-h-11 items-center justify-center
-            rounded-md bg-primary px-6
+            rounded-sm bg-primary px-6
             text-sm font-semibold text-primary-foreground
             transition-opacity hover:opacity-90
             focus-visible:outline-none
@@ -619,7 +502,7 @@ function StageIntegrityError({
         type="button"
         onClick={onRecover}
         className="
-          mt-7 min-h-11 rounded-md bg-primary
+          mt-7 min-h-11 rounded-sm bg-primary
           px-6 text-sm font-semibold text-primary-foreground
           focus-visible:outline-none focus-visible:ring-2
           focus-visible:ring-ring focus-visible:ring-offset-2

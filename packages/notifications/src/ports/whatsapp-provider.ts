@@ -9,6 +9,7 @@ export interface WhatsAppSendOptions {
   recipientPhone: string;
   templateName: string;
   parameters: Record<string, string>;
+  languageCode?: string;
   correlationId?: string;
 }
 

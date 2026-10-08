@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from "next";
-import "@vaahansafe/ui/styles/globals.css";
-import { ThemeProvider } from "@vaahansafe/ui/theme";
-import { Toaster } from "@vaahansafe/ui";
-import { ClientErrorSanitizer } from "../components/journal/ClientErrorSanitizer";
+import "@vaahansafe/ui/styles/core.css";
+import "./journal-paper.css";
+import { ThemeProvider } from "@vaahansafe/ui/theme/theme-provider";
+import { Toaster } from "@vaahansafe/ui/components/sonner";
 import { NetworkStatusProvider } from "../components/system/NetworkStatusProvider";
 
 export const viewport: Viewport = {
@@ -44,10 +44,15 @@ export default function BlogRootLayout({
 }) {
   return (
     <html lang="en" className="overflow-x-clip" suppressHydrationWarning>
-      <body className="min-h-screen overflow-x-clip bg-[#faf9f5] font-sans antialiased text-[#141413] dark:bg-[#181715] dark:text-[#faf9f5]">
-        <ThemeProvider>
+      <head>
+        <link rel="alternate" type="application/rss+xml" href="/rss.xml" title="VaahanSafe Journal" />
+      </head>
+      <body className="journal-paper min-h-screen">
+        <ThemeProvider defaultTheme="light">
           <NetworkStatusProvider>
-            <ClientErrorSanitizer />
+            <a className="journal-skip-link" href="#main-content">
+              Skip to content
+            </a>
             {children}
             <Toaster />
           </NetworkStatusProvider>

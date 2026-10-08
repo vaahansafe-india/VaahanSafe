@@ -91,7 +91,7 @@ export function InlineAddVehicle({
             <button
               type="button"
               onClick={() => setVehicleType("CAR")}
-              className={`flex items-center justify-center gap-2 py-2.5 rounded-xl border text-xs font-medium transition-all ${
+              className={`flex items-center justify-center gap-2 py-2.5 rounded-sm border text-xs font-medium transition-all ${
                 vehicleType === "CAR"
                   ? "border-primary bg-primary/10 text-primary font-semibold"
                   : "border-border bg-background text-muted-foreground hover:bg-muted"
@@ -104,7 +104,7 @@ export function InlineAddVehicle({
             <button
               type="button"
               onClick={() => setVehicleType("TWO_WHEELER")}
-              className={`flex items-center justify-center gap-2 py-2.5 rounded-xl border text-xs font-medium transition-all ${
+              className={`flex items-center justify-center gap-2 py-2.5 rounded-sm border text-xs font-medium transition-all ${
                 vehicleType === "TWO_WHEELER"
                   ? "border-primary bg-primary/10 text-primary font-semibold"
                   : "border-border bg-background text-muted-foreground hover:bg-muted"

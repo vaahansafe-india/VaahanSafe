@@ -69,9 +69,9 @@ export function ActivationReview({
     <div className="space-y-6">
       {/* Header */}
       <div className="space-y-2">
-        <h1 className="font-serif text-3xl sm:text-4xl text-foreground font-normal tracking-tight">
+        <h2 className="font-serif text-3xl sm:text-4xl text-foreground font-normal tracking-tight">
           Review & Activate QR
-        </h1>
+        </h2>
 
         <p className="text-xs sm:text-sm text-muted-foreground max-w-lg leading-relaxed">
           Please confirm your vehicle and QR details below. Once confirmed, your safety identity will be active immediately.
@@ -158,7 +158,7 @@ export function ActivationReview({
       </div>
 
       {error && (
-        <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-3.5 text-xs text-destructive space-y-1">
+        <div className="rounded-sm border border-destructive/30 bg-destructive/10 p-3.5 text-xs text-destructive space-y-1">
           <div className="font-semibold flex items-center gap-2">
             <VaahanIcon name="alert" size={14} />
             <span>Activation Notice</span>
@@ -173,7 +173,7 @@ export function ActivationReview({
           type="button"
           onClick={() => setIsConfirmOpen(true)}
           disabled={isCommitting}
-          className="w-full h-12 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-semibold transition-colors shadow-sm disabled:opacity-50"
+          className="w-full h-12 rounded-sm bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-semibold transition-colors shadow-sm disabled:opacity-50"
         >
           {isCommitting ? (
             <div className="flex items-center gap-2">
@@ -192,7 +192,7 @@ export function ActivationReview({
 
       {/* Sensitive Confirmation Dialog */}
       <AlertDialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
-        <AlertDialogContent className="w-[calc(100vw-2rem)] sm:max-w-md rounded-2xl p-5 sm:p-6 border border-border bg-background shadow-xl">
+        <AlertDialogContent className="w-[calc(100vw-2rem)] sm:max-w-md rounded-sm p-5 sm:p-6 border border-border bg-background shadow-xl">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-base font-bold tracking-tight">
               Activate this QR?
@@ -202,7 +202,7 @@ export function ActivationReview({
             </AlertDialogDescription>
           </AlertDialogHeader>
 
-          <div className="rounded-lg border border-border bg-muted/30 p-3.5 space-y-2 font-mono text-xs">
+          <div className="rounded-sm border border-border bg-muted/30 p-3.5 space-y-2 font-mono text-xs">
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">QR</span>
               <span className="font-bold text-foreground">{displayCode}</span>
@@ -216,12 +216,12 @@ export function ActivationReview({
           </div>
 
           <AlertDialogFooter className="flex-row gap-2 justify-end pt-2">
-            <AlertDialogCancel className="h-9 px-4 rounded-lg text-xs font-mono">
+            <AlertDialogCancel className="h-9 px-4 rounded-sm text-xs font-mono">
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleCommitActivation}
-              className="h-9 px-4 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-mono font-semibold"
+              className="h-9 px-4 rounded-sm bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-mono font-semibold"
             >
               Activate QR
             </AlertDialogAction>

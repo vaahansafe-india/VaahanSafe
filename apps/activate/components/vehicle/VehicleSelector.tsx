@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@vaahansafe/ui/components";
 import { InlineAddVehicle } from "./InlineAddVehicle";
 import type { EligibleVehicleDto } from "@/lib/types";
@@ -10,35 +11,28 @@ interface VehicleSelectorProps {
 }
 
 export function VehicleSelector({ onVehicleSelected }: VehicleSelectorProps) {
-  const [vehicles, setVehicles] = useState<EligibleVehicleDto[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [isAddOpen, setIsAddOpen] = useState(false);
-
-  const fetchVehicles = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const res = await fetch("/api/activate/vehicles");
-      if (res.ok) {
-        const data = await res.json();
-        setVehicles(data.vehicles || []);
-      } else {
-        setError("Could not load your registered vehicles. Please try again.");
-      }
-    } catch {
-      setError("Network error while loading vehicles.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchVehicles();
-  }, []);
+  const queryClient = useQueryClient();
+  const vehiclesQuery = useQuery<EligibleVehicleDto[]>({
+    queryKey: ["activation", "vehicles"],
+    queryFn: async ({ signal }) => {
+      const response = await fetch("/api/activate/vehicles", {
+        cache: "no-store",
+        credentials: "include",
+        signal,
+      });
+      if (!response.ok) throw new Error("VEHICLES_UNAVAILABLE");
+      const data = await response.json() as { vehicles?: EligibleVehicleDto[] };
+      return data.vehicles ?? [];
+    },
+    staleTime: 15_000,
+  });
+  const vehicles = vehiclesQuery.data ?? [];
+  const isLoading = vehiclesQuery.isPending;
+  const error = vehiclesQuery.isError;
 
   const handleVehicleAdded = (newVehicle: EligibleVehicleDto) => {
-    setVehicles((prev) => [newVehicle, ...prev]);
+    queryClient.setQueryData<EligibleVehicleDto[]>(["activation", "vehicles"], (previous) => [newVehicle, ...(previous ?? [])]);
     onVehicleSelected(newVehicle);
   };
 
@@ -48,9 +42,9 @@ export function VehicleSelector({ onVehicleSelected }: VehicleSelectorProps) {
       <div className="space-y-2">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
-            <h1 className="font-serif text-3xl sm:text-4xl text-foreground font-normal tracking-tight">
+            <h2 className="font-serif text-3xl sm:text-4xl text-foreground font-normal tracking-tight">
               Select Your Vehicle
-            </h1>
+            </h2>
             <p className="text-xs sm:text-sm text-muted-foreground max-w-lg leading-relaxed pt-1">
               Choose the vehicle to connect with this QR sticker, or register a new vehicle.
             </p>
@@ -74,12 +68,12 @@ export function VehicleSelector({ onVehicleSelected }: VehicleSelectorProps) {
           <p className="font-mono text-xs text-muted-foreground">Querying vehicle registry...</p>
         </div>
       ) : error ? (
-        <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-xs text-destructive space-y-2">
-          <p>{error}</p>
+        <div className="rounded-sm border border-destructive/30 bg-destructive/10 p-4 text-xs text-destructive space-y-2">
+          <p>Could not load your registered vehicles. Please try again.</p>
           <Button
             type="button"
             variant="outline"
-            onClick={fetchVehicles}
+            onClick={() => void vehiclesQuery.refetch()}
             className="h-8 text-xs font-mono"
           >
             Try Again
@@ -87,7 +81,7 @@ export function VehicleSelector({ onVehicleSelected }: VehicleSelectorProps) {
         </div>
       ) : vehicles.length === 0 ? (
         /* Zero State */
-        <div className="border border-dashed border-border rounded-xl p-8 text-center space-y-4">
+        <div className="border border-dashed border-border rounded-sm p-8 text-center space-y-4">
           <div className="space-y-1">
             <h3 className="font-mono text-xs font-semibold uppercase text-foreground">
               No Vehicles Registered
@@ -99,7 +93,7 @@ export function VehicleSelector({ onVehicleSelected }: VehicleSelectorProps) {
           <Button
             type="button"
             onClick={() => setIsAddOpen(true)}
-            className="h-10 px-5 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-semibold uppercase tracking-wider"
+            className="h-10 px-5 rounded-sm bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-semibold uppercase tracking-wider"
           >
             + Add Vehicle Profile
           </Button>
@@ -154,7 +148,7 @@ export function VehicleSelector({ onVehicleSelected }: VehicleSelectorProps) {
                         type="button"
                         onClick={() => onVehicleSelected(v)}
                         variant="outline"
-                        className="h-9 px-4 rounded-lg text-xs font-mono font-medium border-border hover:border-primary hover:text-primary transition-colors"
+                        className="h-9 px-4 rounded-sm text-xs font-mono font-medium border-border hover:border-primary hover:text-primary transition-colors"
                       >
                         <span>SELECT</span>
                         <span className="ml-1 text-muted-foreground">→</span>

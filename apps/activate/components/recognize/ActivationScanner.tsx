@@ -235,40 +235,20 @@ export function ActivationScanner({
   // 1. Inactive State — Clean interactive card with "Activate Camera" button
   if (!isActive) {
     return (
-      <div className="relative w-full overflow-hidden rounded-2xl border border-border bg-card p-6 sm:p-12 text-center shadow-xs">
-        <div className="mx-auto flex w-full max-w-sm flex-col items-center justify-center space-y-6">
-          {/* Reticle / Camera Illustration */}
-          <div className="relative flex h-24 w-24 items-center justify-center rounded-2xl border-2 border-dashed border-primary/40 bg-primary/5">
-            <span className="absolute -top-1 -left-1 h-3.5 w-3.5 border-t-2 border-l-2 border-primary" />
-            <span className="absolute -top-1 -right-1 h-3.5 w-3.5 border-t-2 border-r-2 border-primary" />
-            <span className="absolute -bottom-1 -left-1 h-3.5 w-3.5 border-b-2 border-l-2 border-primary" />
-            <span className="absolute -bottom-1 -right-1 h-3.5 w-3.5 border-b-2 border-r-2 border-primary" />
-            <VaahanIcon name="camera" size={32} className="text-primary" />
-          </div>
-
-          {/* Action Buttons */}
-          <div className="w-full space-y-3">
-            <Button
-              type="button"
-              onClick={() => {
-                setErrorMessage(null);
-                setIsActive(true);
-              }}
-              className="w-full h-12 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-sm shadow-sm flex items-center justify-center gap-2"
-            >
-              <VaahanIcon name="camera" size={16} />
-              <span>Activate Camera</span>
-            </Button>
-
-            <button
-              type="button"
-              onClick={onFallbackToManual}
-              className="w-full py-1 text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center justify-center gap-1.5"
-            >
-              <VaahanIcon name="edit" size={13} />
-              <span>Enter sticker ID manually</span>
-            </button>
-          </div>
+      <div className="scanner-inactive flex flex-col gap-5 pt-5 sm:flex-row sm:items-center sm:gap-7">
+        <div className="scanner-icon flex h-16 w-16 shrink-0 items-center justify-center border border-border bg-muted/40 text-primary">
+          <VaahanIcon name="camera" size={24} />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-semibold text-foreground">Scan the QR on your physical sticker</p>
+          <p className="mt-1 text-xs leading-5 text-muted-foreground">Your camera opens only when you choose to scan. The QR is checked against the VaahanSafe registry.</p>
+          <Button
+            type="button"
+            onClick={() => { setErrorMessage(null); setIsActive(true); }}
+            className="mt-4 h-11 w-full gap-2 bg-primary px-5 text-sm font-semibold text-primary-foreground sm:w-auto"
+          >
+            <VaahanIcon name="camera" size={16} /> Open camera
+          </Button>
         </div>
       </div>
     );
@@ -276,7 +256,7 @@ export function ActivationScanner({
 
   // 2. Active State — Live Viewfinder with controls & error fallback
   return (
-    <div className="relative w-full overflow-hidden rounded-2xl border border-border bg-black shadow-lg">
+    <div className="relative w-full overflow-hidden rounded-sm border border-border bg-black shadow-lg">
       {/* Live Video Feed */}
       <video
         ref={videoRef}
@@ -288,7 +268,7 @@ export function ActivationScanner({
 
       {/* Target Viewfinder Reticle */}
       <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-        <div className="relative h-52 w-52 rounded-2xl border-2 border-white/50 shadow-[0_0_0_9999px_rgba(0,0,0,0.55)]">
+        <div className="relative h-52 w-52 rounded-sm border-2 border-white/50 shadow-[0_0_0_9999px_rgba(0,0,0,0.55)]">
           {/* Corner Brackets */}
           <span className="absolute -top-1 -left-1 h-4 w-4 border-t-2 border-l-2 border-primary" />
           <span className="absolute -top-1 -right-1 h-4 w-4 border-t-2 border-r-2 border-primary" />
@@ -374,7 +354,7 @@ export function ActivationScanner({
                 setErrorMessage(null);
                 startCamera();
               }}
-              className="flex-1 h-10 rounded-lg text-xs bg-primary hover:bg-primary/90 text-primary-foreground"
+              className="flex-1 h-10 rounded-sm text-xs bg-primary hover:bg-primary/90 text-primary-foreground"
             >
               <VaahanIcon name="refresh" size={14} className="mr-1.5" />
               Activate Camera
@@ -383,7 +363,7 @@ export function ActivationScanner({
               type="button"
               onClick={onFallbackToManual}
               variant="secondary"
-              className="flex-1 h-10 rounded-lg text-xs bg-white/10 hover:bg-white/20 text-white border-white/20"
+              className="flex-1 h-10 rounded-sm text-xs bg-white/10 hover:bg-white/20 text-white border-white/20"
             >
               Enter ID Manually
             </Button>

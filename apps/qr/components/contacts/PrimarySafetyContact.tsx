@@ -1,5 +1,5 @@
 import React from "react";
-import { Badge } from "@vaahansafe/ui/components";
+import { Badge } from "@vaahansafe/ui/components/badge";
 import { ContactAction } from "./ContactAction";
 import type { PublicEmergencyContact } from "@vaahansafe/qr-core";
 

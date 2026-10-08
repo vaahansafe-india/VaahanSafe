@@ -25,12 +25,14 @@ describe("VaahanSafe Camera Scanner Architecture & Invariants", () => {
 
     it("Landing experience dynamically imports the camera scanner modal on demand", () => {
       const landingExperience = fs.readFileSync(
-        path.join(landingDir, "LandingExperience.tsx"),
-        "utf8"
+        path.join(landingDir, "IdentityHero.tsx"),
+        "utf8",
       );
 
       expect(landingExperience).toContain("dynamic(");
-      expect(landingExperience).toContain('import("../scanner/VaahanScannerModal")');
+      expect(landingExperience).toContain(
+        'import("../scanner/VaahanScannerModal")',
+      );
       expect(landingExperience).toContain("ssr: false");
     });
   });
@@ -40,7 +42,10 @@ describe("VaahanSafe Camera Scanner Architecture & Invariants", () => {
   // --------------------------------------------------------------------------
   describe("State Machine & Media Track Lifecycle", () => {
     it("defines the canonical 11-state scanner state machine", () => {
-      const typesContent = fs.readFileSync(path.join(scannerDir, "types.ts"), "utf8");
+      const typesContent = fs.readFileSync(
+        path.join(scannerDir, "types.ts"),
+        "utf8",
+      );
 
       expect(typesContent).toContain('"IDLE"');
       expect(typesContent).toContain('"REQUESTING_PERMISSION"');
@@ -58,7 +63,7 @@ describe("VaahanSafe Camera Scanner Architecture & Invariants", () => {
     it("enforces media track cleanup on close, unmount, and page visibility changes", () => {
       const hookContent = fs.readFileSync(
         path.join(scannerDir, "useCameraScanner.ts"),
-        "utf8"
+        "utf8",
       );
 
       // Track cleanup
@@ -73,7 +78,7 @@ describe("VaahanSafe Camera Scanner Architecture & Invariants", () => {
     it("feature-detects BarcodeDetector before attempting native detection", () => {
       const hookContent = fs.readFileSync(
         path.join(scannerDir, "useCameraScanner.ts"),
-        "utf8"
+        "utf8",
       );
 
       expect(hookContent).toContain('"BarcodeDetector" in window');
@@ -88,7 +93,7 @@ describe("VaahanSafe Camera Scanner Architecture & Invariants", () => {
     it("Scanner modal implements proper dialog and aria-modal attributes", () => {
       const modalContent = fs.readFileSync(
         path.join(scannerDir, "VaahanScannerModal.tsx"),
-        "utf8"
+        "utf8",
       );
 
       expect(modalContent).toContain('role="dialog"');
@@ -99,7 +104,7 @@ describe("VaahanSafe Camera Scanner Architecture & Invariants", () => {
     it("ScannerStateOverlay uses polite aria-live announcements", () => {
       const overlayContent = fs.readFileSync(
         path.join(scannerDir, "ScannerStateOverlay.tsx"),
-        "utf8"
+        "utf8",
       );
 
       expect(overlayContent).toContain('aria-live="polite"');
@@ -110,7 +115,7 @@ describe("VaahanSafe Camera Scanner Architecture & Invariants", () => {
     it("ManualIdFallback uses zero-trust payload validation before navigating", () => {
       const fallbackContent = fs.readFileSync(
         path.join(scannerDir, "ManualIdFallback.tsx"),
-        "utf8"
+        "utf8",
       );
 
       expect(fallbackContent).toContain("parseVaahanSafeQrPayload");

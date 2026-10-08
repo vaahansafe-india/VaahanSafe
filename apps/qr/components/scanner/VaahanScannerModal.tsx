@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { VaahanIcon } from "@vaahansafe/icons";
 import { VaahanSafeLogo } from "@vaahansafe/ui/brand";
@@ -14,17 +14,60 @@ interface VaahanScannerModalProps {
   onClose: () => void;
 }
 
-export function VaahanScannerModal({ isOpen, onClose }: VaahanScannerModalProps) {
+export function VaahanScannerModal({
+  isOpen,
+  onClose,
+}: VaahanScannerModalProps) {
   const router = useRouter();
   const [showManualEntry, setShowManualEntry] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const previousFocus = document.activeElement as HTMLElement | null;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    dialogRef.current
+      ?.querySelector<HTMLButtonElement>('[aria-label="Close scanner"]')
+      ?.focus();
+    const keyboard = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onClose();
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const elements = Array.from(
+        dialogRef.current?.querySelectorAll<HTMLElement>(
+          'button:not(:disabled), input:not([type="file"]), a[href]',
+        ) || [],
+      ).filter((el) => el.getClientRects().length > 0);
+      const first = elements[0],
+        last = elements[elements.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last?.focus();
+      }
+      if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first?.focus();
+      }
+    };
+    document.addEventListener("keydown", keyboard);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", keyboard);
+      previousFocus?.focus();
+    };
+  }, [isOpen, onClose]);
 
   const handleSuccess = useCallback(
     (publicId: string) => {
       onClose();
-      router.push(`/${publicId}`);
+      router.push(`/${encodeURIComponent(publicId)}`);
     },
-    [onClose, router]
+    [onClose, router],
   );
 
   const {
@@ -55,6 +98,7 @@ export function VaahanScannerModal({ isOpen, onClose }: VaahanScannerModalProps)
 
   return (
     <div
+      ref={dialogRef}
       role="dialog"
       aria-modal="true"
       aria-label="VaahanSafe QR Camera Scanner"
@@ -69,7 +113,12 @@ export function VaahanScannerModal({ isOpen, onClose }: VaahanScannerModalProps)
         {/* 1. Scanner Top Navigation Bar */}
         <header className="relative z-30 flex items-center justify-between px-4 py-3 bg-[#181715]/80 backdrop-blur-md border-b border-white/10 text-white select-none">
           <div className="flex items-center gap-2">
-            <VaahanSafeLogo size="sm" variant="brand" theme="dark" showTagline={false} />
+            <VaahanSafeLogo
+              size="sm"
+              variant="brand"
+              theme="dark"
+              showTagline={false}
+            />
           </div>
 
           <div className="flex items-center gap-2">
@@ -78,7 +127,9 @@ export function VaahanScannerModal({ isOpen, onClose }: VaahanScannerModalProps)
               <button
                 type="button"
                 onClick={toggleTorch}
-                aria-label={isTorchOn ? "Turn flashlight off" : "Turn flashlight on"}
+                aria-label={
+                  isTorchOn ? "Turn flashlight off" : "Turn flashlight on"
+                }
                 className={`size-9 rounded-xl flex items-center justify-center border transition-colors ${
                   isTorchOn
                     ? "bg-amber-400/20 text-amber-300 border-amber-400/40"
@@ -108,7 +159,9 @@ export function VaahanScannerModal({ isOpen, onClose }: VaahanScannerModalProps)
               aria-label="Close scanner"
               className="size-9 rounded-xl bg-white/10 text-white/80 border border-white/15 hover:bg-white/20 flex items-center justify-center transition-colors cursor-pointer"
             >
-              <VaahanIcon name="error" size={16} />
+              <span aria-hidden="true" className="text-xl leading-none">
+                ×
+              </span>
             </button>
           </div>
         </header>

@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { VaahanIcon } from "@vaahansafe/icons";
-import { Badge } from "@vaahansafe/ui/components";
+import { Badge } from "@vaahansafe/ui/components/badge";
 
 export interface QrIdentityBadgeProps {
   publicId: string;

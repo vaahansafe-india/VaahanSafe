@@ -22,6 +22,8 @@ export default function GlobalError({
           margin: 0,
           padding: 0,
           backgroundColor: "#faf9f5",
+          backgroundImage: "url('/images/paper-texture.webp')",
+          backgroundSize: "400px 400px",
           color: "#141413",
           fontFamily:
             '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
@@ -42,10 +44,12 @@ export default function GlobalError({
             color: "#141413",
             display: "flex",
             justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: "12px",
           }}
         >
           <span>VAAHANSAFE / JOURNAL</span>
-          <span style={{ color: "#c64545" }}>SYSTEM FAULT</span>
+          <span style={{ color: "#9b5139" }}>PAGE UNAVAILABLE</span>
         </header>
 
         {/* Center state */}
@@ -69,7 +73,7 @@ export default function GlobalError({
                 marginBottom: "16px",
               }}
             >
-              ● CRITICAL / 500 • ROOT SYSTEM INTERRUPTED
+              500 / REQUEST INTERRUPTED
             </div>
 
             <div
@@ -116,7 +120,14 @@ export default function GlobalError({
                   REQUEST
                 </text>
                 <circle cx="56" cy="9" r="4" fill="#cc785c" />
-                <line x1="60" y1="9" x2="220" y2="9" stroke="#e6dfd8" strokeWidth="1" />
+                <line
+                  x1="60"
+                  y1="9"
+                  x2="220"
+                  y2="9"
+                  stroke="#e6dfd8"
+                  strokeWidth="1"
+                />
                 <circle cx="224" cy="9" r="4" fill="#c64545" />
                 <text
                   x="234"
@@ -157,8 +168,8 @@ export default function GlobalError({
                 margin: "0 0 32px 0",
               }}
             >
-              The root application environment encountered an unrecoverable rendering
-              event. The browser does not need to reload repeatedly.
+              We couldn’t load the Journal right now. Please try again in a
+              moment.
               {error?.digest && (
                 <span
                   style={{
@@ -173,14 +184,21 @@ export default function GlobalError({
               )}
             </p>
 
-            <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "16px",
+                alignItems: "center",
+              }}
+            >
               <button
                 type="button"
                 onClick={() => reset()}
                 style={{
                   height: "44px",
                   padding: "0 24px",
-                  borderRadius: "9999px",
+                  borderRadius: "4px",
                   backgroundColor: "#141413",
                   color: "#faf9f5",
                   border: "none",

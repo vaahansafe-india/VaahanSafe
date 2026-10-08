@@ -1,30 +1,18 @@
+// QR relational data: Supabase. Cloudflare provides hosting, analytics and asset delivery.
+// Set SUPABASE_SERVICE_ROLE_KEY with Wrangler secrets for each environment. Never put it in vars.
 {
   "$schema": "../../node_modules/wrangler/config-schema.json",
   "name": "vaahansafe-qr",
   "main": ".worker-next/index.mjs",
   "compatibility_date": "2026-09-01",
-  "compatibility_flags": ["nodejs_compat"],
-
-  // =========================================================================
-  // LEAST-PRIVILEGE BINDINGS — QR EMERGENCY RESOLVER
-  // INVARIANT 08: QR surface does NOT bind payment or messaging secrets.
-  // INVARIANT 11: Minimal critical path (Edge -> Worker -> Supabase -> Public Projection).
-  // =========================================================================
-
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
   "vars": {
     "SUPABASE_URL": "https://zpjwrptrqgpeyvlvscpv.supabase.co",
-    "SUPABASE_PUBLISHABLE_KEY": "sb_publishable_b2gKJgEfWgdR99PqkQ5z2g_JOa7lfk4"
+    "SUPABASE_PUBLISHABLE_KEY": "sb_publishable_b2gKJgEfWgdR99PqkQ5z2g_JOa7lfk4",
+    "NEXT_PUBLIC_APP_ENV": "development"
   },
-
-  // Development Environment (Default)
-  "d1_databases": [
-    {
-      "binding": "DB",
-      "database_name": "vaahansafe-dev-db",
-      "database_id": "788a90e8-afb6-474f-a8c6-8c638ae0f721",
-      "migrations_dir": "../../infrastructure/cloudflare/d1/migrations"
-    }
-  ],
   "queues": {
     "producers": [
       {
@@ -33,18 +21,8 @@
       }
     ]
   },
-
-  // Multi-Environment Overrides
   "env": {
     "development": {
-      "d1_databases": [
-        {
-          "binding": "DB",
-          "database_name": "vaahansafe-dev-db",
-          "database_id": "788a90e8-afb6-474f-a8c6-8c638ae0f721",
-          "migrations_dir": "../../infrastructure/cloudflare/d1/migrations"
-        }
-      ],
       "queues": {
         "producers": [
           {
@@ -52,17 +30,14 @@
             "queue": "vaahansafe-dev-analytics-events"
           }
         ]
+      },
+      "vars": {
+        "SUPABASE_URL": "https://zpjwrptrqgpeyvlvscpv.supabase.co",
+        "SUPABASE_PUBLISHABLE_KEY": "sb_publishable_b2gKJgEfWgdR99PqkQ5z2g_JOa7lfk4",
+        "NEXT_PUBLIC_APP_ENV": "development"
       }
     },
     "staging": {
-      "d1_databases": [
-        {
-          "binding": "DB",
-          "database_name": "vaahansafe-staging-db",
-          "database_id": "6a95cf9f-9a96-4931-9531-370b467a940d",
-          "migrations_dir": "../../infrastructure/cloudflare/d1/migrations"
-        }
-      ],
       "queues": {
         "producers": [
           {
@@ -70,17 +45,14 @@
             "queue": "vaahansafe-staging-analytics-events"
           }
         ]
+      },
+      "vars": {
+        "SUPABASE_URL": "https://zpjwrptrqgpeyvlvscpv.supabase.co",
+        "SUPABASE_PUBLISHABLE_KEY": "sb_publishable_b2gKJgEfWgdR99PqkQ5z2g_JOa7lfk4",
+        "NEXT_PUBLIC_APP_ENV": "staging"
       }
     },
     "production": {
-      "d1_databases": [
-        {
-          "binding": "DB",
-          "database_name": "vaahansafe-prod-db",
-          "database_id": "ed46249f-2967-4cd4-8807-75e1421d1754",
-          "migrations_dir": "../../infrastructure/cloudflare/d1/migrations"
-        }
-      ],
       "queues": {
         "producers": [
           {
@@ -88,7 +60,15 @@
             "queue": "vaahansafe-prod-analytics-events"
           }
         ]
+      },
+      "vars": {
+        "SUPABASE_URL": "https://zpjwrptrqgpeyvlvscpv.supabase.co",
+        "SUPABASE_PUBLISHABLE_KEY": "sb_publishable_b2gKJgEfWgdR99PqkQ5z2g_JOa7lfk4",
+        "NEXT_PUBLIC_APP_ENV": "production"
       }
     }
+  },
+  "observability": {
+    "enabled": true
   }
 }

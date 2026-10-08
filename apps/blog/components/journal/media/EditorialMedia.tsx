@@ -9,6 +9,25 @@ import type {
 } from "@vaahansafe/content";
 import { EditorialMediaFallback } from "./EditorialMediaFallback";
 
+const localImageDescriptions: Record<string, string> = {
+  "/images/editorial/vehicle-placement-hero.jpg":
+    "Silver sedan with a vehicle safety QR decal on its windshield.",
+  "/images/editorial/car-windshield-placement.jpg":
+    "Close view of a QR decal on the clear area of a car windshield, beside its dotted border.",
+  "/images/editorial/helmet-placement.jpg":
+    "Full-face motorcycle helmet with a small identity marker on its side.",
+  "/images/editorial/scooter-placement.jpg":
+    "Red scooter parked beside a building, with an identity marker on its front panel.",
+  "/images/editorial/windshield-decal-bonding.jpg":
+    "Hands positioning a vehicle safety QR decal on the inside of a windshield.",
+  "/images/editorial/emergency-contact-relays.jpg":
+    "Person receiving an emergency relay call beside a stopped car at dusk.",
+  "/images/editorial/motorcycle-placement.jpg":
+    "Black motorcycle with a brown seat and a QR decal on its side panel.",
+  "/images/editorial/edge-routing-emergency-alerts.jpg":
+    "Light trails on a city highway at dusk beneath illuminated road signs.",
+};
+
 interface EditorialMediaProps {
   src?: string;
   alt: string;
@@ -39,6 +58,9 @@ export function EditorialMedia({
   role = "HERO",
 }: EditorialMediaProps) {
   const [hasError, setHasError] = React.useState(false);
+  React.useEffect(() => {
+    setHasError(false);
+  }, [src]);
 
   if (!src || hasError) {
     return (
@@ -52,19 +74,8 @@ export function EditorialMedia({
     );
   }
 
-  // Frame treatments
-  let frameClasses = "rounded-xl sm:rounded-2xl";
-  if (frame === "FULL_BLEED") {
-    frameClasses = "rounded-none sm:rounded-xl";
-  } else if (frame === "TALL_PORTRAIT") {
-    frameClasses = "rounded-xl";
-  } else if (frame === "CROPPED_DETAIL") {
-    frameClasses = "rounded-lg";
-  } else if (frame === "INSET_TECHNICAL") {
-    frameClasses = "rounded-none border border-[#e6dfd8] dark:border-[#2e2b27] p-1 bg-[#f5f0e8]/50 dark:bg-[#1f1e1b]/50";
-  } else if (frame === "DARK_FIELD") {
-    frameClasses = "rounded-xl bg-[#141413] border border-[#2e2b27]";
-  }
+  const frameClasses =
+    frame === "INSET_TECHNICAL" ? "journal-media p-1" : "journal-media";
 
   const objectPosition = focalPoint
     ? `${focalPoint.x}% ${focalPoint.y}%`
@@ -78,7 +89,7 @@ export function EditorialMedia({
       >
         <Image
           src={src}
-          alt={alt}
+          alt={localImageDescriptions[src] || alt}
           fill
           priority={priority}
           sizes={sizes}
@@ -89,13 +100,13 @@ export function EditorialMedia({
             }
             setHasError(true);
           }}
-          className="object-cover transition-transform duration-700 ease-out group-hover/media:scale-[1.018]"
+          className="object-cover transition-transform duration-300 ease-out group-hover/media:scale-[1.018] motion-reduce:transform-none"
         />
       </div>
 
       {/* Technical Editorial Caption */}
       {caption && (
-        <figcaption className="flex items-center justify-between font-mono text-[9px] uppercase tracking-[0.18em] text-[#8e8b82] dark:text-[#77736d]">
+        <figcaption className="journal-media-caption flex items-center justify-between gap-3">
           <span>{caption}</span>
           <span className="h-1 w-1 rounded-full bg-[#cc785c]" />
         </figcaption>
