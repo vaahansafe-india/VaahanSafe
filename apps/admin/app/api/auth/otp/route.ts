@@ -1,4 +1,4 @@
-import { getSupabaseAdminClient, getCloudflareDatabaseClient } from "@vaahansafe/database";
+import { getSupabaseAdminClient, SupabaseOtpRequestStore } from "@vaahansafe/database";
 import { Msg91OtpAdapter, getOtpDeliveryAvailability } from "@vaahansafe/notifications";
 import { OtpRequestGuard, OtpRequestError, serializeOtpCookie } from "@vaahansafe/auth";
 import { NextResponse } from "next/server";
@@ -30,7 +30,7 @@ export async function POST(request: Request) {
       .single();
     if (error || actorError) throw error || actorError;
     const provider = new Msg91OtpAdapter();
-    const guard = new OtpRequestGuard(getCloudflareDatabaseClient(), "ADMIN");
+    const guard = new OtpRequestGuard(new SupabaseOtpRequestStore(), "ADMIN");
     if (body.action === "send") {
       const raw = String(body.phone || "").replace(/[\s()-]/g, "");
       const phone = raw.startsWith("+91")

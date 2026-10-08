@@ -256,7 +256,7 @@ export function CustomerAppShell({
               role="alert"
               className="mb-6 border-l-2 border-[#a9583e] bg-[#f1ece3] px-4 py-3 text-sm text-[#615f59]"
             >
-              Some account information couldn't load. Please refresh to try
+              Some account information couldn&apos;t load. Please refresh to try
               again.
             </div>
           )}

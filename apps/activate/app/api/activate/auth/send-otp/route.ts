@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { phoneSchema } from "@vaahansafe/validation";
 import { Msg91OtpAdapter, getOtpDeliveryAvailability } from "@vaahansafe/notifications";
-import { getCloudflareDatabaseClient } from "@vaahansafe/database";
+import { SupabaseOtpRequestStore } from "@vaahansafe/database";
 import { OtpRequestGuard, OtpRequestError, serializeOtpCookie } from "@vaahansafe/auth";
 
 const headers = { "Cache-Control": "private, no-store" };
@@ -21,7 +21,7 @@ export async function POST(req: Request) {
       error: channel === "WHATSAPP" ? "WhatsApp verification is currently unavailable. Choose SMS if available." : "Mobile verification is temporarily unavailable. Please try again later.",
     }, { status: 503, headers });
     const phone = `+91${parsed.data}`;
-    const guard = new OtpRequestGuard(getCloudflareDatabaseClient(), "ACTIVATE");
+    const guard = new OtpRequestGuard(new SupabaseOtpRequestStore(), "ACTIVATE");
     const reservation = await guard.reserve(phone, req, channel);
     let result;
     try {

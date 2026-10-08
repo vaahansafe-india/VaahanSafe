@@ -50,7 +50,7 @@ export class Msg91OtpAdapter implements IOtpService {
       throw new Error("MSG91 WhatsApp OTP configuration unavailable");
     try {
       const response = await fetch(
-        `https://control.msg91.com/api/v5/widget/${method}`,
+        `https://api.msg91.com/api/v5/widget/${method}`,
         {
           method: "POST",
           headers: {
@@ -61,7 +61,21 @@ export class Msg91OtpAdapter implements IOtpService {
           signal: AbortSignal.timeout(10000),
         },
       );
-      if (!response.ok) throw new Error("OTP provider request failed");
+      if (!response.ok) {
+        // Log operational metadata only: never payloads, phone numbers or codes.
+        const rejected = await response.json().catch(() => ({})) as { code?: unknown; message?: unknown };
+        const code = String(rejected.code || "");
+        const message = typeof rejected.message === "string" ? rejected.message : "";
+        const category = /captcha/i.test(message) ? "CAPTCHA_REQUIRED"
+          : /whitelist|ip.*(?:blocked|restricted|denied)/i.test(message) ? "IP_RESTRICTED"
+          : /invalid.*auth|auth.*(?:invalid|fail)|unauthori[sz]ed/i.test(message) ? "AUTH_REJECTED"
+          : /disabled/i.test(message) ? "SERVICE_DISABLED" : "UNCLASSIFIED";
+        const contentType = response.headers.get("content-type") || "";
+        console.error("[MSG91 OTP] Request rejected", { method, status: response.status,
+          code: /^[a-zA-Z0-9_-]{1,32}$/.test(code) ? code : "PROVIDER_ERROR", category,
+          responseFormat: /json/i.test(contentType) ? "JSON" : /html/i.test(contentType) ? "HTML" : "OTHER" });
+        throw new Error("OTP provider request failed");
+      }
       return (await response.json()) as {
         type?: string;
         message?: unknown;

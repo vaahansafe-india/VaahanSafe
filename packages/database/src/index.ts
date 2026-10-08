@@ -26,5 +26,6 @@ export * from "./repositories/journal.repository";
 export * from "./repositories/supabase-journal.repository";
 export * from "./repositories/supabase-data.repository";
 export * from "./repositories/supabase-auth.repository";
+export * from "./repositories/supabase-otp.repository";
 export * from "./queries/public-emergency-profile.query";
 export * from "./notifications/dispatcher";

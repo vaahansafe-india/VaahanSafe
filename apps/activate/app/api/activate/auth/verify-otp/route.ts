@@ -15,7 +15,7 @@ import {
   getAuthIdentityRepository,
   getSessionRepository,
   getQrActivationChallengeRepository,
-  getCloudflareDatabaseClient,
+  SupabaseOtpRequestStore,
 } from "@vaahansafe/database";
 import { parseCookie, hashToken, ACTIVATION_CHALLENGE_COOKIE_NAME } from "@/lib/crypto-helpers";
 
@@ -45,7 +45,7 @@ export async function POST(req: Request) {
 
     // Verify OTP via MSG91
     const otpService = new Msg91OtpAdapter();
-    const verifyResult = await new OtpRequestGuard(getCloudflareDatabaseClient(), "ACTIVATE")
+    const verifyResult = await new OtpRequestGuard(new SupabaseOtpRequestStore(), "ACTIVATE")
       .verify(normalizedE164, req, (challenge) => otpService.verify(normalizedE164, rawOtp, challenge.requestId, challenge.channel));
 
     if (!verifyResult.success) {

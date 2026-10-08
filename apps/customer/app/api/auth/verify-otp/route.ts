@@ -13,7 +13,7 @@ import {
   getAuthIdentityRepository,
   getSessionRepository,
   getNotificationRepositories,
-  getCloudflareDatabaseClient,
+  SupabaseOtpRequestStore,
   getSupabaseAdminClient,
 } from "@vaahansafe/database";
 import { getAuthenticatedCustomer } from "@/lib/session";
@@ -49,7 +49,7 @@ export async function POST(req: Request) {
 
     // Verify OTP via MSG91
     const otpService = new Msg91OtpAdapter();
-    const verifyResult = await new OtpRequestGuard(getCloudflareDatabaseClient(), "CUSTOMER")
+    const verifyResult = await new OtpRequestGuard(new SupabaseOtpRequestStore(), "CUSTOMER")
       .verify(normalizedE164, req, (challenge) => otpService.verify(normalizedE164, rawOtp, challenge.requestId, challenge.channel));
 
     if (!verifyResult.success) {

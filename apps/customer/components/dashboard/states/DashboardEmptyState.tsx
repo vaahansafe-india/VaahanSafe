@@ -66,7 +66,7 @@ export function DashboardEmptyState() {
           <em className="text-[#a9583e]">all in one place.</em>
         </h1>
         <p className="mt-4 max-w-lg text-center text-sm leading-relaxed text-muted-foreground">
-          You haven't added a vehicle yet. Add your vehicle to manage its safety
+          You haven&apos;t added a vehicle yet. Add your vehicle to manage its safety
           details, emergency contacts and QR identity.
         </p>
         <div className="mt-7 flex flex-wrap items-center justify-center gap-3">

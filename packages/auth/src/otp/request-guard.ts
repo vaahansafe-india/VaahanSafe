@@ -1,10 +1,9 @@
-/** D1-owned OTP request truth. MSG91 generates and verifies the code. */
-interface OtpDatabase {
-  queryFirst<T>(sql: string, params?: unknown[]): Promise<T | null>;
-  execute(
-    sql: string,
-    params?: unknown[],
-  ): Promise<{ success: boolean; rowsAffected?: number }>;
+/** Server-owned OTP request truth. MSG91 generates and verifies the code. */
+export interface OtpRequestStore {
+  reserve(input: { id: string; tokenHash: string; phoneHash: string; ipHash: string; surface: OtpSurface; channel: "SMS" | "WHATSAPP" }): Promise<boolean>;
+  finishDispatch(id: string, success: boolean, requestId?: string): Promise<boolean>;
+  claimVerification(input: { tokenHash: string; phoneHash: string; surface: OtpSurface }): Promise<{ id: string; channel: "SMS" | "WHATSAPP"; provider_request_id: string | null } | null>;
+  finishVerification(id: string, success: boolean): Promise<boolean>;
 }
 export type OtpSurface = "CUSTOMER" | "ACTIVATE" | "API" | "ADMIN";
 export interface OtpProviderChallenge {
@@ -67,7 +66,7 @@ function readOtpCookie(surface: OtpSurface, request: Request) {
 
 export class OtpRequestGuard {
   constructor(
-    private db: OtpDatabase,
+    private store: OtpRequestStore,
     private surface: OtpSurface,
   ) {}
 
@@ -76,42 +75,16 @@ export class OtpRequestGuard {
     request: Request,
     channel: "SMS" | "WHATSAPP" = "SMS",
   ) {
-    const now = Date.now();
     const token = `${crypto.randomUUID()}${crypto.randomUUID()}`;
     const [phoneHash, ipHash, tokenHash] = await Promise.all([
       digest(`phone:${phone}`),
-      // The trusted Cloudflare header is deliberately preferred over forwarded headers.
-      digest(`ip:${request.headers.get("cf-connecting-ip") || "unavailable"}`),
+      // Vercel overwrites x-vercel-forwarded-for; generic client-forwarded headers are ignored.
+      digest(`ip:${process.env.VERCEL === "1" ? request.headers.get("x-vercel-forwarded-for")?.split(",")[0]?.trim() || "unavailable" : request.headers.get("cf-connecting-ip") || "unavailable"}`),
       digest(`token:${token}`),
     ]);
     const id = `otp_${crypto.randomUUID()}`;
-    // A single D1 conditional write serializes concurrent send attempts across every surface.
-    const result = await this.db.execute(
-      `INSERT INTO auth_otp_requests
-      (id,token_hash,phone_hash,ip_hash,surface,channel,status,created_at,expires_at)
-      SELECT ?,?,?,?,?,?,'RESERVED',?,?
-      WHERE NOT EXISTS (SELECT 1 FROM auth_otp_requests WHERE phone_hash = ? AND created_at > ?)
-      AND (SELECT COUNT(*) FROM auth_otp_requests WHERE phone_hash = ? AND created_at > ?) < 5
-      AND (SELECT COUNT(*) FROM auth_otp_requests WHERE ip_hash = ? AND created_at > ?) < 20`,
-      [
-        id,
-        tokenHash,
-        phoneHash,
-        ipHash,
-        this.surface,
-        channel,
-        now,
-        now + 300000,
-        phoneHash,
-        now - 60000,
-        phoneHash,
-        now - 900000,
-        ipHash,
-        now - 900000,
-      ],
-    );
-    if (!result.success) throw new Error("OTP reservation unavailable");
-    if (result.rowsAffected !== 1)
+    const reserved = await this.store.reserve({ id, tokenHash, phoneHash, ipHash, surface: this.surface, channel });
+    if (!reserved)
       throw new OtpRequestError(
         429,
         "OTP_RATE_LIMITED",
@@ -124,15 +97,8 @@ export class OtpRequestGuard {
     id: string,
     result: { success: boolean; requestId?: string },
   ) {
-    const update = await this.db.execute(
-      "UPDATE auth_otp_requests SET status = ?, provider_request_id = ? WHERE id = ? AND status = 'RESERVED'",
-      [
-        result.success ? "SENT" : "FAILED",
-        result.success ? result.requestId || null : null,
-        id,
-      ],
-    );
-    if (!update.success || update.rowsAffected !== 1)
+    const saved = await this.store.finishDispatch(id, result.success, result.requestId);
+    if (!saved)
       throw new Error("OTP dispatch recording unavailable");
   }
 
@@ -149,24 +115,8 @@ export class OtpRequestGuard {
       digest(`token:${token}`),
       digest(`phone:${phone}`),
     ]);
-    const row = await this.db.queryFirst<{
-      id: string;
-      channel: "SMS" | "WHATSAPP";
-      provider_request_id: string | null;
-    }>(
-      `SELECT id, channel, provider_request_id FROM auth_otp_requests
-      WHERE token_hash = ? AND phone_hash = ? AND surface = ? AND status = 'SENT'
-      AND expires_at > ? AND attempt_count < 5`,
-      [tokenHash, phoneHash, this.surface, Date.now()],
-    );
+    const row = await this.store.claimVerification({ tokenHash, phoneHash, surface: this.surface });
     if (!row) return { success: false };
-    const claimed = await this.db.execute(
-      `UPDATE auth_otp_requests SET status = 'VERIFYING', attempt_count = attempt_count + 1
-      WHERE id = ? AND status = 'SENT' AND attempt_count < 5 AND expires_at > ?`,
-      [row.id, Date.now()],
-    );
-    if (!claimed.success || claimed.rowsAffected !== 1)
-      return { success: false };
     let success = false;
     try {
       if (row.channel !== "SMS" && row.channel !== "WHATSAPP")
@@ -181,11 +131,8 @@ export class OtpRequestGuard {
       ).success;
       return { success };
     } finally {
-      const saved = await this.db.execute(
-        "UPDATE auth_otp_requests SET status = ?, verified_at = ? WHERE id = ? AND status = 'VERIFYING'",
-        [success ? "VERIFIED" : "SENT", success ? Date.now() : null, row.id],
-      );
-      if (!saved.success || saved.rowsAffected !== 1)
+      const saved = await this.store.finishVerification(row.id, success);
+      if (!saved)
         throw new Error("OTP verification recording unavailable");
     }
   }

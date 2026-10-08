@@ -207,7 +207,7 @@ export function OtpVerificationForm({
       {/* Resend actions supporting both channels */}
       <div className="mt-4 flex flex-col gap-2 rounded-[3px] border border-[#e2dcd2] bg-white p-2.5 text-xs text-[#615f59]">
         <div className="flex items-center justify-between">
-          <span>Didn't receive a code?</span>
+          <span>Didn&apos;t receive a code?</span>
           {cooldown > 0 ? (
             <span className="font-mono text-[#77736c]">
               Resend in 0:{String(cooldown).padStart(2, "0")}

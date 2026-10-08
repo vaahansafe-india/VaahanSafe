@@ -39,7 +39,7 @@ describe("Provider-owned WhatsApp OTP", () => {
       channel: "WHATSAPP",
     });
     const [url, options] = fetch.mock.calls[0];
-    expect(url).toBe("https://control.msg91.com/api/v5/widget/sendOtp");
+    expect(url).toBe("https://api.msg91.com/api/v5/widget/sendOtp");
     expect(JSON.parse(options.body)).toEqual({
       widgetId: "widget-fixture",
       identifier: phone.slice(1),
@@ -64,6 +64,19 @@ describe("Provider-owned WhatsApp OTP", () => {
       false,
     );
   });
+  it("logs a safe rejection category without the provider's sensitive message", async () => {
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({
+      message: "Invalid authentication for private-credential phone 919876543210 code 675829",
+    }), { status: 403, headers: { "Content-Type": "application/json" } })));
+    try {
+      await expect(adapter().send({ phone, channel: "WHATSAPP" })).rejects.toThrow("provider unavailable");
+      expect(log).toHaveBeenCalledWith("[MSG91 OTP] Request rejected", {
+        method: "sendOtp", status: 403, code: "PROVIDER_ERROR", category: "AUTH_REJECTED", responseFormat: "JSON",
+      });
+      expect(JSON.stringify(log.mock.calls)).not.toMatch(/private-credential|919876543210|675829/);
+    } finally { log.mockRestore(); }
+  });
   it("validates the access token with MSG91 and binds the resulting phone", async () => {
     const fetch = vi
       .fn()
@@ -79,8 +92,9 @@ describe("Provider-owned WhatsApp OTP", () => {
       reqId: requestId,
       widgetId: "widget-fixture",
     });
+    expect(fetch.mock.calls[0][0]).toBe("https://api.msg91.com/api/v5/widget/verifyOtp");
     expect(fetch.mock.calls[1][0]).toBe(
-      "https://control.msg91.com/api/v5/widget/verifyAccessToken",
+      "https://api.msg91.com/api/v5/widget/verifyAccessToken",
     );
     expect(JSON.parse(fetch.mock.calls[1][1].body)["access-token"]).toBe(token);
   });
@@ -118,8 +132,10 @@ describe("Provider-owned WhatsApp OTP", () => {
   it("uses the channel and reference stored on the server rather than client claims", async () => {
     vi.stubEnv("SESSION_SECRET", "security-fixture-at-least-sixteen");
     const db = {
-      execute: vi.fn().mockResolvedValue({ success: true, rowsAffected: 1 }),
-      queryFirst: vi
+      reserve: vi.fn().mockResolvedValue(true),
+      finishDispatch: vi.fn().mockResolvedValue(true),
+      finishVerification: vi.fn().mockResolvedValue(true),
+      claimVerification: vi
         .fn()
         .mockResolvedValue({
           id: "challenge-fixture",
@@ -133,7 +149,7 @@ describe("Provider-owned WhatsApp OTP", () => {
       new Request("https://app.vaahansafe.com"),
       "WHATSAPP",
     );
-    expect(db.execute.mock.calls[0][1]).toContain("WHATSAPP");
+    expect(db.reserve.mock.calls[0][0].channel).toBe("WHATSAPP");
     const verify = vi.fn().mockResolvedValue({ success: true });
     expect(
       (
