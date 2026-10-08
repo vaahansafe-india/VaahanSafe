@@ -39,7 +39,7 @@ describe("Provider-owned WhatsApp OTP", () => {
       channel: "WHATSAPP",
     });
     const [url, options] = fetch.mock.calls[0];
-    expect(url).toBe("https://control.msg91.com/api/v5/widget/sendOtp");
+    expect(url).toBe("https://api.msg91.com/api/v5/widget/sendOtp");
     expect(JSON.parse(options.body)).toEqual({
       widgetId: "widget-fixture",
       identifier: phone.slice(1),
@@ -79,8 +79,9 @@ describe("Provider-owned WhatsApp OTP", () => {
       reqId: requestId,
       widgetId: "widget-fixture",
     });
+    expect(fetch.mock.calls[0][0]).toBe("https://api.msg91.com/api/v5/widget/verifyOtp");
     expect(fetch.mock.calls[1][0]).toBe(
-      "https://control.msg91.com/api/v5/widget/verifyAccessToken",
+      "https://api.msg91.com/api/v5/widget/verifyAccessToken",
     );
     expect(JSON.parse(fetch.mock.calls[1][1].body)["access-token"]).toBe(token);
   });

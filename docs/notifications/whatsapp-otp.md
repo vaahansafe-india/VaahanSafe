@@ -23,6 +23,11 @@ access token with `widget/verifyAccessToken`. The verified phone must exactly
 match the reserved challenge. Invisible verification and ambiguous success
 responses are rejected.
 
+All three widget requests use the documented server API host `https://api.msg91.com`.
+The dashboard host `control.msg91.com` returned HTTP 403 from the Vercel preview,
+even though the configured key is active and its OTP permissions are enabled.
+There is no automatic retry through an alternate host, which could send duplicate codes.
+
 The provider widget requires a minimum fifteen-minute expiry. VaahanSafe enforces
 a stricter five-minute expiry in Supabase before contacting the verification provider,
 plus the existing shared send cooldown, phone/IP limits, five verification
@@ -56,4 +61,7 @@ there is no configured valid SMS template ID and MSG91's SendOTP template list i
 empty.
 
 References: [OTP Widget API](https://docs.msg91.com/otp-widget),
+[Send OTP](https://docs.msg91.com/otp-widget/send-otp-1),
+[Verify OTP](https://docs.msg91.com/otp-widget/verify-otp),
+[Verify access token](https://docs.msg91.com/otp-widget/verify-access-token),
 [MSG91 integration guide](https://msg91.com/help/sendotp/how-to-integrate-the-new-login-with-otp-widget).

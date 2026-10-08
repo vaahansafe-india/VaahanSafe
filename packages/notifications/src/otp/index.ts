@@ -50,7 +50,7 @@ export class Msg91OtpAdapter implements IOtpService {
       throw new Error("MSG91 WhatsApp OTP configuration unavailable");
     try {
       const response = await fetch(
-        `https://control.msg91.com/api/v5/widget/${method}`,
+        `https://api.msg91.com/api/v5/widget/${method}`,
         {
           method: "POST",
           headers: {
