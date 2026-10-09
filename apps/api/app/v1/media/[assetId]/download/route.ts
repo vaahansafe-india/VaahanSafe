@@ -4,25 +4,17 @@ import {
   getSafeDownloadHeaders,
   StorageError,
 } from "@vaahansafe/storage";
-import { getMediaAssetRepository, getObjectStoreForBucket } from "../../_helpers";
+import { getMediaAssetRepository, getObjectStoreForBucket, getStorageActor, canAccessStorageOwner } from "../../_helpers";
 
 export async function GET(
   req: Request,
   props: { params: Promise<{ assetId: string }> }
 ) {
   try {
+    const actor = await getStorageActor(req);
+    if (actor instanceof NextResponse) return actor;
     const { assetId } = await props.params;
     const url = new URL(req.url);
-
-    // Extract actor credentials from headers or query parameters
-    const actorId =
-      req.headers.get("x-actor-id") ||
-      url.searchParams.get("actorId") ||
-      "anonymous";
-    const actorRole =
-      req.headers.get("x-actor-role") ||
-      url.searchParams.get("actorRole") ||
-      "GUEST";
 
     const dispositionParam = url.searchParams.get("disposition");
     const disposition = dispositionParam === "inline" ? "inline" : "attachment";
@@ -32,12 +24,9 @@ export async function GET(
     // 1. Authorize private download (IDOR & role check)
     const asset = await authorizePrivateDownload({
       assetId,
-      actor: { id: actorId, role: actorRole },
+      actor,
       mediaRepo,
-      entityOwnershipCheck: (_type, ownerId, actId) => {
-        // In local/test environment, matching IDs are authorized
-        return ownerId === actId;
-      },
+      entityOwnershipCheck: canAccessStorageOwner,
     });
 
     // 2. Fetch object bytes/stream from R2

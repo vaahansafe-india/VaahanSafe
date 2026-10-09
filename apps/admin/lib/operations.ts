@@ -1,6 +1,7 @@
 import "server-only";
 import { getSupabaseAdminClient } from "@vaahansafe/database";
 import { getAuthoritativeObjectStore } from "@vaahansafe/storage";
+import { getOtpDeliveryAvailability } from "@vaahansafe/notifications";
 import { canReadModule, canSearchPhone, getAdminModule } from "./modules";
 import { AdminError } from "./session";
 import { maskAdminRow } from "./presentation";
@@ -172,16 +173,17 @@ export async function checkConnections(): Promise<ConnectionCheck[]> {
     {
       name: "MSG91 OTP",
       state:
-        process.env.MSG91_AUTH_KEY && process.env.MSG91_OTP_TEMPLATE_ID
+        Object.values(getOtpDeliveryAvailability()).some(Boolean)
           ? "connected"
           : "unconfigured",
       checkedAt,
     },
     {
-      name: "Cloudflare Turnstile",
+      name: "Supabase OTP protection",
       state:
-        process.env.TURNSTILE_SECRET_KEY &&
-        process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY
+        (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL) &&
+        (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY) &&
+        (process.env.OTP_REQUEST_HASH_SECRET || process.env.SESSION_SECRET || "").length >= 16
           ? "connected"
           : "unconfigured",
       checkedAt,

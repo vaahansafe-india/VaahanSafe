@@ -1,4 +1,13 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
+vi.mock("../apps/api/app/v1/media/_helpers", async importOriginal => ({
+  ...await importOriginal<typeof import("../apps/api/app/v1/media/_helpers")>(),
+  ...await import("./fixtures/media-gateway"),
+}));
+vi.mock("../apps/api/app/v1/_auth", () => ({
+  requireUserSession: async (request: Request) => ({
+    user: { id: request.headers.get("x-actor-id"), role: request.headers.get("x-actor-role"), phone: "+919876543210" },
+  }),
+}));
 import {
   getCacheControlHeader,
   getSafeDownloadHeaders,

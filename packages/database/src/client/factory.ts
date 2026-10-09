@@ -1,8 +1,8 @@
 /**
  * Authoritative Database Client & Repository Factory
  *
- * Automatically resolves Cloudflare D1 via native bindings (in Cloudflare Workers)
- * or via CloudflareD1HttpClient (in Next.js Edge/Server or Node).
+ * Application services use Supabase PostgreSQL. Explicit D1 clients are retained
+ * only for legacy tooling; missing Supabase credentials never select D1.
  * INVARIANT: Never falls back to mock or local databases.
  */
 
@@ -47,17 +47,7 @@ export function getAuthoritativeDatabaseClient(
     return new D1DatabaseAdapter(binding);
   }
   if (!defaultDatabaseClient) {
-    if (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY) {
-      defaultDatabaseClient = new SupabaseDatabaseAdapter();
-    } else if (process.env.CLOUDFLARE_API_TOKEN && process.env.CLOUDFLARE_D1_DATABASE_ID) {
-      defaultDatabaseClient = new CloudflareD1HttpClient();
-    } else {
-      try {
-        defaultDatabaseClient = new SupabaseDatabaseAdapter();
-      } catch {
-        defaultDatabaseClient = new CloudflareD1HttpClient();
-      }
-    }
+    defaultDatabaseClient = new SupabaseDatabaseAdapter();
   }
   return defaultDatabaseClient;
 }

@@ -1,15 +1,17 @@
 import { NextResponse } from "next/server";
 import { authorizeDirectUpload, StorageError } from "@vaahansafe/storage";
-import { getMediaAssetRepository } from "../../_helpers";
+import { getMediaAssetRepository, getStorageActor, canAccessStorageOwner } from "../../_helpers";
 
 export async function POST(req: Request) {
   try {
+    const actor = await getStorageActor(req);
+    if (actor instanceof NextResponse) return actor;
     const body = await req.json();
     const mediaRepo = getMediaAssetRepository();
 
     const ticket = await authorizeDirectUpload(
       {
-        actor: body.actor,
+        actor,
         purpose: body.purpose,
         ownerType: body.ownerType,
         ownerId: body.ownerId,
@@ -18,6 +20,7 @@ export async function POST(req: Request) {
         sizeBytes: body.sizeBytes,
         sha256: body.sha256,
         altText: body.altText,
+        entityOwnershipCheck: canAccessStorageOwner,
       },
       mediaRepo
     );

@@ -1,12 +1,14 @@
 import { NextResponse } from "next/server";
 import { completeUpload, StorageError } from "@vaahansafe/storage";
-import { getMediaAssetRepository, getObjectStoreForBucket } from "../../../_helpers";
+import { getMediaAssetRepository, getObjectStoreForBucket, getStorageActor, canAccessStorageOwner } from "../../../_helpers";
 
 export async function POST(
   req: Request,
   props: { params: Promise<{ uploadId: string }> }
 ) {
   try {
+    const actor = await getStorageActor(req);
+    if (actor instanceof NextResponse) return actor;
     const { uploadId } = await props.params;
     const body = await req.json();
 
@@ -25,6 +27,9 @@ export async function POST(
       );
     }
 
+    if (!await canAccessStorageOwner(asset.ownerType, asset.ownerId, actor.id, actor.role)) {
+      throw new StorageError("UPLOAD_NOT_AUTHORIZED", "You don't have access to this upload.");
+    }
     const objectStore = getObjectStoreForBucket(asset.bucket);
 
     let magicBytes: Uint8Array | undefined;
@@ -39,7 +44,7 @@ export async function POST(
     const completed = await completeUpload(
       {
         assetId: uploadId,
-        actor: body.actor,
+        actor,
         actualSizeBytes: body.actualSizeBytes,
         sha256: body.sha256,
         magicBytes,

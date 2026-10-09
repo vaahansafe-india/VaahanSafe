@@ -1,19 +1,7 @@
 "use client";
-import { useCallback, useEffect, useRef, useState } from "react";
-import Script from "next/script";
+import { useState } from "react";
 import { VaahanIcon } from "@vaahansafe/icons";
 import { useOtpAvailability } from "@vaahansafe/ui/lib/use-otp-availability";
-
-interface Turnstile {
-  render(element: HTMLElement, options: Record<string, unknown>): string;
-  remove(id: string): void;
-  reset(id: string): void;
-}
-declare global {
-  interface Window {
-    turnstile?: Turnstile;
-  }
-}
 
 function WhatsAppIcon({ size = 15, className }: { size?: number; className?: string }) {
   return (
@@ -48,34 +36,9 @@ export function PhoneVerification({
     [code, setCode] = useState(""),
     [sent, setSent] = useState(false),
     [busy, setBusy] = useState(false),
-    [error, setError] = useState(""),
-    [token, setToken] = useState("");
-  const container = useRef<HTMLDivElement>(null),
-    widget = useRef<string | null>(null);
-  const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
-  const render = useCallback(() => {
-    if (container.current && window.turnstile && siteKey && !widget.current)
-      widget.current = window.turnstile.render(container.current, {
-        sitekey: siteKey,
-        action: "admin_otp",
-        theme: "light",
-        size: "compact",
-        callback: (value: string) => setToken(value),
-        "expired-callback": () => setToken(""),
-        "error-callback": () => setToken(""),
-      });
-  }, [siteKey]);
-  useEffect(() => {
-    render();
-    return () => {
-      if (widget.current) {
-        window.turnstile?.remove(widget.current);
-        widget.current = null;
-      }
-    };
-  }, [render]);
+    [error, setError] = useState("");
   const canSubmit =
-    !busy && (sent ? code.length === 6 : !availability.loading && availability.channels[channel] && !!token && /^[6-9]\d{9}$/.test(phone));
+    !busy && (sent ? code.length === 6 : !availability.loading && availability.channels[channel] && /^[6-9]\d{9}$/.test(phone));
   const submit = async (customChannel?: "WHATSAPP" | "SMS") => {
     if (!canSubmit) return;
     setBusy(true);
@@ -90,7 +53,6 @@ export function PhoneVerification({
           phone,
           channel: targetChannel,
           code,
-          turnstileToken: token,
         }),
       });
       const result = await response.json();
@@ -115,8 +77,6 @@ export function PhoneVerification({
       setError(e instanceof Error ? e.message : "Please try again.");
     } finally {
       setBusy(false);
-      setToken("");
-      if (widget.current) window.turnstile?.reset(widget.current);
     }
   };
   return (
@@ -249,19 +209,7 @@ export function PhoneVerification({
           </p>
         </>
       )}
-      {siteKey && (
-        <Script
-          src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
-          strategy="afterInteractive"
-          onReady={render}
-        />
-      )}
-      <div
-        className="admin-phone-challenge"
-        ref={container}
-        hidden={sent || !siteKey}
-      />
-      {!sent && (!siteKey || (!availability.loading && !availability.anyAvailable)) && (
+      {!sent && !availability.loading && !availability.anyAvailable && (
         <div
           className="admin-notice admin-verification-unavailable"
           role="status"
