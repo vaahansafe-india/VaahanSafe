@@ -55,7 +55,7 @@ describe("Admin OTP with Supabase abuse controls", () => {
     const response = await POST(request({ action: "send", phone }));
     expect(response.status).toBe(200);
     expect(response.headers.get("set-cookie")).toContain("HttpOnly; SameSite=Lax; Path=/; Max-Age=300; Secure");
-    expect(state.requireAdmin).toHaveBeenCalledWith(undefined, { pendingPhone: true });
+    expect(state.requireAdmin).toHaveBeenCalledWith();
     expect(state.assertOrigin).toHaveBeenCalled();
     expect(state.rpc.mock.calls.map(call => call[0])).toEqual(["admin_reserve_otp", "auth_otp_reserve", "auth_otp_finish_dispatch"]);
     expect(state.rpc.mock.invocationCallOrder[1]).toBeLessThan(state.send.mock.invocationCallOrder[0]);

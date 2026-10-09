@@ -11,7 +11,7 @@ export default async function LoginPage({
   searchParams: Promise<{ error?: string }>;
 }) {
   const identity = await getAdminIdentity();
-  if (identity) redirect(identity.phoneVerified ? "/" : "/verify-phone");
+  if (identity) redirect(identity.emailVerified ? "/" : "/verify-email");
   const { error } = await searchParams;
   const webUrl = DOMAINS.web || "https://vaahansafe.com";
   return (
@@ -92,7 +92,7 @@ export default async function LoginPage({
             <div className="admin-login-verification">
               <div className="admin-login-verification-heading">
                 <VaahanIcon name="lock" size={15} />
-                <span>Secure access, in two steps</span>
+                <span>Secure workspace access</span>
               </div>
               <ol>
                 <li>
@@ -105,7 +105,7 @@ export default async function LoginPage({
                   <span className="admin-login-step" aria-hidden="true">
                     02
                   </span>
-                  <span>Verify your mobile number</span>
+                  <span>Verify a code sent to your email</span>
                 </li>
               </ol>
             </div>

@@ -6,7 +6,7 @@ import { canMutateModule, getAdminModule } from "../lib/modules";
 import { columnLabel, displayValue } from "../lib/presentation";
 import { RecordTable } from "./RecordTable";
 import { AdminDialog } from "./AdminDialog";
-import { PhoneVerification } from "./PhoneVerification";
+import { EmailVerification } from "./EmailVerification";
 const editFields: Record<
   string,
   { key: string; label: string; options?: string[]; type?: string }[]
@@ -18,7 +18,10 @@ const editFields: Record<
     { key: "status", label: "Status", options: ["ACTIVE", "SUSPENDED"] },
   ],
   support: [
-    { key: "customer_user_id", label: "Customer account ID (optional, enables customer updates)" },
+    {
+      key: "customer_user_id",
+      label: "Customer account ID (optional, enables customer updates)",
+    },
     { key: "reference_code", label: "Ticket reference" },
     { key: "subject", label: "Subject" },
     {
@@ -518,12 +521,12 @@ export function OperationsWorkspace({
           onClose={closeDialog}
         >
           {stepUp ? (
-            <PhoneVerification
+            <EmailVerification
               stepUp
               onVerified={() => {
                 setStepUp(false);
                 setDialogError(
-                  "Mobile verified. Review and confirm your action again.",
+                  "Email verified. Review and confirm your action again.",
                 );
               }}
             />

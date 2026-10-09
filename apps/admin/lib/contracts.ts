@@ -6,6 +6,7 @@ export interface AdminIdentity {
   role: AdminRole;
   sessionId: string;
   phoneVerified: boolean;
+  emailVerified: boolean;
   stepUpAt: string | null;
 }
 export type AdminRow = Record<string, string | number | boolean | null>;

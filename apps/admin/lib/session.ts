@@ -6,6 +6,7 @@ import { hashSessionToken, ADMIN_SESSION_COOKIE_NAME } from "@vaahansafe/auth";
 import { getSupabaseAdminClient } from "@vaahansafe/database";
 import { ADMIN_ROLES, canReadModule } from "./modules";
 import type { AdminIdentity } from "./contracts";
+import { isAdminWorkEmail } from "./password-policy";
 
 export class AdminError extends Error {
   constructor(
@@ -23,7 +24,9 @@ export const getAdminIdentity = cache(
     const db = getSupabaseAdminClient();
     const { data: session, error } = await db
       .from("admin_sessions")
-      .select("id,admin_id,phone_verified_at,step_up_at,created_at,expires_at")
+      .select(
+        "id,admin_id,phone_verified_at,email_verified_at,step_up_at,created_at,expires_at",
+      )
       .eq("token_hash", await hashSessionToken(token))
       .is("revoked_at", null)
       .gt("expires_at", new Date().toISOString())
@@ -51,7 +54,12 @@ export const getAdminIdentity = cache(
         "SERVICE_UNAVAILABLE",
         "We couldn't open the admin workspace right now. Please try again.",
       );
-    if (!actor || !ADMIN_ROLES.includes(actor.role)) return null;
+    if (
+      !actor ||
+      !ADMIN_ROLES.includes(actor.role) ||
+      !isAdminWorkEmail(actor.email)
+    )
+      return null;
     return {
       id: actor.id,
       name: actor.name,
@@ -59,13 +67,14 @@ export const getAdminIdentity = cache(
       role: actor.role,
       sessionId: session.id,
       phoneVerified: !!session.phone_verified_at,
+      emailVerified: !!session.email_verified_at,
       stepUpAt: session.step_up_at,
     };
   },
 );
 export async function requireAdmin(
   moduleKey?: string,
-  options?: { pendingPhone?: boolean; stepUp?: boolean },
+  options?: { pendingEmail?: boolean; stepUp?: boolean },
 ) {
   const identity = await getAdminIdentity();
   if (!identity)
@@ -74,11 +83,11 @@ export async function requireAdmin(
       "AUTH_REQUIRED",
       "Sign in to your admin account to continue.",
     );
-  if (!identity.phoneVerified && !options?.pendingPhone)
+  if (!identity.emailVerified && !options?.pendingEmail)
     throw new AdminError(
       403,
-      "PHONE_REQUIRED",
-      "Verify your mobile number to continue.",
+      "EMAIL_REQUIRED",
+      "Verify the code sent to your work email to continue.",
     );
   if (moduleKey && !canReadModule(identity.role, moduleKey))
     throw new AdminError(
@@ -94,14 +103,14 @@ export async function requireAdmin(
     throw new AdminError(
       403,
       "STEP_UP_REQUIRED",
-      "Verify a fresh mobile OTP before this action.",
+      "Verify a fresh email OTP before this action.",
     );
   return identity;
 }
 export async function requireAdminPage(moduleKey: string) {
   const identity = await getAdminIdentity();
   if (!identity) redirect("/login");
-  if (!identity.phoneVerified) redirect("/verify-phone");
+  if (!identity.emailVerified) redirect("/verify-email");
   if (!canReadModule(identity.role, moduleKey)) redirect("/access-denied");
   return identity;
 }

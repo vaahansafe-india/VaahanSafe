@@ -98,7 +98,7 @@ export async function mutateAdminArticle(
     throw new AdminError(
       403,
       "STEP_UP_REQUIRED",
-      "Verify a fresh mobile OTP before changing public content.",
+      "Verify a fresh email OTP before changing public content.",
     );
   const { data, error } = await getSupabaseAdminClient().rpc(
     "admin_article_mutate",

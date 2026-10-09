@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { PhoneVerification } from "./PhoneVerification";
+import { EmailVerification } from "./EmailVerification";
 import {
   Card,
   CardContent,
@@ -522,7 +522,7 @@ export function ArticleEditorForm({
           I have reviewed this change and its publication status.
         </label>
         {stepUp && (
-          <PhoneVerification stepUp onVerified={() => setStepUp(false)} />
+          <EmailVerification stepUp onVerified={() => setStepUp(false)} />
         )}
       </section>
       {/* Action Buttons */}

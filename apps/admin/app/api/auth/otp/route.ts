@@ -14,7 +14,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     assertSameOrigin(request);
-    const identity = await requireAdmin(undefined, { pendingPhone: true });
+    const identity = await requireAdmin();
     const body = await request.json();
     const db = getSupabaseAdminClient();
     const { data: ses, error } = await db

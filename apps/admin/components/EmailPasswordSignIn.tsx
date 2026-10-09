@@ -7,7 +7,6 @@ export function EmailPasswordSignIn() {
   const [visible, setVisible] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const [emailAccepted, setEmailAccepted] = useState(false);
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (busy) return;
@@ -15,14 +14,6 @@ export function EmailPasswordSignIn() {
     const values = new FormData(form);
     if (!isAdminWorkEmail(values.get("email"))) {
       setError("Use your @vaahansafe.com work email to continue.");
-      setEmailAccepted(false);
-      return;
-    }
-    if (!emailAccepted) {
-      const field = form.elements.namedItem("email") as HTMLInputElement;
-      field.value = field.value.trim().toLowerCase();
-      setError("");
-      setEmailAccepted(true);
       return;
     }
     setBusy(true);
@@ -37,13 +28,13 @@ export function EmailPasswordSignIn() {
         }),
       });
       const result = await response.json();
-      if (!response.ok || result.data?.next !== "/verify-phone")
+      if (!response.ok || result.data?.next !== "/verify-email")
         throw new Error(
           result.error?.message ||
             "We couldn't complete sign-in right now. Please try again.",
         );
       form.reset();
-      window.location.assign("/verify-phone");
+      window.location.assign("/verify-email");
     } catch (e) {
       setError(
         e instanceof Error
@@ -67,53 +58,37 @@ export function EmailPasswordSignIn() {
         spellCheck={false}
         maxLength={254}
         placeholder="you@vaahansafe.com"
-        readOnly={emailAccepted}
         aria-describedby="admin-email-hint"
         required
         disabled={busy}
       />
       <div className="admin-email-hint" id="admin-email-hint">
         <span>Only @vaahansafe.com work emails can continue.</span>
-        {emailAccepted && (
+      </div>
+      <>
+        <label htmlFor="admin-password">Password</label>
+        <div className="admin-password-field">
+          <input
+            id="admin-password"
+            name="password"
+            type={visible ? "text" : "password"}
+            autoComplete="current-password"
+            maxLength={128}
+            required
+            disabled={busy}
+          />
           <button
             type="button"
+            className="admin-password-toggle"
+            aria-label={visible ? "Hide password" : "Show password"}
+            aria-pressed={visible}
+            onClick={() => setVisible(!visible)}
             disabled={busy}
-            onClick={() => {
-              setEmailAccepted(false);
-              setError("");
-            }}
           >
-            Change
+            <VaahanIcon name={visible ? "eye-off" : "eye"} size={18} />
           </button>
-        )}
-      </div>
-      {emailAccepted && (
-        <>
-          <label htmlFor="admin-password">Password</label>
-          <div className="admin-password-field">
-            <input
-              id="admin-password"
-              name="password"
-              type={visible ? "text" : "password"}
-              autoComplete="current-password"
-              autoFocus
-              maxLength={128}
-              required
-              disabled={busy}
-            />
-            <button
-              type="button"
-              className="admin-password-toggle"
-              aria-label={visible ? "Hide password" : "Show password"}
-              aria-pressed={visible}
-              onClick={() => setVisible(!visible)}
-              disabled={busy}
-            >
-              <VaahanIcon name={visible ? "eye-off" : "eye"} size={18} />
-            </button>
-          </div>
-        </>
-      )}
+        </div>
+      </>
       {error && (
         <div className="admin-notice error" role="alert">
           {error}
@@ -124,11 +99,7 @@ export function EmailPasswordSignIn() {
         type="submit"
         disabled={busy}
       >
-        {busy
-          ? "Signing in…"
-          : emailAccepted
-            ? "Sign in to workspace"
-            : "Continue with work email"}
+        {busy ? "Signing in…" : "Sign in to workspace"}
         <VaahanIcon name="arrow-right" size={16} />
       </button>
       <p className="admin-password-help">
