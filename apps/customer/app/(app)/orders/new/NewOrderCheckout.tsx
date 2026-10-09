@@ -691,7 +691,7 @@ export function NewOrderCheckout({
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="size-3.5 text-emerald-500 shrink-0" />
-                  <span>Digital QR Pass Unlocked Upon Payment</span>
+                  <span>Digital QR after assignment and activation</span>
                 </div>
               </div>
 
