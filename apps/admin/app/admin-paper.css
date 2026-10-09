@@ -59,6 +59,11 @@
   --input: 36 20% 81%;
   --primary: 16 46% 45%;
   --primary-foreground: 48 33% 98%;
+  --admin-loading-base: #ece7de;
+  --admin-loading-highlight: #f3efe6;
+  --admin-progress: #a9583e;
+  --admin-transition-fast: 120ms cubic-bezier(0.2, 0, 0, 1);
+  --admin-transition-normal: 180ms cubic-bezier(0.2, 0, 0, 1);
 }
 * {
   box-sizing: border-box;
@@ -3001,3 +3006,70 @@ input[type="checkbox"] {
     grid-template-columns: 1fr;
   }
 }
+
+/* ==========================================================================
+   Admin Page Loading & Route Transition System (Rules 39–66)
+   ========================================================================== */
+
+/* 2.5px top progress indicator */
+.admin-route-progress-bar {
+  position: fixed;
+  top: env(safe-area-inset-top, 0);
+  left: 0;
+  right: 0;
+  height: 2.5px;
+  background: var(--admin-progress, #a9583e);
+  z-index: 9999;
+  transform-origin: 0 50%;
+  pointer-events: none;
+  transition: transform 180ms cubic-bezier(0.1, 0.9, 0.2, 1), opacity 150ms ease;
+  box-shadow: 0 1px 6px rgba(169, 88, 62, 0.35);
+}
+
+/* Restrained opacity pulse (0.55 -> 0.82 -> 0.55 over 1.6s) */
+@keyframes admin-skeleton-pulse {
+  0%, 100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 0.82;
+  }
+}
+
+.admin-loading-block {
+  background-color: var(--admin-loading-base, #ece7de);
+  animation: admin-skeleton-pulse 1.6s ease-in-out infinite;
+  display: block;
+}
+
+/* Sidebar navigation item immediate feedback (Rule 43) */
+.admin-nav-link.is-pending {
+  background: rgba(169, 88, 62, 0.08);
+  color: var(--paper-ink, #1b1c1a);
+  transition: background-color var(--admin-transition-fast, 120ms);
+}
+
+/* Main workspace aria-busy state */
+.admin-main[aria-busy="true"] {
+  cursor: progress;
+}
+
+/* Page entrance motion wrapper */
+.admin-page-transition-content {
+  width: 100%;
+}
+
+/* Reduced motion accessibility (Rule 59) */
+@media (prefers-reduced-motion: reduce) {
+  .admin-route-progress-bar {
+    transition: none !important;
+  }
+  .admin-loading-block {
+    animation: none !important;
+    opacity: 0.65;
+  }
+  .admin-nav-link.is-pending {
+    transition: none !important;
+  }
+}
+

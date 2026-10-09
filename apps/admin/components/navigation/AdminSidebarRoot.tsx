@@ -5,6 +5,8 @@ import { VaahanIcon } from "@vaahansafe/icons";
 import type { AdminNavigationSection } from "./navigation-model";
 import { AdminSidebarItem } from "./AdminSidebarItem";
 
+import { useAdminRouteProgress } from "../loading";
+
 export interface AdminSidebarRootProps {
   sections: AdminNavigationSection[];
   activeModuleKey: string;
@@ -24,6 +26,10 @@ export function AdminSidebarRoot({
   onNavigate,
   collapsed,
 }: AdminSidebarRootProps) {
+  const { isNavigating, pendingPathname, startNavigation } =
+    useAdminRouteProgress();
+  const isSearchPending = isNavigating && pendingPathname === "/search";
+
   return (
     <div className="admin-nav-root-view">
       {/* Level 1: Overview direct link */}
@@ -77,8 +83,11 @@ export function AdminSidebarRoot({
         <div className="admin-nav-root-search">
           <Link
             href="/search"
-            onClick={onNavigate}
-            className={`admin-nav-link admin-nav-search-link ${activeModuleKey === "search" ? "active" : ""}`}
+            onClick={() => {
+              if (activeModuleKey !== "search") startNavigation("/search");
+              onNavigate?.();
+            }}
+            className={`admin-nav-link admin-nav-search-link ${activeModuleKey === "search" ? "active" : ""} ${isSearchPending ? "is-pending" : ""}`}
           >
             <VaahanIcon name="search" size={14} />
             <span className="admin-nav-text">Global Search</span>

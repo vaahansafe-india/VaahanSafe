@@ -3,6 +3,7 @@ import { usePathname } from "next/navigation";
 import type { AdminIdentity } from "../lib/contracts";
 import { AdminShell } from "./AdminShell";
 import { AdminQueryProvider } from "./AdminQueryProvider";
+import { AdminRouteProgressProvider } from "./loading";
 export function AdminLayoutClient({
   identity,
   children,
@@ -21,7 +22,9 @@ export function AdminLayoutClient({
     return <>{children}</>;
   return (
     <AdminQueryProvider key={`${identity.id}:${identity.sessionId}`}>
-      <AdminShell identity={identity}>{children}</AdminShell>
+      <AdminRouteProgressProvider>
+        <AdminShell identity={identity}>{children}</AdminShell>
+      </AdminRouteProgressProvider>
     </AdminQueryProvider>
   );
 }

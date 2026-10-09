@@ -20,6 +20,7 @@ import {
 import { ADMIN_MODULES, canReadModule } from "../lib/modules";
 import type { AdminIdentity } from "../lib/contracts";
 import { AdminSidebar } from "./navigation";
+import { useAdminRouteProgress, AdminPageTransition } from "./loading";
 
 export function AdminShell({
   identity,
@@ -30,6 +31,7 @@ export function AdminShell({
 }) {
   const pathname = usePathname(),
     router = useRouter();
+  const { isNavigating } = useAdminRouteProgress();
   const current =
     ADMIN_MODULES.find((m) => m.key === pathname.split("/")[1]) ||
     ADMIN_MODULES[0]!;
@@ -172,8 +174,14 @@ export function AdminShell({
             </DropdownMenu>
           </div>
         </header>
-        <main id="admin-main" className="admin-main">
-          {children}
+        <main
+          id="admin-main"
+          className="admin-main"
+          aria-busy={isNavigating}
+        >
+          <AdminPageTransition key={pathname}>
+            {children}
+          </AdminPageTransition>
         </main>
         <footer className="admin-footer">
           <span>VaahanSafe · Operations console</span>

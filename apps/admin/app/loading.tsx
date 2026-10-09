@@ -1,7 +1,5 @@
-export default function Loading() {
-  return (
-    <div className="admin-loading" role="status">
-      Opening your workspace…
-    </div>
-  );
+import { AdminDashboardSkeleton } from "../components/loading";
+
+export default function RootLoading() {
+  return <AdminDashboardSkeleton />;
 }

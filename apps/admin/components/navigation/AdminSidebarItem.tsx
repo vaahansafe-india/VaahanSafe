@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { VaahanIcon, type VaahanIconName } from "@vaahansafe/icons";
+import { useAdminRouteProgress } from "../loading";
 
 export interface AdminSidebarItemProps {
   moduleKey: string;
@@ -20,13 +21,28 @@ export function AdminSidebarItem({
   onClick,
   collapsed,
 }: AdminSidebarItemProps) {
+  const { isNavigating, pendingPathname, startNavigation } =
+    useAdminRouteProgress();
   const href = moduleKey === "dashboard" ? "/" : `/${moduleKey}`;
+  const isPending =
+    isNavigating &&
+    !isActive &&
+    (pendingPathname === href ||
+      (href !== "/" && pendingPathname?.startsWith(href)));
+
+  const handleClick = () => {
+    if (!isActive) {
+      startNavigation(href);
+    }
+    onClick?.();
+  };
+
   return (
     <Link
       href={href}
-      onClick={onClick}
+      onClick={handleClick}
       title={collapsed ? label : undefined}
-      className={`admin-nav-link ${isActive ? "active" : ""}`}
+      className={`admin-nav-link ${isActive ? "active" : ""} ${isPending ? "is-pending" : ""}`}
       aria-current={isActive ? "page" : undefined}
     >
       <VaahanIcon name={icon} size={15} />
@@ -34,3 +50,4 @@ export function AdminSidebarItem({
     </Link>
   );
 }
+
