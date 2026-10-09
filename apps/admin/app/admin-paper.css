@@ -1894,6 +1894,8 @@ input[type="checkbox"] {
 .admin-brand-header {
   height: 48px;
   min-height: 48px;
+  max-height: 48px;
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   padding: 0 12px;
@@ -2230,10 +2232,13 @@ input[type="checkbox"] {
   position: sticky;
   top: 0;
   z-index: 30;
-  height: 52px;
-  min-height: 52px;
-  padding: 0 20px;
-  border-color: #e4dfd5;
+  height: 48px;
+  min-height: 48px;
+  max-height: 48px;
+  box-sizing: border-box;
+  padding: 0 16px;
+  border-bottom: 1px solid #eae6de;
+  border-color: #eae6de;
   background: #fcfbf8ed;
   backdrop-filter: blur(16px);
 }
@@ -2759,6 +2764,24 @@ input[type="checkbox"] {
     justify-content: center;
     padding: 0;
   }
+.admin-mobile-navigation {
+  background: #fbfaf8 !important;
+  border-right: 1px solid #e7e3da !important;
+  padding: 0 !important;
+  width: 280px !important;
+  max-width: 85vw !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+.admin-mobile-navigation .admin-brand-header {
+  height: 48px;
+  min-height: 48px;
+  max-height: 48px;
+  box-sizing: border-box;
+  padding: 0 12px;
+  border-bottom: 1px solid #eae6de;
+  display: flex;
+  align-items: center;
 }
 @media (max-width: 1150px) {
   .admin-account-name {
@@ -2810,6 +2833,9 @@ input[type="checkbox"] {
     padding: 0 12px;
     height: 48px;
     min-height: 48px;
+    max-height: 48px;
+    box-sizing: border-box;
+    border-bottom: 1px solid #eae6de;
   }
   .admin-console .topbar-context {
     gap: 8px;
