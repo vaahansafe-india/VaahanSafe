@@ -19,11 +19,41 @@ import {
 // Mock D1 database client adhering strictly to IDatabaseClient
 class MockD1PaymentDatabase implements IDatabaseClient {
   public tables: {
-    orders: Array<{ id: string; user_id: string; vehicle_id: string; status: string; total_minor: number }>;
-    payments: Array<{ id: string; order_id: string; provider: string; provider_order_id: string; provider_payment_id?: string; status: string; amount_minor: number }>;
-    payment_webhook_events: Array<{ provider: string; provider_event_id: string; event_type: string }>;
-    qr_stickers: Array<{ id: string; public_id: string; status: string; vehicle_id?: string }>;
-    service_entitlements: Array<{ id: string; user_id: string; vehicle_id: string; qr_sticker_id: string; capability: string; status: string }>;
+    orders: Array<{
+      id: string;
+      user_id: string;
+      vehicle_id: string;
+      status: string;
+      total_minor: number;
+    }>;
+    payments: Array<{
+      id: string;
+      order_id: string;
+      provider: string;
+      provider_order_id: string;
+      provider_payment_id?: string;
+      status: string;
+      amount_minor: number;
+    }>;
+    payment_webhook_events: Array<{
+      provider: string;
+      provider_event_id: string;
+      event_type: string;
+    }>;
+    qr_stickers: Array<{
+      id: string;
+      public_id: string;
+      status: string;
+      vehicle_id?: string;
+    }>;
+    service_entitlements: Array<{
+      id: string;
+      user_id: string;
+      vehicle_id: string;
+      qr_sticker_id: string;
+      capability: string;
+      status: string;
+    }>;
   } = {
     orders: [],
     payments: [],
@@ -33,10 +63,13 @@ class MockD1PaymentDatabase implements IDatabaseClient {
   };
 
   async query<T = unknown>(sql: string, params: unknown[] = []): Promise<T[]> {
-    if (sql.includes("FROM payment_webhook_events") && sql.includes("provider_event_id")) {
+    if (
+      sql.includes("FROM payment_webhook_events") &&
+      sql.includes("provider_event_id")
+    ) {
       const [provider, eventId] = params as string[];
       const found = this.tables.payment_webhook_events.filter(
-        (e) => e.provider === provider && e.provider_event_id === eventId
+        (e) => e.provider === provider && e.provider_event_id === eventId,
       );
       return found as unknown as T[];
     }
@@ -54,14 +87,20 @@ class MockD1PaymentDatabase implements IDatabaseClient {
     if (sql.includes("FROM payments") && sql.includes("provider_order_id")) {
       const [provider, providerOrderId] = params as string[];
       const found = this.tables.payments.filter(
-        (p) => p.provider === provider && p.provider_order_id === providerOrderId
+        (p) =>
+          p.provider === provider && p.provider_order_id === providerOrderId,
       );
       return found as unknown as T[];
     }
 
-    if (sql.includes("FROM qr_stickers") && sql.includes("WHERE public_id = ?")) {
+    if (
+      sql.includes("FROM qr_stickers") &&
+      sql.includes("WHERE public_id = ?")
+    ) {
       const [publicId] = params as string[];
-      const sticker = this.tables.qr_stickers.find((s) => s.public_id === publicId);
+      const sticker = this.tables.qr_stickers.find(
+        (s) => s.public_id === publicId,
+      );
       return sticker ? ([sticker] as unknown as T[]) : [];
     }
 
@@ -70,19 +109,33 @@ class MockD1PaymentDatabase implements IDatabaseClient {
       const qr = this.tables.qr_stickers.find((s) => s.public_id === publicId);
       if (!qr) return [] as T[];
       const entitlement = this.tables.service_entitlements.find(
-        (e) => e.qr_sticker_id === qr.id && e.capability === "SAFETY_VIEW_ACTIVE" && e.status === "ENABLED"
+        (e) =>
+          e.qr_sticker_id === qr.id &&
+          e.capability === "SAFETY_VIEW_ACTIVE" &&
+          e.status === "ENABLED",
       );
       if (!entitlement) return [] as T[];
-      return [{ id: entitlement.id, status: entitlement.status, qr_status: qr.status }] as unknown as T[];
+      return [
+        {
+          id: entitlement.id,
+          status: entitlement.status,
+          qr_status: qr.status,
+        },
+      ] as unknown as T[];
     }
 
     if (sql.includes("FROM service_entitlements")) {
       const [userId, capability] = params as string[];
       const matched = this.tables.service_entitlements.filter(
-        (e) => e.user_id === userId && e.capability === capability && e.status === "ENABLED"
+        (e) =>
+          e.user_id === userId &&
+          e.capability === capability &&
+          e.status === "ENABLED",
       );
       return matched.map((e) => {
-        const qr = this.tables.qr_stickers.find((s) => s.id === e.qr_sticker_id);
+        const qr = this.tables.qr_stickers.find(
+          (s) => s.id === e.qr_sticker_id,
+        );
         return {
           id: e.id,
           capability: e.capability,
@@ -95,11 +148,18 @@ class MockD1PaymentDatabase implements IDatabaseClient {
     return [] as T[];
   }
 
-  async execute(sql: string, params: unknown[] = []): Promise<{ success: boolean }> {
+  async execute(
+    sql: string,
+    params: unknown[] = [],
+  ): Promise<{ success: boolean }> {
     if (sql.includes("INSERT INTO service_entitlements")) {
-      const [id, userId, vehicleId, qrStickerId, capability] = params as string[];
+      const [id, userId, vehicleId, qrStickerId, capability] =
+        params as string[];
       const existingIdx = this.tables.service_entitlements.findIndex(
-        (e) => e.vehicle_id === vehicleId && e.qr_sticker_id === qrStickerId && e.capability === capability
+        (e) =>
+          e.vehicle_id === vehicleId &&
+          e.qr_sticker_id === qrStickerId &&
+          e.capability === capability,
       );
       if (existingIdx >= 0) {
         this.tables.service_entitlements[existingIdx].status = "ENABLED";
@@ -133,45 +193,95 @@ describe("Razorpay Payment Architecture & Security Invariants", () => {
     const paymentId = "pay_O4eG8QW6P0h4kH";
 
     it("verifies genuine Razorpay checkout signatures with timing-safe comparison", async () => {
-      const signature = await computeRazorpayCheckoutSignature(orderId, paymentId, TEST_KEY_SECRET);
+      const signature = await computeRazorpayCheckoutSignature(
+        orderId,
+        paymentId,
+        TEST_KEY_SECRET,
+      );
       expect(signature).toBeDefined();
       expect(signature.length).toBe(64); // SHA-256 hex string
 
-      const isValid = await verifyRazorpayCheckoutSignature(orderId, paymentId, signature, TEST_KEY_SECRET);
+      const isValid = await verifyRazorpayCheckoutSignature(
+        orderId,
+        paymentId,
+        signature,
+        TEST_KEY_SECRET,
+      );
       expect(isValid).toBe(true);
     });
 
     it("rejects tampered payment_id", async () => {
-      const signature = await computeRazorpayCheckoutSignature(orderId, paymentId, TEST_KEY_SECRET);
+      const signature = await computeRazorpayCheckoutSignature(
+        orderId,
+        paymentId,
+        TEST_KEY_SECRET,
+      );
       const tamperedPaymentId = "pay_TAMPERED999999";
 
-      const isValid = await verifyRazorpayCheckoutSignature(orderId, tamperedPaymentId, signature, TEST_KEY_SECRET);
+      const isValid = await verifyRazorpayCheckoutSignature(
+        orderId,
+        tamperedPaymentId,
+        signature,
+        TEST_KEY_SECRET,
+      );
       expect(isValid).toBe(false);
     });
 
     it("rejects tampered order_id", async () => {
-      const signature = await computeRazorpayCheckoutSignature(orderId, paymentId, TEST_KEY_SECRET);
+      const signature = await computeRazorpayCheckoutSignature(
+        orderId,
+        paymentId,
+        TEST_KEY_SECRET,
+      );
       const tamperedOrderId = "order_TAMPERED1111";
 
-      const isValid = await verifyRazorpayCheckoutSignature(tamperedOrderId, paymentId, signature, TEST_KEY_SECRET);
+      const isValid = await verifyRazorpayCheckoutSignature(
+        tamperedOrderId,
+        paymentId,
+        signature,
+        TEST_KEY_SECRET,
+      );
       expect(isValid).toBe(false);
     });
 
     it("rejects tampered signature", async () => {
-      const signature = await computeRazorpayCheckoutSignature(orderId, paymentId, TEST_KEY_SECRET);
+      const signature = await computeRazorpayCheckoutSignature(
+        orderId,
+        paymentId,
+        TEST_KEY_SECRET,
+      );
       const tamperedSignature = signature.slice(0, -2) + "00";
 
-      const isValid = await verifyRazorpayCheckoutSignature(orderId, paymentId, tamperedSignature, TEST_KEY_SECRET);
+      const isValid = await verifyRazorpayCheckoutSignature(
+        orderId,
+        paymentId,
+        tamperedSignature,
+        TEST_KEY_SECRET,
+      );
       expect(isValid).toBe(false);
     });
 
     it("rejects when key secret is wrong or missing", async () => {
-      const signature = await computeRazorpayCheckoutSignature(orderId, paymentId, TEST_KEY_SECRET);
+      const signature = await computeRazorpayCheckoutSignature(
+        orderId,
+        paymentId,
+        TEST_KEY_SECRET,
+      );
 
-      const isValidWrongSecret = await verifyRazorpayCheckoutSignature(orderId, paymentId, signature, "wrong_secret");
+      const isValidWrongSecret = await verifyRazorpayCheckoutSignature(
+        orderId,
+        paymentId,
+        signature,
+        "wrong_secret",
+      );
       expect(isValidWrongSecret).toBe(false);
 
-      const isValidEmptySecret = await verifyRazorpayCheckoutSignature(orderId, paymentId, signature, "");
+      const isValidEmptySecret = await verifyRazorpayCheckoutSignature(
+        orderId,
+        paymentId,
+        signature,
+        "",
+      );
       expect(isValidEmptySecret).toBe(false);
     });
   });
@@ -198,23 +308,41 @@ describe("Razorpay Payment Architecture & Security Invariants", () => {
     });
 
     it("verifies genuine Razorpay webhook payload signature", async () => {
-      const signature = await computeRazorpayWebhookSignature(rawWebhookPayload, TEST_WEBHOOK_SECRET);
+      const signature = await computeRazorpayWebhookSignature(
+        rawWebhookPayload,
+        TEST_WEBHOOK_SECRET,
+      );
       expect(signature).toBeDefined();
 
-      const isValid = await verifyRazorpayWebhookSignature(rawWebhookPayload, signature, TEST_WEBHOOK_SECRET);
+      const isValid = await verifyRazorpayWebhookSignature(
+        rawWebhookPayload,
+        signature,
+        TEST_WEBHOOK_SECRET,
+      );
       expect(isValid).toBe(true);
     });
 
     it("rejects webhook if raw body was altered after transmission", async () => {
-      const signature = await computeRazorpayWebhookSignature(rawWebhookPayload, TEST_WEBHOOK_SECRET);
+      const signature = await computeRazorpayWebhookSignature(
+        rawWebhookPayload,
+        TEST_WEBHOOK_SECRET,
+      );
       const tamperedPayload = rawWebhookPayload.replace("49900", "10000");
 
-      const isValid = await verifyRazorpayWebhookSignature(tamperedPayload, signature, TEST_WEBHOOK_SECRET);
+      const isValid = await verifyRazorpayWebhookSignature(
+        tamperedPayload,
+        signature,
+        TEST_WEBHOOK_SECRET,
+      );
       expect(isValid).toBe(false);
     });
 
     it("rejects webhook if signature header is missing or empty", async () => {
-      const isValid = await verifyRazorpayWebhookSignature(rawWebhookPayload, "", TEST_WEBHOOK_SECRET);
+      const isValid = await verifyRazorpayWebhookSignature(
+        rawWebhookPayload,
+        "",
+        TEST_WEBHOOK_SECRET,
+      );
       expect(isValid).toBe(false);
     });
   });
@@ -226,20 +354,20 @@ describe("Razorpay Payment Architecture & Security Invariants", () => {
       // First check
       const existing = await mockDb.query(
         "SELECT provider_event_id FROM payment_webhook_events WHERE provider = ? AND provider_event_id = ?",
-        ["RAZORPAY", eventId]
+        ["RAZORPAY", eventId],
       );
       expect(existing.length).toBe(0);
 
       // Record first processing
       await mockDb.query(
         "INSERT INTO payment_webhook_events (provider, provider_event_id, event_type) VALUES (?, ?, ?)",
-        ["RAZORPAY", eventId, "payment.captured"]
+        ["RAZORPAY", eventId, "payment.captured"],
       );
 
       // Replay attempt
       const replayCheck = await mockDb.query(
         "SELECT provider_event_id FROM payment_webhook_events WHERE provider = ? AND provider_event_id = ?",
-        ["RAZORPAY", eventId]
+        ["RAZORPAY", eventId],
       );
       expect(replayCheck.length).toBe(1); // Dedup prevented duplicate processing
     });
@@ -260,9 +388,12 @@ describe("Razorpay Payment Architecture & Security Invariants", () => {
       });
 
       // Server looks up payment attempt by trusted order ID stored in DB
-      const [trustedRecord] = await mockDb.query<{ id: string; provider_order_id: string }>(
+      const [trustedRecord] = await mockDb.query<{
+        id: string;
+        provider_order_id: string;
+      }>(
         "SELECT id, provider_order_id FROM payments WHERE provider = ? AND provider_order_id = ?",
-        ["RAZORPAY", attackerSuppliedOrderId]
+        ["RAZORPAY", attackerSuppliedOrderId],
       );
 
       expect(trustedRecord).toBeUndefined(); // Attacker cannot hijack another order
@@ -317,7 +448,9 @@ describe("Razorpay Payment Architecture & Security Invariants", () => {
       });
 
       // Verify records were created
-      expect(mockDb.tables.service_entitlements.length).toBe(ALL_ENTITLEMENT_CAPABILITIES.length);
+      expect(mockDb.tables.service_entitlements.length).toBe(
+        ALL_ENTITLEMENT_CAPABILITIES.length,
+      );
 
       const canAccess = await canUseQrService({
         userId,
@@ -363,13 +496,13 @@ describe("Razorpay Payment Architecture & Security Invariants", () => {
           provider_payment_id: "pay_rzp_998877",
           status: "SUCCESS",
           amount_minor: 49900,
-        }
+        },
       );
 
       // Historical Cashfree query
       const [histRecord] = await mockDb.query<{ id: string; provider: string }>(
         "SELECT id, provider FROM payments WHERE provider = ? AND provider_order_id = ?",
-        ["CASHFREE", "cf_order_998877"]
+        ["CASHFREE", "cf_order_998877"],
       );
       expect(histRecord).toBeDefined();
       expect(histRecord.provider).toBe("CASHFREE");
@@ -377,7 +510,7 @@ describe("Razorpay Payment Architecture & Security Invariants", () => {
       // New Razorpay query
       const [newRecord] = await mockDb.query<{ id: string; provider: string }>(
         "SELECT id, provider FROM payments WHERE provider = ? AND provider_order_id = ?",
-        ["RAZORPAY", "order_rzp_554433"]
+        ["RAZORPAY", "order_rzp_554433"],
       );
       expect(newRecord).toBeDefined();
       expect(newRecord.provider).toBe("RAZORPAY");
@@ -385,20 +518,20 @@ describe("Razorpay Payment Architecture & Security Invariants", () => {
   });
 
   describe("7. Razorpay Adapter Offline Test Mode Safety", () => {
-    it("RazorpayClient safely uses synthetic responses when in offline test mode without live credentials", async () => {
-      const client = new RazorpayClient("mock_placeholder_key", "mock_placeholder_secret");
+    it("RazorpayClient rejects requests without real provider credentials", async () => {
+      const client = new RazorpayClient(
+        "mock_placeholder_key",
+        "mock_placeholder_secret",
+      );
       expect(client.isConfigured()).toBe(false);
 
-      const order = await client.createOrder({
-        amount: 49900,
-        currency: "INR",
-        receipt: "test_receipt_001",
-      });
-
-      expect(order.id).toBeDefined();
-      expect(order.amount).toBe(49900);
-      expect(order.currency).toBe("INR");
-      expect(order.receipt).toBe("test_receipt_001");
+      await expect(
+        client.createOrder({
+          amount: 49900,
+          currency: "INR",
+          receipt: "test_receipt_001",
+        }),
+      ).rejects.toThrow("configuration unavailable");
     });
 
     it("RazorpayPaymentAdapter initializes with safe test mode defaults", () => {

@@ -1,7 +1,10 @@
 "use server";
 
 import { getAuthenticatedCustomer } from "@/lib/session";
-import { getAuthoritativeDatabaseClient, createInAppNotification } from "@vaahansafe/database";
+import {
+  getAuthoritativeDatabaseClient,
+  createInAppNotification,
+} from "@vaahansafe/database";
 import { getPaymentGateway } from "@vaahansafe/payments";
 
 export interface CheckoutAddressInput {
@@ -52,18 +55,26 @@ export interface CreateOrderCheckoutResult {
 export async function createOrderAndPaymentSession(
   productCode: string,
   vehicleId: string | null,
-  addressInput: CheckoutAddressInput
+  addressInput: CheckoutAddressInput,
 ): Promise<CreateOrderCheckoutResult> {
   try {
     const auth = await getAuthenticatedCustomer();
     if (!auth) {
-      return { success: false, error: "Authentication required. Please sign in." };
+      return {
+        success: false,
+        error: "Authentication required. Please sign in.",
+      };
     }
+    if (!auth.phoneVerified)
+      return {
+        success: false,
+        error: "Verify your mobile number before checkout.",
+      };
 
     const db = getAuthoritativeDatabaseClient();
 
     // 1. Authoritative Product & Pricing Resolution (Server-Authoritative Pricing)
-    let products = await db.query<{
+    const products = await db.query<{
       id: string;
       code: string;
       name: string;
@@ -73,80 +84,50 @@ export async function createOrderAndPaymentSession(
     }>(
       `SELECT id, code, name, price_minor, currency, status
        FROM products
-       WHERE (code = ? OR product_type = 'PHYSICAL_QR_STICKER') AND status = 'ACTIVE'
+       WHERE (code = ? OR id = ?) AND product_type = 'PHYSICAL_QR_STICKER' AND status = 'ACTIVE'
        LIMIT 1`,
-      [productCode]
+      [productCode, productCode],
     );
 
-    let product = products[0];
-    if (!product) {
-      // If products table has not yet been populated in D1 or migration is running, provision canonical hardware product
-      if (
-        productCode === "PROD_QR_STICKER_INDIVIDUAL" ||
-        productCode === "prod_qr_sticker_kit" ||
-        !productCode
-      ) {
-        await db.execute(
-          `INSERT OR IGNORE INTO products (
-            id, code, name, description, product_type, status, price_minor, currency, requires_shipping, requires_qr_allocation
-          ) VALUES (
-            'prod_qr_sticker_kit',
-            'PROD_QR_STICKER_INDIVIDUAL',
-            'VaahanSafe Automotive Safety Kit',
-            '2x UV-Laminated Weatherproof Physical QR Stickers with Cryptographic Safety Routing.',
-            'PHYSICAL_QR_STICKER',
-            'ACTIVE',
-            49900,
-            'INR',
-            1,
-            1
-          )`
-        );
-
-        const refetched = await db.query<{
-          id: string;
-          code: string;
-          name: string;
-          price_minor: number;
-          currency: string;
-          status: string;
-        }>(
-          `SELECT id, code, name, price_minor, currency, status
-           FROM products
-           WHERE (code = 'PROD_QR_STICKER_INDIVIDUAL' OR product_type = 'PHYSICAL_QR_STICKER') AND status = 'ACTIVE'
-           LIMIT 1`
-        );
-
-        product = refetched[0] || {
-          id: "prod_qr_sticker_kit",
-          code: "PROD_QR_STICKER_INDIVIDUAL",
-          name: "VaahanSafe Automotive Safety Kit",
-          price_minor: 49900,
-          currency: "INR",
-          status: "ACTIVE",
-        };
-      } else {
-        return { success: false, error: "Product is currently unavailable." };
-      }
+    const product = products[0];
+    if (
+      !product ||
+      !Number.isSafeInteger(product.price_minor) ||
+      product.price_minor <= 0 ||
+      product.currency !== "INR"
+    ) {
+      return {
+        success: false,
+        error: "Product is currently unavailable. Please try again later.",
+      };
     }
 
     // 2. Validate Vehicle Ownership if specified
     let verifiedVehicleId: string | null = null;
     if (vehicleId && vehicleId.trim().length > 0) {
       const vehicles = await db.query<{ id: string }>(
-        `SELECT id FROM vehicles WHERE id = ? AND user_id = ? LIMIT 1`,
-        [vehicleId, auth.user.id]
+        `SELECT id FROM vehicles WHERE id = ? AND user_id = ? AND status <> 'DELETED' LIMIT 1`,
+        [vehicleId, auth.user.id],
       );
       const v = vehicles[0];
-      if (v) {
-        verifiedVehicleId = v.id;
+      if (!v) {
+        return {
+          success: false,
+          error:
+            "Selected vehicle is unavailable. Please select a vehicle you own.",
+        };
       }
+      verifiedVehicleId = v.id;
     }
 
     // 3. Resolve Shipping Address
     let shippingAddressId: string = "";
-    let recipientName = addressInput.recipientName?.trim() || auth.user.name || "Valued Customer";
-    let recipientPhone = addressInput.phone?.replace(/\D/g, "").slice(-10) || auth.user.phone?.replace(/\D/g, "").slice(-10) || "";
+    let recipientName =
+      addressInput.recipientName?.trim() || auth.user.name || "Valued Customer";
+    let recipientPhone =
+      addressInput.phone?.replace(/\D/g, "").slice(-10) ||
+      auth.user.phone?.replace(/\D/g, "").slice(-10) ||
+      "";
 
     if (addressInput.addressId) {
       // Use existing address
@@ -156,7 +137,7 @@ export async function createOrderAndPaymentSession(
         phone: string;
       }>(
         `SELECT id, recipient_name, phone FROM addresses WHERE id = ? AND user_id = ? LIMIT 1`,
-        [addressInput.addressId, auth.user.id]
+        [addressInput.addressId, auth.user.id],
       );
       const existingAddr = addresses[0];
       if (!existingAddr) {
@@ -182,10 +163,17 @@ export async function createOrderAndPaymentSession(
         return { success: false, error: "State is required." };
       }
       if (!postalCode || !/^\d{6}$/.test(postalCode)) {
-        return { success: false, error: "Valid 6-digit postal PIN code is required." };
+        return {
+          success: false,
+          error: "Valid 6-digit postal PIN code is required.",
+        };
       }
       if (!recipientPhone || recipientPhone.length !== 10) {
-        return { success: false, error: "Valid 10-digit mobile number is required for courier updates." };
+        return {
+          success: false,
+          error:
+            "Valid 10-digit mobile number is required for courier updates.",
+        };
       }
 
       const newAddressId = `addr_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`;
@@ -205,7 +193,7 @@ export async function createOrderAndPaymentSession(
           city,
           state,
           postalCode,
-        ]
+        ],
       );
       shippingAddressId = newAddressId;
     }
@@ -235,7 +223,7 @@ export async function createOrderAndPaymentSession(
         product.price_minor,
         shippingAddressId,
         verifiedVehicleId,
-      ]
+      ],
     );
 
     // 6. Create D1 Order Item Record
@@ -256,7 +244,7 @@ export async function createOrderAndPaymentSession(
         product.name,
         product.price_minor,
         product.price_minor,
-      ]
+      ],
     );
 
     // In-App Notification: Order Placed
@@ -280,7 +268,7 @@ export async function createOrderAndPaymentSession(
       amountPaise: product.price_minor,
       currency: "INR",
       customerId: auth.user.id,
-      customerPhone: recipientPhone || "9999999999",
+      customerPhone: auth.user.phone!,
       customerName: recipientName,
       customerEmail: auth.user.email || undefined,
       returnUrl: `${appUrl}/orders/checkout-status?order_id=${orderId}`,
@@ -306,7 +294,7 @@ export async function createOrderAndPaymentSession(
         paymentSession.gatewayOrderId,
         product.price_minor,
         product.currency || "INR",
-      ]
+      ],
     );
 
     return {
@@ -314,20 +302,15 @@ export async function createOrderAndPaymentSession(
       orderId,
       orderNumber,
       razorpay: paymentSession.checkoutOptions,
-      paymentSessionId: paymentSession.paymentSessionId || paymentSession.gatewayOrderId,
+      paymentSessionId:
+        paymentSession.paymentSessionId || paymentSession.gatewayOrderId,
     };
   } catch (err: any) {
-    console.error("[createOrderAndPaymentSession] Error:", err);
-    const msg = err?.message || "";
-    if (msg.includes("Order creation failed (401)") || msg.includes("Authentication failed")) {
-      return {
-        success: false,
-        error: "Razorpay authentication failed (401). Your RAZORPAY_KEY_ID or RAZORPAY_KEY_SECRET in .env.local is invalid or expired. Please update with active keys from dashboard.razorpay.com.",
-      };
-    }
+    console.error("[Checkout] Payment initiation unavailable");
     return {
       success: false,
-      error: "We couldn't initiate secure payment. Please try again in a few moments.",
+      error:
+        "We couldn't initiate secure payment. Please try again in a few moments.",
     };
   }
 }

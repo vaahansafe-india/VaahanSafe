@@ -28,7 +28,9 @@ export interface RazorpayAdapterConfig {
  * - Secrets never leave the server.
  * - Checkout signatures and webhook signatures are cryptographically verified with timing-safe checks.
  */
-export class RazorpayPaymentAdapter implements IPaymentProvider, PaymentGateway {
+export class RazorpayPaymentAdapter
+  implements IPaymentProvider, PaymentGateway
+{
   private readonly client: RazorpayClient;
   private readonly keyId: string;
   private readonly keySecret?: string;
@@ -38,8 +40,15 @@ export class RazorpayPaymentAdapter implements IPaymentProvider, PaymentGateway 
   constructor(config?: RazorpayAdapterConfig) {
     this.keyId = config?.keyId || process.env.RAZORPAY_KEY_ID || "";
     this.keySecret = config?.keySecret || process.env.RAZORPAY_KEY_SECRET;
-    this.webhookSecret = config?.webhookSecret || process.env.RAZORPAY_WEBHOOK_SECRET;
-    this.mode = config?.mode || (process.env.RAZORPAY_MODE as "test" | "live") || "test";
+    this.webhookSecret =
+      config?.webhookSecret || process.env.RAZORPAY_WEBHOOK_SECRET;
+    this.mode =
+      config?.mode || (process.env.RAZORPAY_MODE as "test" | "live") || "test";
+    if (
+      !["test", "live"].includes(this.mode) ||
+      (this.keyId && !this.keyId.startsWith(`rzp_${this.mode}_`))
+    )
+      throw new Error("Payment provider mode mismatch");
     this.client = new RazorpayClient(this.keyId, this.keySecret);
   }
 
@@ -51,7 +60,9 @@ export class RazorpayPaymentAdapter implements IPaymentProvider, PaymentGateway 
   // PaymentGateway PORT METHODS
   // ==========================================
 
-  async createPaymentOrder(input: PaymentOrderInput): Promise<PaymentOrderSession> {
+  async createPaymentOrder(
+    input: PaymentOrderInput,
+  ): Promise<PaymentOrderSession> {
     const rzpOrder = await this.client.createOrder({
       amount: input.amountPaise,
       currency: input.currency || "INR",
@@ -62,6 +73,13 @@ export class RazorpayPaymentAdapter implements IPaymentProvider, PaymentGateway 
       },
     });
 
+    if (
+      !/^order_[A-Za-z0-9]+$/.test(rzpOrder.id) ||
+      rzpOrder.amount !== input.amountPaise ||
+      rzpOrder.currency !== "INR" ||
+      rzpOrder.receipt !== input.orderId
+    )
+      throw new Error("Payment provider order mismatch");
     return {
       gatewayOrderId: rzpOrder.id,
       orderId: input.orderId,
@@ -92,31 +110,40 @@ export class RazorpayPaymentAdapter implements IPaymentProvider, PaymentGateway 
   }> {
     try {
       const order = await this.client.getOrder(gatewayOrderId);
-      const isPaid = order.status === "paid" || order.amount_paid >= order.amount;
+      const payments = await this.client.getOrderPayments(gatewayOrderId);
+      const captured = payments.items.find(
+        (payment) =>
+          payment.order_id === order.id &&
+          payment.status === "captured" &&
+          payment.captured === true &&
+          payment.amount === order.amount &&
+          payment.currency === order.currency,
+      );
+      const isPaid =
+        order.status === "paid" &&
+        order.amount_paid === order.amount &&
+        order.amount_due === 0 &&
+        Boolean(captured);
 
       return {
         status: isPaid ? "SUCCESS" : "PENDING",
-        gatewayPaymentId: isPaid ? `pay_for_${order.id}` : undefined,
+        gatewayPaymentId: isPaid ? captured?.id : undefined,
         amountPaise: order.amount,
       };
     } catch (err) {
-      console.warn("[RazorpayPaymentAdapter] Fetch status error:", err);
-      return {
-        status: "PENDING",
-        amountPaise: 0,
-      };
+      throw new Error("Payment provider status unavailable");
     }
   }
 
   async verifyWebhook(
     rawBody: string,
     signature: string,
-    _timestamp?: string
+    _timestamp?: string,
   ): Promise<WebhookVerificationResult> {
     const isValid = await verifyRazorpayWebhookSignature(
       rawBody,
       signature,
-      this.webhookSecret
+      this.webhookSecret,
     );
 
     if (!isValid) {
@@ -130,10 +157,15 @@ export class RazorpayPaymentAdapter implements IPaymentProvider, PaymentGateway 
 
       return {
         isValid: true,
-        eventTime: parsed.created_at ? new Date(parsed.created_at * 1000).toISOString() : undefined,
+        eventTime: parsed.created_at
+          ? new Date(parsed.created_at * 1000).toISOString()
+          : undefined,
         eventType: parsed.event,
         rawSafePayload: {
-          orderId: order?.receipt || payment?.notes?.vaahansafe_order_ref || payment?.order_id,
+          orderId:
+            order?.receipt ||
+            payment?.notes?.vaahansafe_order_ref ||
+            payment?.order_id,
           gatewayOrderId: payment?.order_id || order?.id,
           gatewayPaymentId: payment?.id,
           paymentStatus: payment?.status,
@@ -141,7 +173,7 @@ export class RazorpayPaymentAdapter implements IPaymentProvider, PaymentGateway 
         },
       };
     } catch {
-      return { isValid: true };
+      return { isValid: false };
     }
   }
 
@@ -149,7 +181,9 @@ export class RazorpayPaymentAdapter implements IPaymentProvider, PaymentGateway 
   // IPaymentProvider LEGACY METHODS
   // ==========================================
 
-  async createOrder(input: CreatePaymentOrderInput): Promise<CreatePaymentOrderResult> {
+  async createOrder(
+    input: CreatePaymentOrderInput,
+  ): Promise<CreatePaymentOrderResult> {
     const session = await this.createPaymentOrder({
       orderId: input.orderId,
       amountPaise: Math.round(input.orderAmount * 100),
@@ -170,10 +204,12 @@ export class RazorpayPaymentAdapter implements IPaymentProvider, PaymentGateway 
     };
   }
 
-  verifyWebhookSignature(rawBody: string, signature: string): boolean {
-    if (!this.webhookSecret || !signature || !rawBody) return false;
-    if (this.webhookSecret === "test_webhook_secret" && signature === "test_valid_webhook_signature") return true;
-    return signature.length > 0 && rawBody.length > 0;
+  verifyWebhookSignature(rawBody: string, signature: string): Promise<boolean> {
+    return verifyRazorpayWebhookSignature(
+      rawBody,
+      signature,
+      this.webhookSecret,
+    );
   }
 
   mapGatewayStatusToInternalStatus(status: string): PaymentStatus {

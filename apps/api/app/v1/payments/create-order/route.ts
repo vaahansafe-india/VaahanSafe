@@ -2,12 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getRazorpayPaymentGateway } from "@vaahansafe/payments";
 import { getApiDatabase } from "../../_db";
+import { getApiAuthContext } from "../../_auth";
 
 export const dynamic = "force-dynamic";
 
 const createOrderSchema = z.object({
   productId: z.string().trim().min(1),
-  userId: z.string().trim().min(1),
   vehicleId: z.string().trim().optional(),
 });
 
@@ -22,11 +22,20 @@ const createOrderSchema = z.object({
  */
 export async function POST(req: NextRequest) {
   try {
+    const auth = await getApiAuthContext(req);
+    if (!auth)
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 },
+      );
     let rawBody: unknown;
     try {
       rawBody = await req.json();
     } catch {
-      return NextResponse.json({ error: "Invalid JSON payload" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid JSON payload" },
+        { status: 400 },
+      );
     }
 
     const parseResult = createOrderSchema.safeParse(rawBody);
@@ -37,12 +46,30 @@ export async function POST(req: NextRequest) {
           code: "ERR_VALIDATION_FAILED",
           details: parseResult.error.flatten(),
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    const { productId, userId, vehicleId } = parseResult.data;
+    const { productId, vehicleId } = parseResult.data;
+    const userId = auth.user.id;
     const db = getApiDatabase();
+    const identity = await db.queryFirst<{ id: string }>(
+      `SELECT id FROM auth_identities WHERE user_id = ? AND provider = 'PHONE' AND provider_subject = ? AND verified_at IS NOT NULL LIMIT 1`,
+      [userId, auth.user.phone || ""],
+    );
+    if (!identity)
+      return NextResponse.json(
+        { error: "Verify your mobile number before checkout" },
+        { status: 403 },
+      );
+    if (
+      vehicleId &&
+      !(await db.queryFirst(
+        `SELECT id FROM vehicles WHERE id = ? AND user_id = ? AND status != 'DELETED' LIMIT 1`,
+        [vehicleId, userId],
+      ))
+    )
+      return NextResponse.json({ error: "Vehicle not found" }, { status: 404 });
     const now = new Date().toISOString();
 
     // 1. Authoritative Product Resolution
@@ -58,19 +85,28 @@ export async function POST(req: NextRequest) {
        FROM products
        WHERE (id = ? OR code = ?) AND status = 'ACTIVE'
        LIMIT 1`,
-      [productId, productId]
+      [productId, productId],
     );
 
     if (!product) {
       return NextResponse.json(
-        { error: "Product not found or inactive in catalog", code: "ERR_PRODUCT_NOT_FOUND" },
-        { status: 404 }
+        {
+          error: "Product not found or inactive in catalog",
+          code: "ERR_PRODUCT_NOT_FOUND",
+        },
+        { status: 404 },
       );
     }
 
     // 2. Authoritative Price Calculation (Rule 08)
     const amountMinor = product.price_minor;
     const currency = product.currency || "INR";
+    if (
+      currency !== "INR" ||
+      !Number.isSafeInteger(amountMinor) ||
+      amountMinor <= 0
+    )
+      throw new Error("Invalid catalog price");
 
     // 3. Create Internal Order Record
     const orderId = `ord_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
@@ -93,37 +129,32 @@ export async function POST(req: NextRequest) {
         vehicleId || null,
         now,
         now,
-      ]
+      ],
     );
 
     await db.execute(
       `INSERT INTO order_items (
          id, order_id, product_id, quantity, unit_price_minor, total_price_minor, created_at
        ) VALUES (?, ?, ?, 1, ?, ?, ?)`,
-      [orderItemId, orderId, product.id, amountMinor, amountMinor, now]
+      [orderItemId, orderId, product.id, amountMinor, amountMinor, now],
     );
 
     // 4. Initialize Razorpay Gateway Order
     const rzpGateway = getRazorpayPaymentGateway();
-    let gatewayOrderId = `order_sim_${Date.now()}`;
-    try {
-      const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3001";
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3005";
+    let gatewayOrderId: string;
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3001";
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3005";
 
-      const session = await rzpGateway.createPaymentOrder({
-        orderId,
-        amountPaise: amountMinor,
-        currency: "INR",
-        customerId: userId,
-        customerPhone: "9999999999",
-        returnUrl: `${appUrl}/orders/${orderId}`,
-        notifyUrl: `${apiUrl}/v1/payments/webhook`,
-      });
-      gatewayOrderId = session.gatewayOrderId;
-    } catch (rzpErr) {
-      console.warn("[ApiCreateOrder] Razorpay client initialisation warning:", rzpErr);
-      // Keep gatewayOrderId as simulated ID if gateway keys are sandbox / not yet filled
-    }
+    const session = await rzpGateway.createPaymentOrder({
+      orderId,
+      amountPaise: amountMinor,
+      currency: "INR",
+      customerId: userId,
+      customerPhone: auth.user.phone!,
+      returnUrl: `${appUrl}/orders/${orderId}`,
+      notifyUrl: `${apiUrl}/v1/payments/webhook`,
+    });
+    gatewayOrderId = session.gatewayOrderId;
 
     // 5. Record Payment Intent in Database
     const paymentId = `pay_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
@@ -131,7 +162,7 @@ export async function POST(req: NextRequest) {
       `INSERT INTO payments (
          id, order_id, provider, provider_order_id, status, amount_minor, currency, created_at, updated_at
        ) VALUES (?, ?, 'RAZORPAY', ?, 'PENDING', ?, ?, ?, ?)`,
-      [paymentId, orderId, gatewayOrderId, amountMinor, currency, now, now]
+      [paymentId, orderId, gatewayOrderId, amountMinor, currency, now, now],
     );
 
     return NextResponse.json(
@@ -150,18 +181,21 @@ export async function POST(req: NextRequest) {
         payment: {
           provider: "RAZORPAY",
           providerOrderId: gatewayOrderId,
-          keyId: process.env.RAZORPAY_KEY_ID || "rzp_test_placeholder",
+          keyId: session.checkoutOptions!.keyId,
           amount: amountMinor,
           currency,
         },
       },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
-    console.error("[ApiCreateOrder] Failed to create order:", error);
+    console.error("[ApiCreateOrder] Payment initiation unavailable");
     return NextResponse.json(
-      { error: "Failed to create payment order. Please try again.", code: "ERR_CREATE_ORDER_FAILED" },
-      { status: 500 }
+      {
+        error: "Failed to create payment order. Please try again.",
+        code: "ERR_CREATE_ORDER_FAILED",
+      },
+      { status: 500 },
     );
   }
 }

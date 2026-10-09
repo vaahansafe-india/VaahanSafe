@@ -16,7 +16,8 @@ export type {
   WebhookVerificationResult,
 };
 
-export type PaymentProviderType = "RAZORPAY" | "CASHFREE" | "INTERNAL" | "MANUAL";
+export type PaymentProviderType =
+  "RAZORPAY" | "CASHFREE" | "INTERNAL" | "MANUAL";
 
 export interface CreatePaymentOrderInput {
   orderId: string;
@@ -144,7 +145,13 @@ export interface CashfreeWebhookPayload {
 }
 
 export interface IPaymentProvider {
-  createOrder(input: CreatePaymentOrderInput): Promise<CreatePaymentOrderResult>;
-  verifyWebhookSignature(rawBody: string, signature: string, timestamp?: string): boolean;
+  createOrder(
+    input: CreatePaymentOrderInput,
+  ): Promise<CreatePaymentOrderResult>;
+  verifyWebhookSignature(
+    rawBody: string,
+    signature: string,
+    timestamp?: string,
+  ): boolean | Promise<boolean>;
   mapGatewayStatusToInternalStatus(status: string): PaymentStatus;
 }

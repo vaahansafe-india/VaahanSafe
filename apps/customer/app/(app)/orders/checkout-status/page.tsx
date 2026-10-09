@@ -4,10 +4,14 @@ import Link from "next/link";
 import { getAuthenticatedCustomer } from "@/lib/session";
 import { getAuthoritativeDatabaseClient } from "@vaahansafe/database";
 import { Card, Badge } from "@vaahansafe/ui/components";
-import { CheckCircle2, Clock, XCircle, ArrowRight, RefreshCw, ShieldCheck } from "@/components/ui/icons";
-
-import { getPaymentGateway } from "@vaahansafe/payments";
-import { fulfillPaidOnlineOrder } from "@vaahansafe/qr-core";
+import {
+  CheckCircle2,
+  Clock,
+  XCircle,
+  ArrowRight,
+  RefreshCw,
+  ShieldCheck,
+} from "@/components/ui/icons";
 
 export const metadata: Metadata = {
   title: "Payment Verification — VaahanSafe",
@@ -20,7 +24,9 @@ interface CheckoutStatusPageProps {
   }>;
 }
 
-export default async function CheckoutStatusPage({ searchParams }: CheckoutStatusPageProps) {
+export default async function CheckoutStatusPage({
+  searchParams,
+}: CheckoutStatusPageProps) {
   const auth = await getAuthenticatedCustomer();
   if (!auth) {
     redirect("/login");
@@ -48,7 +54,7 @@ export default async function CheckoutStatusPage({ searchParams }: CheckoutStatu
      FROM orders
      WHERE (id = ? OR order_number = ?) AND user_id = ?
      LIMIT 1`,
-    [order_id, order_id, auth.user.id]
+    [order_id, order_id, auth.user.id],
   );
   const order = orders[0];
 
@@ -56,64 +62,17 @@ export default async function CheckoutStatusPage({ searchParams }: CheckoutStatu
     redirect("/orders");
   }
 
-  // Authoritative Gateway Verification: If still pending, reconcile directly with Payment Gateway
-  if (order.status === "PENDING_PAYMENT" || order.status === "DRAFT") {
-    try {
-      const payments = await db.query<{
-        id: string;
-        provider_order_id: string | null;
-        provider_payment_id: string | null;
-      }>(
-        `SELECT id, provider_order_id, provider_payment_id
-         FROM payments
-         WHERE order_id = ?
-         ORDER BY attempt_number DESC
-         LIMIT 1`,
-        [order.id]
-      );
-
-      const payment = payments[0];
-      const lookupOrderId = payment?.provider_order_id || order.id;
-
-      const gateway = getPaymentGateway();
-      const statusRes = await gateway.fetchPaymentStatus(lookupOrderId);
-
-      if (statusRes.status === "SUCCESS") {
-        const now = new Date().toISOString();
-        await db.execute(
-          `UPDATE payments SET status = 'SUCCESS', provider_payment_id = COALESCE(?, provider_payment_id), confirmed_at = ?, updated_at = ? WHERE order_id = ?`,
-          [statusRes.gatewayPaymentId || null, now, now, order.id]
-        );
-        await db.execute(
-          `UPDATE orders SET status = 'PAID', paid_at = ?, updated_at = ? WHERE id = ?`,
-          [now, now, order.id]
-        );
-
-        order.status = "PAID";
-        order.paid_at = now;
-      }
-    } catch (err) {
-      console.warn("[CheckoutStatusPage] Server payment verification error:", err);
-    }
-  }
-
-  // Fulfill paid order if vehicle is linked and entitlements/QR not yet assigned
-  if ((order.status === "PAID" || order.status === "FULFILLED" || order.status === "FULFILMENT_PENDING") && order.vehicle_id) {
-    try {
-      await fulfillPaidOnlineOrder({
-        userId: auth.user.id,
-        vehicleId: order.vehicle_id,
-        orderId: order.id,
-        db,
-      });
-    } catch (err) {
-      console.error("[CheckoutStatusPage] Fulfillment error:", err);
-    }
-  }
+  // Reading the return page never confirms payments or allocates QR inventory.
 
   // Authoritative status evaluation
-  const isPaid = order.status === "PAID" || order.status === "FULFILLED" || order.status === "FULFILMENT_PENDING";
-  const isFailed = order.status === "PAYMENT_FAILED" || order.status === "CANCELLED" || order.status === "EXPIRED";
+  const isPaid =
+    order.status === "PAID" ||
+    order.status === "FULFILLED" ||
+    order.status === "FULFILMENT_PENDING";
+  const isFailed =
+    order.status === "PAYMENT_FAILED" ||
+    order.status === "CANCELLED" ||
+    order.status === "EXPIRED";
 
   return (
     <div className="max-w-xl mx-auto space-y-6 py-8">
@@ -140,17 +99,17 @@ export default async function CheckoutStatusPage({ searchParams }: CheckoutStatu
           </div>
           <h1 className="mt-1 font-serif text-2xl font-medium text-foreground sm:text-3xl">
             {isPaid
-              ? "Payment Authoritatively Confirmed"
+              ? "Payment confirmed"
               : isFailed
-              ? "Payment Incomplete or Cancelled"
-              : "Verifying Secure Payment"}
+                ? "Payment Incomplete or Cancelled"
+                : "Confirming your payment"}
           </h1>
           <p className="mt-2 text-xs sm:text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
             {isPaid
-              ? "Your payment was cryptographically confirmed. Your hardware order has been registered and digital entitlements have been unlocked."
+              ? "Your payment is confirmed. View your order for fulfillment progress. QR services become available after your QR is assigned and its activation requirements are complete."
               : isFailed
-              ? "We could not confirm payment for this transaction. If an amount was debited, your bank will automatically refund it within 3-5 business days."
-              : "We are awaiting final confirmation from the secure payment gateway. This screen automatically refreshes when verification completes."}
+                ? "Payment is incomplete or the order was cancelled. If your account was debited, check the order status or contact support before paying again."
+                : "We're waiting for secure confirmation from Razorpay. Refresh the status shortly. Please avoid making another payment while confirmation is pending."}
           </p>
         </div>
 
@@ -158,18 +117,24 @@ export default async function CheckoutStatusPage({ searchParams }: CheckoutStatu
         <div className="rounded-xl border border-border bg-muted/40 p-4 text-left font-mono text-xs space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground">Order Reference:</span>
-            <span className="font-bold text-foreground">{order.order_number}</span>
+            <span className="font-bold text-foreground">
+              {order.order_number}
+            </span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">Authoritative Amount:</span>
+            <span className="text-muted-foreground">Amount:</span>
             <span className="font-bold text-foreground">
               ₹{(order.total_minor / 100).toFixed(2)}
             </span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">Backend Status:</span>
-            <Badge variant={isPaid ? "default" : isFailed ? "destructive" : "outline"}>
-              {order.status}
+            <span className="text-muted-foreground">Order status:</span>
+            <Badge
+              variant={
+                isPaid ? "default" : isFailed ? "destructive" : "outline"
+              }
+            >
+              {order.status.replaceAll("_", " ").toLowerCase()}
             </Badge>
           </div>
         </div>
@@ -179,10 +144,10 @@ export default async function CheckoutStatusPage({ searchParams }: CheckoutStatu
           {isPaid ? (
             <>
               <Link
-                href="/qr/digital"
+                href={`/orders/${encodeURIComponent(order.id)}`}
                 className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#cc785c] px-6 font-mono text-xs font-semibold uppercase tracking-wider text-white hover:bg-[#b5654b] transition-colors shadow-xs"
               >
-                <span>View Digital Pass</span>
+                <span>View order</span>
                 <ArrowRight className="size-4" />
               </Link>
               <Link
@@ -220,7 +185,7 @@ export default async function CheckoutStatusPage({ searchParams }: CheckoutStatu
 
         <div className="border-t pt-3 flex items-center justify-center gap-2 text-[11px] font-mono text-muted-foreground">
           <ShieldCheck className="size-3.5 text-emerald-600" />
-          <span>Server Authoritative Entitlement Machine</span>
+          <span>Payment status verified securely</span>
         </div>
       </Card>
     </div>
