@@ -68,8 +68,11 @@
 * {
   box-sizing: border-box;
 }
+html,
 body {
   margin: 0;
+  overflow-x: hidden;
+  max-width: 100vw;
   background: var(--paper) url("/images/paper-texture.webp") repeat;
   background-size: 400px 400px;
   color: var(--paper-ink);
@@ -123,6 +126,8 @@ input[type="checkbox"] {
 }
 .admin-shell {
   min-height: 100vh;
+  overflow-x: hidden;
+  max-width: 100vw;
   background: var(--paper) url("/images/paper-texture.webp") repeat;
   background-size: 400px 400px;
 }
@@ -1636,28 +1641,26 @@ input[type="checkbox"] {
     font-size: 35px;
   }
 }
-@media (max-width: 760px) {
+@media (max-width: 1023px) {
   .admin-sidebar {
-    transform: translateX(-100%);
-    transition: transform 0.2s;
-    width: 236px;
+    display: none !important;
   }
   .admin-sidebar.is-open {
-    transform: translateX(0);
+    display: none !important;
   }
   .admin-backdrop {
-    display: block;
-    position: fixed;
-    inset: 0;
-    border: 0;
-    background: #25352366;
-    z-index: 35;
+    display: none !important;
   }
   .admin-workspace-main {
-    margin: 0;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+  }
+  .desktop-menu {
+    display: none !important;
   }
   .mobile-menu {
-    display: inline-grid;
+    display: inline-flex !important;
   }
   .admin-topbar {
     padding: 12px 16px;
@@ -2302,6 +2305,12 @@ input[type="checkbox"] {
   border: 1px solid transparent;
   transition: background 0.12s ease;
 }
+.admin-console .desktop-menu {
+  display: inline-flex;
+}
+.admin-console .mobile-menu {
+  display: none !important;
+}
 .admin-icon-button:hover {
   background: #eae5db;
 }
@@ -2697,7 +2706,7 @@ input[type="checkbox"] {
   font-size: 10px;
   margin-top: 6px;
 }
-@media (min-width: 761px) {
+@media (min-width: 1024px) {
   .admin-console.sidebar-compact .admin-sidebar {
     width: 50px;
   }
@@ -2814,15 +2823,17 @@ input[type="checkbox"] {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
-@media (max-width: 760px) {
+@media (max-width: 1023px) {
   .admin-console .admin-sidebar {
-    display: none;
+    display: none !important;
   }
   .admin-console .admin-workspace-main {
-    margin-left: 0;
+    margin-left: 0 !important;
+    width: 100% !important;
+    max-width: 100vw !important;
   }
   .admin-console .desktop-menu {
-    display: none;
+    display: none !important;
   }
   .admin-console .mobile-menu {
     display: inline-flex;
@@ -2916,14 +2927,36 @@ input[type="checkbox"] {
   }
   .admin-console .admin-main {
     padding: 20px 14px;
+    width: 100%;
+    max-width: 100vw;
+    box-sizing: border-box;
+  }
+  .admin-console .admin-panel {
+    max-width: 100%;
+    width: 100%;
+    overflow: hidden;
+    border-radius: 4px;
+  }
+  .admin-table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
   }
   .admin-console .admin-page-heading {
     align-items: flex-start;
     flex-direction: column;
     gap: 12px;
   }
+  .admin-console .admin-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    width: 100%;
+  }
   .admin-console .admin-toolbar {
     flex-wrap: wrap;
+    gap: 8px;
     padding: 12px;
     border-radius: 4px;
   }
@@ -2958,7 +2991,6 @@ input[type="checkbox"] {
   .admin-console .topbar-actions {
     gap: 4px;
   }
-}
   .admin-pulse-grid strong {
     font-size: 20px;
   }
