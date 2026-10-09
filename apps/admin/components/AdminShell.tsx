@@ -72,29 +72,44 @@ export function AdminShell({
     .toUpperCase();
   const navigation = (
     <>
-      <Link href="/" className="admin-brand" onClick={() => setOpen(false)}>
-        <span className="admin-brand-mark">
-          <VaahanIcon name="qr" size={23} />
-        </span>
-        <span className="admin-brand-name">
-          Vaahan<span className="brand-light">Safe</span>
-          <small>Operations console</small>
-        </span>
-      </Link>
-      <div className="admin-workspace">
-        <VaahanIcon name="shield" size={15} />
-        <span>
-          Platform administration<small>Authorized team access</small>
-        </span>
+      <div className="admin-brand-header">
+        <Link href="/" className="admin-brand" onClick={() => setOpen(false)}>
+          <span className="admin-brand-mark">
+            <VaahanIcon name="qr" size={13} />
+          </span>
+          <span className="admin-brand-slash">/</span>
+          <span className="admin-brand-project-icon">
+            <VaahanIcon name="database" size={13} />
+          </span>
+          <div className="admin-brand-meta">
+            <span className="admin-brand-name">vaahansafe</span>
+            <span className="admin-project-badge">OPS</span>
+          </div>
+          <VaahanIcon
+            name="chevron-down"
+            size={12}
+            className="admin-brand-caret"
+          />
+        </Link>
       </div>
       <div className="admin-nav-filter">
-        <VaahanIcon name="search" size={14} />
+        <VaahanIcon name="search" size={13} />
         <input
           aria-label="Find a workspace section"
-          placeholder="Find a section…"
+          placeholder="Filter..."
           value={navSearch}
           onChange={(e) => setNavSearch(e.target.value)}
         />
+        {navSearch ? (
+          <button
+            type="button"
+            className="admin-nav-filter-clear"
+            onClick={() => setNavSearch("")}
+            aria-label="Clear filter"
+          >
+            <VaahanIcon name="close" size={11} />
+          </button>
+        ) : null}
       </div>
       <nav aria-label="Workspace sections">
         {groups.map((group) => {
@@ -105,12 +120,14 @@ export function AdminShell({
               m.label.toLowerCase().includes(navSearch.toLowerCase()),
           );
           if (!modules.length) return null;
-          const visible = collapsed || !!navSearch || expanded.includes(group);
+          const isExpanded =
+            collapsed || !!navSearch || expanded.includes(group);
           return (
             <section className="admin-nav-group" key={group}>
               <button
+                type="button"
                 className="admin-nav-heading"
-                aria-expanded={visible}
+                aria-expanded={isExpanded}
                 onClick={() =>
                   setExpanded((v) =>
                     v.includes(group)
@@ -121,27 +138,31 @@ export function AdminShell({
               >
                 <span>{groupLabels[group]}</span>
                 <VaahanIcon
-                  name={visible ? "chevron-down" : "chevron-right"}
-                  size={12}
+                  name="chevron-down"
+                  size={11}
+                  className={`admin-nav-chevron ${isExpanded ? "is-expanded" : "is-collapsed"}`}
                 />
               </button>
-              {visible &&
-                modules.map((m) => (
-                  <Link
-                    key={m.key}
-                    href={m.key === "dashboard" ? "/" : `/${m.key}`}
-                    onClick={() => setOpen(false)}
-                    title={collapsed ? m.label : undefined}
-                    className={`admin-nav-link ${m.key === current.key ? "active" : ""}`}
-                    aria-current={m.key === current.key ? "page" : undefined}
-                  >
-                    <VaahanIcon name={m.icon} size={18} />
-                    <span>{m.label}</span>
-                    {m.key === current.key && (
-                      <span className="nav-selection" />
-                    )}
-                  </Link>
-                ))}
+              {isExpanded && (
+                <div className="admin-nav-list">
+                  {modules.map((m) => {
+                    const isActive = m.key === current.key;
+                    return (
+                      <Link
+                        key={m.key}
+                        href={m.key === "dashboard" ? "/" : `/${m.key}`}
+                        onClick={() => setOpen(false)}
+                        title={collapsed ? m.label : undefined}
+                        className={`admin-nav-link ${isActive ? "active" : ""}`}
+                        aria-current={isActive ? "page" : undefined}
+                      >
+                        <VaahanIcon name={m.icon} size={15} />
+                        <span className="admin-nav-text">{m.label}</span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
             </section>
           );
         })}
@@ -158,7 +179,7 @@ export function AdminShell({
           <strong>{identity.name}</strong>
           <small>{identity.role.replaceAll("_", " ").toLowerCase()}</small>
         </span>
-        <VaahanIcon name="shield" size={15} />
+        <VaahanIcon name="shield" size={13} />
       </div>
     </>
   );
