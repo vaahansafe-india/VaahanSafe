@@ -1678,9 +1678,12 @@ input[type="checkbox"] {
     border: 0;
     padding: 6px;
   }
-  .admin-search-trigger span,
+  .admin-search-trigger .admin-search-trigger-text,
   .admin-search-trigger kbd {
-    display: none;
+    display: none !important;
+  }
+  .admin-search-trigger > span:not(.admin-search-trigger-text) {
+    display: inline-flex !important;
   }
   .topbar-actions {
     gap: 9px;
@@ -2609,7 +2612,7 @@ input[type="checkbox"] {
   background: #f1eee7;
 }
 .admin-mobile-navigation .admin-brand {
-  padding-right: 55px;
+  padding-right: 0 !important;
 }
 .admin-monitoring {
   background: #f2efe7;
@@ -2847,10 +2850,48 @@ input[type="checkbox"] {
   min-height: 48px;
   max-height: 48px;
   box-sizing: border-box;
-  padding: 0 12px;
+  padding: 0 46px 0 12px;
   border-bottom: 1px solid #eae6de;
   display: flex;
   align-items: center;
+  overflow: hidden;
+}
+.admin-mobile-navigation [data-ui="surface-close"],
+.admin-mobile-navigation button[data-ui="surface-close"] {
+  position: absolute !important;
+  top: 8px !important;
+  right: 8px !important;
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  min-height: 32px !important;
+  border-radius: 4px !important;
+  border: 1px solid #eae6de !important;
+  background: #f6f4ef !important;
+  color: #606958 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+  z-index: 60 !important;
+  cursor: pointer !important;
+  padding: 0 !important;
+}
+.admin-mobile-navigation [data-ui="surface-close"]:hover,
+.admin-mobile-navigation button[data-ui="surface-close"]:hover {
+  background: #eae5db !important;
+  color: #1b1c1a !important;
+  border-color: #ded9cd !important;
+  transform: none !important;
+}
+.admin-mobile-navigation [data-ui="surface-close"] svg,
+.admin-mobile-navigation button[data-ui="surface-close"] svg {
+  width: 14px !important;
+  height: 14px !important;
+  display: block !important;
+  color: currentColor !important;
 }
 @media (max-width: 1200px) {
   .admin-account-name,
@@ -2880,10 +2921,23 @@ input[type="checkbox"] {
     padding: 0;
     justify-content: center;
     border-radius: 4px;
+    color: #606958;
   }
-  .admin-console .admin-search-trigger span,
+  .admin-console .admin-search-trigger .admin-search-trigger-text,
   .admin-console .admin-search-trigger kbd {
-    display: none;
+    display: none !important;
+  }
+  .admin-console .admin-search-trigger > span:not(.admin-search-trigger-text) {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+  }
+  .admin-console .admin-search-trigger svg {
+    margin: 0;
+    display: block;
+    width: 16px;
+    height: 16px;
+    color: #606958;
   }
   .admin-media-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -2962,16 +3016,21 @@ input[type="checkbox"] {
     border: 1px solid #e0dcd2;
     background: #f6f4ef;
   }
-  .admin-console .admin-search-trigger span,
+  .admin-console .admin-search-trigger .admin-search-trigger-text,
   .admin-console .admin-search-trigger kbd {
-    display: none;
+    display: none !important;
+  }
+  .admin-console .admin-search-trigger > span:not(.admin-search-trigger-text) {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
   }
   .admin-console .admin-search-trigger svg {
     margin: 0;
-    display: block;
-    width: 16px;
-    height: 16px;
-    color: #666f60;
+    display: block !important;
+    width: 16px !important;
+    height: 16px !important;
+    color: #606958 !important;
   }
   .admin-console .admin-icon-button {
     width: 32px;

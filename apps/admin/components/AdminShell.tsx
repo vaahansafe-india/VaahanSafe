@@ -114,9 +114,14 @@ export function AdminShell({
             </nav>
           </div>
           <div className="topbar-actions">
-            <Link className="admin-search-trigger" href="/search">
+            <Link
+              className="admin-search-trigger"
+              href="/search"
+              aria-label="Search records"
+              title="Search records"
+            >
               <VaahanIcon name="search" size={16} />
-              <span>Search records</span>
+              <span className="admin-search-trigger-text">Search records</span>
               <kbd>Ctrl K</kbd>
             </Link>
             <a
