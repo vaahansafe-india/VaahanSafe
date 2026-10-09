@@ -71,7 +71,7 @@
 html,
 body {
   margin: 0;
-  overflow-x: hidden;
+  overflow-x: clip;
   max-width: 100vw;
   background: var(--paper) url("/images/paper-texture.webp") repeat;
   background-size: 400px 400px;
@@ -126,7 +126,7 @@ input[type="checkbox"] {
 }
 .admin-shell {
   min-height: 100vh;
-  overflow-x: hidden;
+  overflow-x: clip;
   max-width: 100vw;
   background: var(--paper) url("/images/paper-texture.webp") repeat;
   background-size: 400px 400px;
@@ -2242,15 +2242,16 @@ input[type="checkbox"] {
 .admin-console .admin-topbar {
   position: sticky;
   top: 0;
-  z-index: 30;
+  z-index: 50;
   height: 48px;
   min-height: 48px;
   max-height: 48px;
   box-sizing: border-box;
   padding: 0 16px;
   border-bottom: 1px solid #eae6de !important;
-  background: #fcfbf8ed;
+  background: #fcfbf8f2;
   backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
@@ -2818,11 +2819,33 @@ input[type="checkbox"] {
   .sidebar-compact .admin-sidebar .admin-nav-text,
   .sidebar-compact .admin-nav-subhead,
   .sidebar-compact .admin-nav-root-search,
-  .sidebar-compact .admin-nav-back-row,
   .sidebar-compact .admin-nav-heading-static,
   .sidebar-compact .admin-nav-drilldown-chevron,
   .sidebar-compact .admin-sidebar-foot > span:nth-child(2),
   .sidebar-compact .admin-sidebar-foot > svg {
+    display: none;
+  }
+  .sidebar-compact .admin-nav-back-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2px 0 6px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid #eae6de;
+    width: 100%;
+  }
+  .sidebar-compact .admin-nav-back-button {
+    width: 34px;
+    height: 30px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    background: transparent;
+  }
+  .sidebar-compact .admin-nav-back-button span,
+  .sidebar-compact .admin-nav-section-title {
     display: none;
   }
   .sidebar-compact .admin-sidebar .admin-nav-viewport {
@@ -2832,6 +2855,7 @@ input[type="checkbox"] {
     border-top: none;
     margin-top: 0;
     padding-top: 0;
+    width: 100%;
   }
   .sidebar-compact .admin-nav-section-trigger {
     width: 34px;
@@ -2839,27 +2863,45 @@ input[type="checkbox"] {
     min-height: 34px;
     margin: 2px auto;
     padding: 0;
+    display: flex;
+    align-items: center;
     justify-content: center;
     border-radius: 6px;
+  }
+  .sidebar-compact .admin-nav-section-view,
+  .sidebar-compact .admin-nav-section-groups,
+  .sidebar-compact .admin-nav-group,
+  .sidebar-compact .admin-nav-list {
+    width: 100%;
   }
   .sidebar-compact .admin-nav-group {
     margin-top: 0;
   }
   .sidebar-compact .admin-nav-group + .admin-nav-group {
-    margin: 6px auto;
-    padding: 0;
+    margin-top: 4px;
+    padding-top: 4px;
+    border-top: none;
+    width: 100%;
+  }
+  .sidebar-compact .admin-nav-group + .admin-nav-group::before {
+    content: "";
+    display: block;
     width: 24px;
-    border-top: 1px solid #eae6de;
+    height: 1px;
+    background: #eae6de;
+    margin: 0 auto 4px;
   }
   .sidebar-compact .admin-sidebar .admin-nav-link {
-    width: 34px;
-    height: 34px;
-    min-height: 34px;
-    max-height: 34px;
-    margin: 2px auto;
-    padding: 0;
-    justify-content: center;
-    border-radius: 6px;
+    width: 34px !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    max-height: 34px !important;
+    margin: 2px auto !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 6px !important;
   }
   .sidebar-compact .admin-sidebar-foot {
     justify-content: center;
@@ -3004,12 +3046,15 @@ input[type="checkbox"] {
     color: #666f60;
   }
   .admin-console .admin-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
     padding: 0 12px;
     height: 48px;
     min-height: 48px;
     max-height: 48px;
     box-sizing: border-box;
-    border-bottom: 1px solid #eae6de;
+    border-bottom: 1px solid #eae6de !important;
   }
   .admin-console .topbar-context {
     gap: 8px;
