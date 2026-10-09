@@ -2309,7 +2309,7 @@ input[type="checkbox"] {
   display: inline-flex;
 }
 .admin-console .mobile-menu {
-  display: none !important;
+  display: none;
 }
 .admin-icon-button:hover {
   background: #eae5db;
@@ -2902,7 +2902,7 @@ input[type="checkbox"] {
     display: none !important;
   }
   .admin-console .mobile-menu {
-    display: inline-flex;
+    display: inline-flex !important;
     align-items: center;
     justify-content: center;
     border-radius: 4px;
@@ -2910,6 +2910,7 @@ input[type="checkbox"] {
     height: 32px;
     min-width: 32px;
     min-height: 32px;
+    color: #666f60;
   }
   .admin-console .admin-topbar {
     padding: 0 12px;
@@ -2968,8 +2969,9 @@ input[type="checkbox"] {
   .admin-console .admin-search-trigger svg {
     margin: 0;
     display: block;
-    width: 15px;
-    height: 15px;
+    width: 16px;
+    height: 16px;
+    color: #666f60;
   }
   .admin-console .admin-icon-button {
     width: 32px;
