@@ -13,6 +13,11 @@ import {
   adminCredentials,
   isAdminWorkEmail,
 } from "../../../../lib/password-policy";
+import {
+  sendAdminEmailChallenge,
+  EMAIL_CHALLENGE_COOKIE,
+  emailChallengeCookieOptions,
+} from "../../../../lib/email-otp";
 
 export async function POST(request: Request) {
   const requestId = crypto.randomUUID();
@@ -179,14 +184,28 @@ export async function POST(request: Request) {
         );
       const raw = generateRawSessionToken();
       boundary = "session_creation";
-      const { error: sessionError } = await db.rpc("admin_password_session", {
-        p_email: credentials.email,
-        p_auth_user: data.user.id,
-        p_hash: await hashSessionToken(raw),
-        p_request: requestId,
+      const { data: sessionId, error: sessionError } = await db.rpc(
+        "admin_password_session",
+        {
+          p_email: credentials.email,
+          p_auth_user: data.user.id,
+          p_hash: await hashSessionToken(raw),
+          p_request: requestId,
+        },
+      );
+      if (sessionError || typeof sessionId !== "string")
+        throw new Error("Authentication service unavailable");
+      boundary = "email_otp_dispatch";
+      const challenge = await sendAdminEmailChallenge({
+        sessionId,
+        email: credentials.email,
       });
-      if (sessionError) throw new Error("Authentication service unavailable");
-      const response = adminResponse({ next: "/verify-phone" });
+      const response = adminResponse({ next: "/verify-email" });
+      response.cookies.set(
+        EMAIL_CHALLENGE_COOKIE,
+        challenge,
+        emailChallengeCookieOptions,
+      );
       response.cookies.set(ADMIN_SESSION_COOKIE_NAME, raw, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",

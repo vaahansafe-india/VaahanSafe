@@ -12,9 +12,10 @@ export function AdminLayoutClient({
   const path = usePathname();
   if (
     !identity ||
-    !identity.phoneVerified ||
+    !identity.emailVerified ||
     path === "/login" ||
-    path === "/verify-phone"
+    path === "/verify-phone" ||
+    path === "/verify-email"
   )
     return <>{children}</>;
   return <AdminShell identity={identity}>{children}</AdminShell>;

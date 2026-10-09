@@ -10,7 +10,7 @@ import { adminFailure } from "../../../../lib/api";
 export async function POST(request: Request) {
   try {
     assertSameOrigin(request);
-    const identity = await requireAdmin(undefined, { pendingPhone: true });
+    const identity = await requireAdmin(undefined, { pendingEmail: true });
     const { error } = await getSupabaseAdminClient().rpc("admin_logout", {
       p_session: identity.sessionId,
       p_request: crypto.randomUUID(),

@@ -2,7 +2,7 @@
 import { useCallback, useState } from "react";
 import Link from "next/link";
 import { AdminDialog } from "../../components/AdminDialog";
-import { PhoneVerification } from "../../components/PhoneVerification";
+import { EmailVerification } from "../../components/EmailVerification";
 import { StatusTag } from "../../components/RecordTable";
 interface ArticleItem {
   id: string;
@@ -215,7 +215,7 @@ export function ArticlesTableClient({
           onClose={close}
         >
           {stepUp ? (
-            <PhoneVerification stepUp onVerified={() => setStepUp(false)} />
+            <EmailVerification stepUp onVerified={() => setStepUp(false)} />
           ) : (
             <>
               <p>
