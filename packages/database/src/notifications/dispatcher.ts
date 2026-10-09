@@ -29,8 +29,8 @@ export async function createInAppNotification(
   const db = isFirstParamDb ? (dbOrParams as DatabaseClient) : ((dbOrParams as CreateInAppNotificationParams).db || getAuthoritativeDatabaseClient());
   const params: CreateInAppNotificationParams = isFirstParamDb ? maybeParams! : (dbOrParams as CreateInAppNotificationParams);
 
-  const id = `notif_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
-  const intentId = `intent_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+  const id = `notif_${crypto.randomUUID()}`;
+  const intentId = `intent_${crypto.randomUUID()}`;
   const now = new Date().toISOString();
   const category = params.category || "ACCOUNT";
   const priority = params.priority || "NORMAL";
@@ -39,14 +39,14 @@ export async function createInAppNotification(
 
   try {
     // 1. Record notification intent
-    await db.execute(
+    await db.batch([{sql:
       `INSERT INTO notification_intents (
          id, event_type, recipient_user_id, category, priority,
          template_key, template_version, payload_json, source_type,
          source_id, dedupe_key, status, created_at, dispatched_at
        ) VALUES (?, ?, ?, ?, ?, 'CANONICAL_IN_APP', 1, '{}', 'SYSTEM', ?, ?, 'PROCESSED', ?, ?)
        ON CONFLICT(dedupe_key) DO NOTHING`,
-      [
+      params: [
         intentId,
         params.eventType,
         params.userId,
@@ -56,16 +56,13 @@ export async function createInAppNotification(
         `dedupe_${id}`,
         now,
         now,
-      ]
-    );
+      ]}, {sql:
 
-    // 2. Insert in-app notification record
-    await db.execute(
       `INSERT INTO notifications (
          id, user_id, intent_id, event_type, category, priority,
          title, body_safe, action_type, action_target, read_at, archived_at, created_at
        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL, ?)`,
-      [
+      params: [
         id,
         params.userId,
         intentId,
@@ -77,10 +74,10 @@ export async function createInAppNotification(
         actionType,
         actionTarget,
         now,
-      ]
-    );
+      ]}]);
   } catch (err) {
     console.error("[createInAppNotification] Error recording notification:", err);
+    throw new Error("Notification could not be recorded");
   }
 
   return {

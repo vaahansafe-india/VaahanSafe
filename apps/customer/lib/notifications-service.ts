@@ -207,9 +207,10 @@ export async function getNotificationCenterData(
   const vehicleRepo = getVehicleRepository();
 
   // Enforce IDOR protection: only load real data for authenticated userId
-  const [rawNotifs, userVehicles] = await Promise.all([
+  const [rawNotifs, userVehicles, totalCounts] = await Promise.all([
     notifRepo.findByUserId(userId, 200, 0),
     vehicleRepo.findByCustomerId(userId),
+    notifRepo.countByUserId(userId),
   ]);
 
   const authorizedVehicles = userVehicles.map((v: { id: string; registrationNumber: string; make: string; model: string }) => ({
@@ -303,6 +304,9 @@ export async function getNotificationCenterData(
   };
 
   // Filter items based on active view and filter state
+  // Counters cover all records, including those outside the bounded recent list.
+  for (const key of ["inbox", "unread", "attention", "archived", "today"] as const) counts[key] = Number(totalCounts[key] || 0);
+  for (const key of Object.keys(counts.categories) as Array<keyof typeof counts.categories>) counts.categories[key] = Number(totalCounts[key] || 0);
   const filteredItems = allItems.filter((item) => {
     // 1. View filter
     if (filters.view === "inbox") {

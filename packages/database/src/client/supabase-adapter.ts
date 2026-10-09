@@ -13,6 +13,7 @@ export interface SupabaseAdapterConfig {
 }
 
 export class SupabaseDatabaseAdapter implements DatabaseClient {
+  readonly dialect = "postgres" as const;
   private url: string;
   private serviceKey: string;
 
@@ -39,13 +40,16 @@ export class SupabaseDatabaseAdapter implements DatabaseClient {
     let paramIndex = 0;
     
     // Replace ? with formatted values
-    let formatted = sql.replace(/\?/g, () => {
+    // Ignore SQL strings/comments: a customer's literal '?' is not a bind marker.
+    let formatted = sql.replace(/'(?:''|[^'])*'|"(?:""|[^"])*"|--[^\n]*|\/\*[\s\S]*?\*\/|\?/g, (token) => {
+      if (token !== "?") return token;
       if (paramIndex >= params.length) {
         throw new Error(`[SupabaseAdapter] Parameter index mismatch: expected ${paramIndex + 1} parameters, got ${params.length}`);
       }
       const val = params[paramIndex++];
       return this.escapeValue(val);
     });
+    if (paramIndex !== params.length) throw new Error("Database parameter count mismatch");
 
     // Translate SQLite idioms to PostgreSQL
     if (/insert\s+or\s+ignore\s+into/i.test(formatted)) {
@@ -92,11 +96,12 @@ export class SupabaseDatabaseAdapter implements DatabaseClient {
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`[SupabaseAdapter Error ${response.status}]: ${errorText}`);
+      throw new Error(`Database service unavailable (${response.status})`);
     }
 
-    return response.json();
+    const result = await response.json();
+    if (result?.error || result?.success === false) throw new Error("Database operation failed");
+    return result;
   }
 
   async query<T = unknown>(sql: string, params: unknown[] = []): Promise<T[]> {
@@ -105,7 +110,7 @@ export class SupabaseDatabaseAdapter implements DatabaseClient {
     if (Array.isArray(result)) {
       return result as T[];
     }
-    return [];
+    throw new Error("Database query returned an invalid result");
   }
 
   async queryFirst<T = unknown>(sql: string, params: unknown[] = []): Promise<T | null> {
@@ -115,13 +120,18 @@ export class SupabaseDatabaseAdapter implements DatabaseClient {
 
   async execute(sql: string, params: unknown[] = []): Promise<{ success: boolean; rowsAffected?: number }> {
     const formatted = this.formatSql(sql, params);
-    await this.callRpc(formatted);
-    return { success: true };
+    const result = await this.callRpc(formatted) as { success?: boolean; rowsAffected?: number };
+    if (result?.success !== true) throw new Error("Database write was not confirmed");
+    return { success: true, rowsAffected: result.rowsAffected };
   }
 
   async batch(operations: Array<{ sql: string; params?: unknown[] }>): Promise<boolean> {
     const formattedStatements = operations.map((op) => this.formatSql(op.sql, op.params || []));
-    const transactionSql = `DO $$ BEGIN\n${formattedStatements.map(s => `  ${s.replace(/;?\s*$/, "")};`).join("\n")}\nEND $$;`;
+    // A fixed $$ delimiter can be terminated by a bound string in the block body.
+    let delimiter: string;
+    do { delimiter = `$vs_${crypto.randomUUID().replaceAll("-", "")}$`; }
+    while (formattedStatements.some(statement => statement.includes(delimiter)));
+    const transactionSql = `DO ${delimiter} BEGIN\n${formattedStatements.map(s => `  ${s.replace(/;?\s*$/, "")};`).join("\n")}\nEND ${delimiter};`;
     await this.callRpc(transactionSql);
     return true;
   }

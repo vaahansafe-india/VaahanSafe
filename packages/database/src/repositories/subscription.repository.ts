@@ -25,7 +25,7 @@ interface DbSubscriptionRow {
   status: string;
   current_period_start: string | null;
   current_period_end: string | null;
-  cancel_at_period_end: number;
+  cancel_at_period_end: number | boolean;
   provider: string;
   provider_subscription_id: string | null;
   created_at: string;
@@ -52,7 +52,7 @@ export class D1SubscriptionRepository implements SubscriptionRepository {
       status: r.status as SubscriptionStatus,
       currentPeriodStart: r.current_period_start ?? undefined,
       currentPeriodEnd: r.current_period_end ?? undefined,
-      cancelAtPeriodEnd: r.cancel_at_period_end === 1,
+      cancelAtPeriodEnd: r.cancel_at_period_end === true || r.cancel_at_period_end === 1,
       provider: r.provider as Subscription["provider"],
       providerSubscriptionId: r.provider_subscription_id ?? undefined,
       createdAt: r.created_at,
@@ -96,7 +96,7 @@ export class D1SubscriptionRepository implements SubscriptionRepository {
         s.status,
         s.currentPeriodStart ?? null,
         s.currentPeriodEnd ?? null,
-        s.cancelAtPeriodEnd ? 1 : 0,
+        this.db.dialect === "postgres" ? s.cancelAtPeriodEnd : s.cancelAtPeriodEnd ? 1 : 0,
         s.provider,
         s.providerSubscriptionId ?? null,
         s.createdAt,
@@ -128,7 +128,7 @@ export class D1SubscriptionRepository implements SubscriptionRepository {
         updates?.currentPeriodStart ?? null,
         updates?.currentPeriodEnd ?? null,
         updates?.cancelAtPeriodEnd !== undefined ? 1 : null,
-        updates?.cancelAtPeriodEnd ? 1 : 0,
+        this.db.dialect === "postgres" ? updates?.cancelAtPeriodEnd ?? false : updates?.cancelAtPeriodEnd ? 1 : 0,
         now,
         id,
       ]

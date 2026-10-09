@@ -76,7 +76,9 @@ export class Msg91WhatsAppAdapter implements IWhatsAppService, WhatsAppProvider 
       }
       return { success: true, messageId: data.request_id };
     } catch {
-      return { success: false, error: "MSG91_SERVICE_UNAVAILABLE", isRetryable: true };
+      // The request may have been accepted before a transport timeout. Automatic
+      // retries here can send the same customer alert twice.
+      return { success: false, error: "MSG91_DELIVERY_OUTCOME_UNKNOWN", isRetryable: false };
     }
   }
 

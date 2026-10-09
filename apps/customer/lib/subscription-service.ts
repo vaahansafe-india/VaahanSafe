@@ -58,7 +58,9 @@ interface DbSubscriptionRow {
   status: string;
   current_period_start: string | null;
   current_period_end: string | null;
-  cancel_at_period_end: number;
+  cancel_at_period_end: number | boolean;
+  provider: string;
+  provider_subscription_id: string | null;
   plan_code: string;
   plan_name: string;
   plan_description: string | null;
@@ -131,7 +133,7 @@ export async function getSubscriptionServiceOverview(
     ),
     db.queryFirst<DbSubscriptionRow>(
       `SELECT s.id, s.vehicle_id, s.plan_id, s.status, s.current_period_start, s.current_period_end,
-              s.cancel_at_period_end, p.code as plan_code, p.name as plan_name, p.description as plan_description,
+              s.cancel_at_period_end, s.provider, s.provider_subscription_id, p.code as plan_code, p.name as plan_name, p.description as plan_description,
               p.price_minor, p.currency, p.vehicle_limit, p.contact_limit, p.features_json
        FROM subscriptions s JOIN plans p ON s.plan_id = p.id
        WHERE s.user_id = ? AND s.status IN ('ACTIVE', 'PENDING_PAYMENT', 'CANCEL_AT_PERIOD_END', 'PAST_DUE')
@@ -258,15 +260,16 @@ export async function getSubscriptionServiceOverview(
 
     let nextBillingEvent: ActiveSubscriptionPassport["nextBillingEvent"] =
       undefined;
-    if (subscriptionRow.current_period_end && !isCancelAtEnd) {
+    const billingConfigured = ['RAZORPAY', 'CASHFREE'].includes(subscriptionRow.provider) && Boolean(subscriptionRow.provider_subscription_id);
+    if (subscriptionRow.current_period_end && !isCancelAtEnd && billingConfigured) {
       nextBillingEvent = {
         date: subscriptionRow.current_period_end,
         description: "Scheduled Automatic Renewal",
       };
-    } else if (subscriptionRow.current_period_end && isCancelAtEnd) {
+    } else if (subscriptionRow.current_period_end) {
       nextBillingEvent = {
         date: subscriptionRow.current_period_end,
-        description: "Service Term Concludes",
+        description: "Current Paid Term Ends",
       };
     }
 
@@ -281,7 +284,8 @@ export async function getSubscriptionServiceOverview(
       termStart: subscriptionRow.current_period_start || undefined,
       termEnd: subscriptionRow.current_period_end || undefined,
       cancelAtPeriodEnd: isCancelAtEnd,
-      autoRenew: !isCancelAtEnd,
+      autoRenew: billingConfigured && !isCancelAtEnd,
+      billingConfigured,
       vehicleLimit: subscriptionRow.vehicle_limit,
       contactLimit: subscriptionRow.contact_limit,
       coveredVehiclesCount: connectedVehicles.length,

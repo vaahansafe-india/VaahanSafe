@@ -123,10 +123,10 @@ export function ExplorePlansSheet({
                 {!isCurrent && (
                   <div className="mt-5">
                     <Link
-                      href={`/qr/buy?plan=${plan.code}`}
+                      href={`/help?plan=${encodeURIComponent(plan.code)}`}
                       className="w-full inline-flex h-9 items-center justify-center gap-2 rounded-xl bg-[#cc785c] px-4 font-mono text-xs font-semibold uppercase tracking-wider text-white hover:bg-[#a9583e] transition-colors"
                     >
-                      <span>Select {plan.name}</span>
+                      <span>Ask about {plan.name}</span>
                       <VaahanIcon name="arrow-right" size={12} />
                     </Link>
                   </div>

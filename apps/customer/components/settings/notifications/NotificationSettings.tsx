@@ -1,76 +1,55 @@
 "use client";
 
-import * as React from "react";
-import { useCustomerRouter } from "@/lib/use-customer-router";
 import { Switch } from "@vaahansafe/ui";
 import { SettingsSection } from "../primitives/SettingsSection";
 import { SettingStatus } from "../primitives/SettingStatus";
 import { updateNotificationPrefAction } from "@/lib/settings-actions";
 import type {
   SettingsData,
-  NotificationCategoryConfig,
   NotificationMatrixCategory,
   NotificationDeliveryChannel,
 } from "@/lib/settings-types";
 import { toast } from "sonner";
+import { useCustomerMutation } from "@/lib/use-customer-mutation";
 
 interface NotificationSettingsProps {
   data: SettingsData;
 }
 
 export function NotificationSettings({ data }: NotificationSettingsProps) {
-  const router = useCustomerRouter();
-  const [categories, setCategories] = React.useState<NotificationCategoryConfig[]>(
-    data.notifications
+  const categories = data.notifications;
+  const mutation = useCustomerMutation(
+    ({
+      category,
+      channel,
+      enabled,
+    }: {
+      category: NotificationMatrixCategory;
+      channel: NotificationDeliveryChannel;
+      enabled: boolean;
+    }) => updateNotificationPrefAction(category, channel, enabled),
+    ["settings", "notifications", "shell"],
   );
 
   const handleToggle = async (
     categoryKey: NotificationMatrixCategory,
     channel: NotificationDeliveryChannel,
-    currentValue: boolean
+    currentValue: boolean,
   ) => {
-    const nextValue = !currentValue;
-
-    // Optimistic UI update
-    setCategories((prev) =>
-      prev.map((cat) => {
-        if (cat.key !== categoryKey) return cat;
-        return {
-          ...cat,
-          channels: {
-            ...cat.channels,
-            [channel]: {
-              ...cat.channels[channel],
-              enabled: nextValue,
-            },
-          },
-        };
-      })
-    );
-
-    const res = await updateNotificationPrefAction(categoryKey, channel, nextValue);
-
-    if (res.success) {
-      router.refresh();
+    if (mutation.isPending) return;
+    try {
+      await mutation.mutateAsync({
+        category: categoryKey,
+        channel,
+        enabled: !currentValue,
+      });
       toast.success("Notification preference updated.");
-    } else {
-      // Rollback on failure
-      setCategories((prev) =>
-        prev.map((cat) => {
-          if (cat.key !== categoryKey) return cat;
-          return {
-            ...cat,
-            channels: {
-              ...cat.channels,
-              [channel]: {
-                ...cat.channels[channel],
-                enabled: currentValue,
-              },
-            },
-          };
-        })
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "We couldn't update this preference.",
       );
-      toast.error(res.error || "We couldn't update this preference. Your previous setting is unchanged.");
     }
   };
 
@@ -81,7 +60,8 @@ export function NotificationSettings({ data }: NotificationSettingsProps) {
           Notifications
         </h1>
         <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-          Configure how you receive time-sensitive alerts, shipping milestones, and safety updates.
+          Configure how you receive time-sensitive alerts, shipping milestones,
+          and safety updates.
         </p>
       </div>
 
@@ -136,7 +116,10 @@ export function NotificationSettings({ data }: NotificationSettingsProps) {
                 </span>
                 <Switch
                   checked={cat.channels.IN_APP.enabled}
-                  disabled={cat.channels.IN_APP.disabledReason === "REQUIRED_SECURITY"}
+                  disabled={
+                    mutation.isPending ||
+                    cat.channels.IN_APP.disabledReason === "REQUIRED_SECURITY"
+                  }
                   onCheckedChange={() =>
                     handleToggle(cat.key, "IN_APP", cat.channels.IN_APP.enabled)
                   }
@@ -151,8 +134,13 @@ export function NotificationSettings({ data }: NotificationSettingsProps) {
                 </span>
                 <Switch
                   checked={cat.channels.WHATSAPP.enabled}
+                  disabled={mutation.isPending}
                   onCheckedChange={() =>
-                    handleToggle(cat.key, "WHATSAPP", cat.channels.WHATSAPP.enabled)
+                    handleToggle(
+                      cat.key,
+                      "WHATSAPP",
+                      cat.channels.WHATSAPP.enabled,
+                    )
                   }
                   aria-label={`${cat.label} WhatsApp notifications`}
                 />
@@ -165,7 +153,10 @@ export function NotificationSettings({ data }: NotificationSettingsProps) {
                 </span>
                 <Switch
                   checked={cat.channels.EMAIL.enabled}
-                  disabled={cat.channels.EMAIL.disabledReason === "REQUIRED_SECURITY"}
+                  disabled={
+                    mutation.isPending ||
+                    cat.channels.EMAIL.disabledReason === "REQUIRED_SECURITY"
+                  }
                   onCheckedChange={() =>
                     handleToggle(cat.key, "EMAIL", cat.channels.EMAIL.enabled)
                   }

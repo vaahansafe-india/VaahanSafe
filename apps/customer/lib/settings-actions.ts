@@ -211,6 +211,9 @@ export async function updateNotificationPrefAction(
     }
 
     // Guard: Account security required channels
+    if (!["ACCOUNT", "SUBSCRIPTION", "SUPPORT", "SAFETY", "FULFILMENT", "COMMERCE", "SECURITY"].includes(category)
+      || !["IN_APP", "WHATSAPP", "EMAIL"].includes(channel) || typeof enabled !== "boolean")
+      return { success: false, error: "Choose a valid notification preference." };
     if (category === "SECURITY" && channel !== "WHATSAPP") {
       return {
         success: false,

@@ -18,6 +18,7 @@ const editFields: Record<
     { key: "status", label: "Status", options: ["ACTIVE", "SUSPENDED"] },
   ],
   support: [
+    { key: "customer_user_id", label: "Customer account ID (optional, enables customer updates)" },
     { key: "reference_code", label: "Ticket reference" },
     { key: "subject", label: "Subject" },
     {

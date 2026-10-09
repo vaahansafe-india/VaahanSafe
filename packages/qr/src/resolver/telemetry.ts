@@ -119,7 +119,7 @@ export async function recordPublicScanEventSafely(
     );
 
     // Notify vehicle owner on active QR scans
-    if (scanResult === "RESOLVED_ACTIVE") {
+    if (scanResult === "RESOLVED_ACTIVE" && db.dialect !== "postgres") {
       try {
         const assignment = await db.queryFirst<{
           user_id: string;

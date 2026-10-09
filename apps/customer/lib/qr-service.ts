@@ -870,8 +870,8 @@ export async function executeQrActivation(
     db,
   });
 
-  // Dispatch in-app notification for retail QR activation
-  try {
+  // Supabase's entitlement trigger owns the canonical multi-channel activation event.
+  if (db.dialect !== "postgres") try {
     const vehicleName =
       `${vehicle.make || ""} ${vehicle.model || ""}`.trim() || "your vehicle";
     await createInAppNotification(db, {

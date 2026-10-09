@@ -4,6 +4,7 @@ import React from "react";
 import { useSearchParams } from "next/navigation";
 import { useCustomerRouter } from "@/lib/use-customer-router";
 import { toast } from "sonner";
+import { useCustomerMutation } from "@/lib/use-customer-mutation";
 import type {
   NotificationItem,
   NotificationCenterData,
@@ -43,18 +44,25 @@ export function NotificationCenterController({
   const searchParams = useSearchParams();
 
   // Local state initialized from server data
-  const [data, setData] = React.useState<NotificationCenterData>(initialData);
+  const data = initialData;
   const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
   const [activeDetailItem, setActiveDetailItem] = React.useState<NotificationItem | null>(null);
+  React.useEffect(() => {
+    setActiveDetailItem(current => current ? data.notifications.find(item => item.id === current.id) || null : null);
+    setSelectedIds(current => new Set([...current].filter(id => data.notifications.some(item => item.id === id))));
+  }, [data.notifications]);
   const [filterSheetOpen, setFilterSheetOpen] = React.useState(false);
   const [settingsSheetOpen, setSettingsSheetOpen] = React.useState(false);
   const [markAllAlertOpen, setMarkAllAlertOpen] = React.useState(false);
-  const [isPending, startTransition] = React.useTransition();
-
-  // Keep state synced with incoming server updates
-  React.useEffect(() => {
-    setData(initialData);
-  }, [initialData]);
+  const mutation = useCustomerMutation(
+    async (action: () => Promise<import("@/lib/notifications-actions").NotificationActionResult>) => action(),
+    ["notifications", "shell", "dashboard"],
+  );
+  const isPending = mutation.isPending;
+  const runAction = async (action: () => Promise<import("@/lib/notifications-actions").NotificationActionResult>) => {
+    try { return await mutation.mutateAsync(action); }
+    catch (error) { return { success: false, error: error instanceof Error ? error.message : "We couldn't update this notification." }; }
+  };
 
   // URL query sync helper
   const updateUrlFilters = (newFilters: NotificationFiltersState) => {
@@ -126,75 +134,45 @@ export function NotificationCenterController({
     setSelectedIds(new Set());
   };
 
-  // Single item actions (with optimistic UI)
+  // Mutations show success only after the server confirms the change.
   const handleToggleRead = (item: NotificationItem) => {
     const isCurrentlyRead = item.isRead;
-    const previousNotifications = [...data.notifications];
-
-    // Optimistic update
-    setData((prev) => ({
-      ...prev,
-      notifications: prev.notifications.map((n) =>
-        n.id === item.id ? { ...n, isRead: !isCurrentlyRead, readAt: !isCurrentlyRead ? new Date().toISOString() : null } : n
-      ),
-      counts: {
-        ...prev.counts,
-        unread: isCurrentlyRead ? prev.counts.unread + 1 : Math.max(0, prev.counts.unread - 1),
-      },
-    }));
-
-    startTransition(async () => {
-      const res = isCurrentlyRead
-        ? await markNotificationAsUnreadAction(item.id)
-        : await markNotificationAsReadAction(item.id);
-
-      if (res.success) router.refresh();
+    if (isPending) return;
+    void (async () => {
+      const res = await runAction(() => isCurrentlyRead
+        ? markNotificationAsUnreadAction(item.id)
+        : markNotificationAsReadAction(item.id));
       if (!res.success) {
         toast.error("Couldn't update read status. Please try again.");
-        setData((prev) => ({ ...prev, notifications: previousNotifications }));
       }
-    });
+    })();
   };
 
   const handleArchive = (item: NotificationItem) => {
     const isCurrentlyArchived = item.isArchived;
-    const previousNotifications = [...data.notifications];
-
-    // Optimistic update
-    setData((prev) => ({
-      ...prev,
-      notifications: prev.notifications.filter((n) => n.id !== item.id),
-      counts: {
-        ...prev.counts,
-        inbox: isCurrentlyArchived ? prev.counts.inbox + 1 : Math.max(0, prev.counts.inbox - 1),
-        archived: isCurrentlyArchived ? Math.max(0, prev.counts.archived - 1) : prev.counts.archived + 1,
-      },
-    }));
-
-    startTransition(async () => {
-      const res = isCurrentlyArchived
-        ? await unarchiveNotificationAction(item.id)
-        : await archiveNotificationAction(item.id);
+    if (isPending) return;
+    void (async () => {
+      const res = await runAction(() => isCurrentlyArchived
+        ? unarchiveNotificationAction(item.id)
+        : archiveNotificationAction(item.id));
 
       if (res.success) {
-        router.refresh();
         toast.success(isCurrentlyArchived ? "Notification moved to inbox" : "Notification archived", {
           action: {
             label: "Undo",
             onClick: () => {
               if (isCurrentlyArchived) {
-                void archiveNotificationAction(item.id).then(() => router.refresh());
+                void runAction(() => archiveNotificationAction(item.id));
               } else {
-                void unarchiveNotificationAction(item.id).then(() => router.refresh());
+                void runAction(() => unarchiveNotificationAction(item.id));
               }
             },
           },
         });
       } else {
         toast.error("Couldn't archive notification. Please try again.");
-        setData((prev) => ({ ...prev, notifications: previousNotifications }));
       }
-    });
+    })();
   };
 
   // Bulk actions
@@ -202,57 +180,61 @@ export function NotificationCenterController({
     const ids = Array.from(selectedIds);
     if (ids.length === 0) return;
 
-    startTransition(async () => {
-      const res = await bulkMarkAsReadAction(ids);
+    if (isPending) return;
+    void (async () => {
+      const res = await runAction(() => bulkMarkAsReadAction(ids));
       if (res.success) {
         toast.success(`${ids.length} ${ids.length === 1 ? "notification" : "notifications"} marked as read.`);
         setSelectedIds(new Set());
       } else {
         toast.error(res.error || "Failed to mark notifications as read.");
       }
-    });
+    })();
   };
 
   const handleBulkMarkUnread = () => {
     const ids = Array.from(selectedIds);
     if (ids.length === 0) return;
 
-    startTransition(async () => {
-      const res = await bulkMarkAsUnreadAction(ids);
+    if (isPending) return;
+    void (async () => {
+      const res = await runAction(() => bulkMarkAsUnreadAction(ids));
       if (res.success) {
         toast.success(`${ids.length} ${ids.length === 1 ? "notification" : "notifications"} marked as unread.`);
         setSelectedIds(new Set());
       } else {
         toast.error(res.error || "Failed to mark notifications as unread.");
       }
-    });
+    })();
   };
 
   const handleBulkArchive = () => {
     const ids = Array.from(selectedIds);
     if (ids.length === 0) return;
 
-    startTransition(async () => {
-      const res = await bulkArchiveAction(ids);
+    if (isPending) return;
+    void (async () => {
+      const res = await runAction(() => bulkArchiveAction(ids));
       if (res.success) {
         toast.success(`${ids.length} ${ids.length === 1 ? "notification" : "notifications"} archived.`);
         setSelectedIds(new Set());
       } else {
         toast.error(res.error || "Failed to archive notifications.");
       }
-    });
+    })();
   };
 
   const handleConfirmMarkAllRead = () => {
-    startTransition(async () => {
-      const res = await markAllAsReadAction();
+    if (isPending) return;
+    void (async () => {
+      const res = await runAction(markAllAsReadAction);
       setMarkAllAlertOpen(false);
       if (res.success) {
         toast.success("All notifications marked as read.");
       } else {
         toast.error(res.error || "Failed to mark all as read.");
       }
-    });
+    })();
   };
 
   // Keyboard navigation (j/k, e to archive, r to toggle read)
@@ -307,6 +289,11 @@ export function NotificationCenterController({
 
         {/* Center Content: Toolbar, Filters, and Activity Inbox */}
         <div className="flex-1 min-w-0 max-w-full space-y-3.5">
+          {data.counts.inbox + data.counts.archived > 200 && (
+            <p className="text-xs text-muted-foreground px-2">
+              Showing your latest 200 notifications. Filters apply to this recent activity; totals include your full inbox.
+            </p>
+          )}
           <div className="rounded-3xl border border-border/80 bg-card p-3.5 sm:p-5 shadow-2xs space-y-3 min-w-0 max-w-full overflow-hidden">
             {/* Toolbar */}
             <NotificationToolbar

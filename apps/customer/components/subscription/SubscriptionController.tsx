@@ -28,6 +28,7 @@ import { CancelRenewalAlert } from "./alerts/CancelRenewalAlert";
 import { SubscriptionEmptyState } from "./states/SubscriptionEmptyState";
 
 import { toggleAutoRenewalAction } from "@/lib/subscription-actions";
+import { useCustomerMutation } from "@/lib/use-customer-mutation";
 import type {
   SubscriptionServiceOverview,
   ConnectedVehicleServiceItem,
@@ -69,7 +70,11 @@ export function SubscriptionController({ initialData }: SubscriptionControllerPr
   const [selectedPaymentRecord, setSelectedPaymentRecord] = React.useState<BillingSummaryRecord | null>(null);
 
   // Mutation loading
-  const [isUpdatingRenewal, setIsUpdatingRenewal] = React.useState(false);
+  const renewal = useCustomerMutation(
+    ({ id, cancel }: { id: string; cancel: boolean }) => toggleAutoRenewalAction(id, cancel),
+    ["subscription", "dashboard", "notifications"],
+  );
+  const isUpdatingRenewal = renewal.isPending;
 
   // Active vehicle reference
   const activeVehicle = scopedVehicleId
@@ -111,40 +116,32 @@ export function SubscriptionController({ initialData }: SubscriptionControllerPr
   // Toggle Auto-Renewal Mutation
   const handleConfirmCancelRenewal = async () => {
     if (!passport.id) return;
-    setIsUpdatingRenewal(true);
     try {
-      const result = await toggleAutoRenewalAction(passport.id, true);
+      const result = await renewal.mutateAsync({ id: passport.id, cancel: true });
       if (result.success) {
         toast.success(result.message);
         setCancelAlertOpen(false);
         setManageSubOpen(false);
-        router.refresh();
       } else {
         toast.error(result.message);
       }
-    } catch {
-      toast.error("Failed to update renewal preference. Please try again.");
-    } finally {
-      setIsUpdatingRenewal(false);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Please try again.");
     }
   };
 
   const handleResumeAutoRenewal = async () => {
     if (!passport.id) return;
-    setIsUpdatingRenewal(true);
     try {
-      const result = await toggleAutoRenewalAction(passport.id, false);
+      const result = await renewal.mutateAsync({ id: passport.id, cancel: false });
       if (result.success) {
         toast.success(result.message);
         setManageSubOpen(false);
-        router.refresh();
       } else {
         toast.error(result.message);
       }
-    } catch {
-      toast.error("Failed to update renewal preference. Please try again.");
-    } finally {
-      setIsUpdatingRenewal(false);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Please try again.");
     }
   };
 

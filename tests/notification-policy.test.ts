@@ -65,6 +65,7 @@ describe("Notification Policy & Preference Evaluation", () => {
       const activeChannels = evaluateNotificationChannels({
         eventType: "QR_ACTIVATED",
         category: "SAFETY",
+        userPreferences: [{ userId: "usr_1", category: "SAFETY", channel: "EMAIL", enabled: true }],
         capabilities: {
           hasPhone: false, // user has no verified phone
           hasEmail: true,

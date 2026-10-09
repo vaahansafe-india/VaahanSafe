@@ -30,7 +30,7 @@ const ALERT_MESSAGES: Record<string, { title: string; defaultBody: string; prior
   },
   EMERGENCY_INCIDENT: {
     title: "URGENT: Vehicle Incident Reported",
-    defaultBody: "A roadside incident was reported for your vehicle. Emergency contacts are being notified.",
+    defaultBody: "A roadside incident was reported for your vehicle. Review the available details in your dashboard.",
     priority: "CRITICAL",
   },
   LIGHTS_ON: {
@@ -113,7 +113,10 @@ export async function POST(req: NextRequest) {
        FROM qr_stickers s
        JOIN qr_assignments a ON s.id = a.qr_id AND a.ended_at IS NULL
        JOIN vehicles v ON a.vehicle_id = v.id
-       WHERE s.public_id = ?
+       WHERE s.public_id = ? AND v.user_id = a.user_id AND v.status != 'DELETED'
+         AND EXISTS (SELECT 1 FROM service_entitlements e WHERE e.qr_sticker_id = s.id
+           AND e.vehicle_id = v.id AND e.user_id = a.user_id AND e.capability = 'EMERGENCY_ROUTING'
+           AND e.status = 'ENABLED' AND (e.expires_at IS NULL OR e.expires_at > datetime('now')))
        LIMIT 1`,
       [publicId]
     );
@@ -189,6 +192,10 @@ export async function POST(req: NextRequest) {
     // Persist a canonical intent first. Queue outages leave a recoverable PENDING intent.
     let notificationQueued = false;
     try {
+      if (db.dialect === 'postgres') {
+        // The scan insert creates the deduplicated canonical event in the same database transaction.
+        notificationQueued = true;
+      } else {
       const binding = (process.env as unknown as { NOTIFICATION_QUEUE?: NotificationQueueBinding }).NOTIFICATION_QUEUE;
       const producer = new NotificationProducerService(new D1NotificationIntentRepository(db), new CloudflareNotificationQueueProducer(binding));
       const result = await producer.recordAndPublishIntent({
@@ -201,6 +208,7 @@ export async function POST(req: NextRequest) {
         sourceType: "EMERGENCY", sourceId: eventId, dedupeKey: `emergency_scan_${eventId}`,
       });
       notificationQueued = result.published;
+      }
     } catch {
       console.warn("[ApiEmergencyAlert] Notification intent unavailable");
     }

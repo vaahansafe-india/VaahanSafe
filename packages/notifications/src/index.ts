@@ -21,3 +21,5 @@ export * from "./errors";
 export * from "./otp";
 export * from "./email";
 export * from "./whatsapp";
+export * from "./outbox/processor";
+export type { InAppRenderResult } from "./templates/definition";

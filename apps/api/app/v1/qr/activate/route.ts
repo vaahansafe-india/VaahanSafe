@@ -215,7 +215,7 @@ export async function POST(req: NextRequest) {
     );
 
     // 9. Dispatch in-app notification
-    await createInAppNotification({
+    if (db.dialect !== "postgres") await createInAppNotification({
       db,
       userId,
       eventType: "QR_ACTIVATED",

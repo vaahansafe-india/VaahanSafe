@@ -29,6 +29,7 @@ export interface D1DatabaseBinding {
 }
 
 export interface DatabaseClient {
+  readonly dialect?: "postgres" | "sqlite";
   query<T = unknown>(sql: string, params?: unknown[]): Promise<T[]>;
   queryFirst<T = unknown>(sql: string, params?: unknown[]): Promise<T | null>;
   execute(sql: string, params?: unknown[]): Promise<{ success: boolean; rowsAffected?: number }>;

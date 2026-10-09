@@ -38,7 +38,7 @@ describe("Notification Pipeline & Invariant Verification", () => {
   let producerService: NotificationProducerService;
   let consumer: NotificationQueueConsumer;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     // 1. Initialize SQLite in-memory database with all 6 migrations
     dbSync = new DatabaseSync(":memory:");
     dbSync.exec("PRAGMA foreign_keys = ON;");
@@ -94,6 +94,13 @@ describe("Notification Pipeline & Invariant Verification", () => {
     deliveryRepo = new D1NotificationDeliveryRepository(dbClient);
     attemptRepo = new D1DeliveryAttemptRepository(dbClient);
     preferenceRepo = new D1NotificationPreferenceRepository(dbClient);
+    // Exercise every channel after explicit recipient opt-in.
+    // Default opt-out is covered by notification-policy/outbox tests.
+    for (const category of ['SAFETY', 'COMMERCE', 'ACCOUNT'] as const) {
+      for (const channel of ['WHATSAPP', 'EMAIL'] as const) {
+        await preferenceRepo.savePreference({userId:'usr_test_1',category,channel,enabled:true});
+      }
+    }
 
     whatsappProvider = new TestWhatsAppProvider();
     emailProvider = new TestEmailProvider();
@@ -189,7 +196,7 @@ describe("Notification Pipeline & Invariant Verification", () => {
 
     // WhatsApp and In-App deliver; Email fails
     expect(result.channelResults.IN_APP.status).toBe("DELIVERED");
-    expect(result.channelResults.WHATSAPP.status).toBe("DELIVERED");
+    expect(result.channelResults.WHATSAPP.status).toBe("PROCESSING");
     expect(result.channelResults.EMAIL.status).toBe("FAILED_RETRYABLE");
 
     // CRITICAL INVARIANT: Payment remains SUCCESS
@@ -294,7 +301,7 @@ describe("Notification Pipeline & Invariant Verification", () => {
 
     // First delivery attempt
     const result1 = await consumer.processMessage(rawQueueMsg);
-    expect(result1.channelResults.WHATSAPP.status).toBe("DELIVERED");
+    expect(result1.channelResults.WHATSAPP.status).toBe("PROCESSING");
     expect(result1.channelResults.EMAIL.status).toBe("DELIVERED");
     expect(whatsappProvider.sentMessages).toHaveLength(1);
     expect(emailProvider.sentEmails).toHaveLength(1);
