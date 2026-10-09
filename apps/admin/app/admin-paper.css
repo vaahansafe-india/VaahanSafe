@@ -2340,6 +2340,8 @@ input[type="checkbox"] {
   text-align: left;
   cursor: pointer;
   transition: background 0.12s ease;
+  min-height: 32px;
+  max-width: 220px;
 }
 .admin-account-trigger:hover {
   background: #f0ede5;
@@ -2347,6 +2349,10 @@ input[type="checkbox"] {
 .admin-account-name {
   font-size: 11px;
   color: #404b38;
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .admin-account-name small {
   display: block;
@@ -2354,39 +2360,87 @@ input[type="checkbox"] {
   font-size: 9px;
   margin-top: 1px;
   text-transform: capitalize;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.admin-account-chevron {
+  flex-shrink: 0;
+  color: #7a826f;
 }
 .admin-account-menu {
   z-index: 200;
-  min-width: 235px;
-  padding: 8px;
+  width: 250px;
+  min-width: 220px;
+  max-width: calc(100vw - 16px);
+  padding: 6px;
   border-radius: 4px;
-  border-color: #d9d3c8;
+  border: 1px solid #d9d3c8;
   background: #fffdf8;
-  box-shadow: 0 15px 45px #302c2118;
+  box-shadow: 0 12px 36px rgba(48, 44, 33, 0.14);
+  box-sizing: border-box;
 }
-.admin-account-menu strong,
+.admin-account-menu strong {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #242921;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .admin-account-menu small {
   display: block;
-}
-.admin-account-menu small {
   color: #75796b;
   font-size: 11px;
-  margin-top: 5px;
+  margin-top: 3px;
+  word-break: break-all;
+}
+.admin-account-menu [role="menuitem"],
+.admin-account-menu a {
+  display: flex !important;
+  align-items: center;
+  gap: 10px !important;
+  padding: 8px 10px !important;
+  font-size: 12px;
+  color: #3e4739;
+  border-radius: 4px;
+  cursor: pointer;
+  outline: none;
+  transition: background 0.1s ease, color 0.1s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+.admin-account-menu [role="menuitem"]:hover,
+.admin-account-menu [role="menuitem"]:focus,
+.admin-account-menu a:hover,
+.admin-account-menu a:focus {
+  background: #f2ede4;
+  color: #1b2019;
+}
+.admin-account-menu [role="menuitem"] svg,
+.admin-account-menu a svg {
+  flex-shrink: 0;
+  color: #6d7565;
 }
 .admin-account-signout {
   display: flex;
   align-items: center;
-  gap: 9px;
-  padding: 9px;
+  gap: 10px;
+  padding: 8px 10px;
   font-size: 12px;
   border: 0;
-  border-radius: 5px;
+  border-radius: 4px;
   background: transparent;
   width: 100%;
   color: #875745;
+  cursor: pointer;
+  transition: background 0.1s ease, color 0.1s ease;
+  box-sizing: border-box;
 }
 .admin-account-signout:hover {
-  background: #f0e9de;
+  background: #f7ebe6;
+  color: #7a3e2e;
 }
 .admin-console .admin-main {
   padding: 32px;
@@ -2797,9 +2851,20 @@ input[type="checkbox"] {
   display: flex;
   align-items: center;
 }
-@media (max-width: 1150px) {
-  .admin-account-name {
-    display: none;
+@media (max-width: 1200px) {
+  .admin-account-name,
+  .admin-account-chevron {
+    display: none !important;
+  }
+  .admin-account-trigger {
+    padding: 0 !important;
+    gap: 0 !important;
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    min-height: 32px;
+    justify-content: center;
+    border-radius: 4px;
   }
   .admin-console .admin-topbar {
     padding-inline: 16px;
@@ -2916,14 +2981,29 @@ input[type="checkbox"] {
     justify-content: center;
   }
   .admin-account-trigger {
-    padding: 2px;
+    padding: 0 !important;
     border-radius: 4px;
-    gap: 3px;
+    gap: 0 !important;
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    min-height: 32px;
+    justify-content: center;
   }
   .admin-account-trigger .admin-avatar {
     width: 28px;
     height: 28px;
     border-radius: 4px !important;
+  }
+  .admin-account-menu {
+    width: min(260px, calc(100vw - 16px));
+    max-width: calc(100vw - 16px);
+  }
+  .admin-account-menu [role="menuitem"],
+  .admin-account-menu a,
+  .admin-account-signout {
+    padding: 10px 12px !important;
+    font-size: 13px;
   }
   .admin-console .admin-main {
     padding: 20px 14px;

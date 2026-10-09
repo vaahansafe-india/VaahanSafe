@@ -142,10 +142,19 @@ export function AdminShell({
                       {identity.role.replaceAll("_", " ").toLowerCase()}
                     </small>
                   </span>
-                  <VaahanIcon name="chevron-down" size={13} />
+                  <VaahanIcon
+                    name="chevron-down"
+                    size={13}
+                    className="admin-account-chevron"
+                  />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="admin-account-menu">
+              <DropdownMenuContent
+                align="end"
+                sideOffset={6}
+                collisionPadding={8}
+                className="admin-account-menu"
+              >
                 <DropdownMenuLabel>
                   <strong>{identity.name}</strong>
                   <small>{identity.email}</small>
