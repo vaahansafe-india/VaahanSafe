@@ -270,7 +270,7 @@ describe("Admin Dashboard — Operations Command Center", () => {
   });
 
   describe("7. Activity Pulse Visualization", () => {
-    it("renders SVG sparkline when pulse has data", () => {
+    it("renders responsive Recharts area visualization when pulse has data", () => {
       const pulse: DashboardPulse = {
         buckets: [
           { hourLabel: "24h ago", scans: 2, activations: 1, orders: 1, failures: 0 },
@@ -290,7 +290,8 @@ describe("Admin Dashboard — Operations Command Center", () => {
         React.createElement(ActivityPulse, { pulse }),
       );
       expect(html).toContain("ACTIVITY — LAST 24 HOURS");
-      expect(html).toContain("<svg");
+      expect(html).toContain("pulse-recharts-container");
+      expect(html).toContain("recharts-responsive-container");
       expect(html).toContain("42");
       expect(html).toContain("15");
       expect(html).toContain("12");

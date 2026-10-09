@@ -138,4 +138,28 @@ describe("Admin Hierarchical Vercel-Style Navigation", () => {
       expect(inferSectionFromPathname("/search", permitted)).toBeNull();
     });
   });
+
+  describe("AdminSidebarBack Component", () => {
+    it("renders back button with icon, label, and accessible semantics", async () => {
+      const React = await import("react");
+      const { renderToString } = await import("react-dom/server");
+      const { AdminSidebarBack } = await import(
+        "../apps/admin/components/navigation/AdminSidebarBack"
+      );
+
+      const html = renderToString(
+        React.createElement(AdminSidebarBack, {
+          onBack: () => {},
+          sectionLabel: "Operations",
+        })
+      );
+
+      expect(html).toContain("admin-nav-back-button");
+      expect(html).toContain("admin-nav-back-icon");
+      expect(html).toContain("admin-nav-back-label");
+      expect(html).toContain("Back");
+      expect(html).toContain("Operations");
+      expect(html).toContain('aria-label="Back to main navigation from Operations"');
+    });
+  });
 });

@@ -1,4 +1,14 @@
-import React from "react";
+"use client";
+
+import React, { useId } from "react";
+import {
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  Tooltip,
+} from "recharts";
 import { VaahanIcon } from "@vaahansafe/icons";
 import type { DashboardPulse } from "../types";
 
@@ -6,7 +16,43 @@ export interface ActivityPulseProps {
   pulse: DashboardPulse;
 }
 
+function CustomPulseTooltip({ active, payload }: any) {
+  if (!active || !payload || !payload.length) return null;
+  const data = payload[0]?.payload;
+  if (!data) return null;
+
+  return (
+    <div className="pulse-tooltip-box">
+      <div className="pulse-tooltip-header">
+        <strong>{data.hourLabel}</strong>
+        <span>{data.total} event{data.total === 1 ? "" : "s"}</span>
+      </div>
+      <div className="pulse-tooltip-list">
+        <div className="pulse-tooltip-row">
+          <span>Scans:</span>
+          <strong>{data.scans}</strong>
+        </div>
+        <div className="pulse-tooltip-row">
+          <span>Activations:</span>
+          <strong>{data.activations}</strong>
+        </div>
+        <div className="pulse-tooltip-row">
+          <span>Orders:</span>
+          <strong>{data.orders}</strong>
+        </div>
+        {data.failures > 0 && (
+          <div className="pulse-tooltip-row is-failure">
+            <span>Failures:</span>
+            <strong>{data.failures}</strong>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function ActivityPulse({ pulse }: ActivityPulseProps) {
+  const gradientId = useId();
   const {
     buckets,
     totalScans24h,
@@ -16,40 +62,14 @@ export function ActivityPulse({ pulse }: ActivityPulseProps) {
     hasData,
   } = pulse;
 
-  // Maximum value for scaling SVG sparkline
-  const maxVal = Math.max(
-    1,
-    ...buckets.map((b) => b.scans + b.orders + b.activations),
-  );
-
-  // Generate SVG sparkline points
-  // Width 360, Height 64, padding 10
-  const width = 360;
-  const height = 64;
-  const paddingX = 16;
-  const paddingY = 12;
-
-  const points = buckets.map((b, idx) => {
-    const total = b.scans + b.orders + b.activations;
-    const x =
-      paddingX + (idx / Math.max(1, buckets.length - 1)) * (width - 2 * paddingX);
-    const y =
-      height -
-      paddingY -
-      (total / maxVal) * (height - 2 * paddingY);
-    return { x, y, total, label: b.hourLabel };
-  });
-
-  const pathD = points.reduce((acc, p, idx) => {
-    if (idx === 0) return `M ${p.x} ${p.y}`;
-    // Smooth bezier curve
-    const prev = points[idx - 1]!;
-    const cx = (prev.x + p.x) / 2;
-    return `${acc} C ${cx} ${prev.y}, ${cx} ${p.y}, ${p.x} ${p.y}`;
-  }, "");
-
-  // Area under curve for subtle gradient fill
-  const areaD = `${pathD} L ${points[points.length - 1]?.x ?? width} ${height} L ${points[0]?.x ?? 0} ${height} Z`;
+  const chartData = buckets.map((b) => ({
+    hourLabel: b.hourLabel,
+    total: b.scans + b.activations + b.orders,
+    scans: b.scans,
+    activations: b.activations,
+    orders: b.orders,
+    failures: b.failures,
+  }));
 
   return (
     <section className="command-panel activity-pulse-panel" aria-label="Platform Activity Pulse">
@@ -67,47 +87,56 @@ export function ActivityPulse({ pulse }: ActivityPulseProps) {
       <div className="command-panel-body activity-pulse-body">
         {hasData ? (
           <>
-            <div className="pulse-chart-container" aria-hidden="true">
-              <svg
-                viewBox={`0 0 ${width} ${height}`}
-                className="pulse-svg"
-                preserveAspectRatio="none"
-              >
-                <defs>
-                  <linearGradient id="pulseGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#4e6348" stopOpacity="0.18" />
-                    <stop offset="100%" stopColor="#4e6348" stopOpacity="0.0" />
-                  </linearGradient>
-                </defs>
-                <path d={areaD} fill="url(#pulseGradient)" />
-                <path
-                  d={pathD}
-                  fill="none"
-                  stroke="#4e6348"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                {points.map((p, i) => (
-                  <circle
-                    key={i}
-                    cx={p.x}
-                    cy={p.y}
-                    r="3.5"
-                    fill="#faf9f5"
-                    stroke="#4e6348"
-                    strokeWidth="2"
+            <div className="pulse-recharts-container">
+              <ResponsiveContainer width="100%" height={84}>
+                <AreaChart
+                  data={chartData}
+                  margin={{ top: 8, right: 12, left: 12, bottom: 0 }}
+                >
+                  <defs>
+                    <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#4e6348" stopOpacity={0.28} />
+                      <stop offset="95%" stopColor="#4e6348" stopOpacity={0.0} />
+                    </linearGradient>
+                  </defs>
+                  <XAxis
+                    dataKey="hourLabel"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 9, fill: "#8c9685" }}
+                    dy={4}
                   />
-                ))}
-              </svg>
-
-              <div className="pulse-axis-labels">
-                {buckets.map((b, i) => (
-                  <span key={i} className="pulse-axis-label">
-                    {b.hourLabel}
-                  </span>
-                ))}
-              </div>
+                  <YAxis hide domain={[0, "dataMax + 1"]} />
+                  <Tooltip
+                    content={<CustomPulseTooltip />}
+                    cursor={{
+                      stroke: "#8c9685",
+                      strokeWidth: 1,
+                      strokeDasharray: "3 3",
+                    }}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="total"
+                    stroke="#4e6348"
+                    strokeWidth={2}
+                    fill={`url(#${gradientId})`}
+                    dot={{
+                      r: 3.5,
+                      fill: "#faf9f5",
+                      stroke: "#4e6348",
+                      strokeWidth: 2,
+                    }}
+                    activeDot={{
+                      r: 5,
+                      fill: "#4e6348",
+                      stroke: "#faf9f5",
+                      strokeWidth: 2,
+                    }}
+                    isAnimationActive={false}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
             </div>
 
             <div className="pulse-summary-stats">
