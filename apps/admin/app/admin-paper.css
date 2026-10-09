@@ -2254,51 +2254,76 @@ input[type="checkbox"] {
   gap: 12px;
 }
 .admin-console .admin-search-trigger {
-  min-width: 195px;
+  min-width: 180px;
+  height: 32px;
   background: #f6f4ef;
-  border-color: #e0dcd2;
-  border-radius: 7px;
+  border: 1px solid #e0dcd2;
+  border-radius: 4px;
   font-size: 11px;
   color: #74756b;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  text-decoration: none;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+.admin-console .admin-search-trigger:hover {
+  background: #eeeae0;
+  border-color: #d6d0c4;
 }
 .admin-console .admin-search-trigger kbd {
   font-family: AdminMono, monospace;
   font-size: 9px;
   padding: 2px 4px;
-  border-color: #e0dcd2;
-  border-radius: 3px;
+  border: 1px solid #e0dcd2;
+  border-radius: 4px;
 }
 .admin-console .admin-icon-button {
   color: #666f60;
-  border-radius: 7px;
-  min-width: 36px;
-  min-height: 36px;
+  border-radius: 4px;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  transition: background 0.12s ease;
 }
 .admin-icon-button:hover {
   background: #eae5db;
 }
 .admin-console .admin-avatar,
 .admin-account-trigger .admin-avatar {
-  height: 34px;
-  width: 34px;
+  height: 28px;
+  width: 28px;
   background: #e8eadd;
   border: 1px solid #dce0cf;
   color: #4e6348;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
-  border-radius: 9px;
+  border-radius: 4px !important;
+  display: grid;
+  place-items: center;
   flex: none;
 }
 .admin-account-trigger {
-  display: flex;
-  gap: 10px;
+  display: inline-flex;
+  gap: 8px;
   align-items: center;
   border: 0;
   background: transparent;
-  padding: 3px;
+  padding: 2px 6px;
   color: #606958;
-  border-radius: 7px;
+  border-radius: 4px;
   text-align: left;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+.admin-account-trigger:hover {
+  background: #f0ede5;
 }
 .admin-account-name {
   font-size: 11px;
@@ -2308,14 +2333,14 @@ input[type="checkbox"] {
   display: block;
   color: #7a826f;
   font-size: 9px;
-  margin-top: 4px;
+  margin-top: 1px;
   text-transform: capitalize;
 }
 .admin-account-menu {
   z-index: 200;
   min-width: 235px;
   padding: 8px;
-  border-radius: 10px;
+  border-radius: 4px;
   border-color: #d9d3c8;
   background: #fffdf8;
   box-shadow: 0 15px 45px #302c2118;
@@ -2740,15 +2765,21 @@ input[type="checkbox"] {
     display: none;
   }
   .admin-console .admin-topbar {
-    padding-inline: 22px;
+    padding-inline: 16px;
   }
   .admin-console .admin-main {
-    padding: 26px;
+    padding: 24px 20px;
   }
   .admin-console .admin-search-trigger {
-    min-width: 145px;
+    min-width: 32px;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    justify-content: center;
+    border-radius: 4px;
   }
-  .admin-search-trigger kbd {
+  .admin-console .admin-search-trigger span,
+  .admin-console .admin-search-trigger kbd {
     display: none;
   }
   .admin-media-grid {
@@ -2766,58 +2797,137 @@ input[type="checkbox"] {
     display: none;
   }
   .admin-console .mobile-menu {
-    display: inline-grid;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    min-height: 32px;
   }
   .admin-console .admin-topbar {
-    padding: 10px 16px;
-    height: 64px;
-    min-height: 64px;
+    padding: 0 12px;
+    height: 48px;
+    min-height: 48px;
   }
-  .admin-console .admin-search-trigger {
-    min-width: 36px;
-    padding: 9px;
-  }
-  .admin-console .admin-search-trigger span {
-    display: none;
+  .admin-console .topbar-context {
+    gap: 8px;
+    min-width: 0;
+    flex: 1;
+    overflow: hidden;
   }
   .admin-breadcrumb {
-    gap: 7px;
-    font-size: 10px;
+    gap: 6px;
+    font-size: 11px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+    flex: 1;
   }
   .admin-breadcrumb strong {
     font-size: 11px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 130px;
+    display: inline-block;
+    vertical-align: middle;
   }
   .admin-console .topbar-actions {
-    gap: 5px;
+    gap: 6px;
+    flex-shrink: 0;
+    align-items: center;
+  }
+  .admin-console .admin-search-trigger {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    min-height: 32px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    border: 1px solid #e0dcd2;
+    background: #f6f4ef;
+  }
+  .admin-console .admin-search-trigger span,
+  .admin-console .admin-search-trigger kbd {
+    display: none;
+  }
+  .admin-console .admin-search-trigger svg {
+    margin: 0;
+    display: block;
+    width: 15px;
+    height: 15px;
+  }
+  .admin-console .admin-icon-button {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    min-height: 32px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .admin-account-trigger {
+    padding: 2px;
+    border-radius: 4px;
+    gap: 3px;
+  }
+  .admin-account-trigger .admin-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 4px !important;
   }
   .admin-console .admin-main {
-    padding: 24px 16px;
+    padding: 20px 14px;
   }
   .admin-console .admin-page-heading {
     align-items: flex-start;
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
   }
   .admin-console .admin-toolbar {
     flex-wrap: wrap;
-    padding: 16px;
+    padding: 12px;
+    border-radius: 4px;
   }
   .admin-select-trigger {
     flex: 1;
-    min-width: 135px;
+    min-width: 130px;
+    border-radius: 4px;
   }
   .admin-console .admin-toolbar > input {
     flex-basis: 100%;
+    border-radius: 4px;
   }
   .admin-pulse-grid {
-    gap: 14px;
+    gap: 12px;
   }
   .admin-pulse-grid > div {
     padding-left: 10px;
+    border-radius: 4px;
   }
   .admin-pulse-grid span {
     font-size: 10px;
   }
+}
+@media (max-width: 480px) {
+  .admin-breadcrumb a,
+  .admin-breadcrumb span {
+    display: none;
+  }
+  .admin-breadcrumb strong {
+    max-width: 110px;
+  }
+  .admin-console .topbar-actions {
+    gap: 4px;
+  }
+}
   .admin-pulse-grid strong {
     font-size: 20px;
   }
