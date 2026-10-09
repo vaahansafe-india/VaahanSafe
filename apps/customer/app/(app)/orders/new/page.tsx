@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { getAuthenticatedCustomer } from "@/lib/session";
 import { getAuthoritativeDatabaseClient } from "@vaahansafe/database";
 import { NewOrderCheckout, type SavedAddress } from "./NewOrderCheckout";
 
 export const metadata: Metadata = {
   title: "Checkout — Order QR Kit — VaahanSafe",
-  description: "Complete your order for genuine VaahanSafe physical QR safety kits.",
+  description:
+    "Complete your order for genuine VaahanSafe physical QR safety kits.",
 };
 
 interface NewOrderPageProps {
@@ -16,16 +18,19 @@ interface NewOrderPageProps {
   }>;
 }
 
-export default async function NewOrderPage({ searchParams }: NewOrderPageProps) {
+export default async function NewOrderPage({
+  searchParams,
+}: NewOrderPageProps) {
   const auth = await getAuthenticatedCustomer();
   if (!auth) {
     redirect("/login");
   }
 
-  const { product: productCodeParam, vehicle: vehicleIdParam } = await searchParams;
+  const { product: productCodeParam, vehicle: vehicleIdParam } =
+    await searchParams;
   const db = getAuthoritativeDatabaseClient();
 
-  // 1. Fetch Product from D1
+  // Resolve the requested kit and its current price from the authoritative catalog.
   const targetCode = productCodeParam || "PROD_QR_STICKER_INDIVIDUAL";
   const products = await db.query<{
     id: string;
@@ -37,19 +42,41 @@ export default async function NewOrderPage({ searchParams }: NewOrderPageProps) 
   }>(
     `SELECT id, code, name, description, price_minor, currency
      FROM products
-     WHERE (code = ? OR product_type = 'PHYSICAL_QR_STICKER') AND status = 'ACTIVE'
+     WHERE (code = ? OR id = ?) AND product_type = 'PHYSICAL_QR_STICKER' AND status = 'ACTIVE'
      LIMIT 1`,
-    [targetCode]
+    [targetCode, targetCode],
   );
 
-  const productRow = products[0] || {
-    id: "prod_qr_sticker_kit",
-    code: "PROD_QR_STICKER_INDIVIDUAL",
-    name: "VaahanSafe Automotive Safety Kit",
-    description: "2x UV-Laminated Weatherproof Physical QR Stickers with Cryptographic Safety Routing.",
-    price_minor: 49900,
-    currency: "INR",
-  };
+  const productRow = products[0];
+  if (
+    !productRow ||
+    !Number.isSafeInteger(productRow.price_minor) ||
+    productRow.price_minor <= 0 ||
+    productRow.currency !== "INR"
+  ) {
+    return (
+      <main className="mx-auto max-w-xl px-4 py-12">
+        <section className="space-y-4 rounded-2xl border border-border bg-card p-6 sm:p-8">
+          <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
+            QR kit checkout
+          </p>
+          <h1 className="font-serif text-2xl text-foreground">
+            This kit is temporarily unavailable
+          </h1>
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            We couldn’t load this kit’s current price. Please try again shortly
+            or choose another kit.
+          </p>
+          <Link
+            href="/qr/buy"
+            className="inline-flex min-h-11 items-center rounded-xl bg-primary px-5 text-sm font-medium text-primary-foreground"
+          >
+            Back to QR kits
+          </Link>
+        </section>
+      </main>
+    );
+  }
 
   const product = {
     id: productRow.id,
@@ -57,8 +84,13 @@ export default async function NewOrderPage({ searchParams }: NewOrderPageProps) 
     name: productRow.name,
     description: productRow.description,
     priceMinor: productRow.price_minor,
-    priceFormatted: `₹${(productRow.price_minor / 100).toFixed(0)}`,
-    currency: productRow.currency || "INR",
+    priceFormatted: new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      minimumFractionDigits: productRow.price_minor % 100 === 0 ? 0 : 2,
+      maximumFractionDigits: 2,
+    }).format(productRow.price_minor / 100),
+    currency: productRow.currency,
   };
 
   // 2. Fetch Vehicle details if parameter is passed
@@ -83,13 +115,14 @@ export default async function NewOrderPage({ searchParams }: NewOrderPageProps) 
        FROM vehicles
        WHERE id = ? AND user_id = ?
        LIMIT 1`,
-      [vehicleIdParam, auth.user.id]
+      [vehicleIdParam, auth.user.id],
     );
 
     const v = vehicles[0];
     if (v) {
       const reg = v.registration_number;
-      const masked = reg.length > 4 ? `${reg.slice(0, 4)}••••${reg.slice(-2)}` : reg;
+      const masked =
+        reg.length > 4 ? `${reg.slice(0, 4)}••••${reg.slice(-2)}` : reg;
       vehicleData = {
         id: v.id,
         plate: reg,
@@ -107,7 +140,7 @@ export default async function NewOrderPage({ searchParams }: NewOrderPageProps) 
      FROM addresses
      WHERE user_id = ?
      ORDER BY is_default DESC, created_at DESC`,
-    [auth.user.id]
+    [auth.user.id],
   );
 
   return (
