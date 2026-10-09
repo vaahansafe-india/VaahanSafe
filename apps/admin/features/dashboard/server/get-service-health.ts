@@ -9,6 +9,41 @@ export interface ServiceHealthResult {
   systemStatus: "operational" | "degraded" | "attention";
 }
 
+function isRazorpayConfigured(): boolean {
+  if (
+    Boolean(
+      process.env.RAZORPAY_KEY_ID ||
+        process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID ||
+        process.env.RAZORPAY_KEY_SECRET,
+    )
+  ) {
+    return true;
+  }
+  try {
+    const fs = require("node:fs");
+    const path = require("node:path");
+    const candidates = [
+      path.resolve(process.cwd(), ".env.local"),
+      path.resolve(process.cwd(), ".env"),
+      path.resolve(process.cwd(), "../../.env"),
+      path.resolve(process.cwd(), "../.env"),
+    ];
+    for (const p of candidates) {
+      if (fs.existsSync(p)) {
+        const text = fs.readFileSync(p, "utf-8");
+        const match = text.match(/^[ \t]*RAZORPAY_KEY_ID=[ \t]*([^\r\n#]+)/m);
+        if (match && match[1].trim()) {
+          process.env.RAZORPAY_KEY_ID = match[1].trim();
+          return true;
+        }
+      }
+    }
+  } catch {
+    // ignore
+  }
+  return false;
+}
+
 export async function getDashboardServiceHealth(): Promise<ServiceHealthResult> {
   const dbStart = Date.now();
   let dbLatency: number | null = null;
@@ -46,11 +81,7 @@ export async function getDashboardServiceHealth(): Promise<ServiceHealthResult> 
     getOtpDeliveryAvailability(),
   ).some(Boolean);
 
-  const isPaymentsConfigured = Boolean(
-    process.env.RAZORPAY_KEY_ID ||
-      process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID ||
-      process.env.RAZORPAY_KEY_SECRET,
-  );
+  const isPaymentsConfigured = isRazorpayConfigured();
 
   const services: DashboardServiceItem[] = [
     {

@@ -68,7 +68,9 @@ export function OperationsHealthStrip({
               : svc.status === "healthy"
                 ? "Healthy"
                 : svc.status === "configured"
-                  ? "Protected"
+                  ? svc.name.toLowerCase().includes("payment")
+                    ? "Active"
+                    : "Protected"
                   : svc.status === "unavailable"
                     ? "Unavailable"
                     : svc.status === "degraded"

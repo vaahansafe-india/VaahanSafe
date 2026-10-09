@@ -245,6 +245,7 @@ describe("Admin Dashboard — Operations Command Center", () => {
       expect(stripHtml).toContain("Cloudflare R2");
       expect(stripHtml).toContain("Unavailable");
       expect(stripHtml).toContain("Razorpay Payments");
+      expect(stripHtml).toContain("Active");
       expect(stripHtml).not.toContain("Cashfree");
 
       const cardHtml = renderToString(
