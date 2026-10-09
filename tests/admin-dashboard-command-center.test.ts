@@ -225,6 +225,11 @@ describe("Admin Dashboard — Operations Command Center", () => {
           actionHref: "/gallery",
           actionLabel: "Inspect →",
         },
+        {
+          name: "Razorpay Payments",
+          status: "configured",
+          detail: "Payment gateway active",
+        },
       ];
 
       const stripHtml = renderToString(
@@ -239,6 +244,8 @@ describe("Admin Dashboard — Operations Command Center", () => {
       expect(stripHtml).toContain("38 ms");
       expect(stripHtml).toContain("Cloudflare R2");
       expect(stripHtml).toContain("Unavailable");
+      expect(stripHtml).toContain("Razorpay Payments");
+      expect(stripHtml).not.toContain("Cashfree");
 
       const cardHtml = renderToString(
         React.createElement(ServiceHealthCard, { services }),
@@ -246,6 +253,8 @@ describe("Admin Dashboard — Operations Command Center", () => {
       expect(cardHtml).toContain("INFRASTRUCTURE HEALTH");
       expect(cardHtml).toContain("38 ms");
       expect(cardHtml).toContain("Cloudflare R2");
+      expect(cardHtml).toContain("Razorpay Payments");
+      expect(cardHtml).not.toContain("Cashfree");
     });
   });
 

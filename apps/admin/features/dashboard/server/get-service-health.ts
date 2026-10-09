@@ -48,8 +48,8 @@ export async function getDashboardServiceHealth(): Promise<ServiceHealthResult> 
 
   const isPaymentsConfigured = Boolean(
     process.env.RAZORPAY_KEY_ID ||
-      process.env.CASHFREE_CLIENT_ID ||
-      process.env.CASHFREE_APP_ID,
+      process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID ||
+      process.env.RAZORPAY_KEY_SECRET,
   );
 
   const services: DashboardServiceItem[] = [
@@ -81,7 +81,7 @@ export async function getDashboardServiceHealth(): Promise<ServiceHealthResult> 
       detail: isMsg91Configured ? "SMS & WhatsApp ready" : "Not configured",
     },
     {
-      name: "Cashfree Payments",
+      name: "Razorpay Payments",
       status: isPaymentsConfigured ? "configured" : "unconfigured",
       detail: isPaymentsConfigured ? "Payment gateway active" : "Not configured",
     },
