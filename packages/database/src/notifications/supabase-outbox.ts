@@ -14,7 +14,9 @@ export class SupabaseNotificationOutbox implements NotificationOutboxStore {
     name: string,
     args: Record<string, unknown>,
   ): Promise<T> {
-    const { data, error } = await this.client.rpc(name, args);
+    const { data, error } = await this.client
+      .rpc(name, args)
+      .abortSignal(AbortSignal.timeout(5000));
     if (error) throw new Error("Notification persistence unavailable");
     return data as T;
   }
