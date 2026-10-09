@@ -367,7 +367,11 @@ export function OperationsWorkspace({
           </span>
         </div>
       ) : null}
-      <section className="admin-panel" data-aos="fade-up">
+      <section
+        className="admin-panel"
+        data-aos="fade-up"
+        suppressHydrationWarning
+      >
         <form
           className="admin-toolbar"
           onSubmit={(e) => {

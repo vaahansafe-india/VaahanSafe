@@ -75,7 +75,11 @@ export default async function AdminDashboardPage() {
           </Link>
         </div>
       </div>
-      <section className="admin-hero" data-aos="fade-up">
+      <section
+        className="admin-hero"
+        data-aos="fade-up"
+        suppressHydrationWarning
+      >
         <div className="admin-hero-copy">
           <div className="admin-eyebrow">Safety, thoughtfully managed</div>
           <h2>Every identity. One accountable workspace.</h2>
@@ -106,6 +110,7 @@ export default async function AdminDashboardPage() {
               className="admin-metric"
               data-aos="fade-up"
               data-aos-delay={i * 50}
+              suppressHydrationWarning
             >
               <div className="admin-metric-top">
                 <span>{m.label}</span>
@@ -121,7 +126,11 @@ export default async function AdminDashboardPage() {
       )}
       <div className="admin-grid">
         <div>
-          <section className="admin-panel" data-aos="fade-up">
+          <section
+            className="admin-panel"
+            data-aos="fade-up"
+            suppressHydrationWarning
+          >
             <div className="admin-panel-head">
               <div>
                 <h2>
@@ -199,7 +208,11 @@ export default async function AdminDashboardPage() {
           </div>
         </div>
         <div>
-          <section className="admin-panel" data-aos="fade-up">
+          <section
+            className="admin-panel"
+            data-aos="fade-up"
+            suppressHydrationWarning
+          >
             <div className="admin-panel-head">
               <div>
                 <h2>Service connections</h2>
@@ -234,6 +247,7 @@ export default async function AdminDashboardPage() {
             className="admin-panel"
             style={{ marginTop: 20 }}
             data-aos="fade-up"
+            suppressHydrationWarning
           >
             <div className="admin-panel-head">
               <div>
