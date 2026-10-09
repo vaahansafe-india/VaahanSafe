@@ -37,20 +37,16 @@ export function ScanSituations() {
   ];
 
   return (
-    <section className="w-full py-16 sm:py-24 border-b border-border/80 bg-background">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-12">
+    <section id="situations" className="qr-section">
+      <div className="qr-container space-y-12">
         {/* Section Header */}
         <div className="max-w-2xl space-y-3">
-          <div className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-primary font-semibold">
-            <span>05</span>
-            <span>&bull;</span>
-            <span>Roadside Utility</span>
-          </div>
-          <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-normal tracking-tight text-foreground leading-[1.15]">
+          <p className="qr-label">05 / Roadside Utility</p>
+          <h2 className="qr-section-title mt-3">
             When a VaahanSafe QR <br />
             is <span className="italic text-primary font-medium">scanned.</span>
           </h2>
-          <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+          <p className="qr-muted mt-5 text-sm sm:text-base leading-relaxed">
             Real life on Indian roads requires communication. VaahanSafe bridges vehicle owners
             and the public with dignity, safety, and respect for privacy.
           </p>
@@ -61,13 +57,13 @@ export function ScanSituations() {
           {situations.map((s) => (
             <div
               key={s.title}
-              className="p-6 rounded-2xl border border-border/80 bg-card space-y-3 shadow-xs"
+              className="p-6 rounded border border-[var(--qr-line)] bg-[var(--qr-paper)] space-y-3 shadow-xs hover:border-[var(--qr-accent)] transition-colors"
             >
               <div className="flex items-center justify-between">
-                <div className="size-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center border border-primary/20">
+                <div className="size-10 rounded bg-[var(--qr-surface)] text-[var(--qr-accent)] flex items-center justify-center border border-[var(--qr-line)]">
                   <VaahanIcon name={s.icon} size={18} />
                 </div>
-                <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                <span className="font-mono text-[10px] uppercase tracking-wider qr-muted">
                   {s.tag}
                 </span>
               </div>
@@ -76,7 +72,7 @@ export function ScanSituations() {
                 {s.title}
               </h3>
 
-              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+              <p className="qr-muted text-xs sm:text-sm leading-relaxed">
                 {s.desc}
               </p>
             </div>

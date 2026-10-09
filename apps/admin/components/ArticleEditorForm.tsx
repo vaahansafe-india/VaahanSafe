@@ -15,6 +15,7 @@ import {
   Button,
 } from "@vaahansafe/ui/components";
 import { CloudflareImageUploader } from "./CloudflareImageUploader";
+import { AdminSelect } from "./AdminSelect";
 
 export interface ArticleFormData {
   id?: string;
@@ -225,18 +226,16 @@ export function ArticleEditorForm({
               <Label htmlFor="category" className="text-xs font-semibold">
                 Category
               </Label>
-              <select
+              <AdminSelect
                 id="category"
+                label="Category"
                 value={formData.category}
-                onChange={(e) => handleCategoryChange(e.target.value)}
-                className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm"
-              >
-                {Object.keys(CATEGORY_MAP).map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
-                  </option>
-                ))}
-              </select>
+                onValueChange={handleCategoryChange}
+                options={Object.keys(CATEGORY_MAP).map((cat) => ({
+                  value: cat,
+                  label: cat,
+                }))}
+              />
             </div>
 
             <div className="space-y-1.5">
@@ -430,22 +429,22 @@ export function ArticleEditorForm({
               <Label htmlFor="status" className="text-xs font-semibold">
                 Status
               </Label>
-              <select
+              <AdminSelect
                 id="status"
+                label="Status"
                 value={formData.status}
-                onChange={(e) =>
+                onValueChange={(value) =>
                   setFormData((prev) => ({
                     ...prev,
-                    status: e.target.value as
-                      "DRAFT" | "PUBLISHED" | "ARCHIVED",
+                    status: value as "DRAFT" | "PUBLISHED" | "ARCHIVED",
                   }))
                 }
-                className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm"
-              >
-                <option value="DRAFT">Draft</option>
-                <option value="PUBLISHED">Published</option>
-                <option value="ARCHIVED">Archived</option>
-              </select>
+                options={[
+                  { value: "DRAFT", label: "Draft" },
+                  { value: "PUBLISHED", label: "Published" },
+                  { value: "ARCHIVED", label: "Archived" },
+                ]}
+              />
             </div>
 
             <div className="space-y-1.5">

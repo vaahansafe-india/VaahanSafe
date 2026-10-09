@@ -224,7 +224,7 @@ export default async function AdminDashboardPage() {
               <div className="admin-health-row">
                 <span>
                   <strong>Administrative access</strong>
-                  <small>Verified mobile · role enforced</small>
+                  <small>Password + email OTP · role enforced</small>
                 </span>
                 <span className="admin-tag">Protected</span>
               </div>
@@ -245,7 +245,7 @@ export default async function AdminDashboardPage() {
             <div className="admin-panel-body">
               <p
                 style={{
-                  fontSize: 10,
+                  fontSize: 12,
                   color: "#8a947f",
                   lineHeight: 2,
                   margin: 0,

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { VaahanIcon } from "@vaahansafe/icons";
 import type { AdminRow } from "../lib/contracts";
 import { RecordTable } from "./RecordTable";
+import { AdminSelect } from "./AdminSelect";
 interface Result {
   key: string;
   label: string;
@@ -67,18 +68,21 @@ export function GlobalSearch({ phoneAllowed }: { phoneAllowed: boolean }) {
           }
         />
         {phoneAllowed && (
-          <select
-            aria-label="Search mode"
+          <AdminSelect
+            label="Search mode"
             value={phone ? "phone" : "reference"}
-            onChange={(e) => {
-              setPhone(e.target.value === "phone");
+            onValueChange={(value) => {
+              setPhone(value === "phone");
+              ++version.current;
+              setBusy(false);
               setGroups(null);
               setQ("");
             }}
-          >
-            <option value="reference">References</option>
-            <option value="phone">Phone lookup</option>
-          </select>
+            options={[
+              { value: "reference", label: "References" },
+              { value: "phone", label: "Phone lookup" },
+            ]}
+          />
         )}
         <button className="admin-button primary" disabled={busy}>
           <VaahanIcon name="search" size={14} />

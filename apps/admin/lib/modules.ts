@@ -474,6 +474,9 @@ export const ADMIN_MODULES: AdminModule[] = [
     table: "media_assets",
     fields: [
       "id",
+      "public_url",
+      "visibility",
+      "alt_text",
       "original_filename",
       "mime_type",
       "size_bytes",

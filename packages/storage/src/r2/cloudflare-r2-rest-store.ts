@@ -8,7 +8,11 @@
  * Single Source of Truth: Cloudflare R2 Storage Buckets
  */
 
-import type { ObjectStore, ObjectStoreMeta, PutObjectOptions } from "../ports/object-store";
+import type {
+  ObjectStore,
+  ObjectStoreMeta,
+  PutObjectOptions,
+} from "../ports/object-store";
 import { StorageError } from "../errors/storage-error";
 
 export interface CloudflareR2RestClientOptions {
@@ -27,38 +31,49 @@ export class CloudflareR2RestClient implements ObjectStore {
   constructor(options?: CloudflareR2RestClientOptions) {
     this.accountId =
       options?.accountId ||
-      (typeof process !== "undefined" ? process.env?.CLOUDFLARE_ACCOUNT_ID : "") ||
+      (typeof process !== "undefined"
+        ? process.env?.CLOUDFLARE_ACCOUNT_ID
+        : "") ||
       "";
     this.apiToken =
       options?.apiToken ||
-      (typeof process !== "undefined" ? process.env?.CLOUDFLARE_API_TOKEN : "") ||
+      (typeof process !== "undefined"
+        ? process.env?.CLOUDFLARE_API_TOKEN
+        : "") ||
       "";
     this.bucketName =
       options?.bucketName ||
-      (typeof process !== "undefined" ? process.env?.CLOUDFLARE_R2_PUBLIC_BUCKET : "") ||
+      (typeof process !== "undefined"
+        ? process.env?.CLOUDFLARE_R2_PUBLIC_BUCKET
+        : "") ||
       "vaahansafe-dev-public";
     this.publicBaseUrl =
       options?.publicBaseUrl ||
-      (typeof process !== "undefined" ? process.env?.NEXT_PUBLIC_ASSETS_URL : "") ||
+      (typeof process !== "undefined"
+        ? process.env?.NEXT_PUBLIC_ASSETS_URL
+        : "") ||
       "https://pub-b68acd2881ca43ed80f94ec4989dff30.r2.dev";
 
     if (!this.accountId || !this.apiToken) {
       throw new StorageError(
         "STORAGE_UNAVAILABLE",
-        "Cloudflare R2 REST credentials missing (CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_API_TOKEN)."
+        "Cloudflare R2 REST credentials missing (CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_API_TOKEN).",
       );
     }
   }
 
   private getObjectUrl(key: string): string {
-    const cleanKey = encodeURIComponent(key.replace(/^\//, "")).replace(/%2F/g, "/");
+    const cleanKey = encodeURIComponent(key.replace(/^\//, "")).replace(
+      /%2F/g,
+      "/",
+    );
     return `https://api.cloudflare.com/client/v4/accounts/${this.accountId}/r2/buckets/${this.bucketName}/objects/${cleanKey}`;
   }
 
   async put(
     key: string,
     data: ArrayBuffer | Uint8Array | ReadableStream,
-    options?: PutObjectOptions
+    options?: PutObjectOptions,
   ): Promise<ObjectStoreMeta> {
     try {
       const url = this.getObjectUrl(key);
@@ -94,7 +109,7 @@ export class CloudflareR2RestClient implements ObjectStore {
         const text = await res.text();
         throw new StorageError(
           "STORAGE_UNAVAILABLE",
-          `Cloudflare R2 PUT failed (${res.status}): ${text}`
+          `Cloudflare R2 PUT failed (${res.status}): ${text}`,
         );
       }
 
@@ -113,14 +128,17 @@ export class CloudflareR2RestClient implements ObjectStore {
       if (err instanceof StorageError) throw err;
       throw new StorageError(
         "STORAGE_UNAVAILABLE",
-        `Cloudflare R2 PUT error for "${key}": ${err instanceof Error ? err.message : String(err)}`
+        `Cloudflare R2 PUT error for "${key}": ${err instanceof Error ? err.message : String(err)}`,
       );
     }
   }
 
   async get(
-    key: string
-  ): Promise<{ data: ReadableStream | ArrayBuffer; meta: ObjectStoreMeta } | null> {
+    key: string,
+  ): Promise<{
+    data: ReadableStream | ArrayBuffer;
+    meta: ObjectStoreMeta;
+  } | null> {
     try {
       const url = this.getObjectUrl(key);
       const res = await fetch(url, {
@@ -134,7 +152,7 @@ export class CloudflareR2RestClient implements ObjectStore {
       if (!res.ok) {
         throw new StorageError(
           "STORAGE_UNAVAILABLE",
-          `Cloudflare R2 GET failed with status ${res.status}`
+          `Cloudflare R2 GET failed with status ${res.status}`,
         );
       }
 
@@ -144,7 +162,8 @@ export class CloudflareR2RestClient implements ObjectStore {
         size: arrayBuf.byteLength,
         etag: res.headers.get("etag") || undefined,
         contentType: res.headers.get("content-type") || undefined,
-        uploadedAt: res.headers.get("last-modified") || new Date().toISOString(),
+        uploadedAt:
+          res.headers.get("last-modified") || new Date().toISOString(),
       };
 
       return {
@@ -155,7 +174,7 @@ export class CloudflareR2RestClient implements ObjectStore {
       if (err instanceof StorageError) throw err;
       throw new StorageError(
         "STORAGE_UNAVAILABLE",
-        `Cloudflare R2 GET error for "${key}": ${err instanceof Error ? err.message : String(err)}`
+        `Cloudflare R2 GET error for "${key}": ${err instanceof Error ? err.message : String(err)}`,
       );
     }
   }
@@ -164,7 +183,9 @@ export class CloudflareR2RestClient implements ObjectStore {
     try {
       // Cloudflare's object REST API supports GET, not HEAD. The documented
       // list endpoint returns metadata without downloading an object's body.
-      const url = new URL(`https://api.cloudflare.com/client/v4/accounts/${this.accountId}/r2/buckets/${this.bucketName}/objects`);
+      const url = new URL(
+        `https://api.cloudflare.com/client/v4/accounts/${this.accountId}/r2/buckets/${this.bucketName}/objects`,
+      );
       url.searchParams.set("prefix", key);
       url.searchParams.set("per_page", "1");
       const res = await fetch(url, {
@@ -172,21 +193,34 @@ export class CloudflareR2RestClient implements ObjectStore {
         headers: {
           Authorization: `Bearer ${this.apiToken}`,
         },
+        signal: AbortSignal.timeout(8000),
       });
 
-      if (res.status === 404) return null;
       if (!res.ok) {
         throw new StorageError(
           "STORAGE_UNAVAILABLE",
-          `Cloudflare R2 HEAD failed with status ${res.status}`
+          `Cloudflare R2 HEAD failed with status ${res.status}`,
         );
       }
 
-      const response = await res.json() as { success: boolean; result?: Array<{key?:string;size?:number;etag?:string;last_modified?:string;http_metadata?:{contentType?:string};custom_metadata?:Record<string,string>}> };
+      const response = (await res.json()) as {
+        success: boolean;
+        result?: Array<{
+          key?: string;
+          size?: number;
+          etag?: string;
+          last_modified?: string;
+          http_metadata?: { contentType?: string };
+          custom_metadata?: Record<string, string>;
+        }>;
+      };
       if (!response.success || !Array.isArray(response.result)) {
-        throw new StorageError("STORAGE_UNAVAILABLE", "Cloudflare R2 metadata lookup failed.");
+        throw new StorageError(
+          "STORAGE_UNAVAILABLE",
+          "Cloudflare R2 metadata lookup failed.",
+        );
       }
-      const object = response.result.find(item => item.key === key);
+      const object = response.result.find((item) => item.key === key);
       if (!object) return null;
       return {
         key,
@@ -200,7 +234,7 @@ export class CloudflareR2RestClient implements ObjectStore {
       if (err instanceof StorageError) throw err;
       throw new StorageError(
         "STORAGE_UNAVAILABLE",
-        `Cloudflare R2 HEAD error for "${key}": ${err instanceof Error ? err.message : String(err)}`
+        `Cloudflare R2 HEAD error for "${key}": ${err instanceof Error ? err.message : String(err)}`,
       );
     }
   }
@@ -220,7 +254,7 @@ export class CloudflareR2RestClient implements ObjectStore {
       if (err instanceof StorageError) throw err;
       throw new StorageError(
         "STORAGE_UNAVAILABLE",
-        `Cloudflare R2 DELETE error for "${key}": ${err instanceof Error ? err.message : String(err)}`
+        `Cloudflare R2 DELETE error for "${key}": ${err instanceof Error ? err.message : String(err)}`,
       );
     }
   }

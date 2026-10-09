@@ -30,33 +30,29 @@ export function QrPrinciples() {
   ];
 
   return (
-    <section id="principles" className="w-full py-16 sm:py-24 border-b border-border/80 bg-background">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-12">
+    <section id="principles" className="qr-section">
+      <div className="qr-container space-y-12">
         {/* Section Header */}
         <div className="max-w-2xl space-y-3">
-          <div className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-primary font-semibold">
-            <span>07</span>
-            <span>&bull;</span>
-            <span>System Principles</span>
-          </div>
-          <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-normal tracking-tight text-foreground leading-[1.15]">
+          <p className="qr-label">06 / System Principles</p>
+          <h2 className="qr-section-title mt-3">
             Foundational rules of <br />
             the <span className="italic text-primary font-medium">VaahanSafe QR architecture.</span>
           </h2>
-          <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+          <p className="qr-muted mt-5 text-sm sm:text-base leading-relaxed">
             These non-negotiable security boundaries protect vehicle owners and reassure first responders.
           </p>
         </div>
 
         {/* Registry List */}
-        <div className="border-t border-border/80 divide-y divide-border/60">
+        <div className="border-t border-[var(--qr-line)] divide-y divide-[var(--qr-line)]">
           {principles.map((p) => (
             <div
               key={p.num}
-              className="py-6 sm:py-8 grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-6 items-start hover:bg-muted/20 transition-colors px-2 rounded-xl"
+              className="py-6 sm:py-8 grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-6 items-start hover:bg-[var(--qr-surface)]/50 transition-colors px-3 rounded"
             >
               <div className="md:col-span-2">
-                <span className="font-mono text-xs sm:text-sm font-bold text-primary">
+                <span className="font-mono text-xs sm:text-sm font-bold text-[var(--qr-accent)]">
                   {p.num}
                 </span>
               </div>
@@ -68,7 +64,7 @@ export function QrPrinciples() {
               </div>
 
               <div className="md:col-span-6">
-                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                <p className="qr-muted text-xs sm:text-sm leading-relaxed">
                   {p.desc}
                 </p>
               </div>

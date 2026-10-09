@@ -46,8 +46,8 @@ yarn-error.log*
 
 # Scratch & Temporary local files
 scratch/
-/output/admin-supabase-release/
-/output/admin-exports-dry-run/
+tmp/
+output/
 brand-icon-preview.png
 WHATSAPP_TEMPLATES_GUIDE.md
 *.docx

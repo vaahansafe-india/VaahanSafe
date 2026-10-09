@@ -24,6 +24,17 @@ export interface AdminMetric {
 }
 export interface ConnectionCheck {
   name: string;
-  state: "connected" | "unavailable" | "unconfigured";
+  state: "connected" | "configured" | "unavailable" | "unconfigured";
   checkedAt: string;
+}
+export interface AdminHealth {
+  connections: ConnectionCheck[];
+  monitoring: {
+    checkedAt: string | null;
+    status: string | null;
+    latencyMs: number | null;
+    runs24h: number | null;
+    overdue: boolean;
+    unavailable: boolean;
+  };
 }

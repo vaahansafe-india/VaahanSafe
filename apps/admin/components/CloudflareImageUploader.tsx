@@ -28,10 +28,16 @@ export function CloudflareImageUploader({
   const handleFileUpload = async (file: File) => {
     if (!file) return;
 
-    if (!file.type.startsWith("image/")) {
-      setUploadError(
-        "Only image files (JPEG, PNG, WebP, AVIF, SVG) are allowed.",
-      );
+    if (
+      ![
+        "image/jpeg",
+        "image/png",
+        "image/webp",
+        "image/avif",
+        "image/gif",
+      ].includes(file.type)
+    ) {
+      setUploadError("Choose a JPEG, PNG, WebP, AVIF or GIF image.");
       return;
     }
 

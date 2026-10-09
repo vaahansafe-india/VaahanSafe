@@ -239,6 +239,75 @@ body.qr-paper {
   gap: 0.5rem;
   flex-shrink: 0;
 }
+/* Strict uniform 36px height for all header action elements */
+.qr-theme-toggle,
+.qr-header-actions .qr-button,
+.qr-header-actions .qr-icon-button {
+  height: 36px !important;
+  min-height: 36px !important;
+  max-height: 36px !important;
+  box-sizing: border-box !important;
+  border-radius: 4px !important;
+  margin: 0 !important;
+  vertical-align: middle !important;
+}
+
+/* Square icon buttons: Theme toggle and mobile menu summary */
+.qr-theme-toggle,
+.qr-header-actions .qr-icon-button {
+  width: 36px !important;
+  min-width: 36px !important;
+  max-width: 36px !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: var(--qr-paper) !important;
+  border: 1px solid var(--qr-line) !important;
+  color: var(--qr-ink) !important;
+  cursor: pointer !important;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s !important;
+}
+
+.qr-theme-toggle:hover,
+.qr-header-actions .qr-icon-button:hover {
+  background: var(--qr-surface) !important;
+  border-color: var(--qr-accent) !important;
+  color: var(--qr-accent) !important;
+}
+
+/* CTA Button: Activate your QR */
+.qr-header-actions .qr-button {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.35rem !important;
+  padding: 0 0.875rem !important;
+  font-size: 0.8125rem !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+
+/* Instant Zero-Flash CSS Theme Icons */
+.qr-theme-toggle .qr-theme-icon-sun {
+  display: none !important;
+}
+.qr-theme-toggle .qr-theme-icon-moon {
+  display: block !important;
+  color: var(--qr-ink) !important;
+}
+
+.dark .qr-theme-toggle .qr-theme-icon-sun,
+html.dark .qr-theme-toggle .qr-theme-icon-sun {
+  display: block !important;
+  color: #fbbf24 !important;
+}
+.dark .qr-theme-toggle .qr-theme-icon-moon,
+html.dark .qr-theme-toggle .qr-theme-icon-moon {
+  display: none !important;
+}
+
 .qr-header-nav {
   display: flex;
   align-items: center;
@@ -250,17 +319,12 @@ body.qr-paper {
   align-items: center;
   min-height: 44px;
 }
-.qr-header-actions button {
-  width: 44px;
-  height: 44px;
-  border-radius: 4px;
-}
 .qr-icon-button {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
+  width: 36px;
+  height: 36px;
   border: 1px solid var(--qr-line);
   border-radius: 4px;
 }

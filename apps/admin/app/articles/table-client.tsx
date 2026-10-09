@@ -4,6 +4,9 @@ import Link from "next/link";
 import { AdminDialog } from "../../components/AdminDialog";
 import { EmailVerification } from "../../components/EmailVerification";
 import { StatusTag } from "../../components/RecordTable";
+import { AdminSelect } from "../../components/AdminSelect";
+import { useQuery } from "@tanstack/react-query";
+import { getAdminData } from "../../lib/client-api";
 interface ArticleItem {
   id: string;
   slug: string;
@@ -22,8 +25,7 @@ export function ArticlesTableClient({
   initialArticles: ArticleItem[];
   categories: Array<{ id: string; slug: string; name: string; count: number }>;
 }) {
-  const [articles, setArticles] = useState(initialArticles),
-    [search, setSearch] = useState(""),
+  const [search, setSearch] = useState(""),
     [category, setCategory] = useState(""),
     [status, setStatus] = useState(""),
     [action, setAction] = useState<{
@@ -35,6 +37,13 @@ export function ArticlesTableClient({
     [busy, setBusy] = useState(false),
     [error, setError] = useState(""),
     [stepUp, setStepUp] = useState(false);
+  const editorial = useQuery({
+    queryKey: ["admin-articles"],
+    queryFn: ({ signal }) =>
+      getAdminData<{ articles: ArticleItem[] }>("/api/articles", signal),
+    initialData: { articles: initialArticles },
+  });
+  const articles = editorial.isError ? [] : editorial.data.articles;
   const close = useCallback(() => {
     setAction(null);
     setError("");
@@ -69,21 +78,7 @@ export function ArticlesTableClient({
           result.error?.message || "We couldn't change this article.",
         );
       }
-      setArticles((current) =>
-        current.map((a) =>
-          a.id === action.article.id
-            ? {
-                ...a,
-                status:
-                  action.kind === "archive"
-                    ? "ARCHIVED"
-                    : a.status === "PUBLISHED"
-                      ? "DRAFT"
-                      : "PUBLISHED",
-              }
-            : a,
-        ),
-      );
+      await editorial.refetch();
       close();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Please try again.");
@@ -109,29 +104,41 @@ export function ArticlesTableClient({
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-        <select
-          aria-label="Article category"
+        <AdminSelect
+          label="Article category"
           value={category}
-          onChange={(e) => setCategory(e.target.value)}
-        >
-          <option value="">All categories</option>
-          {categories.map((c) => (
-            <option key={c.slug} value={c.slug}>
-              {c.name}
-            </option>
-          ))}
-        </select>
-        <select
-          aria-label="Publication status"
+          onValueChange={setCategory}
+          options={[
+            { value: "", label: "All categories" },
+            ...categories.map((c) => ({ value: c.slug, label: c.name })),
+          ]}
+        />
+        <AdminSelect
+          label="Publication status"
           value={status}
-          onChange={(e) => setStatus(e.target.value)}
+          onValueChange={setStatus}
+          options={[
+            { value: "", label: "All statuses" },
+            ...["DRAFT", "PUBLISHED", "ARCHIVED"].map((s) => ({
+              value: s,
+              label: s,
+            })),
+          ]}
+        />
+        <button
+          className="admin-button"
+          disabled={editorial.isFetching}
+          onClick={() => void editorial.refetch()}
         >
-          <option value="">All statuses</option>
-          {["DRAFT", "PUBLISHED", "ARCHIVED"].map((s) => (
-            <option key={s}>{s}</option>
-          ))}
-        </select>
+          Refresh
+        </button>
       </div>
+      {editorial.isError && (
+        <div className="admin-notice error" role="alert">
+          Editorial records are temporarily unavailable. Use Refresh to try
+          again.
+        </div>
+      )}
       {filtered.length ? (
         <div className="admin-table-wrap">
           <table className="admin-table">

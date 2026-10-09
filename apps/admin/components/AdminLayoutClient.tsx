@@ -2,6 +2,7 @@
 import { usePathname } from "next/navigation";
 import type { AdminIdentity } from "../lib/contracts";
 import { AdminShell } from "./AdminShell";
+import { AdminQueryProvider } from "./AdminQueryProvider";
 export function AdminLayoutClient({
   identity,
   children,
@@ -18,5 +19,9 @@ export function AdminLayoutClient({
     path === "/verify-email"
   )
     return <>{children}</>;
-  return <AdminShell identity={identity}>{children}</AdminShell>;
+  return (
+    <AdminQueryProvider key={`${identity.id}:${identity.sessionId}`}>
+      <AdminShell identity={identity}>{children}</AdminShell>
+    </AdminQueryProvider>
+  );
 }

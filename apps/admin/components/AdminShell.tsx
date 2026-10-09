@@ -1,10 +1,36 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { VaahanIcon } from "@vaahansafe/icons";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@vaahansafe/ui/components/dropdown-menu";
+import {
+  Sheet,
+  SheetContent,
+  SheetTitle,
+  SheetTrigger,
+} from "@vaahansafe/ui/components/sheet";
 import { ADMIN_MODULES, canReadModule, type AdminGroup } from "../lib/modules";
 import type { AdminIdentity } from "../lib/contracts";
+const groups: AdminGroup[] = [
+  "Workspace",
+  "Operations",
+  "Commerce / Customer",
+  "Platform / Content",
+];
+const groupLabels: Record<AdminGroup, string> = {
+  Workspace: "Workspace",
+  Operations: "QR operations",
+  "Commerce / Customer": "Customers & commerce",
+  "Platform / Content": "Platform & content",
+};
 export function AdminShell({
   identity,
   children,
@@ -12,136 +38,242 @@ export function AdminShell({
   identity: AdminIdentity;
   children: React.ReactNode;
 }) {
-  const pathname = usePathname();
-  const [open, setOpen] = useState(false);
-  useEffect(() => {
-    setOpen(false);
-  }, [pathname]);
-  useEffect(() => {
-    if (!open) return;
-    const handle = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
-    };
-    window.addEventListener("keydown", handle);
-    return () => window.removeEventListener("keydown", handle);
-  }, [open]);
+  const pathname = usePathname(),
+    router = useRouter();
   const current =
     ADMIN_MODULES.find((m) => m.key === pathname.split("/")[1]) ||
-    ADMIN_MODULES[0];
-  const groups: AdminGroup[] = [
+    ADMIN_MODULES[0]!;
+  const [open, setOpen] = useState(false),
+    [collapsed, setCollapsed] = useState(false),
+    [navSearch, setNavSearch] = useState("");
+  const [expanded, setExpanded] = useState<string[]>([
     "Workspace",
-    "Operations",
-    "Commerce / Customer",
-    "Platform / Content",
-  ];
+    current.group,
+  ]);
+  useEffect(() => {
+    setOpen(false);
+    setExpanded((v) => (v.includes(current.group) ? v : [...v, current.group]));
+  }, [pathname, current.group]);
+  useEffect(() => {
+    const shortcut = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        router.push("/search");
+      }
+    };
+    document.addEventListener("keydown", shortcut);
+    return () => document.removeEventListener("keydown", shortcut);
+  }, [router]);
+  const initials = identity.name
+    .split(/\s+/)
+    .map((n) => n[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+  const navigation = (
+    <>
+      <Link href="/" className="admin-brand" onClick={() => setOpen(false)}>
+        <span className="admin-brand-mark">
+          <VaahanIcon name="qr" size={23} />
+        </span>
+        <span className="admin-brand-name">
+          Vaahan<span className="brand-light">Safe</span>
+          <small>Operations console</small>
+        </span>
+      </Link>
+      <div className="admin-workspace">
+        <VaahanIcon name="shield" size={15} />
+        <span>
+          Platform administration<small>Authorized team access</small>
+        </span>
+      </div>
+      <div className="admin-nav-filter">
+        <VaahanIcon name="search" size={14} />
+        <input
+          aria-label="Find a workspace section"
+          placeholder="Find a section…"
+          value={navSearch}
+          onChange={(e) => setNavSearch(e.target.value)}
+        />
+      </div>
+      <nav aria-label="Workspace sections">
+        {groups.map((group) => {
+          const modules = ADMIN_MODULES.filter(
+            (m) =>
+              m.group === group &&
+              canReadModule(identity.role, m.key) &&
+              m.label.toLowerCase().includes(navSearch.toLowerCase()),
+          );
+          if (!modules.length) return null;
+          const visible = collapsed || !!navSearch || expanded.includes(group);
+          return (
+            <section className="admin-nav-group" key={group}>
+              <button
+                className="admin-nav-heading"
+                aria-expanded={visible}
+                onClick={() =>
+                  setExpanded((v) =>
+                    v.includes(group)
+                      ? v.filter((g) => g !== group)
+                      : [...v, group],
+                  )
+                }
+              >
+                <span>{groupLabels[group]}</span>
+                <VaahanIcon
+                  name={visible ? "chevron-down" : "chevron-right"}
+                  size={12}
+                />
+              </button>
+              {visible &&
+                modules.map((m) => (
+                  <Link
+                    key={m.key}
+                    href={m.key === "dashboard" ? "/" : `/${m.key}`}
+                    onClick={() => setOpen(false)}
+                    title={collapsed ? m.label : undefined}
+                    className={`admin-nav-link ${m.key === current.key ? "active" : ""}`}
+                    aria-current={m.key === current.key ? "page" : undefined}
+                  >
+                    <VaahanIcon name={m.icon} size={18} />
+                    <span>{m.label}</span>
+                    {m.key === current.key && (
+                      <span className="nav-selection" />
+                    )}
+                  </Link>
+                ))}
+            </section>
+          );
+        })}
+        {navSearch &&
+          !ADMIN_MODULES.some(
+            (m) =>
+              canReadModule(identity.role, m.key) &&
+              m.label.toLowerCase().includes(navSearch.toLowerCase()),
+          ) && <p className="admin-nav-empty">No matching section.</p>}
+      </nav>
+      <div className="admin-sidebar-foot">
+        <span className="admin-avatar">{initials}</span>
+        <span>
+          <strong>{identity.name}</strong>
+          <small>{identity.role.replaceAll("_", " ").toLowerCase()}</small>
+        </span>
+        <VaahanIcon name="shield" size={15} />
+      </div>
+    </>
+  );
   return (
-    <div className="admin-shell">
+    <div
+      className={`admin-shell admin-console ${collapsed ? "sidebar-compact" : ""}`}
+    >
       <a className="admin-skip" href="#admin-main">
         Skip to workspace
       </a>
-      {open && (
-        <button
-          className="admin-backdrop"
-          onClick={() => setOpen(false)}
-          aria-label="Close navigation"
-        />
-      )}
-      <aside
-        className={`admin-sidebar ${open ? "is-open" : ""}`}
-        aria-label="Admin navigation"
-      >
-        <Link href="/" className="admin-brand">
-          <span className="admin-brand-mark">
-            <VaahanIcon name="qr" size={21} />
-          </span>
-          <span>
-            vaahan<span className="brand-light">safe</span>
-            <small>OPERATIONS CONSOLE</small>
-          </span>
-        </Link>
-        <div className="admin-workspace">
-          <span className="status-dot" />
-          Platform workspace<span className="workspace-label">ADMIN</span>
-        </div>
-        <nav>
-          {groups.map((group) => (
-            <div className="admin-nav-group" key={group}>
-              <p>{group}</p>
-              {ADMIN_MODULES.filter(
-                (m) => m.group === group && canReadModule(identity.role, m.key),
-              ).map((m) => {
-                const href = m.key === "dashboard" ? "/" : `/${m.key}`;
-                const selected = m.key === current?.key;
-                return (
-                  <Link
-                    key={m.key}
-                    href={href}
-                    className={
-                      selected ? "admin-nav-link active" : "admin-nav-link"
-                    }
-                    aria-current={selected ? "page" : undefined}
-                  >
-                    <VaahanIcon name={m.icon} size={17} />
-                    <span>{m.label}</span>
-                    {selected && <span className="nav-selection" />}
-                  </Link>
-                );
-              })}
-            </div>
-          ))}
-        </nav>
-        <div className="admin-sidebar-foot">
-          <VaahanIcon name="eye-off" size={16} />
-          <span>
-            Private workspace<small>Access is recorded and controlled</small>
-          </span>
-        </div>
+      <aside className="admin-sidebar" aria-label="Admin navigation">
+        {navigation}
       </aside>
       <div className="admin-workspace-main">
         <header className="admin-topbar">
           <div className="topbar-context">
             <button
-              className="admin-icon-button mobile-menu"
-              onClick={() => setOpen(!open)}
-              aria-expanded={open}
-              aria-label="Toggle navigation"
+              className="admin-icon-button desktop-menu"
+              aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+              aria-expanded={!collapsed}
+              onClick={() => setCollapsed((v) => !v)}
             >
-              <VaahanIcon name="menu" size={20} />
+              <VaahanIcon name="menu" size={19} />
             </button>
-            <span>Workspace</span>
-            <span className="breadcrumb-divider">/</span>
-            <strong>{current?.label}</strong>
+            <Sheet open={open} onOpenChange={setOpen}>
+              <SheetTrigger asChild>
+                <button
+                  className="admin-icon-button mobile-menu"
+                  aria-label="Open navigation"
+                >
+                  <VaahanIcon name="menu" size={20} />
+                </button>
+              </SheetTrigger>
+              <SheetContent
+                side="left"
+                className="admin-mobile-navigation"
+                aria-describedby={undefined}
+              >
+                <SheetTitle className="sr-only">Admin navigation</SheetTitle>
+                {navigation}
+              </SheetContent>
+            </Sheet>
+            <nav aria-label="Breadcrumb" className="admin-breadcrumb">
+              <Link href="/">Console</Link>
+              <span>/</span>
+              <strong>{current.label}</strong>
+            </nav>
           </div>
           <div className="topbar-actions">
             <Link className="admin-search-trigger" href="/search">
-              <VaahanIcon name="search" size={17} />
-              <span>Search workspace</span>
-              <kbd>⌕</kbd>
+              <VaahanIcon name="search" size={16} />
+              <span>Search records</span>
+              <kbd>Ctrl K</kbd>
             </Link>
-            <span className="admin-avatar" aria-hidden="true">
-              {identity.name.slice(0, 2).toUpperCase()}
-            </span>
-            <div className="admin-user">
-              <strong>{identity.name}</strong>
-              <small>{identity.role.replaceAll("_", " ").toLowerCase()}</small>
-            </div>
-            <form action="/api/auth/logout" method="post">
-              <button
-                className="admin-icon-button"
-                title="Sign out"
-                aria-label="Sign out"
-              >
-                <VaahanIcon name="logout" size={17} />
-              </button>
-            </form>
+            <a
+              href="https://status.vaahansafe.com"
+              target="_blank"
+              rel="noreferrer"
+              className="admin-icon-button"
+              aria-label="Open service status"
+              title="Service status"
+            >
+              <VaahanIcon name="activity" size={18} />
+            </a>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  className="admin-account-trigger"
+                  aria-label="Account menu"
+                >
+                  <span className="admin-avatar">{initials}</span>
+                  <span className="admin-account-name">
+                    {identity.name}
+                    <small>
+                      {identity.role.replaceAll("_", " ").toLowerCase()}
+                    </small>
+                  </span>
+                  <VaahanIcon name="chevron-down" size={13} />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="admin-account-menu">
+                <DropdownMenuLabel>
+                  <strong>{identity.name}</strong>
+                  <small>{identity.email}</small>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {canReadModule(identity.role, "settings") && (
+                  <DropdownMenuItem asChild>
+                    <Link href="/settings">
+                      <VaahanIcon name="settings" size={15} />
+                      System settings
+                    </Link>
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuItem onSelect={() => router.push("/search")}>
+                  <VaahanIcon name="search" size={15} />
+                  Search workspace
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <form action="/api/auth/logout" method="post">
+                  <button type="submit" className="admin-account-signout">
+                    <VaahanIcon name="logout" size={15} />
+                    Sign out
+                  </button>
+                </form>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </header>
         <main id="admin-main" className="admin-main">
           {children}
         </main>
         <footer className="admin-footer">
-          <span>VaahanSafe · Operations & administration</span>
-          <span>Private by design. Accountable by default.</span>
+          <span>VaahanSafe · Operations console</span>
+          <span>Access controlled · Changes audited</span>
         </footer>
       </div>
     </div>

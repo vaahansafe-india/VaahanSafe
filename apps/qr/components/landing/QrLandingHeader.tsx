@@ -2,10 +2,13 @@
 import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { VaahanSafeLogo } from "@vaahansafe/ui/brand";
-import { ThemeToggle } from "@vaahansafe/ui/theme/theme-toggle";
+import { QrThemeToggle } from "./QrThemeToggle";
 const links = [
   { label: "How it works", href: "#how-it-works" },
+  { label: "Sticker anatomy", href: "#anatomy" },
   { label: "Your privacy", href: "#privacy" },
+  { label: "Roadside utility", href: "#situations" },
+  { label: "Principles", href: "#principles" },
   { label: "Questions", href: "#faq" },
 ];
 export function QrLandingHeader({
@@ -55,12 +58,18 @@ export function QrLandingHeader({
           ))}
         </nav>
         <div className="qr-header-actions">
-          <ThemeToggle />
-          <a className="qr-button qr-button-primary" href={activateUrl}>
+          <QrThemeToggle />
+          <a
+            className="qr-button qr-button-primary qr-header-cta"
+            href={activateUrl}
+          >
             Activate your QR <span aria-hidden="true">↗</span>
           </a>
           <details ref={menu} className="qr-menu">
-            <summary className="qr-icon-button" aria-label="Navigation menu">
+            <summary
+              className="qr-icon-button"
+              aria-label="Navigation menu"
+            >
               <span aria-hidden="true">☰</span>
             </summary>
             <nav

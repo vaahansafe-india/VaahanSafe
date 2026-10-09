@@ -17,16 +17,14 @@ export function ProjectionBoundaryDiagram() {
   ];
 
   return (
-    <div className="w-full rounded-2xl border border-border/90 bg-card p-6 sm:p-8 space-y-8">
+    <div className="w-full rounded-2xl border border-[var(--qr-line)] bg-[var(--qr-paper)] p-6 sm:p-8 space-y-8 shadow-xs">
       <div className="space-y-2">
-        <span className="font-mono text-xs uppercase tracking-widest text-primary font-semibold">
-          Architectural Boundary
-        </span>
+        <p className="qr-label">Architectural Boundary</p>
         <h3 className="font-serif text-2xl sm:text-3xl font-medium text-foreground tracking-tight">
           Only the approved public view <br className="hidden sm:inline" />
           is returned to a scan.
         </h3>
-        <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed max-w-xl">
+        <p className="qr-muted text-xs sm:text-sm leading-relaxed max-w-xl">
           VaahanSafe strictly separates account records from public emergency resolution.
           Server-side projection ensures private fields never touch the browser.
         </p>
@@ -55,7 +53,7 @@ export function ProjectionBoundaryDiagram() {
                   <span className="text-xs font-semibold text-foreground block">
                     {f.label}
                   </span>
-                  <span className="text-[11px] text-muted-foreground block">
+                  <span className="text-[11px] qr-muted block">
                     {f.note}
                   </span>
                 </div>
@@ -65,9 +63,9 @@ export function ProjectionBoundaryDiagram() {
         </div>
 
         {/* Blocked Private Storage Side */}
-        <div className="p-5 rounded-xl border border-border bg-muted/40 space-y-4">
-          <div className="flex items-center justify-between pb-2 border-b border-border">
-            <span className="font-mono text-xs font-bold uppercase text-muted-foreground">
+        <div className="p-5 rounded-xl border border-[var(--qr-line)] bg-[var(--qr-surface)]/60 space-y-4">
+          <div className="flex items-center justify-between pb-2 border-b border-[var(--qr-line)]">
+            <span className="font-mono text-xs font-bold uppercase qr-muted">
               Private Account Storage
             </span>
             <span className="font-mono text-[10px] text-destructive font-semibold">
@@ -85,7 +83,7 @@ export function ProjectionBoundaryDiagram() {
                   <span className="text-xs font-semibold text-foreground block">
                     {f.label}
                   </span>
-                  <span className="text-[11px] text-muted-foreground block">
+                  <span className="text-[11px] qr-muted block">
                     {f.note}
                   </span>
                 </div>
@@ -96,11 +94,11 @@ export function ProjectionBoundaryDiagram() {
       </div>
 
       {/* Signature Projection Boundary Footnote */}
-      <div className="pt-4 border-t border-border/70 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+      <div className="pt-4 border-t border-[var(--qr-line)] flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
         <span className="font-mono text-[11px] text-foreground font-semibold">
           PRIVATE ACCOUNT &rarr; CONTROLLED PROJECTION &rarr; PUBLIC SAFETY VIEW
         </span>
-        <span className="font-mono text-[10px] text-muted-foreground">
+        <span className="font-mono text-[10px] qr-muted">
           Zero Private Leaks &bull; Server Whitelist Verified
         </span>
       </div>

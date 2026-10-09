@@ -14,8 +14,8 @@ export function IdentityPath({ activeNode = "CAMERA" }: IdentityPathProps) {
   ];
 
   return (
-    <nav aria-label="Resolution Path Progress" className="w-full py-4 border-y border-border/70 bg-card/40 select-none">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <nav aria-label="Resolution Path Progress" className="w-full py-3.5 border-y border-[var(--qr-line)] bg-[var(--qr-surface)] select-none">
+      <div className="qr-container">
         {/* Desktop Horizontal Milestone Trail */}
         <div className="hidden md:flex items-center justify-between">
           {nodes.map((n, idx) => {
@@ -26,20 +26,20 @@ export function IdentityPath({ activeNode = "CAMERA" }: IdentityPathProps) {
                   <span
                     className={`size-2.5 rounded-full transition-all ${
                       isActive
-                        ? "bg-primary ring-4 ring-primary/20 scale-110"
-                        : "bg-muted-foreground/50"
+                        ? "bg-[var(--qr-accent)] ring-4 ring-[var(--qr-accent)]/20 scale-110"
+                        : "bg-[var(--qr-muted)]/50"
                     }`}
                   />
                   <span
                     className={`font-mono text-xs uppercase tracking-wider ${
-                      isActive ? "text-primary font-bold" : "text-muted-foreground"
+                      isActive ? "text-[var(--qr-accent)] font-bold" : "qr-muted"
                     }`}
                   >
                     {n.label}
                   </span>
                 </div>
                 {idx < nodes.length - 1 && (
-                  <div className="flex-1 h-px bg-border/80 mx-4" />
+                  <div className="flex-1 h-px bg-[var(--qr-line)] mx-4" />
                 )}
               </React.Fragment>
             );
@@ -47,9 +47,9 @@ export function IdentityPath({ activeNode = "CAMERA" }: IdentityPathProps) {
         </div>
 
         {/* Mobile Horizontal Compact Badge Indicator */}
-        <div className="flex md:hidden items-center justify-between text-[11px] font-mono uppercase tracking-wider text-muted-foreground">
+        <div className="flex md:hidden items-center justify-between text-[11px] font-mono uppercase tracking-wider qr-muted">
           <span className="flex items-center gap-2 text-foreground font-semibold">
-            <span className="size-2 rounded-full bg-primary ring-2 ring-primary/20" />
+            <span className="size-2 rounded-full bg-[var(--qr-accent)] ring-2 ring-[var(--qr-accent)]/20" />
             Scanner Path
           </span>
           <span>Camera &rarr; QR &rarr; Public Pass</span>

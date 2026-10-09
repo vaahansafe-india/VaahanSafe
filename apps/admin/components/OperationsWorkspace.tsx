@@ -1,5 +1,6 @@
 "use client";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { VaahanIcon } from "@vaahansafe/icons";
 import type { AdminIdentity, AdminList, AdminRow } from "../lib/contracts";
 import { canMutateModule, getAdminModule } from "../lib/modules";
@@ -7,6 +8,10 @@ import { columnLabel, displayValue } from "../lib/presentation";
 import { RecordTable } from "./RecordTable";
 import { AdminDialog } from "./AdminDialog";
 import { EmailVerification } from "./EmailVerification";
+import { AdminSelect } from "./AdminSelect";
+import { getAdminData } from "../lib/client-api";
+import { MonitoringPanel } from "./MonitoringPanel";
+import { MediaGallery } from "./MediaGallery";
 const editFields: Record<
   string,
   { key: string; label: string; options?: string[]; type?: string }[]
@@ -99,16 +104,11 @@ export function OperationsWorkspace({
   initialError: boolean;
 }) {
   const m = getAdminModule(moduleKey)!;
-  const [data, setData] = useState(initial),
-    [q, setQ] = useState(""),
+  const [q, setQ] = useState(""),
     [status, setStatus] = useState(""),
-    [error, setError] = useState(
-      initialError
-        ? "We couldn't load these records right now. Please try again."
-        : "",
-    ),
+    [error, setError] = useState(""),
     [notice, setNotice] = useState(""),
-    [busy, setBusy] = useState(false),
+    [actionBusy, setBusy] = useState(false),
     [selected, setSelected] = useState<string[]>([]),
     [inspect, setInspect] = useState<AdminRow | null>(null),
     [editing, setEditing] = useState(false),
@@ -122,46 +122,41 @@ export function OperationsWorkspace({
       rows: AdminRow[];
     } | null>(null),
     [dialogError, setDialogError] = useState("");
-  const requestVersion = useRef(0),
-    abort = useRef<AbortController | null>(null);
-  useEffect(() => () => abort.current?.abort(), []);
+  const queryClient = useQueryClient();
+  const [filters, setFilters] = useState({ q: "", status: "", page: 1 });
+  const listOptions = (input: typeof filters) => ({
+    queryKey: ["admin-records", identity.sessionId, moduleKey, input],
+    queryFn: ({ signal }: { signal: AbortSignal }) =>
+      getAdminData<AdminList>(
+        `/api/operations/${moduleKey}?${new URLSearchParams({ ...input, page: String(input.page) })}`,
+        signal,
+      ),
+  });
+  const records = useQuery({
+    ...listOptions(filters),
+    initialData:
+      !filters.q && !filters.status && filters.page === 1 && !initialError
+        ? initial || undefined
+        : undefined,
+  });
+  const data = records.isError ? null : records.data;
+  const loadError = records.error?.message || "";
+  const busy = actionBusy || records.isFetching;
   const writable = canMutateModule(identity.role, moduleKey);
   const inventoryWrite =
     moduleKey === "inventory" &&
     ["SUPER_ADMIN", "OPS_ADMIN"].includes(identity.role);
-  const refresh = useCallback(
-    async (page = 1) => {
-      const version = ++requestVersion.current;
-      abort.current?.abort();
-      const control = new AbortController();
-      abort.current = control;
-      setBusy(true);
-      setError("");
-      try {
-        const params = new URLSearchParams({ q, status, page: String(page) });
-        const response = await fetch(`/api/operations/${moduleKey}?${params}`, {
-          cache: "no-store",
-          signal: control.signal,
-        });
-        const result = await response.json();
-        if (!response.ok)
-          throw new Error(result.error?.message || "Records are unavailable.");
-        if (version === requestVersion.current) {
-          setData(result.data);
-          setSelected([]);
-        }
-      } catch (e) {
-        if (control.signal.aborted) return;
-        if (version === requestVersion.current) {
-          setData(null);
-          setError(e instanceof Error ? e.message : "Please try again.");
-        }
-      } finally {
-        if (version === requestVersion.current) setBusy(false);
-      }
-    },
-    [moduleKey, q, status],
-  );
+  const refresh = async (page = 1) => {
+    const next = { q, status, page };
+    setFilters(next);
+    setSelected([]);
+    setError("");
+    try {
+      await queryClient.fetchQuery({ ...listOptions(next), staleTime: 0 });
+    } catch {
+      /* Query state presents the recoverable error. */
+    }
+  };
   const closeDialog = useCallback(() => {
     setInspect(null);
     setEditing(false);
@@ -261,11 +256,12 @@ export function OperationsWorkspace({
   const fields =
     m.fields?.filter(
       (key) =>
-        key !== "id" ||
-        moduleKey === "reports" ||
-        moduleKey === "payments" ||
-        moduleKey === "refunds" ||
-        moduleKey === "support",
+        !["public_url", "alt_text", "visibility"].includes(key) &&
+        (key !== "id" ||
+          moduleKey === "reports" ||
+          moduleKey === "payments" ||
+          moduleKey === "refunds" ||
+          moduleKey === "support"),
     ) || [];
   const statuses =
     (
@@ -344,10 +340,11 @@ export function OperationsWorkspace({
           )}
         </div>
       </div>
-      {error && (
+      {moduleKey === "incidents" && <MonitoringPanel />}
+      {(error || loadError) && (
         <div className="admin-notice error" role="alert">
           <VaahanIcon name="alert" size={16} />
-          <span>{error}</span>
+          <span>{error || loadError}</span>
           <button className="admin-link" onClick={() => void refresh()}>
             Try again
           </button>
@@ -390,26 +387,25 @@ export function OperationsWorkspace({
             onChange={(e) => setQ(e.target.value)}
           />
           {m.statusField && (
-            <select
-              aria-label="Record status"
+            <AdminSelect
+              label="Record status"
               value={status}
-              onChange={(e) => setStatus(e.target.value)}
-            >
-              <option value="">All statuses</option>
-              {statuses.length
-                ? statuses.map((s) => (
-                    <option key={s} value={s}>
-                      {s.replaceAll("_", " ")}
-                    </option>
-                  ))
-                : [
-                    ...new Set(
-                      data?.rows
-                        .map((r) => String(r[m.statusField!] || ""))
-                        .filter(Boolean),
-                    ),
-                  ].map((s) => <option key={s}>{s}</option>)}
-            </select>
+              onValueChange={setStatus}
+              options={[
+                { value: "", label: "All statuses" },
+                ...[
+                  ...new Set([
+                    ...statuses,
+                    status,
+                    ...(data?.rows.map((r) =>
+                      String(r[m.statusField!] || ""),
+                    ) || []),
+                  ]),
+                ]
+                  .filter(Boolean)
+                  .map((s) => ({ value: s, label: s.replaceAll("_", " ") })),
+              ]}
+            />
           )}
           <button className="admin-button" disabled={busy} type="submit">
             <VaahanIcon name="filter" size={13} />
@@ -448,6 +444,26 @@ export function OperationsWorkspace({
             </button>
           </div>
         )}
+        <div className="admin-data-caption" role="status">
+          <span>
+            {records.isFetching
+              ? "Updating records…"
+              : data
+                ? "Latest records loaded"
+                : "Waiting for records"}
+          </span>
+          <span>
+            {data
+              ? `${Math.min((data.page - 1) * data.pageSize + 1, data.total)}–${Math.min(data.page * data.pageSize, data.total)} of ${data.total.toLocaleString("en-IN")}`
+              : ""}
+          </span>
+        </div>
+        {moduleKey === "gallery" && (
+          <MediaGallery
+            rows={data?.rows || []}
+            onUpload={() => void refresh()}
+          />
+        )}
         {busy && !data ? (
           <div className="admin-loading" role="status">
             Loading records…
@@ -472,12 +488,18 @@ export function OperationsWorkspace({
                 : undefined
             }
           />
-        ) : !error ? (
+        ) : !error && !loadError ? (
           <div className="admin-empty">
             <VaahanIcon name={m.icon} size={27} />
-            <h3>{q || status ? "No matching records" : "No records yet"}</h3>
+            <h3>
+              {filters.q || filters.status
+                ? "No matching records"
+                : moduleKey === "incidents"
+                  ? "No incidents recorded"
+                  : "No records yet"}
+            </h3>
             <p>
-              {q || status
+              {filters.q || filters.status
                 ? "Try another reference or clear the status filter."
                 : "Records will appear here when they are created in the platform."}
             </p>
@@ -583,19 +605,18 @@ export function OperationsWorkspace({
                 <div key={f.key}>
                   <label htmlFor={`edit-${f.key}`}>{f.label}</label>
                   {f.options ? (
-                    <select
+                    <AdminSelect
                       id={`edit-${f.key}`}
-                      value={values[f.key] || f.options[0]}
-                      onChange={(e) =>
-                        setValues((v) => ({ ...v, [f.key]: e.target.value }))
+                      label={f.label}
+                      value={values[f.key] || f.options[0]!}
+                      onValueChange={(value) =>
+                        setValues((v) => ({ ...v, [f.key]: value }))
                       }
-                    >
-                      {f.options.map((o) => (
-                        <option key={o} value={o}>
-                          {o.replaceAll("_", " ")}
-                        </option>
-                      ))}
-                    </select>
+                      options={f.options.map((o) => ({
+                        value: o,
+                        label: o.replaceAll("_", " "),
+                      }))}
+                    />
                   ) : f.type === "textarea" ? (
                     <textarea
                       id={`edit-${f.key}`}

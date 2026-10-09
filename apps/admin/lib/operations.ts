@@ -6,11 +6,13 @@ import { canReadModule, canSearchPhone, getAdminModule } from "./modules";
 import { AdminError } from "./session";
 import { maskAdminRow } from "./presentation";
 import { adminSearchFilters } from "./search-filters";
+import { publicMediaPreview } from "./media-preview";
 import type {
   AdminIdentity,
   AdminList,
   AdminMetric,
   ConnectionCheck,
+  AdminHealth,
 } from "./contracts";
 export async function listAdminRecords(
   identity: AdminIdentity,
@@ -24,7 +26,13 @@ export async function listAdminRecords(
       "FORBIDDEN",
       "This module is not available for your role.",
     );
-  const page = Math.max(1, Math.min(10000, Math.floor(input.page || 1))),
+  const page = Math.max(
+      1,
+      Math.min(
+        10000,
+        Math.floor(Number.isFinite(input.page) ? input.page! : 1),
+      ),
+    ),
     pageSize = 25;
   let query = getSupabaseAdminClient()
     .from(m.table)
@@ -52,6 +60,7 @@ export async function listAdminRecords(
   }
   const { data, count, error } = await query
     .order(m.orderField || "created_at", { ascending: false })
+    .order("id", { ascending: false })
     .range((page - 1) * pageSize, page * pageSize - 1);
   if (error)
     throw new AdminError(
@@ -60,9 +69,16 @@ export async function listAdminRecords(
       "We couldn't load these records right now. Please try again.",
     );
   return {
-    rows: (data || []).map((r) =>
-      maskAdminRow(r as unknown as Record<string, unknown>),
-    ),
+    rows: (data || []).map((r) => {
+      const row = maskAdminRow(r as unknown as Record<string, unknown>);
+      if (key === "gallery") {
+        row.public_url = publicMediaPreview(
+          row,
+          process.env.NEXT_PUBLIC_ASSETS_URL,
+        );
+      }
+      return row;
+    }),
     total: count || 0,
     page,
     pageSize,
@@ -142,7 +158,8 @@ export async function checkConnections(): Promise<ConnectionCheck[]> {
       const { error } = await getSupabaseAdminClient()
         .from("admin_users")
         .select("id")
-        .limit(1);
+        .limit(1)
+        .abortSignal(AbortSignal.timeout(8000));
       if (error) throw error;
     })(),
     (async () => {
@@ -166,29 +183,80 @@ export async function checkConnections(): Promise<ConnectionCheck[]> {
         (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL) &&
         (process.env.SUPABASE_SERVICE_ROLE_KEY ||
           process.env.SUPABASE_SECRET_KEY)
-          ? "connected"
+          ? "configured"
           : "unconfigured",
       checkedAt,
     },
     {
       name: "MSG91 OTP",
-      state:
-        Object.values(getOtpDeliveryAvailability()).some(Boolean)
-          ? "connected"
-          : "unconfigured",
+      state: Object.values(getOtpDeliveryAvailability()).some(Boolean)
+        ? "configured"
+        : "unconfigured",
       checkedAt,
     },
     {
       name: "Supabase OTP protection",
       state:
         (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL) &&
-        (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY) &&
-        (process.env.OTP_REQUEST_HASH_SECRET || process.env.SESSION_SECRET || "").length >= 16
-          ? "connected"
+        (process.env.SUPABASE_SERVICE_ROLE_KEY ||
+          process.env.SUPABASE_SECRET_KEY) &&
+        (
+          process.env.OTP_REQUEST_HASH_SECRET ||
+          process.env.SESSION_SECRET ||
+          ""
+        ).length >= 16
+          ? "configured"
           : "unconfigured",
       checkedAt,
     },
+    {
+      name: "Admin email delivery",
+      state: [
+        "SMTP_HOST",
+        "SMTP_PORT",
+        "SMTP_USER",
+        "SMTP_PASS",
+        "SMTP_FROM",
+      ].every((key) => !!process.env[key])
+        ? "configured"
+        : "unconfigured",
+      checkedAt,
+    },
   ];
+}
+export async function getAdminHealth(): Promise<AdminHealth> {
+  const db = getSupabaseAdminClient();
+  const [connections, latest, runs] = await Promise.all([
+    checkConnections(),
+    db
+      .from("status_heartbeats")
+      .select("checked_at,status,latency_ms")
+      .eq("service_name", "supabase_database")
+      .order("checked_at", { ascending: false })
+      .limit(1)
+      .abortSignal(AbortSignal.timeout(8000)),
+    db
+      .from("status_heartbeats")
+      .select("id", { head: true, count: "exact" })
+      .eq("service_name", "supabase_database")
+      .gte("checked_at", new Date(Date.now() - 86400000).toISOString())
+      .abortSignal(AbortSignal.timeout(8000)),
+  ]);
+  const heartbeat = latest.error ? null : latest.data?.[0];
+  const checkedAt = heartbeat?.checked_at || null;
+  return {
+    connections,
+    monitoring: {
+      checkedAt,
+      status: heartbeat?.status || null,
+      latencyMs:
+        heartbeat?.latency_ms == null ? null : Number(heartbeat.latency_ms),
+      runs24h: runs.error ? null : runs.count,
+      overdue:
+        !checkedAt || Date.now() - new Date(checkedAt).getTime() > 25 * 60000,
+      unavailable: !!latest.error || !!runs.error,
+    },
+  };
 }
 export async function searchWorkspace(
   identity: AdminIdentity,
