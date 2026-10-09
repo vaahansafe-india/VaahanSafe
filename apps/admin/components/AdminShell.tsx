@@ -43,6 +43,18 @@ export function AdminShell({
   }, [pathname]);
 
   useEffect(() => {
+    const mql = window.matchMedia("(min-width: 1024px)");
+    const handleMedia = (e: MediaQueryListEvent | MediaQueryList) => {
+      if (e.matches) {
+        setOpen(false);
+      }
+    };
+    handleMedia(mql);
+    mql.addEventListener("change", handleMedia);
+    return () => mql.removeEventListener("change", handleMedia);
+  }, []);
+
+  useEffect(() => {
     const shortcut = (event: KeyboardEvent) => {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
@@ -81,9 +93,10 @@ export function AdminShell({
               className="admin-icon-button desktop-menu"
               aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
               aria-expanded={!collapsed}
+              title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
               onClick={() => setCollapsed((v) => !v)}
             >
-              <VaahanIcon name="menu" size={19} />
+              <VaahanIcon name="panel-left" size={18} />
             </button>
             <Sheet open={open} onOpenChange={setOpen}>
               <SheetTrigger asChild>
