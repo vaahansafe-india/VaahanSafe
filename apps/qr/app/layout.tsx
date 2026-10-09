@@ -5,13 +5,23 @@ import { ThemeProvider } from "@vaahansafe/ui/theme/theme-provider";
 import { SmoothScrollHandler } from "../components/shell/SmoothScrollHandler";
 
 export const metadata: Metadata = {
-  title: "Vehicle Safety Identity — VaahanSafe Resolver",
-  description:
-    "Official public emergency vehicle profile and safety resolver runtime.",
-  robots: {
-    index: false,
-    follow: false,
+  metadataBase: new URL("https://qr.vaahansafe.com"),
+  title: {
+    default: "VaahanSafe QR — Vehicle Safety Identity Platform",
+    template: "%s | VaahanSafe QR",
   },
+  description:
+    "Official public vehicle safety identity platform and emergency contact relay runtime.",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+    apple: [
+      { url: "/apple-icon.svg", type: "image/svg+xml" },
+    ],
+  },
+  manifest: "/manifest.webmanifest",
 };
 
 export const viewport: Viewport = {

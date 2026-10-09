@@ -2,7 +2,16 @@ import type { MetadataRoute } from "next";
 
 export const dynamic = "force-static";
 
-// Private records and public QR identities are never enumerated.
+// Public root landing page is indexed for discovery.
+// Individual resolver passes (/{publicId}) are strictly NOINDEX and excluded to preserve personal safety boundaries.
 export default function sitemap(): MetadataRoute.Sitemap {
-  return [];
+  const origin = "https://qr.vaahansafe.com";
+  return [
+    {
+      url: `${origin}/`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 1.0,
+    },
+  ];
 }
