@@ -164,4 +164,14 @@ describe("Razorpay real-service boundary", () => {
       processRazorpayWebhook(body, sign(body), "evt_fixture", db),
     ).rejects.toThrow("storage failure");
   });
+  it("acknowledges signed unsupported events without touching financial data", async () => {
+    vi.stubEnv("RAZORPAY_WEBHOOK_SECRET", secret);
+    const db = store();
+    const body = JSON.stringify({ event: "integration.endpoint_check" });
+    await expect(
+      processRazorpayWebhook(body, sign(body), null, db),
+    ).resolves.toEqual({ received: true, ignored: true });
+    expect(db.queryFirst).not.toHaveBeenCalled();
+    expect(db.batch).not.toHaveBeenCalled();
+  });
 });
