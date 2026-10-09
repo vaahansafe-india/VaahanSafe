@@ -1,93 +1,33 @@
-/**
- * API Worker Storage Gateway Helpers
- *
- * Resolves Cloudflare D1 and R2 bindings safely with fallbacks for
- * local development, testing, and edge runtime execution.
- */
+/** Supabase stores media metadata; Cloudflare R2 stores object bytes. */
+import { D1MediaAssetRepository, getAuthoritativeDatabaseClient } from "@vaahansafe/database";
+import { getAuthoritativeObjectStore } from "@vaahansafe/storage";
+import type { ObjectStore, MediaAssetRepository } from "@vaahansafe/storage";
+import type { OwnerType, StorageActor } from "@vaahansafe/storage";
+import { getSupabaseAdminClient } from "@vaahansafe/database";
+import { NextResponse } from "next/server";
+import { requireUserSession } from "../_auth";
 
-import { D1DatabaseAdapter, D1MediaAssetRepository, getAuthoritativeDatabaseClient } from "@vaahansafe/database";
-import type { D1DatabaseBinding } from "@vaahansafe/database";
-import { R2ObjectStore, MemoryObjectStore } from "@vaahansafe/storage";
-import type { ObjectStore, MediaAssetRepository, CloudflareR2Bucket } from "@vaahansafe/storage";
+export async function getStorageActor(request: Request): Promise<StorageActor | NextResponse> {
+  const auth = await requireUserSession(request);
+  if (auth instanceof NextResponse) return auth;
+  if (!auth.user.phone) return NextResponse.json({ success: false, error: { code: "PHONE_REQUIRED", message: "Verify your mobile number to continue." } }, { status: 403 });
+  return { id: auth.user.id, role: auth.user.role };
+}
 
-// Global in-memory singletons for test/dev environments
-let localMemoryStore: MemoryObjectStore | null = null;
+export async function canAccessStorageOwner(ownerType: OwnerType, ownerId: string, actorId: string, actorRole: string): Promise<boolean> {
+  if (actorRole === "ADMIN") return true;
+  if (ownerType === "USER") return ownerId === actorId;
+  const table = ownerType === "VEHICLE" ? "vehicles" : ownerType === "ORDER" ? "orders" : null;
+  if (!table) return false;
+  const { data, error } = await getSupabaseAdminClient().from(table).select("id").eq("id", ownerId).eq("user_id", actorId).maybeSingle();
+  if (error) throw new Error("Storage ownership verification unavailable");
+  return !!data;
+}
 
 export function getObjectStoreForBucket(bucketClass: "PUBLIC" | "PRIVATE" | "EXPORT"): ObjectStore {
-  const env = process.env as Record<string, unknown>;
-  const bindingName = `${bucketClass}_STORAGE`;
-  const bucketBinding = env[bindingName];
-
-  if (bucketBinding && typeof (bucketBinding as { put?: unknown }).put === "function") {
-    return new R2ObjectStore(bucketBinding as unknown as CloudflareR2Bucket);
-  }
-
-  // Fallback to in-memory store for local/testing
-  if (!localMemoryStore) {
-    localMemoryStore = new MemoryObjectStore();
-  }
-  return localMemoryStore;
+  return getAuthoritativeObjectStore(bucketClass);
 }
-
-let localMediaRepo: MockMediaAssetRepository | null = null;
 
 export function getMediaAssetRepository(): MediaAssetRepository {
-  const env = process.env as Record<string, unknown>;
-  const d1Binding = env.DB;
-
-  if (d1Binding && typeof (d1Binding as { prepare?: unknown }).prepare === "function") {
-    const client = new D1DatabaseAdapter(d1Binding as unknown as D1DatabaseBinding);
-    return new D1MediaAssetRepository(client);
-  }
-
   return new D1MediaAssetRepository(getAuthoritativeDatabaseClient());
-}
-
-/**
- * In-memory fallback repository when running outside Cloudflare Workers context
- */
-class MockMediaAssetRepository implements MediaAssetRepository {
-  private assets = new Map<string, import("@vaahansafe/storage").MediaAsset>();
-
-  async findById(id: string) {
-    return this.assets.get(id) || null;
-  }
-
-  async findByObjectKey(key: string) {
-    for (const a of this.assets.values()) {
-      if (a.objectKey === key) return a;
-    }
-    return null;
-  }
-
-  async findByOwner(ownerType: string, ownerId: string) {
-    const res: import("@vaahansafe/storage").MediaAsset[] = [];
-    for (const a of this.assets.values()) {
-      if (a.ownerType === ownerType && a.ownerId === ownerId) {
-        res.push(a);
-      }
-    }
-    return res;
-  }
-
-  async save(asset: import("@vaahansafe/storage").MediaAsset) {
-    this.assets.set(asset.id, { ...asset });
-    return { ...asset };
-  }
-
-  async updateStatus(
-    id: string,
-    status: import("@vaahansafe/storage").AssetStatus,
-    updates: Partial<import("@vaahansafe/storage").MediaAsset> = {}
-  ) {
-    const existing = this.assets.get(id);
-    if (!existing) throw new Error(`Asset ${id} not found`);
-    const updated = { ...existing, ...updates, status, updatedAt: new Date().toISOString() };
-    this.assets.set(id, updated);
-    return updated;
-  }
-
-  async delete(id: string) {
-    return this.assets.delete(id);
-  }
 }

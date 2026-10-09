@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 import { serverUpload, getUploadPolicy, StorageError } from "@vaahansafe/storage";
-import { getMediaAssetRepository, getObjectStoreForBucket } from "../../_helpers";
+import { getMediaAssetRepository, getObjectStoreForBucket, getStorageActor, canAccessStorageOwner } from "../../_helpers";
 
 export async function POST(req: Request) {
   try {
+    const actor = await getStorageActor(req);
+    if (actor instanceof NextResponse) return actor;
     const body = await req.json();
 
     if (!body.dataBase64) {
@@ -31,7 +33,7 @@ export async function POST(req: Request) {
 
     const asset = await serverUpload(
       {
-        actor: body.actor,
+        actor,
         purpose: body.purpose,
         ownerType: body.ownerType,
         ownerId: body.ownerId,
@@ -42,6 +44,7 @@ export async function POST(req: Request) {
         sha256: body.sha256,
         width: body.width,
         height: body.height,
+        entityOwnershipCheck: canAccessStorageOwner,
       },
       mediaRepo,
       objectStore

@@ -6,7 +6,6 @@ import {
   requireAdmin,
   assertSameOrigin,
   AdminError,
-  adminOrigin,
 } from "../../../../lib/session";
 import { adminResponse, adminFailure } from "../../../../lib/api";
 export async function GET() {
@@ -52,35 +51,6 @@ export async function POST(request: Request) {
           429,
           "RATE_LIMITED",
           "Please wait a minute before requesting another code.",
-        );
-      const secret = process.env.TURNSTILE_SECRET_KEY;
-      if (!secret) throw new Error("Turnstile unavailable");
-      const turnstile = await fetch(
-        "https://challenges.cloudflare.com/turnstile/v0/siteverify",
-        {
-          method: "POST",
-          body: new URLSearchParams({
-            secret,
-            response: String(body.turnstileToken || ""),
-          }),
-          signal: AbortSignal.timeout(10000),
-        },
-      );
-      const challenge = (await turnstile.json()) as {
-        success?: boolean;
-        hostname?: string;
-        action?: string;
-      };
-      if (
-        !turnstile.ok ||
-        !challenge.success ||
-        challenge.hostname !== new URL(adminOrigin()).hostname ||
-        challenge.action !== "admin_otp"
-      )
-        throw new AdminError(
-          400,
-          "CHALLENGE_REQUIRED",
-          "Complete the security check and try again.",
         );
       const rawChannel = body.channel;
       const channel = rawChannel === undefined ? "WHATSAPP" : rawChannel;

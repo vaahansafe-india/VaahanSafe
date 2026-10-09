@@ -99,8 +99,11 @@ export class SupabaseDatabaseAdapter implements DatabaseClient {
       throw new Error(`Database service unavailable (${response.status})`);
     }
 
-    const result = await response.json();
-    if (result?.error || result?.success === false) throw new Error("Database operation failed");
+    const result: unknown = await response.json();
+    if (result && typeof result === "object" &&
+      (("error" in result && result.error) || ("success" in result && result.success === false))) {
+      throw new Error("Database operation failed");
+    }
     return result;
   }
 
