@@ -250,7 +250,7 @@ export class D1NotificationRepository implements NotificationRepository {
   async findByUserId(userId: string, limit = 50, offset = 0): Promise<Notification[]> {
     const rows = await this.db.query<DbNotificationRow>(
       `SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?`,
-      [userId, limit, offset]
+      [userId, Math.max(1, Math.min(limit, 200)), Math.max(0, offset)]
     );
     return rows.map(mapNotificationRow);
   }
@@ -261,6 +261,27 @@ export class D1NotificationRepository implements NotificationRepository {
       [userId]
     );
     return row?.count ?? 0;
+  }
+
+  async countByUserId(userId: string): Promise<Record<string, number>> {
+    const row = await this.db.queryFirst<Record<string, number>>(
+      `SELECT
+        COUNT(CASE WHEN archived_at IS NULL THEN 1 END) AS inbox,
+        COUNT(CASE WHEN archived_at IS NULL AND read_at IS NULL THEN 1 END) AS unread,
+        COUNT(CASE WHEN archived_at IS NOT NULL THEN 1 END) AS archived,
+        COUNT(CASE WHEN archived_at IS NULL AND created_at >= ? THEN 1 END) AS today,
+        COUNT(CASE WHEN archived_at IS NULL AND (priority IN ('HIGH','CRITICAL') OR event_type='SUBSCRIPTION_RENEWAL_FAILED' OR lower(title) LIKE '%action required%' OR lower(body_safe) LIKE '%action required%' OR lower(title) LIKE '%failed%' OR lower(body_safe) LIKE '%verify your mobile%') THEN 1 END) AS attention,
+        COUNT(CASE WHEN archived_at IS NULL AND category='SAFETY' THEN 1 END) AS qr,
+        COUNT(CASE WHEN archived_at IS NULL AND event_type IN ('VEHICLE_ADDED','VEHICLE_UPDATED') THEN 1 END) AS vehicles,
+        COUNT(CASE WHEN archived_at IS NULL AND category='FULFILMENT' THEN 1 END) AS orders,
+        COUNT(CASE WHEN archived_at IS NULL AND category='COMMERCE' THEN 1 END) AS payments,
+        COUNT(CASE WHEN archived_at IS NULL AND category='SUBSCRIPTION' THEN 1 END) AS subscription,
+        COUNT(CASE WHEN archived_at IS NULL AND category='SECURITY' THEN 1 END) AS security,
+        COUNT(CASE WHEN archived_at IS NULL AND category='ACCOUNT' THEN 1 END) AS account
+       FROM notifications WHERE user_id = ?`,
+      [new Date(new Date().setHours(0, 0, 0, 0)).toISOString(), userId],
+    );
+    return row || {};
   }
 
   async markAsRead(id: string, userId: string, readAt?: string): Promise<boolean> {
@@ -538,8 +559,12 @@ export class D1NotificationPreferenceRepository implements NotificationPreferenc
     userId: string,
     preferences: UserNotificationPreference[]
   ): Promise<void> {
-    for (const pref of preferences) {
-      await this.savePreference({ ...pref, userId });
-    }
+    const now = new Date().toISOString();
+    if (!preferences.length) return;
+    await this.db.batch(preferences.map(pref => ({
+      sql: `INSERT INTO notification_preferences (id,user_id,category,channel,enabled,created_at,updated_at)
+        VALUES (?,?,?,?,?,?,?) ON CONFLICT(user_id,category,channel) DO UPDATE SET enabled=excluded.enabled,updated_at=excluded.updated_at`,
+      params: [`pref_${crypto.randomUUID()}`,userId,pref.category,pref.channel,pref.enabled?1:0,now,now],
+    })));
   }
 }

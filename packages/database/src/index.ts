@@ -29,3 +29,4 @@ export * from "./repositories/supabase-auth.repository";
 export * from "./repositories/supabase-otp.repository";
 export * from "./queries/public-emergency-profile.query";
 export * from "./notifications/dispatcher";
+export * from "./notifications/supabase-outbox";

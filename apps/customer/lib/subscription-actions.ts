@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { getAuthenticatedCustomer } from "./session";
-import { getAuthoritativeDatabaseClient } from "@vaahansafe/database";
+import { getSupabaseAdminClient } from "@vaahansafe/database";
 
 export interface ActionResult {
   success: boolean;
@@ -10,69 +10,68 @@ export interface ActionResult {
   error?: string;
 }
 
-/**
- * Toggles auto-renewal preference (cancel_at_period_end) on an active subscription.
- */
-export async function toggleAutoRenewalAction(subscriptionId: string, cancelAtEnd: boolean): Promise<ActionResult> {
+/** Persist an owned-account preference and its audit event in one transaction. */
+export async function toggleAutoRenewalAction(
+  subscriptionId: string,
+  cancelAtEnd: boolean,
+): Promise<ActionResult> {
   const auth = await getAuthenticatedCustomer();
-  if (!auth) {
-    return { success: false, message: "Authentication required", error: "UNAUTHORIZED" };
+  if (!auth)
+    return {
+      success: false,
+      message: "Please sign in to continue.",
+      error: "UNAUTHORIZED",
+    };
+  if (!auth.phoneVerified)
+    return {
+      success: false,
+      message: "Verify your mobile number to continue.",
+      error: "PHONE_REQUIRED",
+    };
+  if (
+    typeof subscriptionId !== "string" ||
+    !subscriptionId ||
+    subscriptionId.length > 128 ||
+    typeof cancelAtEnd !== "boolean"
+  ) {
+    return {
+      success: false,
+      message: "Please choose a valid subscription.",
+      error: "INVALID_REQUEST",
+    };
   }
-
-  const db = getAuthoritativeDatabaseClient();
-
   try {
-    // 1. Verify subscription belongs to this user
-    const sub = await db.queryFirst<{ id: string; user_id: string; status: string }>(
-      `SELECT id, user_id, status FROM subscriptions WHERE id = ? AND user_id = ?`,
-      [subscriptionId, auth.user.id]
+    const { data, error } = await getSupabaseAdminClient().rpc(
+      "set_subscription_auto_renew",
+      {
+        p_user: auth.user.id,
+        p_subscription: subscriptionId,
+        p_cancel: cancelAtEnd,
+      },
     );
-
-    if (!sub) {
-      return { success: false, message: "Subscription not found or not owned by user", error: "NOT_FOUND" };
+    if (error) throw new Error("Subscription preference unavailable");
+    if (data !== true) {
+      return {
+        success: false,
+        message:
+          "This subscription cannot change its renewal preference. Contact support for billing help.",
+        error: "RENEWAL_UNAVAILABLE",
+      };
     }
-
-    if (sub.status !== "ACTIVE" && sub.status !== "CANCEL_AT_PERIOD_END") {
-      return { success: false, message: "Only active subscriptions can update renewal preference", error: "INVALID_STATE" };
-    }
-
-    const now = new Date().toISOString();
-    const newStatus = cancelAtEnd ? "CANCEL_AT_PERIOD_END" : "ACTIVE";
-
-    // 2. Update subscription record
-    await db.execute(
-      `UPDATE subscriptions 
-       SET cancel_at_period_end = ?, status = ?, updated_at = ?
-       WHERE id = ?`,
-      [cancelAtEnd ? 1 : 0, newStatus, now, subscriptionId]
-    );
-
-    // 3. Append to subscription_events for audit trail
-    const eventId = `sev_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
-    await db.execute(
-      `INSERT INTO subscription_events (id, subscription_id, event_type, payload_json, created_at)
-       VALUES (?, ?, ?, ?, ?)`,
-      [
-        eventId,
-        subscriptionId,
-        cancelAtEnd ? "CANCELLATION_REQUESTED" : "RECOVERED",
-        JSON.stringify({ updatedBy: auth.user.id, cancelAtPeriodEnd: cancelAtEnd }),
-        now,
-      ]
-    );
-
     revalidatePath("/subscription");
     return {
       success: true,
-      message: cancelAtEnd
-        ? "Auto-renewal cancelled. Your service will remain active until the end of the term."
-        : "Auto-renewal re-enabled. Your service will renew seamlessly.",
+      message:
+        "Renewal preference saved. Your current paid coverage remains available until its term ends.",
     };
-  } catch (err: unknown) {
-    console.error("[SubscriptionActions] Error updating auto-renewal:", err);
+  } catch {
+    console.error(
+      "[SubscriptionActions] Renewal preference update unavailable",
+    );
     return {
       success: false,
-      message: "We couldn't update your renewal preference right now. Please try again.",
+      message:
+        "We couldn't update your renewal preference right now. Please try again.",
       error: "INTERNAL_ERROR",
     };
   }

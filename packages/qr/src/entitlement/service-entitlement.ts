@@ -9,6 +9,7 @@ import { generateScratchSecret } from "../secrets/generate-secret";
 import { hashScratchSecret } from "../secrets/hash-secret";
 
 export interface IDatabaseClient {
+  readonly dialect?: "postgres" | "sqlite";
   query<T = unknown>(sql: string, params?: unknown[]): Promise<T[]>;
   execute(sql: string, params?: unknown[]): Promise<{ success: boolean; rowsAffected?: number }>;
 }
@@ -314,7 +315,7 @@ export async function fulfillPaidOnlineOrder(
   // 7. Emit in-app notification: QR Activated
   const notifId = `notif_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
   const notifIntentId = `intent_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
-  try {
+  if (db.dialect !== "postgres") try {
     await db.execute(
       `INSERT INTO notification_intents (
          id, event_type, recipient_user_id, category, priority,

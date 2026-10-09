@@ -96,7 +96,9 @@ interface DbSubscriptionRow {
   id: string;
   status: string;
   current_period_end: string | null;
-  cancel_at_period_end?: number;
+  cancel_at_period_end?: number | boolean;
+  provider?: string;
+  provider_subscription_id?: string | null;
   auto_renew?: number;
   plan_name: string | null;
 }
@@ -235,7 +237,7 @@ export async function getDashboardOverview(
     ),
     // Active Subscription
     db.queryFirst<DbSubscriptionRow>(
-      `SELECT s.id, s.status, s.current_period_end, s.cancel_at_period_end, p.name as plan_name
+      `SELECT s.id, s.status, s.current_period_end, s.cancel_at_period_end, s.provider, s.provider_subscription_id, p.name as plan_name
        FROM subscriptions s
        LEFT JOIN plans p ON s.plan_id = p.id
        WHERE s.user_id = ?
@@ -624,9 +626,9 @@ export async function getDashboardOverview(
     });
   }
 
-  const autoRenew = subRow
+  const autoRenew = subRow && ['RAZORPAY', 'CASHFREE'].includes(subRow.provider || '') && subRow.provider_subscription_id
     ? subRow.cancel_at_period_end !== undefined
-      ? subRow.cancel_at_period_end === 0
+      ? !subRow.cancel_at_period_end
       : Boolean(subRow.auto_renew)
     : false;
 

@@ -62,7 +62,7 @@ export async function POST(
     const allowed: Record<string, string[]> = {
       distributors: ["reference_code", "name", "city", "status"],
       retailers: ["reference_code", "name", "city", "status"],
-      support: ["reference_code", "subject", "priority", "status"],
+      support: ["reference_code", "subject", "priority", "status", "customer_user_id"],
       incidents: ["title", "summary", "impact", "status"],
       documents: ["title", "asset_key", "status"],
       flags: ["name", "description", "enabled"],
@@ -83,6 +83,11 @@ export async function POST(
       );
     if (module === "distributors" || module === "retailers")
       values.kind = module === "distributors" ? "DISTRIBUTOR" : "RETAILER";
+    if (module === "support") {
+      if (values.customer_user_id === "") delete values.customer_user_id;
+      if (values.customer_user_id && !/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(values.customer_user_id))
+        throw new AdminError(400, "INVALID_CUSTOMER", "Choose a valid customer account ID.");
+    }
     if (
       module === "documents" &&
       (typeof values.asset_key !== "string" ||

@@ -431,6 +431,7 @@ export const ADMIN_MODULES: AdminModule[] = [
     table: "admin_support_tickets",
     fields: [
       "id",
+      "customer_user_id",
       "reference_code",
       "subject",
       "priority",

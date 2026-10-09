@@ -37,6 +37,9 @@ export class SmtpEmailAdapter implements IEmailService {
           user,
           pass,
         },
+        connectionTimeout: 10000,
+        greetingTimeout: 10000,
+        socketTimeout: 10000,
       });
     }
   }
@@ -58,9 +61,8 @@ export class SmtpEmailAdapter implements IEmailService {
 
       return { success: true, messageId: info.messageId };
     } catch (err: unknown) {
-      const errorMsg = err instanceof Error ? err.message : String(err);
-      console.error("[SmtpEmailAdapter] Email delivery failed:", errorMsg);
-      return { success: false, error: errorMsg };
+      console.error("[SmtpEmailAdapter] Email delivery unavailable");
+      return { success: false, error: "EMAIL_DELIVERY_OUTCOME_UNKNOWN" };
     }
   }
 }

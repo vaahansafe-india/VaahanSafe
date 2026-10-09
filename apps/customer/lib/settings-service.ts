@@ -196,6 +196,16 @@ export async function getSettingsData(
   };
 
   const notificationCategories: NotificationCategoryConfig[] = [
+    ...(["ACCOUNT", "SUBSCRIPTION", "SUPPORT"] as const).map((key) => ({
+      key,
+      label: key === "ACCOUNT" ? "Account Updates" : key === "SUBSCRIPTION" ? "Plan & Renewal Updates" : "Support Updates",
+      description: key === "ACCOUNT" ? "Welcome and account setup updates." : key === "SUBSCRIPTION" ? "Verified renewal confirmations and billing notices." : "Status changes on support cases linked to your account.",
+      channels: {
+        IN_APP: { enabled: getPrefState(key, "IN_APP", true) },
+        WHATSAPP: { enabled: getPrefState(key, "WHATSAPP", false) },
+        EMAIL: { enabled: getPrefState(key, "EMAIL", true) },
+      },
+    })),
     {
       key: "SAFETY",
       label: "QR Activity & Alerts",

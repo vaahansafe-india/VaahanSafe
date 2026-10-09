@@ -68,6 +68,7 @@ export interface ActiveSubscriptionPassport {
   termEnd?: string;
   cancelAtPeriodEnd: boolean;
   autoRenew: boolean;
+  billingConfigured?: boolean;
   vehicleLimit: number;
   contactLimit: number;
   coveredVehiclesCount: number;

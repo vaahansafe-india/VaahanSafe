@@ -53,6 +53,9 @@ export interface SessionItem {
 }
 
 export type NotificationMatrixCategory =
+  | "ACCOUNT"
+  | "SUBSCRIPTION"
+  | "SUPPORT"
   | "SAFETY"
   | "FULFILMENT"
   | "COMMERCE"

@@ -14,6 +14,13 @@ import { NotificationChannel } from "../domain/channel";
 import { getEligibleChannelsForEvent } from "../events/event-policy";
 import { UserNotificationPreference, isChannelMandatoryForCategory } from "./policy";
 
+/** Mirrors the account settings matrix; optional channels need explicit opt-in. */
+export function defaultNotificationChannelEnabled(category: NotificationCategory, channel: NotificationChannel): boolean {
+  if (channel === "IN_APP") return true;
+  if (channel === "WHATSAPP") return category === "SAFETY" || category === "FULFILMENT";
+  return category !== "SAFETY";
+}
+
 export interface RecipientCapabilities {
   hasPhone: boolean;
   hasEmail: boolean;
@@ -60,8 +67,8 @@ export function evaluateNotificationChannels(input: EvaluateChannelsInput): Noti
     } else {
       // Default behavior when no explicit preference record exists:
       // IN_APP is always active by default.
-      // EMAIL and WHATSAPP are active by default for transactional events.
-      activeChannels.push(channel);
+      // Optional channel defaults match the customer settings matrix.
+      if (defaultNotificationChannelEnabled(input.category, channel)) activeChannels.push(channel);
     }
   }
 

@@ -13,6 +13,8 @@ export function middleware(request: NextRequest) {
     // Razorpay authenticates deliveries with a raw-body HMAC, not a customer cookie.
     // Keep the exception exact; the route independently verifies every delivery.
     pathname === "/api/webhooks/razorpay" ||
+    pathname === "/api/webhooks/msg91" ||
+    pathname === "/api/internal/notifications/drain" ||
     pathname === "/auth/callback" ||
     pathname.startsWith("/images") ||
     pathname.startsWith("/fonts/") ||

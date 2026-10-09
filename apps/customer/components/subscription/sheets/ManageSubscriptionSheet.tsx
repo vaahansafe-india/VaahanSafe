@@ -83,7 +83,7 @@ export function ManageSubscriptionSheet({
               <div className="flex justify-between py-1.5">
                 <span>Auto-Renewal Status</span>
                 <span className="font-mono font-bold text-foreground">
-                  {passport.cancelAtPeriodEnd ? "Scheduled to Conclude" : "Active Auto-Renewal"}
+                  {!passport.billingConfigured ? "Not configured" : passport.cancelAtPeriodEnd ? "Scheduled to Conclude" : "Active Auto-Renewal"}
                 </span>
               </div>
             </div>
@@ -95,12 +95,16 @@ export function ManageSubscriptionSheet({
               Renewal Controls
             </div>
 
-            {passport.cancelAtPeriodEnd ? (
+            {!passport.billingConfigured ? (
+              <div className="rounded-xl border border-border bg-background p-4 text-xs text-muted-foreground leading-relaxed">
+                Automatic billing is not configured for this subscription. Your current paid term remains available. Contact support for renewal options.
+              </div>
+            ) : passport.cancelAtPeriodEnd ? (
               <div className="rounded-xl border border-[#e8a55a]/40 bg-[#e8a55a]/[0.05] p-4 space-y-3">
                 <div className="flex items-start gap-2.5">
                   <VaahanIcon name="warning" size={16} className="text-[#e8a55a] shrink-0 mt-0.5" />
                   <div className="text-xs text-muted-foreground">
-                    Your subscription is set to conclude on <strong className="text-foreground">{formatDate(passport.termEnd)}</strong>. Advanced telematics and scan history will pause after this date.
+                    Your paid subscription term ends on <strong className="text-foreground">{formatDate(passport.termEnd)}</strong>. Your QR safety services follow their own service entitlement.
                   </div>
                 </div>
                 <button
