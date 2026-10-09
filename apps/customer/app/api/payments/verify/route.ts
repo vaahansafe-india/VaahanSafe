@@ -1,184 +1,87 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedCustomer } from "@/lib/session";
-import { getAuthoritativeDatabaseClient, createInAppNotification } from "@vaahansafe/database";
+import { getAuthoritativeDatabaseClient } from "@vaahansafe/database";
 import {
   verifyRazorpayCheckoutSignature,
   getRazorpayPaymentGateway,
 } from "@vaahansafe/payments";
-import { fulfillPaidOnlineOrder } from "@vaahansafe/qr-core";
-
-interface VerifyCheckoutRequest {
-  orderId: string;
-  razorpayPaymentId: string;
-  razorpayOrderId: string;
-  razorpaySignature: string;
-}
-
-/**
- * Authoritative Server-Side Verification for Razorpay Checkout Callbacks.
- *
- * INVARIANTS:
- * - Never trust client claims of successful payment without cryptographic signature verification.
- * - Compares HMAC-SHA256 signature against server-held RAZORPAY_KEY_SECRET.
- * - Verifies trusted order_id stored in D1 payments table matches provider order.
- * - Confirms captured state from Razorpay REST API.
- * - Atomically marks order PAID and triggers fulfillment/entitlements.
- */
 export async function POST(req: NextRequest) {
   try {
     const auth = await getAuthenticatedCustomer();
-    if (!auth) {
-      return NextResponse.json({ success: false, error: "Authentication required" }, { status: 401 });
-    }
-
-    const body = (await req.json()) as VerifyCheckoutRequest;
-    const { orderId, razorpayPaymentId, razorpayOrderId, razorpaySignature } = body;
-
-    if (!orderId || !razorpayPaymentId || !razorpayOrderId || !razorpaySignature) {
+    if (!auth)
       return NextResponse.json(
-        { success: false, error: "Missing required verification parameters" },
-        { status: 400 }
+        { success: false, error: "Authentication required" },
+        { status: 401 },
       );
-    }
-
-    const db = getAuthoritativeDatabaseClient();
-
-    // 1. Authoritative Order Lookup
-    const orders = await db.query<{
-      id: string;
-      user_id: string;
-      vehicle_id: string | null;
+    const body = await req.json();
+    const { orderId, razorpayPaymentId, razorpayOrderId, razorpaySignature } =
+      body;
+    if (
+      ![orderId, razorpayPaymentId, razorpayOrderId, razorpaySignature].every(
+        (v) => typeof v === "string" && v.length > 0 && v.length <= 128,
+      )
+    )
+      return NextResponse.json(
+        { success: false, error: "Invalid payment verification request" },
+        { status: 400 },
+      );
+    const payment = await getAuthoritativeDatabaseClient().queryFirst<{
+      provider_order_id: string;
+      amount_minor: number;
+      currency: string;
       status: string;
-      total_minor: number;
-      order_number?: string;
+      order_status: string;
     }>(
-      `SELECT id, user_id, vehicle_id, status, total_minor, order_number
-       FROM orders
-       WHERE id = ? AND user_id = ?
-       LIMIT 1`,
-      [orderId, auth.user.id]
+      `SELECT p.provider_order_id, p.amount_minor, p.currency, p.status, o.status AS order_status FROM payments p JOIN orders o ON o.id = p.order_id
+       WHERE o.id = ? AND o.user_id = ? AND p.provider = 'RAZORPAY' AND p.provider_order_id = ? LIMIT 1`,
+      [orderId, auth.user.id, razorpayOrderId],
     );
-
-    const order = orders[0];
-    if (!order) {
-      return NextResponse.json({ success: false, error: "Order not found" }, { status: 404 });
-    }
-
-    // 2. Fetch Payment Record & Verify Trusted Order ID
-    const payments = await db.query<{
-      id: string;
-      provider_order_id: string | null;
-      status: string;
-    }>(
-      `SELECT id, provider_order_id, status
-       FROM payments
-       WHERE order_id = ?
-       ORDER BY attempt_number DESC
-       LIMIT 1`,
-      [orderId]
-    );
-
-    const payment = payments[0];
-    if (!payment) {
-      return NextResponse.json({ success: false, error: "Payment attempt not found" }, { status: 404 });
-    }
-
-    if (payment.provider_order_id && payment.provider_order_id !== razorpayOrderId) {
-      console.warn(
-        `[PaymentVerify] Mismatched trusted order ID. DB: ${payment.provider_order_id}, Received: ${razorpayOrderId}`
-      );
+    if (!payment || !payment.provider_order_id)
       return NextResponse.json(
-        { success: false, error: "Untrusted payment order reference" },
-        { status: 400 }
+        { success: false, error: "Payment attempt not found" },
+        { status: 404 },
       );
-    }
-
-    // 3. Cryptographic Signature Verification
-    const secretKey = process.env.RAZORPAY_KEY_SECRET;
-    const isSignatureValid = await verifyRazorpayCheckoutSignature(
-      razorpayOrderId,
-      razorpayPaymentId,
-      razorpaySignature,
-      secretKey
-    );
-
-    if (!isSignatureValid) {
-      console.warn(`[PaymentVerify] Invalid HMAC signature for payment ${razorpayPaymentId}`);
+    if (
+      !(await verifyRazorpayCheckoutSignature(
+        payment.provider_order_id,
+        razorpayPaymentId,
+        razorpaySignature,
+        process.env.RAZORPAY_KEY_SECRET,
+      ))
+    )
       return NextResponse.json(
-        { success: false, error: "Cryptographic signature verification failed" },
-        { status: 400 }
+        { success: false, error: "Unable to verify this payment response" },
+        { status: 400 },
       );
-    }
-
-    // 4. Confirm Payment Captured with Razorpay REST API
-    const gateway = getRazorpayPaymentGateway();
-    let isCaptured = true;
-    try {
-      const paymentEntity = await gateway.rawClient.getPayment(razorpayPaymentId);
-      isCaptured =
-        paymentEntity.status === "captured" ||
-        paymentEntity.status === "authorized" ||
-        paymentEntity.captured === true;
-    } catch (err) {
-      console.warn("[PaymentVerify] Razorpay status check warning (proceeding with verified signature):", err);
-    }
-
-    const now = new Date().toISOString();
-
-    // 5. Update Payment Record
-    await db.execute(
-      `UPDATE payments
-       SET status = ?,
-           provider_payment_id = ?,
-           confirmed_at = ?,
-           updated_at = ?
-       WHERE id = ?`,
-      [isCaptured ? "SUCCESS" : "PENDING", razorpayPaymentId, now, now, payment.id]
+    const entity =
+      await getRazorpayPaymentGateway().rawClient.getPayment(razorpayPaymentId);
+    if (
+      entity.order_id !== payment.provider_order_id ||
+      entity.amount !== Number(payment.amount_minor) ||
+      entity.currency !== payment.currency
+    )
+      return NextResponse.json(
+        { success: false, error: "Payment details do not match" },
+        { status: 400 },
+      );
+    // The callback authenticates the receipt. Only the signed webhook may change financial truth.
+    return NextResponse.json(
+      {
+        success: true,
+        orderId,
+        status: payment.order_status,
+        confirming: payment.status !== "SUCCESS",
+      },
+      { headers: { "Cache-Control": "private, no-store" } },
     );
-
-    // 6. Update Order Record if Payment Succeeded
-    if (isCaptured) {
-      await db.execute(
-        `UPDATE orders
-         SET status = 'PAID',
-             paid_at = ?,
-             updated_at = ?
-         WHERE id = ?`,
-        [now, now, order.id]
-      );
-
-      // 7. Authoritative Fulfillment & Service Entitlement Allocation
-      if (order.vehicle_id) {
-        await fulfillPaidOnlineOrder({
-          userId: order.user_id,
-          vehicleId: order.vehicle_id,
-          orderId: order.id,
-          db,
-        });
-      }
-
-      // 8. In-App Notification: Payment Received & Processing
-      const formattedAmount = (order.total_minor / 100).toFixed(0);
-      await createInAppNotification({
-        userId: order.user_id,
-        eventType: "PAYMENT_SUCCEEDED",
-        category: "COMMERCE",
-        priority: "HIGH",
-        title: `Payment Received (₹${formattedAmount})`,
-        body: `Payment of ₹${formattedAmount} for order #${order.order_number || order.id} was confirmed via Razorpay. Your hardware kit is preparing for fulfillment.`,
-        actionType: "VIEW_ORDER",
-        actionTarget: order.id,
-        db,
-      });
-    }
-
-    return NextResponse.json({
-      success: true,
-      orderId: order.id,
-      status: isCaptured ? "PAID" : "PENDING",
-    });
-  } catch (err) {
-    console.error("[PaymentVerify] Internal error during verification:", err);
-    return NextResponse.json({ success: false, error: "Internal verification error" }, { status: 500 });
+  } catch {
+    console.error("[Razorpay checkout] Verification unavailable");
+    return NextResponse.json(
+      {
+        success: false,
+        error: "We're confirming your payment. Please check your order status.",
+      },
+      { status: 503 },
+    );
   }
 }

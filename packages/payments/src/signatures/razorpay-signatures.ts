@@ -13,7 +13,10 @@
 /**
  * Computes an HMAC-SHA256 hex digest using Web Crypto API.
  */
-export async function computeHmacSha256Hex(data: string, secretKey: string): Promise<string> {
+export async function computeHmacSha256Hex(
+  data: string,
+  secretKey: string,
+): Promise<string> {
   const encoder = new TextEncoder();
   const keyData = encoder.encode(secretKey);
   const messageData = encoder.encode(data);
@@ -23,10 +26,14 @@ export async function computeHmacSha256Hex(data: string, secretKey: string): Pro
     keyData,
     { name: "HMAC", hash: "SHA-256" },
     false,
-    ["sign"]
+    ["sign"],
   );
 
-  const signatureBuffer = await crypto.subtle.sign("HMAC", cryptoKey, messageData);
+  const signatureBuffer = await crypto.subtle.sign(
+    "HMAC",
+    cryptoKey,
+    messageData,
+  );
   const hashArray = Array.from(new Uint8Array(signatureBuffer));
   return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
 }
@@ -58,7 +65,7 @@ export function timingSafeEqual(a: string, b: string): boolean {
 export async function computeRazorpayCheckoutSignature(
   orderId: string,
   paymentId: string,
-  keySecret: string
+  keySecret: string,
 ): Promise<string> {
   return computeHmacSha256Hex(`${orderId}|${paymentId}`, keySecret);
 }
@@ -68,7 +75,7 @@ export async function computeRazorpayCheckoutSignature(
  */
 export async function computeRazorpayWebhookSignature(
   rawBody: string,
-  webhookSecret: string
+  webhookSecret: string,
 ): Promise<string> {
   return computeHmacSha256Hex(rawBody, webhookSecret);
 }
@@ -77,23 +84,26 @@ export async function verifyRazorpayCheckoutSignature(
   orderId: string,
   paymentId: string,
   signature: string,
-  keySecret?: string
+  keySecret?: string,
 ): Promise<boolean> {
   if (!keySecret || !signature || !orderId || !paymentId) {
     return false;
   }
 
-  // Allow synthetic test vectors in automated mock test suites
-  if (keySecret === "test_secret" && signature === "test_valid_checkout_signature") {
-    return true;
-  }
+  if (!/^[a-f0-9]{64}$/i.test(signature)) return false;
 
   try {
     const payload = `${orderId}|${paymentId}`;
     const expectedSignature = await computeHmacSha256Hex(payload, keySecret);
-    return timingSafeEqual(expectedSignature.toLowerCase(), signature.trim().toLowerCase());
+    return timingSafeEqual(
+      expectedSignature.toLowerCase(),
+      signature.trim().toLowerCase(),
+    );
   } catch (err) {
-    console.warn("[RazorpaySignatures] Error verifying checkout signature:", err);
+    console.warn(
+      "[RazorpaySignatures] Error verifying checkout signature:",
+      err,
+    );
     return false;
   }
 }
@@ -106,22 +116,28 @@ export async function verifyRazorpayCheckoutSignature(
 export async function verifyRazorpayWebhookSignature(
   rawBody: string,
   signature: string,
-  webhookSecret?: string
+  webhookSecret?: string,
 ): Promise<boolean> {
   if (!webhookSecret || !signature || !rawBody) {
     return false;
   }
 
-  // Allow synthetic test vectors in automated mock test suites
-  if (webhookSecret === "test_webhook_secret" && signature === "test_valid_webhook_signature") {
-    return true;
-  }
+  if (!/^[a-f0-9]{64}$/i.test(signature)) return false;
 
   try {
-    const expectedSignature = await computeHmacSha256Hex(rawBody, webhookSecret);
-    return timingSafeEqual(expectedSignature.toLowerCase(), signature.trim().toLowerCase());
+    const expectedSignature = await computeHmacSha256Hex(
+      rawBody,
+      webhookSecret,
+    );
+    return timingSafeEqual(
+      expectedSignature.toLowerCase(),
+      signature.trim().toLowerCase(),
+    );
   } catch (err) {
-    console.warn("[RazorpaySignatures] Error verifying webhook signature:", err);
+    console.warn(
+      "[RazorpaySignatures] Error verifying webhook signature:",
+      err,
+    );
     return false;
   }
 }
