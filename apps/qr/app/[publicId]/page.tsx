@@ -71,7 +71,7 @@ export default async function DynamicQrResolverPage({
 
     // 3. Render State Router inside Dedicated Shell
     return (
-      <ResolverShell>
+      <ResolverShell verified={resolution.state === "ACTIVE"}>
         <QrStateRouter resolution={resolution} />
       </ResolverShell>
     );

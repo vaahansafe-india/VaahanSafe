@@ -8,7 +8,11 @@ export interface SecondarySafetyContactProps {
   publicId?: string;
 }
 
-export function SecondarySafetyContact({ contact, index, publicId }: SecondarySafetyContactProps) {
+export function SecondarySafetyContact({
+  contact,
+  index,
+  publicId,
+}: SecondarySafetyContactProps) {
   return (
     <div className="flex w-full flex-col gap-4 rounded-xl border border-border bg-card p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-5">
       <div className="space-y-0.5 min-w-0 flex-1">
@@ -25,7 +29,14 @@ export function SecondarySafetyContact({ contact, index, publicId }: SecondarySa
         </p>
       </div>
 
-      <ContactAction phone={contact.phone} isPrimary={false} label="Call" allowCall={contact.allowCall} allowMessage={contact.allowMessage} publicId={publicId} />
+      <ContactAction
+        phone={contact.phone}
+        isPrimary={false}
+        label="Call"
+        allowCall={contact.allowCall}
+        allowMessage={contact.allowMessage}
+        publicId={publicId}
+      />
     </div>
   );
 }

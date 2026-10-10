@@ -28,7 +28,24 @@ Applied, recorded migrations:
 3. `20261010095138_customer_document_vault_share_attempts.sql` — successful sharing does not accumulate failed passcode attempts; actual guessing remains limited.
 4. `20261010102835_customer_document_vault_session_lock.sql` — whole-vault PIN gate, authoritative lock/expiry state, explicit unlock scopes and serialization of file grants with lock changes.
 
-The customer application has **not been deployed**. Its deployed server environment needs `DOCUMENT_VAULT_WORKER_URL=https://vaahansafe-document-vault.vaahansafe.workers.dev`, alongside the existing real authentication/database configuration. The ignored local customer environment files already contain this Worker URL. Deploy the customer app using the existing deployment workflow to expose the new sidebar and pages.
+The customer application is deployed on Vercel as `vaahan-safe-customer`, at `app.vaahansafe.com`. On 2026-10-10, production runtime logs confirmed that `/documents` failed with `SERVICE_UNAVAILABLE` (digest `2132527617`). The stack pointed to `workerUrl()`, and the hosted environment was missing `DOCUMENT_VAULT_WORKER_URL`.
+
+The following public configuration values were saved to the project's **Production** environment:
+
+| Variable                            | Value                                                      |
+| ----------------------------------- | ---------------------------------------------------------- |
+| `DOCUMENT_VAULT_WORKER_URL`         | `https://vaahansafe-document-vault.vaahansafe.workers.dev` |
+| `CLOUDFLARE_R2_SCAN_REPORTS_BUCKET` | `vaahansafe-prod-private`                                  |
+
+The second setting addresses a separate missing configuration found while investigating HTTP 503 failures on private scan-report photo routes. Existing credentials were retained. A new deployment is required to apply both settings. The user subsequently held deployment to review the photo UI changes first; no new production deployment was launched. Until deployment completes and authenticated access is checked, the hosted fix is not verified.
+
+On 2026-10-10, the existing dedicated `CLOUDFLARE_SCAN_REPORTS_API_TOKEN` from the
+ignored customer production environment file was also saved to Vercel as a
+Production Secret after explicit approval. Its entry name and environment scope
+were verified without revealing the saved value. No credential was rotated and
+deployment remains held.
+
+Read-only checks confirmed the four vault tables, projection/session/thumbnail RPCs, quota policy and listing SQL are available. Live checks confirmed the private Worker accepts the configured production/development origins, denies foreign origins and enforces file capabilities. No customer documents or settings were changed by those checks.
 
 ## Verification
 

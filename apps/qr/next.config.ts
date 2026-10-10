@@ -11,7 +11,27 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     return [
-      { source: '/:publicId', headers: [{key:'Permissions-Policy',value:'camera=(self), geolocation=(self), microphone=()'}] },
+      {
+        source: "/:path*",
+        headers: [
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "X-Frame-Options", value: "DENY" },
+        ],
+      },
+      {
+        source: "/api/scan-reports",
+        headers: [{ key: "Cache-Control", value: "no-store" }],
+      },
+      {
+        source: "/:publicId",
+        headers: [
+          {
+            key: "Permissions-Policy",
+            value: "camera=(self), geolocation=(self), microphone=()",
+          },
+        ],
+      },
       {
         source: "/fonts/:font*.woff2",
         headers: [

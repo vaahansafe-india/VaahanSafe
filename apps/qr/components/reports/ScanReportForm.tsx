@@ -4,13 +4,18 @@ import { useEffect, useId, useRef, useState } from "react";
 import Script from "next/script";
 import type { SharedScanLocation, ScanReportReason } from "@vaahansafe/qr-core";
 import { VaahanIcon } from "@vaahansafe/icons";
+import { Checkbox } from "@vaahansafe/ui/components/checkbox";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@vaahansafe/ui/components/select";
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+} from "@vaahansafe/ui/components/dialog";
+import {
+  RadioGroup,
+  RadioGroupItem,
+} from "@vaahansafe/ui/components/radio-group";
 
 type Turnstile = {
   render: (element: HTMLElement, options: Record<string, unknown>) => string;
@@ -81,10 +86,22 @@ async function preparePhoto(file: File): Promise<File> {
 export function ScanReportForm({
   publicId,
   siteKey,
+  vehicleDisplay,
+  initialStep = 0,
 }: {
   publicId: string;
   siteKey: string;
+  vehicleDisplay: string;
+  initialStep?: number;
 }) {
+  const [step, setStep] = useState(initialStep);
+  const [offline, setOffline] = useState(false);
+  const [previewIndex, setPreviewIndex] = useState<number | null>(null);
+  const [reference, setReference] = useState("");
+  const [retryPending, setRetryPending] = useState(false);
+  const sending = useRef(false);
+  const photoProcessing = useRef(false);
+  const heading = useRef<HTMLHeadingElement>(null);
   const [reason, setReason] = useState<ScanReportReason>("PARKING"),
     [note, setNote] = useState("");
   const [location, setLocation] = useState<SharedScanLocation>(),
@@ -105,7 +122,14 @@ export function ScanReportForm({
     requestId = useRef<string | undefined>(undefined);
   useEffect(() => {
     const turnstile = getTurnstile();
-    if (!scriptReady || !siteKey || success || !container.current || !turnstile)
+    if (
+      step !== 3 ||
+      !scriptReady ||
+      !siteKey ||
+      success ||
+      !container.current ||
+      !turnstile
+    )
       return;
     let id: string;
     try {
@@ -141,15 +165,39 @@ export function ScanReportForm({
     return () => {
       turnstile.remove(id);
       widget.current = undefined;
+      setToken("");
     };
-  }, [scriptReady, siteKey, success]);
+  }, [scriptReady, siteKey, success, step]);
+  useEffect(() => {
+    function syncConnection() {
+      setOffline(!navigator.onLine);
+    }
+    syncConnection();
+    window.addEventListener("online", syncConnection);
+    window.addEventListener("offline", syncConnection);
+    return () => {
+      window.removeEventListener("online", syncConnection);
+      window.removeEventListener("offline", syncConnection);
+    };
+  }, []);
+  useEffect(() => {
+    if (step > 0 && heading.current) {
+      heading.current.focus({ preventScroll: true });
+      const target = heading.current.closest("form") || heading.current;
+      target.scrollIntoView({ block: "start", behavior: "auto" });
+    }
+  }, [step, success]);
+  function goToStep(next: number) {
+    setError("");
+    setStep(next);
+  }
   useEffect(() => {
     const urls = photos.map((photo) => URL.createObjectURL(photo));
     setPreviews(urls);
     return () => urls.forEach((url) => URL.revokeObjectURL(url));
   }, [photos]);
   useEffect(() => {
-    if (!siteKey || scriptReady || success) return;
+    if (step !== 3 || !siteKey || scriptReady || success) return;
     const timer = setTimeout(
       () =>
         setSecurityError(
@@ -158,7 +206,7 @@ export function ScanReportForm({
       15000,
     );
     return () => clearTimeout(timer);
-  }, [siteKey, scriptReady, success]);
+  }, [siteKey, scriptReady, success, step]);
   function shareLocation() {
     setError("");
     if (!navigator.geolocation) {
@@ -178,9 +226,13 @@ export function ScanReportForm({
         });
         setLocating(false);
       },
-      () => {
+      (failure) => {
         setError(
-          "Location was not shared. You can try again or send the report without it.",
+          failure.code === 1
+            ? "Location access is blocked. Allow location for this site in your browser settings, then try again. You can also send without it."
+            : failure.code === 3
+              ? "Finding your location took too long. Move to an open area and try again, or send without it."
+              : "Your device couldn’t find your location. Check that location services are on, then try again. You can also send without it.",
         );
         setLocating(false);
       },
@@ -188,7 +240,8 @@ export function ScanReportForm({
     );
   }
   async function addPhotos(files: FileList | null) {
-    if (!files) return;
+    if (!files || photoProcessing.current) return;
+    photoProcessing.current = true;
     setError("");
     setPreparing(true);
     try {
@@ -196,23 +249,50 @@ export function ScanReportForm({
         throw new Error(
           "You can add up to three photos. Remove a photo to choose another.",
         );
-      const prepared = await Promise.all(Array.from(files).map(preparePhoto));
+      // Decode one camera image at a time to limit memory pressure on phones.
+      const prepared: File[] = [];
+      for (const file of Array.from(files))
+        prepared.push(await preparePhoto(file));
       setPhotos((current) => [...current, ...prepared]);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not prepare photos.");
+      setError(
+        e instanceof DOMException
+          ? "This photo could not be opened. Choose another JPEG, PNG or WebP photo."
+          : e instanceof Error
+            ? e.message
+            : "Could not prepare photos. Please choose another photo.",
+      );
     } finally {
       setPreparing(false);
+      photoProcessing.current = false;
     }
   }
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (busy) return;
+    if (sending.current || step !== 3) return;
+    if (!navigator.onLine) {
+      setError(
+        "You're offline. Your report hasn't been sent. Reconnect and try again; your details are still here.",
+      );
+      return;
+    }
     if (!consent || !token || !siteKey || preparing || locating) {
       setError(
         "Please agree to share your report and complete the security check before sending.",
       );
       return;
     }
+    if (
+      location &&
+      Date.now() - Date.parse(location.capturedAt) > 5 * 60000 &&
+      !retryPending
+    ) {
+      setError(
+        "Your shared location is no longer recent. Go back to update it or remove it before sending.",
+      );
+      return;
+    }
+    sending.current = true;
     setBusy(true);
     setError("");
     try {
@@ -234,448 +314,730 @@ export function ScanReportForm({
       const res = await fetch("/api/scan-reports", {
         method: "POST",
         body: data,
+        signal: AbortSignal.timeout(45000),
       });
       const body = await res.json();
       // Only start a fresh request after the server confirms the previous write failed.
       // An ambiguous network error keeps the same ID so a saved report is never duplicated.
-      if (body.code === "REPORT_RETRY") requestId.current = undefined;
+      if (body.code === "REPORT_RETRY") {
+        requestId.current = undefined;
+        setRetryPending(false);
+      }
       if (!res.ok || !body.recorded)
         throw new Error(
           body.error || "We couldn’t send your report. Please try again.",
         );
       setSuccess(
-        "Your report is saved and the owner notification is queued. Delivery may take a moment.",
+        body.notificationQueued
+          ? "Your report was received. The owner notification is queued; delivery may take a moment."
+          : "Your report was received.",
       );
+      if (typeof body.id === "string")
+        setReference(
+          `RPT-••••${body.id
+            .replace(/[^a-z0-9]/gi, "")
+            .slice(-6)
+            .toUpperCase()}`,
+        );
+      setRetryPending(false);
       setPhotos([]);
       setLocation(undefined);
     } catch (e) {
+      const interrupted =
+        e instanceof Error &&
+        (e.name === "TimeoutError" ||
+          e.name === "AbortError" ||
+          e instanceof TypeError);
+      if (interrupted) setRetryPending(true);
       setError(
-        e instanceof Error
-          ? e.message
-          : "We couldn’t send your report. Please try again.",
+        interrupted
+          ? "We couldn't confirm whether your report was received. Retry with the same details so it won't be sent twice."
+          : e instanceof Error
+            ? e.message
+            : "We couldn’t send your report. Please try again.",
       );
     } finally {
       setBusy(false);
+      sending.current = false;
       setToken("");
       if (widget.current) getTurnstile()?.reset(widget.current);
     }
   }
   const locked =
-    busy || preparing || locating || !consent || !token || !siteKey;
+    busy || preparing || locating || offline || !consent || !token || !siteKey;
   const selectedReason = reasons.find((item) => item.value === reason)!;
   const control =
-    "min-h-12 rounded-xl border border-border bg-background px-3 text-sm font-medium transition-colors hover:bg-muted/60 focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50";
+    "inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-border bg-background px-4 text-base font-medium transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50";
+  const primary = `${control} border-primary bg-primary text-primary-foreground hover:bg-primary/90`;
+  const stepTitle =
+    step === 1
+      ? "What happened?"
+      : step === 2
+        ? "Add useful context"
+        : "Review your report";
+  function removePhoto(index: number) {
+    setPhotos((current) => current.filter((_, i) => i !== index));
+    setPreviewIndex(null);
+  }
   return (
     <section
       aria-labelledby={`${formId}-heading`}
-      className="min-w-0 overflow-hidden rounded-2xl border border-border bg-card shadow-[0_8px_30px_-18px_rgba(37,35,32,0.25)]"
+      className="qr-report-section scroll-mt-24 min-w-0 rounded-xl border border-border bg-card"
+      id="report-issue"
     >
-      <header className="border-b border-border bg-muted/40 px-4 py-5 sm:px-6 sm:py-6">
-        <div className="mb-3 flex items-center gap-2 text-primary">
-          <VaahanIcon name="shield-check" size={18} />
-          <span className="font-mono text-[10px] uppercase tracking-[0.16em]">
-            A little help, directly to the owner
-          </span>
-        </div>
-        <h2
-          id={`${formId}-heading`}
-          className="font-serif text-2xl leading-tight text-foreground sm:text-3xl"
-        >
-          Notify the vehicle owner
-        </h2>
-        <p className="mt-2 max-w-sm text-sm leading-relaxed text-muted-foreground">
-          Seen something that needs their attention? Send a short report. No
-          sign-in needed.
-        </p>
-        <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
-          Immediate danger?{" "}
-          <a
-            href="tel:112"
-            className="inline-flex min-h-11 items-center gap-1 font-semibold text-primary underline underline-offset-4"
+      {step === 0 ? (
+        <div className="space-y-3 p-5 sm:p-6">
+          <p className="text-sm font-medium text-primary">Need to help?</p>
+          <h2
+            id={`${formId}-heading`}
+            className="font-serif text-2xl font-semibold"
           >
-            Call 112 <VaahanIcon name="arrow-right" size={14} />
-          </a>
-        </p>
-      </header>
-      {success ? (
-        <div role="status" className="space-y-3 px-4 py-6 sm:px-6">
-          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-emerald-600/10 text-emerald-700 dark:text-emerald-400">
-            <VaahanIcon name="success" size={24} />
-          </div>
-          <h3 className="font-serif text-2xl">Thank you for looking out.</h3>
-          <p className="text-sm leading-relaxed text-muted-foreground">
+            Report a vehicle issue
+          </h2>
+          <p className="text-base leading-relaxed text-muted-foreground">
+            Share useful information with the owner. No sign-in needed.
+          </p>
+          <button
+            type="button"
+            className={`${primary} w-full sm:w-auto`}
+            onClick={() => goToStep(1)}
+          >
+            Report an issue <VaahanIcon name="arrow-right" size={18} />
+          </button>
+          <p className="text-sm text-muted-foreground">
+            Immediate danger?{" "}
+            <a
+              className="inline-flex min-h-11 items-center font-semibold text-primary underline underline-offset-4"
+              href="tel:112"
+            >
+              Call 112
+            </a>
+            .
+          </p>
+        </div>
+      ) : success ? (
+        <div className="space-y-4 p-5 sm:p-6" role="status">
+          <VaahanIcon
+            name="success"
+            size={32}
+            className="text-emerald-800 dark:text-emerald-300"
+          />
+          <h2
+            id={`${formId}-heading`}
+            ref={heading}
+            tabIndex={-1}
+            className="font-serif text-2xl font-semibold"
+          >
+            Report received
+          </h2>
+          <p className="text-base leading-relaxed text-muted-foreground">
             {success}
           </p>
-          <p className="text-xs leading-relaxed text-muted-foreground">
-            If you need an immediate response, use an approved contact above. In
-            an emergency, call 112.
+          {reference && (
+            <p className="text-sm">
+              Reference{" "}
+              <span className="font-mono font-semibold">{reference}</span>
+            </p>
+          )}
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            For an immediate response, use an approved contact above. In an
+            emergency, call 112.
           </p>
+          <a href="#verified-vehicle-title" className={control}>
+            Done <VaahanIcon name="check" size={18} />
+          </a>
         </div>
       ) : (
-        <form
-          onSubmit={submit}
-          aria-busy={busy}
-          className="space-y-6 px-4 py-5 sm:px-6 sm:py-6"
-        >
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-[10px] text-primary">01</span>
-              <h3 className="text-sm font-semibold">Tell us what happened</h3>
-            </div>
-            <div className="space-y-2">
-              <label
-                id={`${formId}-reason-label`}
-                htmlFor={`${formId}-reason`}
-                className="block text-xs font-medium"
-              >
-                What did you notice?
-              </label>
-              <Select
-                value={reason}
-                onValueChange={(value) => setReason(value as ScanReportReason)}
-                disabled={busy}
-                name="reason"
-              >
-                <SelectTrigger
-                  id={`${formId}-reason`}
-                  aria-labelledby={`${formId}-reason-label`}
-                  aria-describedby={`${formId}-reason-hint`}
-                  className="h-auto min-h-12 rounded-xl bg-background px-3 text-left text-base shadow-none sm:text-sm"
+        <form onSubmit={submit} aria-busy={busy} className="min-w-0">
+          <div className="qr-report-context flex items-center gap-2 border-b border-border bg-muted/50 px-5 py-3 sm:px-6">
+            <VaahanIcon
+              name="car"
+              size={18}
+              className="shrink-0 text-primary"
+            />
+            <span className="min-w-0 flex-1 break-words text-sm font-medium">
+              {vehicleDisplay}
+            </span>
+            <Dialog>
+              <DialogTrigger asChild>
+                <button
+                  className="flex h-11 w-11 shrink-0 items-center justify-center text-emerald-800 dark:text-emerald-300"
+                  type="button"
+                  aria-label="View vehicle summary"
                 >
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="max-h-[min(360px,var(--radix-select-content-available-height))] w-[var(--radix-select-trigger-width)] max-w-[calc(100vw-32px)] rounded-xl p-1">
-                  {reasons.map((item) => (
-                    <SelectItem
-                      key={item.value}
-                      value={item.value}
-                      className="min-h-11 cursor-pointer rounded-lg py-3 text-sm"
-                    >
-                      {item.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <p
-                id={`${formId}-reason-hint`}
-                className="text-xs leading-relaxed text-muted-foreground"
-              >
-                {selectedReason.hint}
-              </p>
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between gap-2">
-                <label
-                  htmlFor={`${formId}-note`}
-                  className="text-xs font-medium"
-                >
-                  Add a few details{" "}
-                  <span className="font-normal text-muted-foreground">
-                    (optional)
-                  </span>
-                </label>
-                <span className="font-mono text-[10px] tabular-nums text-muted-foreground">
-                  {note.length}/300
-                </span>
-              </div>
-              <textarea
-                id={`${formId}-note`}
-                value={note}
-                disabled={busy}
-                maxLength={300}
-                onChange={(event) => setNote(event.target.value)}
-                className="block w-full resize-y rounded-xl border border-border bg-background p-3 text-base leading-relaxed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:text-sm"
-                placeholder="For example: Your car is blocking the gate near the main entrance."
-                rows={3}
-              />
-            </div>
-          </div>
-          <div className="space-y-3 border-t border-border pt-5">
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-[10px] text-primary">02</span>
-              <h3 className="text-sm font-semibold">
-                Help them find the situation
-              </h3>
-              <span className="ml-auto text-[10px] text-muted-foreground">
-                Optional
-              </span>
-            </div>
-            <div className="rounded-xl border border-border bg-muted/25 p-3.5">
-              <div className="flex items-start gap-2.5">
-                <VaahanIcon
-                  name="map-pin"
-                  size={18}
-                  className="mt-0.5 shrink-0 text-primary"
-                />
-                <div className="min-w-0">
-                  <p className="text-sm font-medium">Share where you are</p>
-                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                    Your current location can help the owner find the vehicle.
-                    It is shared only with this report.
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={shareLocation}
-                disabled={busy || locating}
-                className={`${control} mt-3 flex w-full items-center justify-center gap-2 text-primary`}
-              >
-                <VaahanIcon
-                  name={locating ? "loading" : "map-pin"}
-                  size={17}
-                  className={locating ? "animate-spin" : ""}
-                />
-                {locating
-                  ? "Finding your location…"
-                  : location
-                    ? "Update shared location"
-                    : "Share my location"}
-              </button>
-              {location && (
-                <div
-                  role="status"
-                  className="mt-2 flex flex-wrap items-center justify-between gap-x-2 text-xs"
-                >
-                  <span className="text-emerald-700 dark:text-emerald-400">
-                    Location added · accuracy ±{Math.ceil(location.accuracy)} m
-                  </span>
-                  <button
-                    type="button"
-                    disabled={busy}
-                    onClick={() => setLocation(undefined)}
-                    className="min-h-11 px-2 font-medium underline underline-offset-4"
-                  >
-                    Remove location
-                  </button>
-                </div>
-              )}
-            </div>
-            <div className="rounded-xl border border-border bg-muted/25 p-3.5">
-              <div className="flex items-start gap-2.5">
-                <VaahanIcon
-                  name="camera"
-                  size={18}
-                  className="mt-0.5 shrink-0 text-primary"
-                />
-                <div className="min-w-0">
-                  <p className="text-sm font-medium">Add a photo</p>
-                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                    Up to 3 photos of the vehicle or nearby area. Avoid faces
-                    and personal documents.
-                  </p>
-                </div>
-              </div>
-              <div className="mt-3 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2">
-                <label
-                  className={`${control} relative flex cursor-pointer items-center justify-center gap-2 px-2 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-50`}
-                >
-                  <VaahanIcon name="add" size={17} />
-                  Choose photos
-                  <input
-                    aria-label="Choose photos"
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp"
-                    multiple
-                    disabled={busy || preparing || photos.length === 3}
-                    onChange={(event) => {
-                      void addPhotos(event.target.files);
-                      event.target.value = "";
-                    }}
-                    className="sr-only"
-                  />
-                </label>
-                <label
-                  className={`${control} relative flex cursor-pointer items-center justify-center gap-2 px-2 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-50`}
-                >
-                  <VaahanIcon name="camera" size={17} />
-                  Take a photo
-                  <input
-                    aria-label="Take a photo"
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp"
-                    capture="environment"
-                    disabled={busy || preparing || photos.length === 3}
-                    onChange={(event) => {
-                      void addPhotos(event.target.files);
-                      event.target.value = "";
-                    }}
-                    className="sr-only"
-                  />
-                </label>
-              </div>
-              {preparing && (
-                <p role="status" className="mt-3 text-xs text-muted-foreground">
-                  Preparing your photos…
+                  <VaahanIcon name="shield-check" size={18} />
+                </button>
+              </DialogTrigger>
+              <DialogContent className="qr-safety-dialog">
+                <DialogTitle>Verified vehicle</DialogTitle>
+                <DialogDescription>{vehicleDisplay}</DialogDescription>
+                <p className="break-all font-mono text-sm">
+                  VaahanSafe ID: {publicId}
                 </p>
-              )}
-              {photos.length > 0 && (
-                <>
-                  <div className="mt-3 grid grid-cols-3 gap-2">
-                    {previews.map((src, index) => (
-                      <div
-                        key={src}
-                        className="min-w-0 overflow-hidden rounded-lg border border-border bg-background"
-                      >
-                        {/* Local, metadata-free preview; no external image service. */}
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={src}
-                          alt={`Selected report photo ${index + 1}`}
-                          className="aspect-square w-full object-cover"
-                        />
-                        <button
-                          type="button"
-                          disabled={busy || preparing}
-                          aria-label={`Remove photo ${index + 1}`}
-                          onClick={() =>
-                            setPhotos((current) =>
-                              current.filter((_, i) => i !== index),
-                            )
-                          }
-                          className="flex min-h-11 w-full items-center justify-center gap-1 text-xs text-muted-foreground"
-                        >
-                          <VaahanIcon name="close" size={14} />
-                          Remove
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                  <p
-                    role="status"
-                    className="mt-2 text-xs text-muted-foreground"
-                  >
-                    {photos.length} of 3 photos added. Photo metadata is removed
-                    before upload.
-                  </p>
-                </>
-              )}
-            </div>
+                <p className="text-sm text-muted-foreground">
+                  This report is for the vehicle linked to this active QR.
+                </p>
+              </DialogContent>
+            </Dialog>
           </div>
-          <div className="space-y-4 border-t border-border pt-5">
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-[10px] text-primary">03</span>
-              <h3 className="text-sm font-semibold">Review and send</h3>
-            </div>
-            <label className="flex min-h-12 cursor-pointer items-start gap-3 rounded-xl border border-border bg-muted/20 p-3.5">
-              <input
-                type="checkbox"
-                checked={consent}
-                disabled={busy}
-                onChange={(event) => setConsent(event.target.checked)}
-                className="mt-0.5 h-5 w-5 shrink-0 accent-[hsl(var(--primary))]"
-              />
-              <span className="text-xs leading-relaxed text-muted-foreground">
-                I agree to share this report and any added photos or location
-                with the vehicle owner. Photos remain private in their
-                VaahanSafe account.
-              </span>
-            </label>
-            {siteKey ? (
-              <div className="min-w-0 space-y-2">
-                <Script
-                  src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
-                  onReady={() => {
-                    setScriptReady(true);
-                    setSecurityError("");
-                  }}
-                  onError={() =>
-                    setSecurityError(
-                      "The security check could not load. Please refresh this page or use an approved contact above.",
-                    )
-                  }
-                />
+          <div className="space-y-5 p-5 sm:p-6">
+            <div aria-label={`Step ${step} of 3`} className="space-y-2">
+              <p className="text-sm font-medium text-muted-foreground">
+                Step {step} of 3 ·{" "}
+                {step === 1 ? "Situation" : step === 2 ? "Details" : "Review"}
+              </p>
+              <div
+                role="progressbar"
+                aria-label="Report progress"
+                aria-valuemin={0}
+                aria-valuemax={3}
+                aria-valuenow={step}
+                className="h-1.5 overflow-hidden rounded-full bg-muted"
+              >
                 <div
-                  className="flex items-center gap-2 text-xs text-muted-foreground"
-                  role="status"
-                >
-                  <VaahanIcon
-                    name={token ? "shield-check" : "shield"}
-                    size={16}
-                  />
-                  <span>
-                    {token
-                      ? "Security check complete"
-                      : securityError
-                        ? "Security check needs attention"
-                        : "Complete the security check below"}
-                  </span>
-                </div>
-                <div ref={container} className="min-w-0" />
-                {securityError && (
-                  <div
-                    role="alert"
-                    className="rounded-lg border border-primary/25 bg-primary/5 p-3 text-xs leading-relaxed"
+                  className="h-full bg-primary transition-[width] duration-150 motion-reduce:transition-none"
+                  style={{ width: `${(step / 3) * 100}%` }}
+                />
+              </div>
+            </div>
+            <h2
+              ref={heading}
+              tabIndex={-1}
+              id={`${formId}-heading`}
+              className="scroll-mt-24 font-serif text-2xl font-semibold focus:outline-none"
+            >
+              {stepTitle}
+            </h2>
+            {offline && (
+              <p
+                role="status"
+                className="rounded-lg border border-primary/30 bg-primary/5 p-3 text-sm"
+              >
+                You’re offline. Your report hasn’t been sent. Reconnect to send;
+                your details remain on this page.
+              </p>
+            )}
+            {step === 1 && (
+              <fieldset className="space-y-4" disabled={busy}>
+                <legend className="sr-only">Report situation</legend>
+                <p className="text-base leading-relaxed text-muted-foreground">
+                  Choose the option that best describes what you noticed.
+                </p>
+                <div className="space-y-2">
+                  <p
+                    id={`${formId}-reason-label`}
+                    className="text-sm font-medium"
                   >
-                    <p>{securityError}</p>
-                    {widget.current && (
+                    Situation
+                  </p>
+                  <RadioGroup
+                    value={reason}
+                    onValueChange={(value) =>
+                      setReason(value as ScanReportReason)
+                    }
+                    aria-labelledby={`${formId}-reason-label`}
+                    aria-describedby={`${formId}-reason-hint`}
+                    disabled={busy}
+                    className="gap-2"
+                  >
+                    {reasons.map((item) => (
+                      <label
+                        key={item.value}
+                        htmlFor={`${formId}-${item.value}`}
+                        className={`flex min-h-14 cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors ${reason === item.value ? "border-primary bg-primary/5" : "border-border bg-background hover:bg-muted"}`}
+                      >
+                        <RadioGroupItem
+                          id={`${formId}-${item.value}`}
+                          value={item.value}
+                          className="qr-report-radio"
+                        />
+                        <VaahanIcon
+                          name={
+                            item.value === "LIGHTS_ON"
+                              ? "info"
+                              : item.value === "DAMAGE" ||
+                                  item.value === "EMERGENCY"
+                                ? "alert"
+                                : item.value === "PARKING"
+                                  ? "car"
+                                  : "shield"
+                          }
+                          size={18}
+                          className="shrink-0 text-primary"
+                        />
+                        <span className="min-w-0 text-base font-medium">
+                          {item.label}
+                        </span>
+                      </label>
+                    ))}
+                  </RadioGroup>
+                  <p
+                    id={`${formId}-reason-hint`}
+                    className="text-sm leading-relaxed text-muted-foreground"
+                  >
+                    {selectedReason.hint}
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <label
+                    htmlFor={`${formId}-note`}
+                    className="block text-sm font-medium"
+                  >
+                    Add a short note{" "}
+                    <span className="font-normal text-muted-foreground">
+                      (optional)
+                    </span>
+                  </label>
+                  <textarea
+                    id={`${formId}-note`}
+                    aria-describedby={`${formId}-note-limit`}
+                    value={note}
+                    maxLength={300}
+                    onChange={(event) => setNote(event.target.value)}
+                    rows={3}
+                    className="block w-full resize-y rounded-lg border border-border bg-background p-3 text-base leading-relaxed focus-visible:ring-2 focus-visible:ring-ring"
+                    placeholder="Describe what you noticed and where to look."
+                  />
+                  <p
+                    id={`${formId}-note-limit`}
+                    className="text-right text-sm tabular-nums text-muted-foreground"
+                  >
+                    {note.length} / 300
+                  </p>
+                </div>
+                {reason === "EMERGENCY" && (
+                  <p className="text-sm text-muted-foreground">
+                    If someone is in immediate danger,{" "}
+                    <a
+                      href="tel:112"
+                      className="font-semibold text-primary underline"
+                    >
+                      call 112 first
+                    </a>
+                    .
+                  </p>
+                )}
+              </fieldset>
+            )}
+            {step === 2 && (
+              <fieldset className="space-y-6" disabled={busy || preparing}>
+                <legend className="sr-only">Optional report details</legend>
+                <p className="text-base leading-relaxed text-muted-foreground">
+                  These details are optional. They can help the owner understand
+                  the situation.
+                </p>
+                <div className="space-y-3">
+                  <h3 className="flex items-center gap-2 text-base font-semibold">
+                    <VaahanIcon name="map-pin" size={19} />
+                    Location
+                  </h3>
+                  <p className="text-sm leading-relaxed text-muted-foreground">
+                    Share your current location to help the owner find the
+                    vehicle. Used only for this report.
+                  </p>
+                  {location ? (
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <p
+                        role="status"
+                        className="text-sm text-emerald-800 dark:text-emerald-300"
+                      >
+                        ✓ Location added · accuracy ±
+                        {Math.ceil(location.accuracy)} m
+                      </p>
                       <button
                         type="button"
-                        disabled={busy}
-                        onClick={() => {
-                          setToken("");
-                          setSecurityError("");
-                          if (widget.current)
-                            getTurnstile()?.reset(widget.current);
-                        }}
-                        className="mt-1 min-h-11 font-semibold text-primary underline underline-offset-4"
+                        className={control}
+                        onClick={shareLocation}
+                        disabled={locating}
                       >
-                        Retry security check
+                        {locating ? "Updating location…" : "Update location"}
                       </button>
+                      <button
+                        type="button"
+                        className={control}
+                        onClick={() => setLocation(undefined)}
+                        disabled={locating}
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      className={control}
+                      onClick={shareLocation}
+                      disabled={locating}
+                    >
+                      <VaahanIcon
+                        name={locating ? "loading" : "map-pin"}
+                        size={18}
+                        className={
+                          locating
+                            ? "animate-spin motion-reduce:animate-none"
+                            : ""
+                        }
+                      />
+                      {locating ? "Finding location…" : "Share location"}
+                    </button>
+                  )}
+                  {location && location.accuracy > 1000 && (
+                    <p className="text-sm leading-relaxed text-muted-foreground">
+                      Your device returned a broad location estimate. Try
+                      updating it outdoors for better accuracy.
+                    </p>
+                  )}
+                </div>
+                <div className="space-y-3 border-t border-border pt-5">
+                  <div className="flex items-center justify-between gap-3">
+                    <h3 className="flex items-center gap-2 text-base font-semibold">
+                      <VaahanIcon name="camera" size={19} />
+                      Photos
+                    </h3>
+                    <span className="text-sm text-muted-foreground">
+                      {photos.length} / 3
+                    </span>
+                  </div>
+                  <p className="text-sm leading-relaxed text-muted-foreground">
+                    Photograph the vehicle or nearby area. Avoid faces, identity
+                    documents and unrelated people.
+                  </p>
+                  <div className="grid grid-cols-1 gap-2 min-[390px]:grid-cols-2">
+                    <label
+                      className={`${primary} qr-photo-button relative cursor-pointer has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-50`}
+                    >
+                      <VaahanIcon
+                        name="camera"
+                        size={18}
+                        className="shrink-0"
+                      />
+                      <span>Take photo</span>
+                      <input
+                        aria-label="Take photo"
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        capture="environment"
+                        disabled={preparing || photos.length === 3}
+                        onChange={(event) => {
+                          void addPhotos(event.target.files);
+                          event.target.value = "";
+                        }}
+                        className="sr-only"
+                      />
+                    </label>
+                    <label
+                      className={`${control} qr-photo-button relative cursor-pointer has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-50`}
+                    >
+                      <VaahanIcon name="add" size={18} className="shrink-0" />
+                      <span>Choose photos</span>
+                      <input
+                        aria-label="Choose photos"
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        multiple
+                        disabled={preparing || photos.length === 3}
+                        onChange={(event) => {
+                          void addPhotos(event.target.files);
+                          event.target.value = "";
+                        }}
+                        className="sr-only"
+                      />
+                    </label>
+                  </div>
+                  {preparing && (
+                    <p role="status" className="text-sm text-muted-foreground">
+                      Preparing photos and removing metadata…
+                    </p>
+                  )}
+                  <p className="text-sm text-muted-foreground">
+                    JPEG, PNG or WebP · up to 15 MB each before preparation.
+                    Photos are resized and metadata is removed before upload.
+                  </p>
+                  {photos.length === 3 && (
+                    <p
+                      role="status"
+                      className="text-sm font-medium text-muted-foreground"
+                    >
+                      3 photos added. Remove a photo to add another.
+                    </p>
+                  )}
+                </div>
+              </fieldset>
+            )}
+            {step === 3 && (
+              <div className="space-y-5">
+                <dl className="grid min-w-0 gap-4 text-base">
+                  <div>
+                    <dt className="text-sm text-muted-foreground">Vehicle</dt>
+                    <dd className="break-words font-medium">
+                      {vehicleDisplay}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-sm text-muted-foreground">Situation</dt>
+                    <dd className="font-medium">{selectedReason.label}</dd>
+                  </div>
+                  {note.trim() && (
+                    <div>
+                      <dt className="text-sm text-muted-foreground">Note</dt>
+                      <dd className="whitespace-pre-wrap break-words">
+                        {note.trim()}
+                      </dd>
+                    </div>
+                  )}
+                  <div>
+                    <dt className="text-sm text-muted-foreground">Location</dt>
+                    <dd>
+                      {location
+                        ? `Shared · accuracy ±${Math.ceil(location.accuracy)} m`
+                        : "Not shared"}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-sm text-muted-foreground">Photos</dt>
+                    <dd>
+                      {photos.length
+                        ? `${photos.length} attached`
+                        : "None added"}
+                    </dd>
+                  </div>
+                </dl>
+                <div className="flex items-start gap-3 border-t border-border pt-4">
+                  <Checkbox
+                    id={`${formId}-consent`}
+                    className="qr-report-checkbox mt-1"
+                    checked={consent}
+                    onCheckedChange={(value) => setConsent(value === true)}
+                    disabled={busy}
+                  />
+                  <label
+                    htmlFor={`${formId}-consent`}
+                    className="min-h-11 cursor-pointer text-sm leading-relaxed"
+                  >
+                    I understand this report and any attached photos or location
+                    will be shared privately with the vehicle owner.
+                  </label>
+                </div>
+                {siteKey ? (
+                  <div className="min-w-0 space-y-2">
+                    <Script
+                      src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
+                      onReady={() => {
+                        setScriptReady(true);
+                        setSecurityError("");
+                      }}
+                      onError={() =>
+                        setSecurityError(
+                          "The security check could not load. Please refresh this page or use an approved contact above.",
+                        )
+                      }
+                    />
+                    <p
+                      role="status"
+                      className="flex items-center gap-2 text-sm text-muted-foreground"
+                    >
+                      <VaahanIcon
+                        name={token ? "shield-check" : "shield"}
+                        size={17}
+                      />
+                      {token
+                        ? "Security check complete"
+                        : securityError
+                          ? "Security check needs attention"
+                          : "Complete the security check to send"}
+                    </p>
+                    <div ref={container} className="min-w-0" />
+                    {securityError && (
+                      <div
+                        role="alert"
+                        className="rounded-lg border border-primary/30 bg-primary/5 p-3 text-sm leading-relaxed"
+                      >
+                        <p>{securityError}</p>
+                        {widget.current && (
+                          <button
+                            type="button"
+                            disabled={busy || offline}
+                            onClick={() => {
+                              setToken("");
+                              setSecurityError("");
+                              if (widget.current)
+                                getTurnstile()?.reset(widget.current);
+                            }}
+                            className="mt-1 min-h-11 font-semibold text-primary underline"
+                          >
+                            Retry security check
+                          </button>
+                        )}
+                      </div>
                     )}
                   </div>
+                ) : (
+                  <p
+                    role="status"
+                    className="rounded-lg border border-primary/30 bg-primary/5 p-3 text-sm leading-relaxed"
+                  >
+                    Online reporting is unavailable right now. Please call or
+                    message an approved contact above. For immediate danger,
+                    call 112.
+                  </p>
                 )}
               </div>
-            ) : (
+            )}
+            {photos.length > 0 && step > 1 && (
               <div
-                role="status"
-                className="rounded-xl border border-primary/25 bg-primary/5 p-3.5"
+                className="grid grid-cols-3 gap-2"
+                aria-label="Attached report photos"
               >
-                <p className="text-sm font-medium">
-                  Online reporting is unavailable right now
-                </p>
-                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                  Please call or message an approved contact above. For
-                  immediate danger, call 112.
-                </p>
+                {previews.map((src, index) => (
+                  <div
+                    key={src}
+                    className="relative aspect-square min-w-0 overflow-hidden rounded-lg border border-border bg-muted"
+                  >
+                    <button
+                      type="button"
+                      className="block h-full w-full"
+                      onClick={() => setPreviewIndex(index)}
+                      aria-label={`Preview photo ${index + 1}`}
+                    >
+                      {/* Local, metadata-free preview; no external image service. */}
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={src}
+                        alt={`Report photo ${index + 1}`}
+                        className="h-full w-full object-cover"
+                      />
+                    </button>
+                    <button
+                      type="button"
+                      disabled={busy || preparing || retryPending}
+                      aria-label={`Remove photo ${index + 1}`}
+                      onClick={() => removePhoto(index)}
+                      className="absolute right-0 top-0 flex h-11 w-11 items-center justify-center rounded-bl-lg bg-background/95 text-foreground"
+                    >
+                      <VaahanIcon name="close" size={17} />
+                    </button>
+                  </div>
+                ))}
               </div>
             )}
             {error && (
               <p
                 role="alert"
-                className="rounded-xl border border-destructive/20 bg-destructive/5 p-3 text-sm leading-relaxed text-destructive"
+                className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm leading-relaxed text-destructive"
               >
                 {error}
               </p>
             )}
-            <button
-              disabled={locked}
-              type="submit"
-              className="flex min-h-[52px] w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              <VaahanIcon
-                name={busy || preparing ? "loading" : "arrow-right"}
-                size={18}
-                className={busy || preparing ? "animate-spin" : ""}
-              />
-              {busy
-                ? "Sending your report…"
-                : preparing
-                  ? "Preparing photos…"
-                  : "Send report to owner"}
-            </button>
-            <p className="text-center text-xs leading-relaxed text-muted-foreground">
-              {!siteKey
-                ? "You can still use the contact options above."
-                : !consent
-                  ? "Agree to share your report to continue."
-                  : !token
-                    ? "Complete the security check to enable sending."
-                    : "The owner will be notified after your report is saved."}
-            </p>
+            {busy && (
+              <p role="status" className="text-sm text-muted-foreground">
+                {photos.length
+                  ? "Uploading photos and saving your report…"
+                  : "Saving your report…"}{" "}
+                Please keep this page open.
+              </p>
+            )}
+            <div className="qr-report-actions grid grid-cols-[auto_1fr] gap-3 border-t border-border pt-4">
+              <button
+                type="button"
+                className={control}
+                disabled={busy || preparing || locating || retryPending}
+                onClick={() => goToStep(step - 1)}
+              >
+                <VaahanIcon name="chevron-left" size={18} />
+                <span>Back</span>
+              </button>
+              {step < 3 ? (
+                <button
+                  type="button"
+                  className={primary}
+                  disabled={busy || preparing || locating}
+                  onClick={() => goToStep(step + 1)}
+                >
+                  Continue <VaahanIcon name="arrow-right" size={18} />
+                </button>
+              ) : (
+                <button type="submit" className={primary} disabled={locked}>
+                  <VaahanIcon
+                    name={busy ? "loading" : "arrow-right"}
+                    size={18}
+                    className={
+                      busy ? "animate-spin motion-reduce:animate-none" : ""
+                    }
+                  />
+                  {busy
+                    ? "Sending…"
+                    : retryPending
+                      ? "Retry send"
+                      : "Send report"}
+                </button>
+              )}
+            </div>
+            {step === 3 && (
+              <p className="text-sm leading-relaxed text-muted-foreground">
+                {!siteKey
+                  ? "Use an approved contact above for help."
+                  : !consent
+                    ? "Confirm sharing to enable sending."
+                    : !token
+                      ? "Complete the security check before sending."
+                      : "The owner will be notified after your report is saved."}
+              </p>
+            )}
           </div>
         </form>
       )}
+      <Dialog
+        open={previewIndex !== null}
+        onOpenChange={(open) => {
+          if (!open) setPreviewIndex(null);
+        }}
+      >
+        <DialogContent className="qr-safety-dialog">
+          <DialogTitle className="pr-10">Photo preview</DialogTitle>
+          <DialogDescription>
+            {previewIndex !== null
+              ? `Photo ${previewIndex + 1} of ${photos.length}. Stored locally until you send the report.`
+              : "Report attachment"}
+          </DialogDescription>
+          {previewIndex !== null && previews[previewIndex] && (
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={previews[previewIndex]}
+                alt={`Report photo ${previewIndex + 1}`}
+                className="max-h-[55dvh] w-full rounded-lg object-contain"
+              />
+              <div className="flex flex-wrap justify-between gap-2">
+                <button
+                  type="button"
+                  className={control}
+                  disabled={previewIndex === 0}
+                  aria-label="Previous photo"
+                  onClick={() => setPreviewIndex(previewIndex - 1)}
+                >
+                  <VaahanIcon name="chevron-left" size={18} />
+                </button>
+                <button
+                  type="button"
+                  className={control}
+                  disabled={busy || retryPending}
+                  onClick={() => removePhoto(previewIndex)}
+                >
+                  Remove photo
+                </button>
+                <button
+                  type="button"
+                  className={control}
+                  disabled={previewIndex === photos.length - 1}
+                  aria-label="Next photo"
+                  onClick={() => setPreviewIndex(previewIndex + 1)}
+                >
+                  <VaahanIcon name="arrow-right" size={18} />
+                </button>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }

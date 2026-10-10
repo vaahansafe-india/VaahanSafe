@@ -8,7 +8,10 @@ export interface PrimarySafetyContactProps {
   publicId?: string;
 }
 
-export function PrimarySafetyContact({ contact, publicId }: PrimarySafetyContactProps) {
+export function PrimarySafetyContact({
+  contact,
+  publicId,
+}: PrimarySafetyContactProps) {
   return (
     <div className="w-full space-y-4 rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -32,7 +35,14 @@ export function PrimarySafetyContact({ contact, publicId }: PrimarySafetyContact
         </p>
       </div>
 
-      <ContactAction phone={contact.phone} isPrimary label="Call contact" allowCall={contact.allowCall} allowMessage={contact.allowMessage} publicId={publicId} />
+      <ContactAction
+        phone={contact.phone}
+        isPrimary
+        label="Call contact"
+        allowCall={contact.allowCall}
+        allowMessage={contact.allowMessage}
+        publicId={publicId}
+      />
     </div>
   );
 }

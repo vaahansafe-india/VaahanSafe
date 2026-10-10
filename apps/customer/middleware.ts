@@ -39,7 +39,17 @@ export function middleware(request: NextRequest) {
   // All other pages require an authenticated session
   if (!sessionToken) {
     if (pathname.startsWith("/api/")) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        {
+          status: 401,
+          headers: {
+            "Cache-Control": "private, no-store",
+            "X-Content-Type-Options": "nosniff",
+            "Referrer-Policy": "no-referrer",
+          },
+        },
+      );
     }
     const loginUrl = new URL("/login", request.url);
     if (pathname !== "/") {

@@ -5,13 +5,17 @@ import { OfflineBanner } from "../states/OfflineBanner";
 
 export interface ResolverShellProps {
   children: React.ReactNode;
+  verified?: boolean;
 }
 
-export function ResolverShell({ children }: ResolverShellProps) {
+export function ResolverShell({
+  children,
+  verified = false,
+}: ResolverShellProps) {
   return (
-    <div className="qr-resolver min-h-screen flex flex-col justify-between text-foreground antialiased selection:bg-primary/20 selection:text-primary">
-      <div className="mx-auto flex w-full min-w-0 max-w-xl flex-1 flex-col px-4 py-5 sm:px-6 sm:py-8">
-        <ResolverHeader />
+    <div className="qr-resolver min-h-dvh flex flex-col justify-between text-foreground antialiased selection:bg-primary/20 selection:text-primary">
+      <ResolverHeader verified={verified} />
+      <div className="mx-auto flex w-full min-w-0 max-w-[728px] flex-1 flex-col px-4 pb-6 sm:px-6">
         <OfflineBanner />
         <main
           id="main-content"

@@ -11,6 +11,7 @@ import {
 } from "@vaahansafe/ui";
 import { VaahanIcon } from "@vaahansafe/icons";
 import { ScanJourney } from "../journey/ScanJourney";
+import { ReportPhoto } from "./ReportPhoto";
 import type { ScanEventItem } from "@/lib/scan-history-types";
 
 interface ScanDetailSheetProps {
@@ -38,7 +39,10 @@ export function ScanDetailSheet({
             <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-primary truncate">
               Scan Encounter Audit
             </div>
-            <Badge variant={event.resultBadgeVariant} className="text-[10px] font-mono shrink-0">
+            <Badge
+              variant={event.resultBadgeVariant}
+              className="text-[10px] font-mono shrink-0"
+            >
               {event.resultLabel}
             </Badge>
           </div>
@@ -68,7 +72,10 @@ export function ScanDetailSheet({
                   {event.vehiclePlate}
                 </div>
               </div>
-              <Badge variant="outline" className="font-mono text-xs text-primary border-primary/30">
+              <Badge
+                variant="outline"
+                className="font-mono text-xs text-primary border-primary/30"
+              >
                 {event.publicQrIdentity}
               </Badge>
             </div>
@@ -81,9 +88,11 @@ export function ScanDetailSheet({
             </div>
             <div className="grid grid-cols-2 gap-3 font-mono text-[11px]">
               <div>
-                <span className="text-muted-foreground block">Approximate Region:</span>
+                <span className="text-muted-foreground block">
+                  Approximate Region:
+                </span>
                 <span className="font-semibold text-foreground">
-                  {event.approximateRegion || "Regional Network"}
+                  {event.approximateRegion || "Not available"}
                 </span>
                 <span className="text-[9px] text-muted-foreground/80 block mt-0.5 font-sans">
                   (Coarse provider estimate only)
@@ -91,21 +100,27 @@ export function ScanDetailSheet({
               </div>
 
               <div>
-                <span className="text-muted-foreground block">Device Category:</span>
+                <span className="text-muted-foreground block">
+                  Device Category:
+                </span>
                 <span className="font-semibold text-foreground">
                   {event.deviceCategory}
                 </span>
               </div>
 
               <div>
-                <span className="text-muted-foreground block">Encounter Type:</span>
+                <span className="text-muted-foreground block">
+                  Encounter Type:
+                </span>
                 <span className="font-semibold text-foreground">
                   {event.scanTypeLabel}
                 </span>
               </div>
 
               <div>
-                <span className="text-muted-foreground block">Referrer Source:</span>
+                <span className="text-muted-foreground block">
+                  Referrer Source:
+                </span>
                 <span className="font-semibold text-foreground">
                   {event.referrerClass}
                 </span>
@@ -119,39 +134,85 @@ export function ScanDetailSheet({
               Public Safety View Dispatched
             </div>
             <p className="text-muted-foreground text-[11px] leading-relaxed">
-              At the moment of encounter, the VaahanSafe Edge server dynamically resolved and served:
+              At the moment of encounter, the VaahanSafe Edge server dynamically
+              resolved and served:
             </p>
 
             <div className="space-y-2 font-mono text-[11px]">
               <div className="flex items-center justify-between p-2 rounded-lg bg-card border border-border/60">
-                <span className="text-muted-foreground">Vehicle Classification:</span>
-                <span className="font-semibold text-foreground">{event.vehicleType}</span>
+                <span className="text-muted-foreground">
+                  Vehicle Classification:
+                </span>
+                <span className="font-semibold text-foreground">
+                  {event.vehicleType}
+                </span>
               </div>
 
               <div className="flex items-center justify-between p-2 rounded-lg bg-card border border-border/60">
                 <span className="text-muted-foreground">Contact Actions:</span>
-                <span className="text-foreground">Owner-approved call / WhatsApp</span>
+                <span className="text-foreground">
+                  Owner-approved call / WhatsApp
+                </span>
               </div>
 
               <div className="flex items-center justify-between p-2 rounded-lg bg-card border border-border/60">
-                <span className="text-muted-foreground">Personal Contact Disclosure:</span>
+                <span className="text-muted-foreground">
+                  Personal Contact Disclosure:
+                </span>
                 <span className="text-foreground">Approved contacts only</span>
               </div>
             </div>
           </div>
 
           {/* Chronological Encounter Journey */}
-          {event.report && <section className="rounded-xl border border-border bg-background p-4 space-y-3">
-            <h3 className="text-sm font-semibold">Finder report · {event.report.reason.replaceAll('_',' ')}</h3>
-            {event.report.note && <p className="text-sm whitespace-pre-wrap">{event.report.note}</p>}
-            {event.report.location ? <div className="space-y-1">
-              <p>Finder-shared GPS · accuracy ±{Math.ceil(event.report.location.accuracy)} m</p>
-              <p className="text-muted-foreground">Captured {new Date(event.report.location.capturedAt).toLocaleString('en-IN',{timeZone:'Asia/Kolkata'})} IST. This is the finder’s location near the vehicle.</p>
-              <a className="text-primary underline inline-flex min-h-[44px] items-center" href={`https://www.google.com/maps/search/?api=1&query=${event.report.location.latitude},${event.report.location.longitude}`} target="_blank" rel="noopener noreferrer">Open shared location in Maps</a>
-            </div> : <p className="text-muted-foreground">The finder did not share a GPS location.</p>}
-            <div className="grid grid-cols-1 gap-3">{event.report.photoUrls.map((url,index)=><a key={url} href={url} target="_blank" rel="noopener noreferrer"><img src={url} alt={`Finder-shared vehicle or parking area photo ${index+1}`} loading="lazy" className="w-full rounded-xl border border-border object-contain" /></a>)}</div>
-            {!event.report.photoUrls.length && <p className="text-muted-foreground">No photos were shared.</p>}
-          </section>}
+          {event.report && (
+            <section className="rounded-xl border border-border bg-background p-4 space-y-3">
+              <h3 className="text-sm font-semibold">
+                Finder report · {event.report.reason.replaceAll("_", " ")}
+              </h3>
+              {event.report.note && (
+                <p className="text-sm whitespace-pre-wrap">
+                  {event.report.note}
+                </p>
+              )}
+              {event.report.location ? (
+                <div className="space-y-1">
+                  <p>
+                    Finder-shared GPS · accuracy ±
+                    {Math.ceil(event.report.location.accuracy)} m
+                  </p>
+                  <p className="text-muted-foreground">
+                    Captured{" "}
+                    {new Date(event.report.location.capturedAt).toLocaleString(
+                      "en-IN",
+                      { timeZone: "Asia/Kolkata" },
+                    )}{" "}
+                    IST. This is the finder’s location near the vehicle.
+                  </p>
+                  <a
+                    className="text-primary underline inline-flex min-h-[44px] items-center"
+                    href={`https://www.google.com/maps/search/?api=1&query=${event.report.location.latitude},${event.report.location.longitude}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Open shared location in Maps
+                  </a>
+                </div>
+              ) : (
+                <p className="text-muted-foreground">
+                  The finder did not share a GPS location.
+                </p>
+              )}
+              <div className="grid grid-cols-1 gap-3">
+                {event.report.photoUrls.map((url, index) => (
+                  <ReportPhoto key={url} url={url} number={index + 1} />
+                ))}
+              </div>
+              {!event.report.photoUrls.length && (
+                <p className="text-muted-foreground">No photos were shared.</p>
+              )}
+            </section>
+          )}
           <ScanJourney milestones={event.journey} />
 
           {/* Close Action */}

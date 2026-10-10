@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createHmac } from "node:crypto";
+import { verifyScanReportTurnstile } from "../../../lib/verify-scan-report-turnstile";
 import { getAuthoritativeDatabaseClient } from "@vaahansafe/database";
 import { getScanReportObjectStore } from "@vaahansafe/storage";
 import {
@@ -69,30 +70,19 @@ export async function POST(request: Request) {
       !isValidPublicIdFormat(input.publicId)
     )
       return NextResponse.json({ error: "Invalid report." }, { status: 400 });
-    const token = String(form.get("turnstileToken") || "");
+    const token = form.get("turnstileToken");
     const secret = process.env.TURNSTILE_SECRET_KEY,
       hashKey = process.env.SESSION_SECRET;
     if (!secret || !hashKey || hashKey.length < 32)
       throw new Error("Report protection unavailable");
-    const verification = await fetch(
-      "https://challenges.cloudflare.com/turnstile/v0/siteverify",
-      {
-        method: "POST",
-        body: new URLSearchParams({ secret, response: token }),
-        signal: AbortSignal.timeout(8000),
-      },
-    );
-    const challenge = (await verification.json()) as {
-      success?: boolean;
-      hostname?: string;
-      action?: string;
-    };
-    if (
-      !verification.ok ||
-      !challenge.success ||
-      challenge.hostname !== new URL(request.url).hostname ||
-      challenge.action !== "scan-report"
-    ) {
+    const verified = await verifyScanReportTurnstile({
+      token,
+      secret,
+      requestHostname: new URL(request.url).hostname,
+      hostnames: process.env.TURNSTILE_HOSTNAMES || "qr.vaahansafe.com",
+      production: process.env.NODE_ENV === "production",
+    });
+    if (!verified) {
       return NextResponse.json(
         { error: "Please complete the security check and try again." },
         { status: 403 },

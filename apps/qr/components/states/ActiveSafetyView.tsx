@@ -1,14 +1,12 @@
 import React from "react";
-import { SafetyIdentityRail } from "../identity/SafetyIdentityRail";
-import { QrIdentityBadge } from "../identity/QrIdentityBadge";
-import { VehicleIdentity } from "../identity/VehicleIdentity";
+import { VerifiedVehicleHero } from "../identity/VerifiedVehicleHero";
 import { ProjectionBoundary } from "../projection/ProjectionBoundary";
 import { SafetyField } from "../projection/SafetyField";
 import { MedicalInformation } from "../projection/MedicalInformation";
 import { PrimarySafetyContact } from "../contacts/PrimarySafetyContact";
 import { SecondarySafetyContact } from "../contacts/SecondarySafetyContact";
 import type { PublicQrResolution } from "@vaahansafe/qr-core";
-import { ScanReportForm } from "../reports/ScanReportForm";
+import { ReportEntry } from "../reports/ReportEntry";
 
 export interface ActiveSafetyViewProps {
   resolution: PublicQrResolution;
@@ -26,20 +24,10 @@ export function ActiveSafetyView({ resolution }: ActiveSafetyViewProps) {
 
   return (
     <div className="w-full min-w-0 space-y-5 animate-in fade-in duration-300 sm:space-y-6">
-      {/* 1. Milestone Status Rail (Rule 15, 18) */}
-      <SafetyIdentityRail currentStage="VIEW" />
-
-      {/* 2. QR Identity Monospace Badge (Rule 17, 20) */}
-      <QrIdentityBadge
+      <VerifiedVehicleHero
+        profile={profile}
         publicId={publicId}
         visibleCode={visibleCode}
-        statusLabel="ACTIVE PASS"
-      />
-
-      {/* 3. Safe Public Vehicle Representation (Rule 20) */}
-      <VehicleIdentity
-        vehicleDisplay={profile.vehicleDisplay}
-        vehicleType={profile.vehicleType}
       />
 
       {/* 4. Controlled Public Safety Projection (Rule 10, 11, 37) */}
@@ -65,7 +53,10 @@ export function ActiveSafetyView({ resolution }: ActiveSafetyViewProps) {
             Emergency contacts
           </h2>
           <span className="text-xs text-muted-foreground">
-            {profile.approvedEmergencyContacts.length} approved {profile.approvedEmergencyContacts.length === 1 ? "contact" : "contacts"}
+            {profile.approvedEmergencyContacts.length} approved{" "}
+            {profile.approvedEmergencyContacts.length === 1
+              ? "contact"
+              : "contacts"}
           </span>
         </div>
 
@@ -91,8 +82,9 @@ export function ActiveSafetyView({ resolution }: ActiveSafetyViewProps) {
           </div>
         )}
       </div>
-      <ScanReportForm
+      <ReportEntry
         publicId={publicId}
+        vehicleDisplay={profile.vehicleDisplay}
         siteKey={
           process.env.TURNSTILE_SITE_KEY ||
           process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ||

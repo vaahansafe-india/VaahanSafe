@@ -8,15 +8,18 @@ export interface QrIdentityBadgeProps {
   publicId: string;
   visibleCode?: string;
   statusLabel?: string;
+  compact?: boolean;
 }
 
 export function QrIdentityBadge({
   publicId,
   visibleCode,
   statusLabel = "ACTIVE",
+  compact = false,
 }: QrIdentityBadgeProps) {
   const [copied, setCopied] = useState(false);
-  const displayId = visibleCode || (publicId.startsWith("VS-") ? publicId : `VS-${publicId}`);
+  const displayId =
+    visibleCode || (publicId.startsWith("VS-") ? publicId : `VS-${publicId}`);
 
   async function handleCopy() {
     try {
@@ -31,7 +34,9 @@ export function QrIdentityBadge({
   }
 
   return (
-    <div className="flex w-full flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5">
+    <div
+      className={`flex w-full flex-wrap items-center justify-between gap-3 ${compact ? "" : "rounded-xl border border-border bg-card p-4 sm:p-5"}`}
+    >
       <div className="min-w-0 flex-1 space-y-1">
         <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground block">
           VaahanSafe ID
@@ -42,12 +47,14 @@ export function QrIdentityBadge({
       </div>
 
       <div className="flex shrink-0 items-center gap-2">
-        <Badge
-          variant="outline"
-          className="font-mono text-[10px] tracking-wider text-emerald-700 dark:text-emerald-400 border-emerald-600/30 bg-emerald-500/5 px-2 py-0.5"
-        >
-          {statusLabel}
-        </Badge>
+        {!compact && (
+          <Badge
+            variant="outline"
+            className="font-mono text-[10px] tracking-wider text-emerald-700 dark:text-emerald-400 border-emerald-600/30 bg-emerald-500/5 px-2 py-0.5"
+          >
+            {statusLabel}
+          </Badge>
+        )}
         <button
           type="button"
           onClick={handleCopy}
@@ -61,7 +68,9 @@ export function QrIdentityBadge({
             <VaahanIcon name="copy" size={14} />
           )}
         </button>
-        <span role="status" className="sr-only">{copied ? "VaahanSafe ID copied" : ""}</span>
+        <span role="status" className="sr-only">
+          {copied ? "VaahanSafe ID copied" : ""}
+        </span>
       </div>
     </div>
   );

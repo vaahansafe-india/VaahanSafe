@@ -8,7 +8,10 @@ export interface VehicleIdentityProps {
   vehicleType: VehicleType | string;
 }
 
-export function VehicleIdentity({ vehicleDisplay, vehicleType }: VehicleIdentityProps) {
+export function VehicleIdentity({
+  vehicleDisplay,
+  vehicleType,
+}: VehicleIdentityProps) {
   const iconName =
     vehicleType === "MOTORCYCLE" || vehicleType === "SCOOTER"
       ? "motorcycle"
@@ -36,7 +39,10 @@ export function VehicleIdentity({ vehicleDisplay, vehicleType }: VehicleIdentity
             This vehicle
           </span>
         </div>
-        <Badge variant="outline" className="font-mono text-[10px] text-muted-foreground px-2 py-0.5">
+        <Badge
+          variant="outline"
+          className="font-mono text-[10px] text-muted-foreground px-2 py-0.5"
+        >
           {typeLabel}
         </Badge>
       </div>

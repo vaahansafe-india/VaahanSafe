@@ -266,7 +266,10 @@ body.qr-paper {
   border: 1px solid var(--qr-line) !important;
   color: var(--qr-ink) !important;
   cursor: pointer !important;
-  transition: background-color 0.15s, border-color 0.15s, color 0.15s !important;
+  transition:
+    background-color 0.15s,
+    border-color 0.15s,
+    color 0.15s !important;
 }
 
 .qr-theme-toggle:hover,
@@ -765,4 +768,103 @@ html.dark .qr-theme-toggle .qr-theme-icon-moon {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
+}
+
+/* The public scan surface has a focused, full-width task header. */
+.qr-safety-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  width: 100%;
+  border-bottom: 1px solid var(--qr-line);
+  background: var(--qr-paper);
+  padding-top: env(safe-area-inset-top);
+}
+.qr-safety-header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+  max-width: 728px;
+  min-height: 72px;
+  margin-inline: auto;
+  padding-inline: 1rem;
+}
+.qr-resolver :is(.rounded-lg, .rounded-xl, .rounded-2xl) {
+  border-radius: 8px;
+}
+.qr-safety-header .vs-logo {
+  display: inline-flex;
+  align-items: center;
+}
+.dark .qr-safety-header .vs-wordmark {
+  color: var(--qr-ink) !important;
+}
+.qr-report-section {
+  overflow: clip;
+}
+.qr-report-context {
+  position: sticky;
+  top: calc(72px + env(safe-area-inset-top));
+  z-index: 30;
+  background: var(--qr-paper);
+  box-shadow: 0 1px 0 var(--qr-line);
+}
+.qr-report-section h2 {
+  scroll-margin-top: calc(152px + env(safe-area-inset-top));
+}
+.qr-report-section form {
+  scroll-margin-top: env(safe-area-inset-top);
+}
+.qr-resolver .qr-report-checkbox {
+  min-height: 20px;
+  min-width: 20px;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+}
+.qr-resolver .qr-report-radio {
+  min-height: 20px;
+  min-width: 20px;
+  width: 20px;
+  height: 20px;
+}
+.qr-report-actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  background: var(--qr-paper);
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+}
+.qr-safety-dialog {
+  max-height: 90dvh;
+  font-family: "Qr Sans", Arial, sans-serif;
+}
+.qr-safety-dialog :is(button, a) {
+  min-height: 44px;
+}
+.qr-report-section .qr-photo-button {
+  height: 52px;
+  min-height: 52px;
+  min-width: 0;
+  gap: 0.5rem;
+  padding-inline: 0.5rem;
+  font-size: 15px;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+@media (min-width: 640px) {
+  .qr-safety-header-inner {
+    padding-inline: 1.5rem;
+  }
+}
+@media (max-width: 359px) {
+  .qr-safety-header .vs-wordmark {
+    font-size: 22px !important;
+  }
+  .qr-safety-header .vs-logo svg {
+    width: 22px;
+    height: 22px;
+  }
 }
