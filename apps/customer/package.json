@@ -51,7 +51,7 @@
     "recharts": "3.10.1"
   },
   "devDependencies": {
-    "@types/d3-geo": "^3.1.0",
+    "@types/d3-geo": "^3.1.1",
     "@types/d3-hierarchy": "3.1.7",
     "@types/d3-scale": "4.0.9",
     "@types/d3-shape": "^3.1.7",
