@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import Script from "next/script";
 import type { SharedScanLocation, ScanReportReason } from "@vaahansafe/qr-core";
+import { VaahanIcon } from "@vaahansafe/icons";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@vaahansafe/ui/components/select";
 
 type Turnstile = {
   render: (element: HTMLElement, options: Record<string, unknown>) => string;
@@ -11,12 +13,12 @@ type Turnstile = {
 };
 const getTurnstile = () =>
   (window as unknown as { turnstile?: Turnstile }).turnstile;
-const reasons: { value: ScanReportReason; label: string }[] = [
-  { value: "PARKING", label: "Parking / access blocked" },
-  { value: "EMERGENCY", label: "Possible emergency" },
-  { value: "LIGHTS_ON", label: "Lights left on" },
-  { value: "DAMAGE", label: "Vehicle damage" },
-  { value: "OTHER", label: "Other safety concern" },
+const reasons: { value: ScanReportReason; label: string; hint: string }[] = [
+  { value: "PARKING", label: "Parking or blocked access", hint: "Let the owner know if their vehicle is blocking a gate, driveway or another vehicle." },
+  { value: "EMERGENCY", label: "Possible emergency", hint: "Alert the owner about an urgent situation. If someone is in immediate danger, call 112 first." },
+  { value: "LIGHTS_ON", label: "Lights left on", hint: "A quick alert can help the owner avoid a flat battery." },
+  { value: "DAMAGE", label: "Vehicle damage", hint: "Share what you noticed. A photo can help the owner understand the situation." },
+  { value: "OTHER", label: "Other safety concern", hint: "Describe the concern so the owner knows how they can help." },
 ];
 
 /** Redraw photos to remove original metadata and keep uploads within server limits. */
@@ -69,25 +71,41 @@ export function ScanReportForm({
     [preparing, setPreparing] = useState(false);
   const [error, setError] = useState(""),
     [success, setSuccess] = useState("");
+  const [securityError, setSecurityError] = useState("");
+  const [previews, setPreviews] = useState<string[]>([]);
+  const formId = useId();
   const container = useRef<HTMLDivElement>(null),
     widget = useRef<string | undefined>(undefined),
     requestId = useRef<string | undefined>(undefined);
   useEffect(() => {
     const turnstile = getTurnstile();
-    if (!scriptReady || !siteKey || !container.current || !turnstile) return;
-    const id = turnstile.render(container.current, {
+    if (!scriptReady || !siteKey || success || !container.current || !turnstile) return;
+    let id: string;
+    try { id = turnstile.render(container.current, {
       sitekey: siteKey,
       action: "scan-report",
-      callback: (value: string) => setToken(value),
-      "expired-callback": () => setToken(""),
-      "error-callback": () => setToken(""),
-    });
+      size: container.current.clientWidth < 300 ? "compact" : "flexible",
+      theme: "auto",
+      callback: (value: string) => { setToken(value); setSecurityError(""); },
+      "expired-callback": () => { setToken(""); setSecurityError("The security check expired. Please retry it before sending."); },
+      "error-callback": () => { setToken(""); setSecurityError("The security check could not finish. Please retry, or use an approved contact above."); },
+    }); } catch { setSecurityError("The security check could not load. Please refresh this page or use an approved contact above."); return; }
     widget.current = id;
     return () => {
       turnstile.remove(id);
       widget.current = undefined;
     };
-  }, [scriptReady, siteKey]);
+  }, [scriptReady, siteKey, success]);
+  useEffect(() => {
+    const urls = photos.map((photo) => URL.createObjectURL(photo));
+    setPreviews(urls);
+    return () => urls.forEach((url) => URL.revokeObjectURL(url));
+  }, [photos]);
+  useEffect(() => {
+    if (!siteKey || scriptReady || success) return;
+    const timer = setTimeout(() => setSecurityError("The security check is taking longer than expected. Please refresh this page or use an approved contact above."), 15000);
+    return () => clearTimeout(timer);
+  }, [siteKey, scriptReady, success]);
   function shareLocation() {
     setError("");
     if (!navigator.geolocation) {
@@ -121,8 +139,9 @@ export function ScanReportForm({
     setError("");
     setPreparing(true);
     try {
-      if (files.length > 3) throw new Error("Choose up to three photos.");
-      setPhotos(await Promise.all(Array.from(files).map(preparePhoto)));
+      if (photos.length + files.length > 3) throw new Error("You can add up to three photos. Remove a photo to choose another.");
+      const prepared = await Promise.all(Array.from(files).map(preparePhoto));
+      setPhotos((current) => [...current, ...prepared]);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not prepare photos.");
     } finally {
@@ -132,6 +151,10 @@ export function ScanReportForm({
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (busy) return;
+    if (!consent || !token || !siteKey || preparing || locating) {
+      setError("Please agree to share your report and complete the security check before sending.");
+      return;
+    }
     setBusy(true);
     setError("");
     try {
