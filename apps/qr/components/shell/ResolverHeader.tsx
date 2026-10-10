@@ -2,12 +2,12 @@ import React from "react";
 import Link from "next/link";
 import { VaahanIcon } from "@vaahansafe/icons";
 import { VaahanSafeLogo } from "@vaahansafe/ui/brand";
-import { Badge } from "@vaahansafe/ui/components/badge";
 import { getWebUrl } from "@vaahansafe/config";
 
 export function ResolverHeader() {
   return (
-    <header className="w-full flex items-center justify-between gap-3 pb-5 sm:pb-6 border-b border-border/60">
+    <header className="w-full space-y-4 border-b border-border pb-4 sm:pb-5">
+      <div className="flex min-w-0 items-center justify-between gap-3">
       {/* Official VaahanSafe App Logo */}
       <Link
         href="/"
@@ -18,23 +18,23 @@ export function ResolverHeader() {
       </Link>
 
       {/* Surface Context & Support */}
-      <div className="flex items-center gap-2 shrink-0">
-        <Badge
-          variant="outline"
-          className="font-mono text-[9px] sm:text-[10px] uppercase tracking-wider text-muted-foreground border-border px-2 py-0.5 whitespace-nowrap shrink-0"
-        >
-          Safety view
-        </Badge>
+      <div className="flex shrink-0 items-center">
         <a
           href={`${getWebUrl()}/help`}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-xs text-muted-foreground hover:text-foreground transition-colors size-11 rounded-sm hover:bg-muted/50 inline-flex items-center justify-center shrink-0"
+          className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl border border-border bg-card px-3 text-xs font-medium text-foreground transition-colors hover:bg-muted/60 focus-visible:ring-2 focus-visible:ring-ring"
           aria-label="VaahanSafe Safety & Help Support"
           title="Safety & Help Support"
         >
-          <VaahanIcon name="help" size={16} />
+          <VaahanIcon name="help" size={17} />
+          <span>Help</span>
         </a>
+      </div>
+      </div>
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs text-muted-foreground">
+        <span className="inline-flex items-center gap-1.5 text-primary"><VaahanIcon name="shield" size={15} />Vehicle safety view</span>
+        <span>Only owner-approved details</span>
       </div>
     </header>
   );

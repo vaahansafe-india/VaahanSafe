@@ -31,17 +31,17 @@ export function QrIdentityBadge({
   }
 
   return (
-    <div className="w-full flex items-center justify-between p-3.5 rounded-xl bg-card border border-border/80 shadow-xs">
-      <div className="space-y-0.5">
+    <div className="flex w-full flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5">
+      <div className="min-w-0 flex-1 space-y-1">
         <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground block">
-          VaahanSafe Identity
+          VaahanSafe ID
         </span>
-        <span className="font-mono text-base font-bold text-foreground tracking-wider block">
+        <span className="block break-all font-mono text-base font-semibold tracking-wide text-foreground sm:text-lg">
           {displayId}
         </span>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex shrink-0 items-center gap-2">
         <Badge
           variant="outline"
           className="font-mono text-[10px] tracking-wider text-emerald-700 dark:text-emerald-400 border-emerald-600/30 bg-emerald-500/5 px-2 py-0.5"
@@ -51,7 +51,7 @@ export function QrIdentityBadge({
         <button
           type="button"
           onClick={handleCopy}
-          className="size-8 rounded-lg border border-border hover:bg-muted/60 text-muted-foreground hover:text-foreground flex items-center justify-center transition-colors text-xs"
+          className="flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-background text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
           title="Copy VaahanSafe ID"
           aria-label="Copy VaahanSafe ID to clipboard"
         >
@@ -61,6 +61,7 @@ export function QrIdentityBadge({
             <VaahanIcon name="copy" size={14} />
           )}
         </button>
+        <span role="status" className="sr-only">{copied ? "VaahanSafe ID copied" : ""}</span>
       </div>
     </div>
   );

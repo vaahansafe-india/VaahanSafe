@@ -10,7 +10,7 @@ export interface ResolverShellProps {
 export function ResolverShell({ children }: ResolverShellProps) {
   return (
     <div className="qr-resolver min-h-screen flex flex-col justify-between text-foreground antialiased selection:bg-primary/20 selection:text-primary">
-      <div className="w-full max-w-lg mx-auto px-4 py-6 sm:py-8 flex-1 flex flex-col">
+      <div className="mx-auto flex w-full min-w-0 max-w-xl flex-1 flex-col px-4 py-5 sm:px-6 sm:py-8">
         <ResolverHeader />
         <OfflineBanner />
         <main

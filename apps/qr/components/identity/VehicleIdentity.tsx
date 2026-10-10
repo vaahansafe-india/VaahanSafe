@@ -28,12 +28,12 @@ export function VehicleIdentity({ vehicleDisplay, vehicleType }: VehicleIdentity
             : "Registered Vehicle";
 
   return (
-    <div className="w-full p-4 rounded-xl bg-card border border-border/80 shadow-xs space-y-2">
-      <div className="flex items-center justify-between">
+    <div className="w-full space-y-3 rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2 text-muted-foreground">
           <VaahanIcon name={iconName} size={16} />
           <span className="font-mono text-[10px] uppercase tracking-wider">
-            Vehicle Identity
+            This vehicle
           </span>
         </div>
         <Badge variant="outline" className="font-mono text-[10px] text-muted-foreground px-2 py-0.5">
@@ -41,7 +41,7 @@ export function VehicleIdentity({ vehicleDisplay, vehicleType }: VehicleIdentity
         </Badge>
       </div>
 
-      <div className="text-base font-serif font-medium text-foreground tracking-tight">
+      <div className="break-words font-serif text-2xl font-medium leading-tight text-foreground sm:text-3xl">
         {vehicleDisplay}
       </div>
     </div>

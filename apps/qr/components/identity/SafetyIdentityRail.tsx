@@ -6,42 +6,10 @@ export interface SafetyIdentityRailProps {
 
 export function SafetyIdentityRail({ currentStage = "VIEW" }: SafetyIdentityRailProps) {
   return (
-    <div className="w-full my-4 py-2" aria-label="Identity Resolution Rail">
-      {/* Mobile Vertical Milestone Rail (<640px) */}
-      <div className="sm:hidden flex flex-col space-y-1 font-mono text-[10px] tracking-wider text-muted-foreground uppercase">
-        <div className="flex items-center gap-3">
-          <span className="size-2 rounded-full bg-foreground/60 shrink-0" />
-          <span>Physical Vehicle</span>
-        </div>
-        <div className="w-px h-3.5 bg-border ml-[3.5px]" />
-        <div className="flex items-center gap-3">
-          <span className="size-2 rounded-full bg-foreground/60 shrink-0" />
-          <span>QR Identity</span>
-        </div>
-        <div className="w-px h-3.5 bg-border ml-[3.5px]" />
-        <div className="flex items-center gap-3">
-          <span className="size-2 rounded-full bg-[#cc785c] ring-3 ring-[#cc785c]/20 shrink-0" />
-          <span className="text-[#cc785c] font-semibold">Public Safety View</span>
-        </div>
-      </div>
-
-      {/* Desktop Horizontal Milestone Rail (>=640px) */}
-      <div className="hidden sm:flex items-center justify-between font-mono text-[10px] tracking-widest text-muted-foreground uppercase">
-        <div className="flex items-center gap-2">
-          <span className="size-2 rounded-full bg-foreground/60" />
-          <span>Vehicle</span>
-        </div>
-        <div className="flex-1 h-px bg-border mx-3" />
-        <div className="flex items-center gap-2">
-          <span className="size-2 rounded-full bg-foreground/60" />
-          <span>QR Identity</span>
-        </div>
-        <div className="flex-1 h-px bg-border mx-3" />
-        <div className="flex items-center gap-2 text-[#cc785c] font-semibold">
-          <span className="size-2 rounded-full bg-[#cc785c] ring-3 ring-[#cc785c]/20" />
-          <span>Safety View</span>
-        </div>
-      </div>
+    <div className="space-y-2 pb-1" aria-label="Vehicle safety information">
+      <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-primary">{currentStage === "VIEW" ? "Here when you need it" : "VaahanSafe vehicle identity"}</p>
+      <h1 className="font-serif font-medium tracking-tight text-foreground">Vehicle safety details</h1>
+      <p className="text-sm leading-relaxed text-muted-foreground">Reach an approved contact or let the owner know about a concern.</p>
     </div>
   );
 }

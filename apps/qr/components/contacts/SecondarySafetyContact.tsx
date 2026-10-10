@@ -10,10 +10,10 @@ export interface SecondarySafetyContactProps {
 
 export function SecondarySafetyContact({ contact, index, publicId }: SecondarySafetyContactProps) {
   return (
-    <div className="w-full p-3.5 rounded-xl bg-card border border-border/70 flex items-center justify-between gap-3 shadow-xs">
+    <div className="flex w-full flex-col gap-4 rounded-xl border border-border bg-card p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-5">
       <div className="space-y-0.5 min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <span className="font-semibold text-sm text-foreground truncate block">
+          <span className="block break-words text-base font-semibold text-foreground">
             {contact.name}
           </span>
           <span className="font-mono text-[9px] text-muted-foreground uppercase">

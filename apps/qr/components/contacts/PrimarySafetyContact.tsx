@@ -10,10 +10,10 @@ export interface PrimarySafetyContactProps {
 
 export function PrimarySafetyContact({ contact, publicId }: PrimarySafetyContactProps) {
   return (
-    <div className="w-full p-4 rounded-xl bg-card border border-border/80 shadow-xs space-y-3">
-      <div className="flex items-center justify-between">
+    <div className="w-full space-y-4 rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-          Primary Emergency Contact
+          First contact
         </span>
         <Badge
           variant="outline"
@@ -24,7 +24,7 @@ export function PrimarySafetyContact({ contact, publicId }: PrimarySafetyContact
       </div>
 
       <div>
-        <h3 className="text-base font-semibold text-foreground tracking-tight">
+        <h3 className="break-words font-serif text-2xl leading-tight text-foreground">
           {contact.name}
         </h3>
         <p className="text-xs text-muted-foreground capitalize mt-0.5">
@@ -32,7 +32,7 @@ export function PrimarySafetyContact({ contact, publicId }: PrimarySafetyContact
         </p>
       </div>
 
-      <ContactAction phone={contact.phone} isPrimary label="Call Primary Contact" allowCall={contact.allowCall} allowMessage={contact.allowMessage} publicId={publicId} />
+      <ContactAction phone={contact.phone} isPrimary label="Call contact" allowCall={contact.allowCall} allowMessage={contact.allowMessage} publicId={publicId} />
     </div>
   );
 }

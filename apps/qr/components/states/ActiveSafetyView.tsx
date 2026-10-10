@@ -8,7 +8,7 @@ import { MedicalInformation } from "../projection/MedicalInformation";
 import { PrimarySafetyContact } from "../contacts/PrimarySafetyContact";
 import { SecondarySafetyContact } from "../contacts/SecondarySafetyContact";
 import type { PublicQrResolution } from "@vaahansafe/qr-core";
-import { ScanReportForm } from '../reports/ScanReportForm';
+import { ScanReportForm } from "../reports/ScanReportForm";
 
 export interface ActiveSafetyViewProps {
   resolution: PublicQrResolution;
@@ -25,7 +25,7 @@ export function ActiveSafetyView({ resolution }: ActiveSafetyViewProps) {
   const secondaryContacts = profile.approvedEmergencyContacts.slice(1);
 
   return (
-    <div className="w-full space-y-5 animate-in fade-in duration-300">
+    <div className="w-full min-w-0 space-y-5 animate-in fade-in duration-300 sm:space-y-6">
       {/* 1. Milestone Status Rail (Rule 15, 18) */}
       <SafetyIdentityRail currentStage="VIEW" />
 
@@ -60,18 +60,21 @@ export function ActiveSafetyView({ resolution }: ActiveSafetyViewProps) {
 
       {/* 5. Emergency Contacts Section (Rule 21, 22, 23) */}
       <div className="space-y-3 pt-1">
-        <div className="flex items-center justify-between px-0.5">
-          <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-            Emergency Contacts ({profile.approvedEmergencyContacts.length})
-          </span>
-          <span className="text-[10px] font-mono text-emerald-700 dark:text-emerald-400 font-medium">
-            Approved contact options
+        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 px-0.5">
+          <h2 className="font-serif text-2xl text-foreground">
+            Emergency contacts
+          </h2>
+          <span className="text-xs text-muted-foreground">
+            {profile.approvedEmergencyContacts.length} approved {profile.approvedEmergencyContacts.length === 1 ? "contact" : "contacts"}
           </span>
         </div>
 
         {primaryContact ? (
           <div className="space-y-2.5">
-            <PrimarySafetyContact contact={primaryContact} publicId={publicId} />
+            <PrimarySafetyContact
+              contact={primaryContact}
+              publicId={publicId}
+            />
 
             {secondaryContacts.map((contact, idx) => (
               <SecondarySafetyContact
@@ -88,7 +91,14 @@ export function ActiveSafetyView({ resolution }: ActiveSafetyViewProps) {
           </div>
         )}
       </div>
-      <ScanReportForm publicId={publicId} siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ''} />
+      <ScanReportForm
+        publicId={publicId}
+        siteKey={
+          process.env.TURNSTILE_SITE_KEY ||
+          process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ||
+          ""
+        }
+      />
     </div>
   );
 }

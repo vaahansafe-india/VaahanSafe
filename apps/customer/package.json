@@ -36,6 +36,11 @@
     "@vaahansafe/ui": "*",
     "@vaahansafe/validation": "*",
     "@vaahansafe/vehicles": "*",
+    "@types/d3-geo": "^3.1.1",
+    "@types/d3-hierarchy": "3.1.7",
+    "@types/d3-scale": "4.0.9",
+    "@types/d3-shape": "^3.1.7",
+    "@types/geojson": "^7946.0.16",
     "class-variance-authority": "^0.7.1",
     "d3-geo": "^3.1.1",
     "d3-hierarchy": "3.1.2",
@@ -51,11 +56,6 @@
     "recharts": "3.10.1"
   },
   "devDependencies": {
-    "@types/d3-geo": "^3.1.1",
-    "@types/d3-hierarchy": "3.1.7",
-    "@types/d3-scale": "4.0.9",
-    "@types/d3-shape": "^3.1.7",
-    "@types/geojson": "^7946.0.16",
     "@types/node": "^22.13.4",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
