@@ -36,6 +36,8 @@ export function CustomerTopBar({
   // Resolve contextual heading based on current route
   const getContextTitle = () => {
     if (pathname === "/" || pathname === "/dashboard") return "Dashboard";
+    if (pathname.startsWith("/documents")) return "Documents";
+    if (/^\/vehicles\/[^/]+\/documents(?:\/|$)/.test(pathname)) return "Vehicle Documents";
     if (pathname.startsWith("/vehicles")) return "Vehicles";
     if (pathname.startsWith("/qr/buy")) return "Buy QR";
     if (pathname.startsWith("/qr/activate")) return "Activate Retail QR";
@@ -47,6 +49,9 @@ export function CustomerTopBar({
     if (pathname.startsWith("/orders")) return "Orders";
     if (pathname.startsWith("/payments")) return "Payments";
     if (pathname.startsWith("/emergency-contacts")) return "Emergency Contacts";
+    if (pathname.startsWith("/analytics/storage")) return "Document Storage";
+    if (pathname.startsWith("/analytics/scans")) return "Scan Analytics";
+    if (pathname.startsWith("/analytics")) return "Usage & Analytics";
     if (pathname.startsWith("/scan-history")) return "Scan History";
     if (pathname.startsWith("/notifications")) return "Notifications";
     if (pathname.startsWith("/settings")) return "Profile & Settings";

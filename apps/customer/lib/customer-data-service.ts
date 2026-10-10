@@ -66,6 +66,7 @@ export async function getCustomerData(
       return (await import("./scan-history-service")).getScanHistoryOverview(
         userId,
         {
+          reportId: params.get('report') || undefined,
           period: choice(
             params.get("period"),
             ["24H", "7D", "30D", "90D", "ALL"],

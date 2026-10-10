@@ -8,6 +8,7 @@
 
 import { TemplateDefinition } from "./definition";
 import { escapeHtml } from "./renderer";
+import { VehicleScanReportVariablesSchema, type VehicleScanReportVariables } from './variables';
 import {
   AccountWelcomeVariablesSchema,
   AccountWelcomeVariables,
@@ -312,6 +313,17 @@ export const EMERGENCY_SCAN_ALERT_V1: TemplateDefinition<EmergencyScanAlertVaria
   },
 };
 
+const reportReason = {PARKING:'Parking / access concern',EMERGENCY:'Possible emergency',LIGHTS_ON:'Lights left on',DAMAGE:'Vehicle damage',OTHER:'Safety concern'};
+const reportUrl = (id:string) => `https://app.vaahansafe.com/scan-history?period=90D&report=${encodeURIComponent(id)}`;
+export const VEHICLE_SCAN_REPORT_V1: TemplateDefinition<VehicleScanReportVariables> = {
+  key:'VEHICLE_SCAN_REPORT_V1',version:1,category:'SAFETY',supportedChannels:['IN_APP','WHATSAPP','EMAIL'],schema:VehicleScanReportVariablesSchema,
+  renderInApp:v=>({title:reportReason[v.reason],body:`A finder shared a report for ${v.vehicleMaskedReg} at ${v.scannedAtFormatted}. ${v.photoCount} photo(s) available.`,actionType:'VIEW_QR',actionTarget:`/scan-history?period=90D&report=${encodeURIComponent(v.reportId)}`}),
+  renderWhatsApp:v=>({templateName:v.reason==='EMERGENCY'?'vhn_vehicle_emergency_report_v1':'vhn_vehicle_report_v1',languageCode:'en',parameters:{
+    1:v.vehicleMaskedReg,2:reportReason[v.reason],3:v.scannedAtFormatted,4:v.locationText,5:reportUrl(v.reportId),
+  }}),
+  renderEmail:v=>({subject:`Vehicle report: ${reportReason[v.reason]}`,html:`<p>A finder reported ${escapeHtml(reportReason[v.reason])} for ${escapeHtml(v.vehicleMaskedReg)}.</p><p>${escapeHtml(v.locationText)}</p><p><a href="${reportUrl(v.reportId)}">View ${v.photoCount} photo(s) and report details in your VaahanSafe account</a></p>`,text:`${reportReason[v.reason]}: ${v.vehicleMaskedReg}\n${v.locationText}\nView ${v.photoCount} photo(s): ${reportUrl(v.reportId)}`}),
+};
+
 export const SECURITY_CHANGED_V1: TemplateDefinition<SecurityChangedVariables> = {
   key: "SECURITY_CHANGED_V1",
   version: 1,
@@ -395,6 +407,7 @@ export const TEMPLATE_REGISTRY: Record<string, TemplateDefinition<any>> = {
   SHIPMENT_UPDATE_V1,
   REPLACEMENT_APPROVED_V1,
   EMERGENCY_SCAN_ALERT_V1,
+  VEHICLE_SCAN_REPORT_V1,
   SECURITY_CHANGED_V1,
   SUPPORT_UPDATE_V1,
 };

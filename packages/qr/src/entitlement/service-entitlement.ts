@@ -11,7 +11,10 @@ import { hashScratchSecret } from "../secrets/hash-secret";
 export interface IDatabaseClient {
   readonly dialect?: "postgres" | "sqlite";
   query<T = unknown>(sql: string, params?: unknown[]): Promise<T[]>;
-  execute(sql: string, params?: unknown[]): Promise<{ success: boolean; rowsAffected?: number }>;
+  execute(
+    sql: string,
+    params?: unknown[],
+  ): Promise<{ success: boolean; rowsAffected?: number }>;
 }
 
 export interface EntitlementCheckParams {
@@ -44,7 +47,7 @@ export const ALL_ENTITLEMENT_CAPABILITIES: readonly EntitlementCapability[] = [
  */
 export async function hasServiceEntitlement(
   capability: EntitlementCapability,
-  params: EntitlementCheckParams
+  params: EntitlementCheckParams,
 ): Promise<boolean> {
   const { userId, vehicleId, qrId, db } = params;
 
@@ -69,10 +72,11 @@ export async function hasServiceEntitlement(
 
   query += ` LIMIT 1`;
 
-  const rows = await db.query<{ id: string; status: string; qr_status: QrLifecycleState }>(
-    query,
-    sqlParams
-  );
+  const rows = await db.query<{
+    id: string;
+    status: string;
+    qr_status: QrLifecycleState;
+  }>(query, sqlParams);
 
   const entitlement = rows[0];
   if (!entitlement) {
@@ -91,11 +95,15 @@ export async function hasServiceEntitlement(
   return true;
 }
 
-export async function canUseQrService(params: EntitlementCheckParams): Promise<boolean> {
+export async function canUseQrService(
+  params: EntitlementCheckParams,
+): Promise<boolean> {
   return hasServiceEntitlement("DIGITAL_QR_ACCESS", params);
 }
 
-export async function canViewDigitalQr(params: EntitlementCheckParams): Promise<boolean> {
+export async function canViewDigitalQr(
+  params: EntitlementCheckParams,
+): Promise<boolean> {
   return hasServiceEntitlement("DIGITAL_QR_ACCESS", params);
 }
 
@@ -104,13 +112,17 @@ export async function canExposeSafetyView(params: {
   db: IDatabaseClient;
 }): Promise<boolean> {
   const { qrPublicId, db } = params;
-  const rows = await db.query<{ id: string; status: string; qr_status: QrLifecycleState }>(
+  const rows = await db.query<{
+    id: string;
+    status: string;
+    qr_status: QrLifecycleState;
+  }>(
     `SELECT e.id, e.status, q.status as qr_status
      FROM service_entitlements e
      JOIN qr_stickers q ON e.qr_sticker_id = q.id
      WHERE q.public_id = ? AND e.capability = 'SAFETY_VIEW_ACTIVE' AND e.status = 'ENABLED'
      LIMIT 1`,
-    [qrPublicId]
+    [qrPublicId],
   );
   const entitlement = rows[0];
   if (!entitlement) return false;
@@ -128,12 +140,14 @@ export async function canRecordScan(params: {
      JOIN qr_stickers q ON e.qr_sticker_id = q.id
      WHERE q.public_id = ? AND e.capability = 'SCAN_HISTORY_LOGGING' AND e.status = 'ENABLED'
      LIMIT 1`,
-    [qrPublicId]
+    [qrPublicId],
   );
   return rows.length > 0;
 }
 
-export async function canRequestReplacement(params: EntitlementCheckParams): Promise<boolean> {
+export async function canRequestReplacement(
+  params: EntitlementCheckParams,
+): Promise<boolean> {
   return hasServiceEntitlement("REPLACEMENT_ELIGIBLE", params);
 }
 
@@ -143,9 +157,10 @@ export async function canRequestReplacement(params: EntitlementCheckParams): Pro
  * - Retail Activation Gate: Scratch proof hash verified -> Vehicle claimed -> QR ACTIVATED -> Entitlements granted.
  */
 export async function grantAuthoritativeEntitlements(
-  params: GrantEntitlementParams
+  params: GrantEntitlementParams,
 ): Promise<void> {
-  const { userId, vehicleId, qrStickerId, acquisitionSource, orderId, db } = params;
+  const { userId, vehicleId, qrStickerId, acquisitionSource, orderId, db } =
+    params;
   const now = new Date().toISOString();
 
   for (const capability of ALL_ENTITLEMENT_CAPABILITIES) {
@@ -170,7 +185,7 @@ export async function grantAuthoritativeEntitlements(
         now,
         now,
         now,
-      ]
+      ],
     );
   }
 }
@@ -196,19 +211,23 @@ export interface FulfillPaidOnlineOrderResult {
  * - If inventory is empty, generates a genuine high-entropy sticker in batch, records secrets, assigns, and enables entitlements.
  */
 export async function fulfillPaidOnlineOrder(
-  params: FulfillPaidOnlineOrderParams
+  params: FulfillPaidOnlineOrderParams,
 ): Promise<FulfillPaidOnlineOrderResult> {
   const { userId, vehicleId, orderId, db } = params;
   const now = new Date().toISOString();
 
   // 1. Check if vehicle already has an active assigned QR sticker
-  const assigned = await db.query<{ id: string; public_id: string; visible_code: string }>(
+  const assigned = await db.query<{
+    id: string;
+    public_id: string;
+    visible_code: string;
+  }>(
     `SELECT q.id, q.public_id, q.visible_code
      FROM qr_stickers q
      JOIN qr_assignments a ON q.id = a.qr_id AND a.ended_at IS NULL
      WHERE a.vehicle_id = ? AND a.user_id = ? AND q.status = 'ACTIVATED'
      LIMIT 1`,
-    [vehicleId, userId]
+    [vehicleId, userId],
   );
 
   if (assigned[0]) {
@@ -230,11 +249,18 @@ export async function fulfillPaidOnlineOrder(
   }
 
   // 2. Check for available pre-printed sticker in inventory
-  const available = await db.query<{ id: string; public_id: string; visible_code: string }>(
-    `SELECT id, public_id, visible_code
-     FROM qr_stickers
-     WHERE status = 'PRINTED'
-     LIMIT 1`
+  const available = await db.query<{
+    id: string;
+    public_id: string;
+    visible_code: string;
+  }>(
+    `SELECT s.id, s.public_id, s.visible_code
+     FROM qr_stickers s JOIN qr_batches b ON b.id = s.batch_id
+     WHERE s.status = 'PRINTED' AND b.inventory_channel = 'ONLINE_SYSTEM'
+       AND s.current_distributor_id IS NULL AND s.current_retailer_id IS NULL
+       AND NOT EXISTS (SELECT 1 FROM qr_assignments a WHERE a.qr_id = s.id AND a.ended_at IS NULL)
+       AND NOT EXISTS (SELECT 1 FROM qr_reservations r WHERE r.qr_sticker_id = s.id AND r.status IN ('RESERVED', 'ALLOCATED'))
+     LIMIT 1`,
   );
 
   let qrStickerId: string;
@@ -249,7 +275,7 @@ export async function fulfillPaidOnlineOrder(
 
     await db.execute(
       `UPDATE qr_stickers SET status = 'ACTIVATED', activated_at = ?, updated_at = ? WHERE id = ?`,
-      [now, now, qrStickerId]
+      [now, now, qrStickerId],
     );
   } else {
     // 3. Issue a new genuine QR sticker for the paid vehicle kit
@@ -258,7 +284,7 @@ export async function fulfillPaidOnlineOrder(
       `INSERT OR IGNORE INTO qr_batches (
          id, reference_code, quantity, status, manufacturer_name, generated_at, created_at, updated_at
        ) VALUES (?, 'BATCH-ONLINE-DIRECT', 100000, 'PRINTED', 'VaahanSafe Secure Print', ?, ?, ?)`,
-      [batchId, now, now, now]
+      [batchId, now, now, now],
     );
 
     publicId = generateQrPublicId();
@@ -269,7 +295,7 @@ export async function fulfillPaidOnlineOrder(
       `INSERT INTO qr_stickers (
          id, public_id, visible_code, batch_id, status, activated_at, created_at, updated_at
        ) VALUES (?, ?, ?, ?, 'ACTIVATED', ?, ?, ?)`,
-      [qrStickerId, publicId, visibleCode, batchId, now, now, now]
+      [qrStickerId, publicId, visibleCode, batchId, now, now, now],
     );
 
     const secret = generateScratchSecret();
@@ -280,7 +306,7 @@ export async function fulfillPaidOnlineOrder(
       `INSERT INTO qr_activation_secrets (
          id, qr_id, secret_hash, hash_version, consumed_at, created_at, updated_at
        ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [secretId, qrStickerId, secretHash, hashVersion, now, now, now]
+      [secretId, qrStickerId, secretHash, hashVersion, now, now, now],
     );
   }
 
@@ -290,7 +316,7 @@ export async function fulfillPaidOnlineOrder(
     `INSERT INTO qr_assignments (
        id, qr_id, vehicle_id, user_id, assignment_type, assigned_at
      ) VALUES (?, ?, ?, ?, 'INITIAL', ?)`,
-    [assignmentId, qrStickerId, vehicleId, userId, now]
+    [assignmentId, qrStickerId, vehicleId, userId, now],
   );
 
   // 5. Grant authoritative entitlements across all capabilities
@@ -309,41 +335,52 @@ export async function fulfillPaidOnlineOrder(
     `INSERT OR IGNORE INTO emergency_profiles (
        id, vehicle_id, display_name, status, created_at, updated_at
      ) VALUES (?, ?, 'Vehicle Owner', 'ACTIVE', ?, ?)`,
-    [epId, vehicleId, now, now]
+    [epId, vehicleId, now, now],
   );
 
   // 7. Emit in-app notification: QR Activated
   const notifId = `notif_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
   const notifIntentId = `intent_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
-  if (db.dialect !== "postgres") try {
-    await db.execute(
-      `INSERT INTO notification_intents (
+  if (db.dialect !== "postgres")
+    try {
+      await db.execute(
+        `INSERT INTO notification_intents (
          id, event_type, recipient_user_id, category, priority,
          template_key, template_version, payload_json, source_type,
          source_id, dedupe_key, status, created_at, dispatched_at
        ) VALUES (?, 'QR_ACTIVATED', ?, 'SAFETY', 'HIGH', 'QR_ACTIVATED_V1', 1, '{}', 'SYSTEM', ?, ?, 'PROCESSED', ?, ?)
        ON CONFLICT(dedupe_key) DO NOTHING`,
-      [notifIntentId, userId, notifId, `dedupe_qr_act_${qrStickerId}`, now, now]
-    );
+        [
+          notifIntentId,
+          userId,
+          notifId,
+          `dedupe_qr_act_${qrStickerId}`,
+          now,
+          now,
+        ],
+      );
 
-    await db.execute(
-      `INSERT INTO notifications (
+      await db.execute(
+        `INSERT INTO notifications (
          id, user_id, intent_id, event_type, category, priority,
          title, body_safe, action_type, action_target, read_at, archived_at, created_at
        ) VALUES (?, ?, ?, 'QR_ACTIVATED', 'SAFETY', 'HIGH', ?, ?, 'VIEW_QR', ?, NULL, NULL, ?)`,
-      [
-        notifId,
-        userId,
-        notifIntentId,
-        "QR Sticker Activated",
-        `Sticker ${visibleCode} is now active and paired with your vehicle. Your digital wallet pass and emergency safety card are live.`,
-        publicId,
-        now,
-      ]
-    );
-  } catch (err) {
-    console.warn("[fulfillPaidOnlineOrder] Warning recording notification:", err);
-  }
+        [
+          notifId,
+          userId,
+          notifIntentId,
+          "QR Sticker Activated",
+          `Sticker ${visibleCode} is now active and paired with your vehicle. Your digital wallet pass and emergency safety card are live.`,
+          publicId,
+          now,
+        ],
+      );
+    } catch (err) {
+      console.warn(
+        "[fulfillPaidOnlineOrder] Warning recording notification:",
+        err,
+      );
+    }
 
   return {
     success: true,

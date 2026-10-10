@@ -5,6 +5,7 @@ import { CustomerLink as Link } from "@/components/query/CustomerLink";
 import {
   LayoutDashboard,
   Car,
+  FileText,
   QrCode,
   CreditCard,
   Package,
@@ -12,6 +13,8 @@ import {
   PhoneCall,
   Activity,
   Bell,
+  Database,
+  History,
   ShoppingCart,
   ScanLine,
   Smartphone,
@@ -60,6 +63,11 @@ const identityNav: NavMainItem[] = [
     title: "Vehicles",
     url: "/vehicles",
     icon: Car,
+  },
+  {
+    title: "Documents",
+    url: "/documents",
+    icon: FileText,
   },
   {
     title: "My QR",
@@ -132,9 +140,25 @@ const servicesNav: NavMainItem[] = [
 
 const activityNav: NavMainItem[] = [
   {
+    title: "Usage & Analytics",
+    url: "/analytics",
+    icon: Activity,
+    exact: true,
+  },
+  {
+    title: "Scan Analytics",
+    url: "/analytics/scans",
+    icon: ScanLine,
+  },
+  {
+    title: "Storage Analytics",
+    url: "/analytics/storage",
+    icon: Database,
+  },
+  {
     title: "Scan History",
     url: "/scan-history",
-    icon: Activity,
+    icon: History,
   },
   {
     title: "Notifications",

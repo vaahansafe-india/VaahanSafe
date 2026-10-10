@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "@vaahansafe/ui/styles/core.css";
 import "./customer-fonts.css";
 import "./customer-paper.css";
+import "@/features/document-vault/vault.css";
 import { ThemeProvider } from "@vaahansafe/ui/theme";
 import { CustomerToaster } from "@/components/ui/CustomerToaster";
 

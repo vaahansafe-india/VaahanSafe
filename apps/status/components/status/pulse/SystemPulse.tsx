@@ -16,11 +16,11 @@ export function SystemPulse({
   onSelectService,
   selectedSlug,
 }: SystemPulseProps) {
-  // Map services by journey stage for fast lookup
-  const serviceByStage = React.useMemo(() => {
+  // Auxiliary capabilities can share a stage; resolve each journey's own service.
+  const serviceBySlug = React.useMemo(() => {
     const map = new Map<string, PublicStatusServiceDto>();
     for (const s of services) {
-      map.set(s.journeyStage, s);
+      map.set(s.slug, s);
     }
     return map;
   }, [services]);
@@ -37,7 +37,7 @@ export function SystemPulse({
             SYSTEM PULSE &bull; THE CUSTOMER SERVICE JOURNEY
           </div>
           <div className="font-sans text-xs text-[#6c6a64] dark:text-[#a09d96]">
-            Every public capability is mapped across the actual vehicle owner and bystander interaction sequence.
+            Core service capabilities are mapped across the vehicle owner and bystander interaction sequence.
           </div>
         </div>
         <div className="font-mono text-[9px] uppercase tracking-wider text-[#8e8b82] dark:text-[#77736d] shrink-0">
@@ -49,7 +49,7 @@ export function SystemPulse({
       <div className="hidden lg:block pt-8 pb-4">
         <div className="grid grid-cols-6 gap-2 text-center">
           {JOURNEY_STAGES.map((j, idx) => {
-            const service = serviceByStage.get(j.stage);
+            const service = serviceBySlug.get(j.serviceSlug);
             const state = service?.state || "UNKNOWN";
             const config = SERVICE_STATE_CONFIG[state] || SERVICE_STATE_CONFIG.UNKNOWN;
             const isOutage = state === "MAJOR OUTAGE" || state === "PARTIAL OUTAGE";
@@ -143,7 +143,7 @@ export function SystemPulse({
       {/* 2. Mobile / Tablet Vertical Pulse (Shown below lg) */}
       <div className="block lg:hidden pt-6 space-y-2">
         {JOURNEY_STAGES.map((j, idx) => {
-          const service = serviceByStage.get(j.stage);
+          const service = serviceBySlug.get(j.serviceSlug);
           const state = service?.state || "UNKNOWN";
           const config = SERVICE_STATE_CONFIG[state] || SERVICE_STATE_CONFIG.UNKNOWN;
           const isOutage = state === "MAJOR OUTAGE" || state === "PARTIAL OUTAGE";

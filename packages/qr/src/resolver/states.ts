@@ -3,7 +3,11 @@
  * Transforms internal operational states into safe, privacy-preserving public resolver states.
  */
 
-import { QrInternalLifecycleState, QrPublicResolverState, PublicResolverMeta } from "./types";
+import {
+  QrInternalLifecycleState,
+  QrPublicResolverState,
+  PublicResolverMeta,
+} from "./types";
 
 /**
  * Maps an internal database lifecycle state to an authoritative public resolver state.
@@ -12,7 +16,7 @@ import { QrInternalLifecycleState, QrPublicResolverState, PublicResolverMeta } f
  * Does NOT leak fraud scores or internal blocking reasons.
  */
 export function mapInternalToPublicResolverState(
-  internalState: QrInternalLifecycleState | string | undefined | null
+  internalState: QrInternalLifecycleState | string | undefined | null,
 ): QrPublicResolverState {
   if (!internalState) {
     return "UNKNOWN";
@@ -21,6 +25,8 @@ export function mapInternalToPublicResolverState(
   const normalized = String(internalState).trim().toUpperCase();
 
   switch (normalized) {
+    case "INVENTORY":
+      return "SETUP_REQUIRED";
     case "ACTIVATED":
     case "ACTIVE":
       return "ACTIVE";
@@ -62,9 +68,23 @@ export function getPublicResolverMeta(
     publicId?: string;
     activateUrl?: string;
     helpUrl?: string;
-  }
+  },
 ): PublicResolverMeta {
   switch (state) {
+    case "SETUP_REQUIRED":
+      return {
+        state,
+        title: "VaahanSafe QR — Setup Required",
+        subtitle:
+          "This QR has not been activated. Contact VaahanSafe to complete its setup.",
+        badgeLabel: "Unactivated QR",
+        badgeVariant: "outline",
+        safeNextAction: {
+          label: "Contact VaahanSafe Help",
+          actionType: "NAVIGATE_HELP",
+          url: options?.helpUrl || "https://vaahansafe.com/help",
+        },
+      };
     case "ACTIVE":
       return {
         state: "ACTIVE",
@@ -82,13 +102,16 @@ export function getPublicResolverMeta(
       return {
         state: "ACTIVATION_AVAILABLE",
         title: "VaahanSafe QR — Ready for Activation",
-        subtitle: "This official VaahanSafe QR sticker has not been activated yet.",
+        subtitle:
+          "This official VaahanSafe QR sticker has not been activated yet.",
         badgeLabel: "Unactivated Sticker",
         badgeVariant: "outline",
         safeNextAction: {
           label: "Activate this QR",
           actionType: "NAVIGATE_ACTIVATE",
-          url: options?.activateUrl || `https://activate.vaahansafe.com/${options?.publicId || ""}`,
+          url:
+            options?.activateUrl ||
+            `https://activate.vaahansafe.com/${options?.publicId || ""}`,
         },
       };
 
@@ -96,7 +119,8 @@ export function getPublicResolverMeta(
       return {
         state: "REPLACED",
         title: "This VaahanSafe QR has been replaced",
-        subtitle: "This vehicle safety profile has transitioned to a replacement sticker.",
+        subtitle:
+          "This vehicle safety profile has transitioned to a replacement sticker.",
         badgeLabel: "Replaced QR",
         badgeVariant: "secondary",
         safeNextAction: {
@@ -124,7 +148,8 @@ export function getPublicResolverMeta(
       return {
         state: "BLOCKED",
         title: "This VaahanSafe QR is currently unavailable",
-        subtitle: "We are unable to display safety records for this QR code at this time.",
+        subtitle:
+          "We are unable to display safety records for this QR code at this time.",
         badgeLabel: "Unavailable",
         badgeVariant: "destructive",
         safeNextAction: {
@@ -139,7 +164,8 @@ export function getPublicResolverMeta(
       return {
         state: "UNKNOWN",
         title: "QR Code Not Recognized",
-        subtitle: "This identifier was not found in the VaahanSafe registry. Check the link or rescan.",
+        subtitle:
+          "This identifier was not found in the VaahanSafe registry. Check the link or rescan.",
         badgeLabel: "Not Recognized",
         badgeVariant: "destructive",
         safeNextAction: {

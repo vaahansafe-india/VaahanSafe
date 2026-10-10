@@ -13,7 +13,6 @@ export interface PublicStatusServiceDto {
   displayOrder: number;
   latencyMs?: number;
   lastProbeAt?: string;
-  targetUrl?: string;
   probeStatus?: string;
 }
 

@@ -111,7 +111,7 @@ export function ServiceRow({ service, history, index, onSelect }: ServiceRowProp
         <span className="shrink-0">90 days ago</span>
         <span className="h-px min-w-3 flex-1 bg-[#cfc7ba] dark:bg-[#49453e]" aria-hidden="true" />
         <span className="shrink-0 font-semibold text-[#252320] dark:text-[#f6f1e9]">
-          {!history?.sourceAvailable ? "History unavailable" : percent === null || percent === undefined ? "No checks recorded" : `${percent.toFixed(2).replace(/\.00$/, "")}% observed success`}
+          {!history?.sourceAvailable ? "History unavailable" : percent === null || percent === undefined ? "No checks recorded" : `${percent.toFixed(2).replace(/\.00$/, "")}% checks successful`}
         </span>
         <span className="h-px min-w-3 flex-1 bg-[#cfc7ba] dark:bg-[#49453e]" aria-hidden="true" />
         <span className="shrink-0">Today</span>
@@ -121,6 +121,11 @@ export function ServiceRow({ service, history, index, onSelect }: ServiceRowProp
         {history?.sourceAvailable ? `${recordedDays}/90 days recorded · ${totalChecks} completed ${totalChecks === 1 ? "check" : "checks"}` : "The recorded check source could not be read"}
         {service.lastProbeAt && service.probeStatus ? ` · Latest: ${service.probeStatus}` : ""}
       </p>
+      {service.slug === "notifications" && (
+        <p className="mt-2 text-[10px] leading-relaxed text-[#756e63] dark:text-[#b2aba0]">
+          Check success measures service availability, not message delivery. Daily bars include earlier checks.
+        </p>
+      )}
       {tooltip && createPortal(
         <div
           role="tooltip"

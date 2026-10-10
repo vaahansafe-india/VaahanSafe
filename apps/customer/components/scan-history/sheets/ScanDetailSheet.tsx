@@ -129,18 +129,29 @@ export function ScanDetailSheet({
               </div>
 
               <div className="flex items-center justify-between p-2 rounded-lg bg-card border border-border/60">
-                <span className="text-muted-foreground">Emergency Relay:</span>
-                <span className="text-emerald-600 font-semibold">Active &bull; Privacy Shielded</span>
+                <span className="text-muted-foreground">Contact Actions:</span>
+                <span className="text-foreground">Owner-approved call / WhatsApp</span>
               </div>
 
               <div className="flex items-center justify-between p-2 rounded-lg bg-card border border-border/60">
                 <span className="text-muted-foreground">Personal Contact Disclosure:</span>
-                <span className="text-foreground">0 Phone Numbers Exposed</span>
+                <span className="text-foreground">Approved contacts only</span>
               </div>
             </div>
           </div>
 
           {/* Chronological Encounter Journey */}
+          {event.report && <section className="rounded-xl border border-border bg-background p-4 space-y-3">
+            <h3 className="text-sm font-semibold">Finder report · {event.report.reason.replaceAll('_',' ')}</h3>
+            {event.report.note && <p className="text-sm whitespace-pre-wrap">{event.report.note}</p>}
+            {event.report.location ? <div className="space-y-1">
+              <p>Finder-shared GPS · accuracy ±{Math.ceil(event.report.location.accuracy)} m</p>
+              <p className="text-muted-foreground">Captured {new Date(event.report.location.capturedAt).toLocaleString('en-IN',{timeZone:'Asia/Kolkata'})} IST. This is the finder’s location near the vehicle.</p>
+              <a className="text-primary underline inline-flex min-h-[44px] items-center" href={`https://www.google.com/maps/search/?api=1&query=${event.report.location.latitude},${event.report.location.longitude}`} target="_blank" rel="noopener noreferrer">Open shared location in Maps</a>
+            </div> : <p className="text-muted-foreground">The finder did not share a GPS location.</p>}
+            <div className="grid grid-cols-1 gap-3">{event.report.photoUrls.map((url,index)=><a key={url} href={url} target="_blank" rel="noopener noreferrer"><img src={url} alt={`Finder-shared vehicle or parking area photo ${index+1}`} loading="lazy" className="w-full rounded-xl border border-border object-contain" /></a>)}</div>
+            {!event.report.photoUrls.length && <p className="text-muted-foreground">No photos were shared.</p>}
+          </section>}
           <ScanJourney milestones={event.journey} />
 
           {/* Close Action */}

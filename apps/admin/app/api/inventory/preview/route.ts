@@ -5,6 +5,7 @@ import {
   AdminError,
 } from "../../../../lib/session";
 import { adminResponse, adminFailure } from "../../../../lib/api";
+import { resolveSelection,validateSelection } from '../../../../features/inventory/server/read-inventory';
 
 export async function POST(request: Request) {
   try {
@@ -17,6 +18,7 @@ export async function POST(request: Request) {
         "Your role cannot change inventory.",
       );
     const body = await request.json();
+    if(body.selection)body.ids=await resolveSelection(identity,validateSelection(body.selection));
     if (
       !Array.isArray(body.ids) ||
       body.ids.length < 1 ||

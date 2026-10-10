@@ -10,7 +10,8 @@ const job = {
   object_key: null,
   updated_at: new Date().toISOString(),
 };
-function fixture(role: string, claim = true) {
+function fixture(role: string, claim = true, moduleKey = "customers") {
+  const exportJob = { ...job, module_key: moduleKey };
   const transitions: Record<string, unknown>[] = [];
   const put = vi.fn().mockResolvedValue(undefined),
     del = vi.fn().mockResolvedValue(undefined);
@@ -24,15 +25,30 @@ function fixture(role: string, claim = true) {
         return Response.json(
           body.p_to === "PROCESSING" && !claim
             ? null
-            : { ...job, status: body.p_to },
+            : { ...exportJob, status: body.p_to },
         );
       }
       if (path.endsWith("admin_export_jobs")) {
         const status = new URL(url).searchParams.get("status");
-        return Response.json(status === "eq.QUEUED" ? [job] : []);
+        return Response.json(status === "eq.QUEUED" ? [exportJob] : []);
       }
       if (path.endsWith("admin_users"))
         return Response.json([{ role, status: "ACTIVE" }]);
+      if (
+        path.endsWith("rpc/admin_distributor_export_page") ||
+        path.endsWith("rpc/admin_retailer_export_page")
+      )
+        return Response.json([
+          {
+            id: "distributor-reference",
+            reference_code: "VS-DST-TEST",
+            name: "=HYPERLINK()",
+            status: "ACTIVE",
+            contact_phone: "+919876543210",
+            notes: "Private",
+            created_at: "2026-10-10T00:00:00Z",
+          },
+        ]);
       if (path.endsWith("users"))
         return Response.json([
           {
@@ -57,6 +73,28 @@ function fixture(role: string, claim = true) {
   };
 }
 describe("Asynchronous private exports", () => {
+  it("uses the scoped retailer RPC and excludes contact and private note fields", async () => {
+    const f = fixture("OPS_ADMIN", true, "retailers");
+    await processExportJobs(f.env);
+    expect(f.put).toHaveBeenCalledOnce();
+    const csv = f.put.mock.calls[0]![1];
+    expect(csv).toContain("distributor_reference");
+    expect(csv).toContain("'=HYPERLINK()");
+    expect(csv).not.toContain("9876543210");
+    expect(csv).not.toContain("Private");
+    expect(f.transitions.map((t) => t.p_to)).toEqual(["PROCESSING", "READY"]);
+  });
+  it("uses the scoped distributor RPC and safe field projection for filtered reports", async () => {
+    const f = fixture("OPS_ADMIN", true, "distributors");
+    await processExportJobs(f.env);
+    expect(f.put).toHaveBeenCalledOnce();
+    const csv = f.put.mock.calls[0]![1];
+    expect(csv).toContain("reference_code");
+    expect(csv).toContain("'=HYPERLINK()");
+    expect(csv).not.toContain("9876543210");
+    expect(csv).not.toContain("Private");
+    expect(f.transitions.map((t) => t.p_to)).toEqual(["PROCESSING", "READY"]);
+  });
   it("masks personal fields, escapes spreadsheet formulas and completes through the audited transition RPC", async () => {
     const f = fixture("SUPER_ADMIN");
     await processExportJobs(f.env);

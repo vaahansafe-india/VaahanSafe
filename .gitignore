@@ -64,6 +64,8 @@ Thumbs.db
 .idea/
 
 # Required project files preserved
+apps/customer/public/pdfjs/
+tooling/scripts/.geo-preparation/
 !.env.example
 !database/migrations/*
 !infrastructure/cloudflare/*

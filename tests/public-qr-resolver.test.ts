@@ -278,9 +278,9 @@ describe("Authoritative Public QR Resolver (@vaahansafe/qr-core & apps/qr)", () 
       );
     });
 
-    it("omits contacts that have not approved calling", async () => {
+    it("omits contacts that have not approved either contact action", async () => {
       await client.execute(
-        "UPDATE emergency_contacts SET allow_call = 0 WHERE emergency_profile_id = 'emp_demo_car'",
+        "UPDATE emergency_contacts SET allow_call = 0, allow_message = 0 WHERE emergency_profile_id = 'emp_demo_car'",
       );
       const result = await resolvePublicQr("7F3K9021", { db: client });
       expect(result.state).toBe("ACTIVE");

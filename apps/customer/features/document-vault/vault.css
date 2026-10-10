@@ -1,0 +1,58 @@
+.vault-select {
+  min-height: 44px;
+  width: 100%;
+  min-width: 0;
+  border: 1px solid hsl(var(--border));
+  border-radius: 6px;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  padding: 8px 10px;
+  font-size: 14px;
+}
+.vault-select:focus-visible {
+  outline: 2px solid #cc785c;
+  outline-offset: 2px;
+}
+/* Override the shared paper sheet's outer scroll and oversized heading locally. */
+.customer-surface [data-ui="sheet-content"].vault-document-sheet {
+  overflow: hidden;
+  padding: 0;
+  gap: 0;
+}
+.customer-surface .vault-document-sheet > [data-ui="sheet-header"] {
+  padding-inline-end: 1rem;
+  background: hsl(var(--background));
+}
+.customer-surface .vault-document-sheet [data-ui="sheet-title"] {
+  font-size: 1.375rem;
+  line-height: 1.25;
+}
+.customer-surface .vault-document-sheet [data-ui="sheet-description"] {
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+.vault-document-sheet > .vault-document-body {
+  padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+}
+.vault-preview-body {
+  max-height: 65dvh;
+}
+.vault-document-viewer:fullscreen {
+  height: 100dvh;
+  border: 0;
+  border-radius: 0;
+  background: hsl(var(--background));
+}
+.vault-document-viewer:fullscreen .vault-preview-body {
+  max-height: none;
+}
+@media (min-width: 640px) {
+  .customer-surface .vault-document-sheet > [data-ui="sheet-header"] {
+    padding-inline-end: 1.5rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vault-select {
+    transition: none;
+  }
+}

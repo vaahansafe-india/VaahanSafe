@@ -150,6 +150,7 @@ export interface MedicalProfile {
 // QR & STICKER LIFECYCLE DOMAIN
 // ==========================================
 export type QrLifecycleState =
+  | "INVENTORY"
   | "PRINTED"
   | "IN_TRANSIT_DISTRIBUTOR"
   | "WITH_DISTRIBUTOR"

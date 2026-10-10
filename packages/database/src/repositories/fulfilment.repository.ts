@@ -710,7 +710,9 @@ export class D1QrInventoryAdapter implements QrInventoryPort {
     const row = await this.db.queryFirst<DbEligibleQrRow>(
       `SELECT s.id, s.public_id, s.visible_code, s.batch_id
        FROM qr_stickers s
+       JOIN qr_batches b ON b.id = s.batch_id
        WHERE s.status = 'PRINTED'
+         AND b.inventory_channel = 'ONLINE_SYSTEM'
          AND s.current_distributor_id IS NULL
          AND s.current_retailer_id IS NULL
          AND NOT EXISTS (

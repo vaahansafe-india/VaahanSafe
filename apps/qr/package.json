@@ -15,6 +15,7 @@
     "@vaahansafe/database": "*",
     "@vaahansafe/icons": "*",
     "@vaahansafe/qr-core": "*",
+    "@vaahansafe/storage": "*",
     "@vaahansafe/types": "*",
     "@vaahansafe/ui": "*",
     "@vaahansafe/validation": "*",

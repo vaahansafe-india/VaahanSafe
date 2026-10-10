@@ -18,6 +18,10 @@ describe("Customer query isolation and filters", () => {
     expect(customerQueryOptions("scope", "scan-history", "period=7D").queryKey)
       .not.toEqual(customerQueryOptions("scope", "scan-history", "period=30D").queryKey);
   });
+  it("keeps a requested finder report in the server query while ignoring account overrides",()=>{
+    const params=new URLSearchParams(customerQuerySearch('scan-history','period=90D&report=report_current&userId=another'));
+    expect(params.get('report')).toBe('report_current');expect(params.has('userId')).toBe(false);
+  });
   it("bounds query search text before sending it to the server", () => {
     expect(new URLSearchParams(customerQuerySearch("notifications", `q=${"x".repeat(1000)}`)).get("q")?.length).toBe(200);
   });

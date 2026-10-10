@@ -1,0 +1,19 @@
+name = "vaahansafe-document-vault"
+main = "src/index.ts"
+compatibility_date = "2026-09-01"
+workers_dev = true
+preview_urls = false
+
+[vars]
+CUSTOMER_ORIGIN = "https://app.vaahansafe.com"
+# Exact development origin; uploads still require a session-bound capability.
+CUSTOMER_ADDITIONAL_ORIGINS = "http://localhost:3001"
+
+[triggers]
+crons = ["*/10 * * * *"]
+
+[[r2_buckets]]
+binding = "DOCUMENT_STORAGE"
+bucket_name = "vaahansafe-prod-documents"
+
+# Secrets: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY. The bucket is private.

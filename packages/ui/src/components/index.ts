@@ -31,3 +31,4 @@ export * from "./scroll-area";
 export * from "./sonner";
 export * from "./form";
 export * from "./alert-dialog";
+export * from "./calendar";

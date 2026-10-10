@@ -13,6 +13,24 @@ export interface QrStateRouterProps {
 
 export function QrStateRouter({ resolution }: QrStateRouterProps) {
   switch (resolution.state) {
+    case "SETUP_REQUIRED":
+      return (
+        <div className="w-full p-6 rounded-2xl border bg-card text-center space-y-5">
+          <h1 className="text-xl font-serif">{resolution.meta.title}</h1>
+          <p className="text-sm text-muted-foreground">
+            {resolution.meta.subtitle}
+          </p>
+          <a
+            className="min-h-[44px] flex items-center justify-center rounded-xl border"
+            href={resolution.meta.safeNextAction.url}
+          >
+            {resolution.meta.safeNextAction.label}
+          </a>
+          <p className="text-xs">
+            VaahanSafe ID: {resolution.visibleCode || resolution.publicId}
+          </p>
+        </div>
+      );
     case "ACTIVE":
       return <ActiveSafetyView resolution={resolution} />;
 

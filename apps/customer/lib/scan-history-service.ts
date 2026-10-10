@@ -3,7 +3,7 @@
  * Authoritative Server-Side Scan History Service
  *
  * Single source of truth read model for the VaahanSafe Scan Intelligence Center.
- * Strictly queries Cloudflare D1 with authorized scoping.
+ * Queries the configured authoritative database with owner scoping.
  * Zero mock data, zero synthetic coordinates, zero browser storage.
  */
 
@@ -172,7 +172,7 @@ function formatRelativeTime(dateStr: string): string {
 
 export async function getScanHistoryOverview(
   userId: string,
-  filterOverrides?: Partial<ScanHistoryFilterState>
+  filterOverrides?: Partial<ScanHistoryFilterState> & {reportId?:string}
 ): Promise<ScanHistoryOverview> {
   const db = getAuthoritativeDatabaseClient();
 
@@ -464,11 +464,18 @@ export async function getScanHistoryOverview(
   }
 
   // 10. Transform into Customer-Safe Read DTOs
+  const reports = await db.query<{
+    id:string; scan_event_id:string; reason:string; note:string;
+    location: {latitude:number;longitude:number;accuracy:number;capturedAt:string}|null;
+    photos:{key:string}[];
+  }>("SELECT id, scan_event_id, reason, note, location, photos FROM qr_scan_reports WHERE owner_user_id = ?::uuid AND status = 'READY' AND expires_at > clock_timestamp() ORDER BY CASE WHEN id = ? THEN 0 ELSE 1 END, created_at DESC LIMIT 200",[userId,filterOverrides?.reportId || '']);
+  const reportMap = new Map(reports.map(r=>[r.scan_event_id,r]));
   const now = new Date();
   const events: ScanEventItem[] = filteredRegistryScans.map((s) => {
     const sticker = qrMap.get(s.qr_id);
     const vehicle = sticker ? vehicleMap.get(sticker.vehicle_id) : null;
     const occurredDate = parseDbUtcDate(s.created_at);
+    const report = reportMap.get(s.id);
 
     const publicId = sticker?.public_id || "VS-UNKNOWN";
     const maskedId = maskPublicId(publicId);
@@ -508,7 +515,7 @@ export async function getScanHistoryOverview(
       {
         key: "IDENTITY_RESOLVED",
         title: "Public Identity Verified",
-        description: `Opaque resolver ID ${maskedId} verified in Cloudflare D1.`,
+        description: `Opaque resolver ID ${maskedId} resolved by the server.`,
         occurredAt: s.created_at,
         isCompleted: true,
         statusText: "Authenticated",
@@ -525,8 +532,8 @@ export async function getScanHistoryOverview(
       },
       {
         key: "SUPPORTED_ACTION",
-        title: "Encrypted Relay Accessible",
-        description: "Emergency contacts protected; direct dial relay accessible without revealing private numbers.",
+        title: "Approved Contact Actions",
+        description: "The public safety view provides the owner's approved calling and WhatsApp contact options.",
         isCompleted: s.result === "RESOLVED_ACTIVE",
         statusText: s.result === "RESOLVED_ACTIVE" ? "Available" : "Not Active",
         badgeVariant: s.result === "RESOLVED_ACTIVE" ? "success" : "secondary",
@@ -556,7 +563,7 @@ export async function getScanHistoryOverview(
       dateGroupKey: getDateGroupKey(occurredDate, now),
       scanType: s.scan_type,
       scanTypeLabel:
-        s.scan_type === "EMERGENCY_TRIGGER"
+        report ? (report.reason === 'EMERGENCY' ? 'Possible emergency report' : 'Finder safety report') : s.scan_type === "EMERGENCY_TRIGGER"
           ? "Emergency Scan"
           : s.scan_type === "ADMIN_INSPECT"
           ? "Inspection Scan"
@@ -568,6 +575,7 @@ export async function getScanHistoryOverview(
       deviceCategory: device,
       referrerClass: s.referrer_class || "DIRECT_CAMERA",
       journey,
+      report: report ? {id:report.id,reason:report.reason,note:report.note,location:report.location,photoUrls:report.photos.map((_,index)=>`/api/scan-reports/${report.id}/photos/${index}`)} : undefined,
     };
   });
 

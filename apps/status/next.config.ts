@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  distDir: process.env.VAAHANSAFE_BUILD_CHECK === "true" ? ".next-qa" : ".next",
   transpilePackages: [
     "@vaahansafe/ui",
     "@vaahansafe/icons",

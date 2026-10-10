@@ -2,6 +2,13 @@ import type { Metadata } from "next";
 import "@vaahansafe/ui/styles/globals.css";
 import "aos/dist/aos.css";
 import "./admin-paper.css";
+import '../features/inventory/inventory.css';
+import '../features/inventory/inventory-record.css';
+import '../features/batches/batches.css';
+import '../features/distributors/distributors.css';
+import '../features/retailers/retailers.css';
+import '../components/admin-dialog.css';
+import { Toaster } from "@vaahansafe/ui/components/sonner";
 import { AdminMotion } from "../components/AdminMotion";
 import { AdminLayoutClient } from "../components/AdminLayoutClient";
 import { getAdminIdentity } from "../lib/session";
@@ -45,6 +52,7 @@ export default async function AdminRootLayout({
       <body>
         <AdminMotion />
         <AdminLayoutClient identity={identity}>{children}</AdminLayoutClient>
+        <Toaster position="top-right" richColors />
       </body>
     </html>
   );

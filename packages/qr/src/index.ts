@@ -24,6 +24,7 @@ export * from "./secrets/generate-secret";
 export * from "./secrets/hash-secret";
 export * from "./secrets/verify-secret";
 export * from "./secrets/secret-policy";
+export * from "./secrets/encrypted-manifest";
 
 // 4. Domain Errors
 export * from "./errors/qr-errors";
@@ -43,6 +44,7 @@ export * from "./entitlement/service-entitlement";
 export * from "./rendering/qr-encoder";
 
 export const QR_LIFECYCLE_STATES: readonly QrLifecycleState[] = [
+  "INVENTORY",
   "PRINTED",
   "IN_TRANSIT_DISTRIBUTOR",
   "WITH_DISTRIBUTOR",
@@ -59,6 +61,9 @@ export function canActivateSticker(status: QrLifecycleState): {
   allowed: boolean;
   reason?: string;
 } {
+  if (status === "INVENTORY") {
+    return { allowed: false, reason: "Sticker setup must be completed before activation." };
+  }
   if (status === "ACTIVATED") {
     return { allowed: false, reason: "Sticker is already activated." };
   }
@@ -96,3 +101,4 @@ export interface QrResolverPayload {
 export interface IQrResolver {
   resolve(publicId: string): Promise<QrResolverPayload>;
 }
+export * from './reports/scan-report';

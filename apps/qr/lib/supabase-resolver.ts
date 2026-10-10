@@ -108,7 +108,6 @@ export function createSupabaseQrRepository(): PublicQrReadRepository {
         .eq("public_id", publicId)
         .eq("entitlements.capability", "SAFETY_VIEW_ACTIVE")
         .eq("assignments.vehicle.profiles.contacts.is_enabled", 1)
-        .eq("assignments.vehicle.profiles.contacts.allow_call", 1)
         .order("priority", {
           referencedTable: "assignments.vehicle.profiles.contacts",
         })

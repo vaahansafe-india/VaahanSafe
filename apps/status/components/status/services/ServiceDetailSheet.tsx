@@ -83,15 +83,6 @@ export function ServiceDetailSheet({
             </div>
           </div>
 
-          <div className="space-y-1 pt-1">
-            <div className="text-[9px] uppercase tracking-wider text-[#8e8b82]">
-              TARGET ENDPOINT / CAPABILITY
-            </div>
-            <div className="text-[11px] text-[#141413] dark:text-[#faf9f5] break-all">
-              {service.targetUrl || service.slug}
-            </div>
-          </div>
-
           <div className="space-y-1">
             <div className="text-[9px] uppercase tracking-wider text-[#8e8b82]">
               PUBLIC SERVICE IDENTIFIER
@@ -108,7 +99,16 @@ export function ServiceDetailSheet({
             OBSERVABILITY POLICY
           </div>
           <p className="font-sans text-xs leading-relaxed text-[#6c6a64] dark:text-[#a09d96]">
-            The live result is a current endpoint check. Historical marks appear only when the scheduled Cloudflare Worker records a completed check in D1. An unrecorded period remains unknown.
+            {service.slug === "customer-analytics"
+              ? "The scheduled monitor checks scan and storage reporting queries with bounded reads of real data. It does not expose customer records or verify every chart or filter. Checks run every ten minutes; results older than 25 minutes become unknown."
+              : service.slug === "notifications"
+              ? "Checks cover WhatsApp provider access, the dispatch scheduler and recorded sending outcomes for WhatsApp and email. Accepted sends awaiting receipts do not count as failures; individual delivery remains unconfirmed until a receipt arrives. Checks run every ten minutes; results older than 25 minutes become unknown."
+              : service.slug === "payments"
+              ? "This result comes from the latest scheduled provider and processing checks. Checks run every ten minutes; results older than 25 minutes become unknown. A healthy result does not certify an individual payment or message delivery."
+              : "The live result is a current endpoint check. Historical marks appear only when the scheduled monitor records a completed check. An unrecorded period remains unknown."}
+          </p>
+          <p className="font-sans text-xs leading-relaxed text-[#6c6a64] dark:text-[#a09d96]">
+            History shows completed monitor checks. A daily bar includes earlier degraded or failed checks even after the current service recovers.
           </p>
         </div>
       </SheetContent>

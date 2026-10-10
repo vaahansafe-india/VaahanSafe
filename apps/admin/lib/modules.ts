@@ -83,6 +83,7 @@ export const ADMIN_MODULES: AdminModule[] = [
     fields: [
       "id",
       "reference_code",
+      "inventory_channel",
       "quantity",
       "status",
       "manufacturer_name",

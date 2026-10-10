@@ -108,6 +108,13 @@ export interface ScanEventItem {
   deviceCategory: "Mobile" | "Desktop" | "Tablet" | "Undisclosed";
   referrerClass: string | null;
   journey: ScanJourneyMilestone[];
+  report?: {
+    id: string;
+    reason: string;
+    note: string;
+    location: {latitude:number;longitude:number;accuracy:number;capturedAt:string} | null;
+    photoUrls: string[];
+  };
 }
 
 export interface AuthorizedVehicleScope {

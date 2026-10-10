@@ -46,6 +46,14 @@ function getBreadcrumbs(pathname: string): { label: string; href?: string }[] {
     return [{ label: "Overview" }, { label: "Dashboard" }];
   }
   if (pathname.startsWith("/vehicles")) {
+    const documentRoute = pathname.match(/^\/vehicles\/([^/]+)\/documents(?:\/|$)/);
+    if (documentRoute) {
+      return [
+        { label: "Vehicles", href: "/vehicles" },
+        { label: "Vehicle", href: `/vehicles/${documentRoute[1]}` },
+        { label: "Documents" },
+      ];
+    }
     if (pathname === "/vehicles/new") {
       return [
         { label: "Vehicles", href: "/vehicles" },
@@ -53,6 +61,12 @@ function getBreadcrumbs(pathname: string): { label: string; href?: string }[] {
       ];
     }
     return [{ label: "Vehicle Identity" }, { label: "Vehicles" }];
+  }
+  if (pathname === "/documents") {
+    return [{ label: "Vehicle Identity" }, { label: "Documents" }];
+  }
+  if (pathname.startsWith("/documents/")) {
+    return [{ label: "Documents", href: "/documents" }, { label: "Document" }];
   }
   if (pathname.startsWith("/qr")) {
     const subRoute = pathname.replace("/qr", "").replace("/", "");
@@ -79,6 +93,11 @@ function getBreadcrumbs(pathname: string): { label: string; href?: string }[] {
   }
   if (pathname.startsWith("/emergency-contacts")) {
     return [{ label: "Services" }, { label: "Emergency Contacts" }];
+  }
+  if (pathname.startsWith("/analytics/storage")) return [{ label: "Analytics", href: "/analytics" }, { label: "Storage & Analytics" }];
+  if (pathname.startsWith("/analytics/scans")) return [{ label: "Analytics", href: "/analytics" }, { label: "Scan Analytics" }];
+  if (pathname.startsWith("/analytics")) {
+    return [{ label: "Activity" }, { label: "Usage & Analytics" }];
   }
   if (pathname.startsWith("/scan-history")) {
     return [{ label: "Activity" }, { label: "Scan History" }];

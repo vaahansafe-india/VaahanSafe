@@ -3,6 +3,8 @@ export const MSG91_TEMPLATE_CATALOG = {
   vhn_welcome_v1: { language: "en", bodyCount: 1 },
   vhn_qr_activated_v1: { language: "en_US", bodyCount: 2 },
   vhn_qr_scan_notice_v2: { language: "en_US", bodyCount: 2 },
+  vhn_vehicle_report_v1: { language: 'en', bodyCount: 5 },
+  vhn_vehicle_emergency_report_v1: { language: 'en', bodyCount: 5 },
   vhn_payment_success_v1: { language: "en", bodyCount: 2 },
   vhn_shipment_update_v1: { language: "en", bodyCount: 2 },
   vhn_sub_renewed_v1: { language: "en", bodyCount: 2 },

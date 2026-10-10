@@ -33,11 +33,15 @@ export function EmergencyContactSheet({
   onSuccess,
 }: EmergencyContactSheetProps) {
   const [isAdding, setIsAdding] = React.useState(false);
+  const [editingContactId,setEditingContactId] = React.useState<string>();
   const [name, setName] = React.useState("");
   const [relationship, setRelationship] = React.useState("Spouse");
   const [phone, setPhone] = React.useState("");
   const [priority, setPriority] = React.useState(1);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [allowCall,setAllowCall] = React.useState(true);
+  const [allowMessage,setAllowMessage] = React.useState(true);
+  React.useEffect(()=>{setIsAdding(false);setEditingContactId(undefined);},[vehicle?.id,open]);
 
   if (!vehicle) return null;
 
@@ -53,11 +57,12 @@ export function EmergencyContactSheet({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: name.trim(),
+          contactId: editingContactId,
           relationship: relationship.trim(),
           phone: phone.trim(),
           priority,
-          allowCall: true,
-          allowMessage: true,
+          allowCall,
+          allowMessage,
         }),
       });
 
@@ -70,12 +75,23 @@ export function EmergencyContactSheet({
       setName("");
       setPhone("");
       setIsAdding(false);
+      setEditingContactId(undefined);
       onSuccess?.();
     } catch (err: any) {
       toast.error(err.message || "Failed to save emergency contact");
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const startNewContact=()=>{
+    setEditingContactId(undefined);setName('');setPhone('');setRelationship('Spouse');
+    setPriority(1);setAllowCall(true);setAllowMessage(true);setIsAdding(true);
+  };
+  const editContact=(contact:VehicleEmergencyContactDetail)=>{
+    setEditingContactId(contact.id);setName(contact.name);setPhone(contact.phone);
+    setRelationship(contact.relationship);setPriority(contact.priority);
+    setAllowCall(contact.allowCall);setAllowMessage(contact.allowMessage);setIsAdding(true);
   };
 
   const handleDeleteContact = async (contactId: string) => {
@@ -108,7 +124,7 @@ export function EmergencyContactSheet({
             Emergency Contacts
           </SheetTitle>
           <SheetDescription className="text-xs text-muted-foreground">
-            Contacts receiving instant incident notifications and masked caller connections.
+            Choose the contacts and calling or WhatsApp options shown on your vehicle’s public safety page.
           </SheetDescription>
         </SheetHeader>
 
@@ -122,7 +138,7 @@ export function EmergencyContactSheet({
               {!isAdding && contacts.length < 5 && (
                 <button
                   type="button"
-                  onClick={() => setIsAdding(true)}
+                  onClick={startNewContact}
                   className="font-mono text-xs font-semibold text-[#cc785c] hover:underline"
                 >
                   + Add Contact
@@ -137,7 +153,7 @@ export function EmergencyContactSheet({
                 </p>
                 <button
                   type="button"
-                  onClick={() => setIsAdding(true)}
+                  onClick={startNewContact}
                   className="mt-3 inline-flex items-center gap-1 font-mono text-xs font-semibold text-[#cc785c]"
                 >
                   <span>+ Add First Contact</span>
@@ -165,8 +181,11 @@ export function EmergencyContactSheet({
                   <div className="mt-1 font-mono text-xs text-muted-foreground">
                     {c.phoneMasked}
                   </div>
+                  <p className="mt-1 text-[10px] text-muted-foreground">{[c.allowCall?'Call enabled':null,c.allowMessage?'WhatsApp enabled':null].filter(Boolean).join(' · ') || 'Contact actions disabled'}</p>
                 </div>
 
+                <div className="flex items-center gap-2">
+                <button type="button" onClick={()=>editContact(c)} disabled={isSubmitting} className="min-h-[44px] px-2 text-xs text-primary underline" aria-label={`Edit ${c.name} contact options`}>Edit</button>
                 <button
                   type="button"
                   onClick={() => handleDeleteContact(c.id)}
@@ -175,6 +194,7 @@ export function EmergencyContactSheet({
                 >
                   <VaahanIcon name="close" size={14} />
                 </button>
+                </div>
               </div>
             ))}
           </div>
@@ -184,7 +204,7 @@ export function EmergencyContactSheet({
             <form onSubmit={handleAddContact} className="rounded-2xl border border-border bg-muted/20 p-4 space-y-4">
               <div className="flex items-center justify-between border-b border-border pb-2">
                 <span className="font-mono text-xs font-semibold uppercase tracking-wider text-foreground">
-                  New Emergency Contact
+                  {editingContactId ? 'Edit Emergency Contact' : 'New Emergency Contact'}
                 </span>
                 <button
                   type="button"
@@ -270,6 +290,12 @@ export function EmergencyContactSheet({
                 />
               </div>
 
+              <fieldset className="space-y-2 text-xs">
+                <legend className="font-semibold mb-2">Actions available on the public QR safety page</legend>
+                <label className="flex items-center gap-2"><input type="checkbox" checked={allowCall} onChange={e=>setAllowCall(e.target.checked)} />Allow calls</label>
+                <label className="flex items-center gap-2"><input type="checkbox" checked={allowMessage} onChange={e=>setAllowMessage(e.target.checked)} />Allow WhatsApp messages</label>
+                <p className="text-muted-foreground">Confirm your contact agrees to be reached through these actions.</p>
+              </fieldset>
               <div className="pt-2 flex justify-end gap-2">
                 <Button
                   type="button"
@@ -286,7 +312,7 @@ export function EmergencyContactSheet({
                   disabled={isSubmitting}
                   className="bg-[#cc785c] hover:bg-[#a9583e] text-white font-mono text-xs uppercase"
                 >
-                  {isSubmitting ? "Saving..." : "Add Contact"}
+                  {isSubmitting ? "Saving..." : editingContactId ? "Save Changes" : "Add Contact"}
                 </Button>
               </div>
             </form>

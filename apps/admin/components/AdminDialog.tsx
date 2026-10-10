@@ -4,15 +4,22 @@ import {
   Dialog,
   DialogContent,
   DialogTitle,
+  DialogDescription,
 } from "@vaahansafe/ui/components/dialog";
 export function AdminDialog({
   title,
   onClose,
   children,
+  description,
+  footer,
+  className = "",
 }: {
   title: string;
   onClose: () => void;
   children: React.ReactNode;
+  description?: string;
+  footer?: React.ReactNode;
+  className?: string;
 }) {
   const [returnFocus] = useState(() =>
     typeof document !== "undefined" &&
@@ -28,8 +35,8 @@ export function AdminDialog({
       }}
     >
       <DialogContent
-        className="admin-dialog admin-radix-dialog"
-        aria-describedby={undefined}
+        className={`admin-dialog admin-radix-dialog ${className}`}
+        {...(description ? {} : { "aria-describedby": undefined })}
         onCloseAutoFocus={(event) => {
           if (returnFocus?.isConnected) {
             event.preventDefault();
@@ -37,8 +44,19 @@ export function AdminDialog({
           }
         }}
       >
-        <DialogTitle>{title}</DialogTitle>
-        {children}
+        <header className="admin-dialog-header">
+          <DialogTitle>{title}</DialogTitle>
+          {description && <DialogDescription>{description}</DialogDescription>}
+        </header>
+        <div
+          className="admin-dialog-body"
+          role="region"
+          aria-label={`${title} contents`}
+          tabIndex={0}
+        >
+          {children}
+        </div>
+        {footer && <footer className="admin-dialog-footer">{footer}</footer>}
       </DialogContent>
     </Dialog>
   );

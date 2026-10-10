@@ -1,4 +1,6 @@
-/** Cloudflare Cron probes the real Supabase database and records a heartbeat. */
+import { probeCapability, publicCapabilityHealth } from "./service-monitoring";
+
+/** Cloudflare Cron probes real services and records measured telemetry. */
 export interface Env {
   SUPABASE_URL: string;
   SUPABASE_PUBLISHABLE_KEY: string;
@@ -10,6 +12,14 @@ export interface Env {
   STATUS_QR_HEALTH_URL?: string;
   STATUS_PAYMENTS_HEALTH_URL?: string;
   STATUS_NOTIFICATIONS_HEALTH_URL?: string;
+  STATUS_ANALYTICS_HEALTH_URL?: string;
+  PAYMENT_PROVIDER?: string;
+  RAZORPAY_MODE?: string;
+  RAZORPAY_KEY_ID?: string;
+  RAZORPAY_KEY_SECRET?: string;
+  MSG91_AUTH_KEY?: string;
+  MSG91_WHATSAPP_NUMBER?: string;
+  MSG91_WHATSAPP_NAMESPACE?: string;
 }
 
 const STALE_AFTER_MS = 25 * 60 * 1000;
@@ -23,6 +33,7 @@ const serviceTargets = [
   ["vehicle-qr-access", "STATUS_QR_HEALTH_URL"],
   ["payments", "STATUS_PAYMENTS_HEALTH_URL"],
   ["notifications", "STATUS_NOTIFICATIONS_HEALTH_URL"],
+  ["customer-analytics", "STATUS_ANALYTICS_HEALTH_URL"],
 ] as const;
 
 function safeTarget(value: string): string {
@@ -52,7 +63,7 @@ async function probeService(url: string): Promise<{ result: "UP" | "DEGRADED" | 
   }
 }
 
-async function recordServiceChecks(env: Env): Promise<void> {
+export async function recordServiceChecks(env: Env): Promise<void> {
   if (!env.STATUS_DB) throw new Error("Missing Cloudflare D1 status binding");
   const serviceRows = await env.STATUS_DB.prepare("SELECT id, slug FROM status_services WHERE is_public = 1")
     .all<{ id: string; slug: string }>();
@@ -60,13 +71,14 @@ async function recordServiceChecks(env: Env): Promise<void> {
   const configured = serviceTargets.flatMap(([slug, key]) => {
     const target = env[key];
     const serviceId = idBySlug.get(slug);
-    return target && serviceId ? [{ target, serviceId }] : [];
+    return target && serviceId ? [{ target, serviceId, slug }] : [];
   });
   if (configured.length === 0) throw new Error("No status probe targets are configured");
 
   const checkedAt = new Date().toISOString();
-  const results = await Promise.all(configured.map(async ({ target, serviceId }) => ({
-    serviceId, ...(await probeService(target)),
+  const results = await Promise.all(configured.map(async ({ target, serviceId, slug }) => ({
+    serviceId, ...(await (slug === "payments" || slug === "notifications" || slug === "customer-analytics"
+      ? probeCapability(slug, env) : probeService(target))),
   })));
   await env.STATUS_DB.batch(results.map((result) => env.STATUS_DB.prepare(
     "INSERT OR IGNORE INTO status_probe_samples (service_id, checked_at, result, latency_ms, http_status) VALUES (?, ?, ?, ?, ?)"
@@ -83,6 +95,7 @@ function endpoint(env: Env, path: string): string {
   }
   return `${env.SUPABASE_URL}${path}`;
 }
+
 
 async function queryLatest(env: Env): Promise<{ checked_at: string; status: string; latency_ms: number } | null> {
   if (!env.SUPABASE_PUBLISHABLE_KEY) throw new Error("Missing Supabase publishable key");
@@ -134,6 +147,12 @@ export default {
     const url = new URL(request.url);
     const path = url.pathname;
 
+
+    if (path === "/services/payments" || path === "/services/notifications") {
+      return publicCapabilityHealth(request, env, path === "/services/payments" ? "payments" : "notifications");
+    }
+    if (path === "/services/customer-analytics") return publicCapabilityHealth(request, env, "customer-analytics");
+
     if (!["/health", "/"].includes(path)) {
       return new Response("Not found", { status: 404 });
     }
@@ -176,4 +195,3 @@ export default {
     }
   },
 };
-

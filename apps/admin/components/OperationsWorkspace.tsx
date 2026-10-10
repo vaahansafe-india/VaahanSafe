@@ -267,6 +267,7 @@ export function OperationsWorkspace({
     (
       {
         inventory: [
+          "INVENTORY",
           "PRINTED",
           "WITH_DISTRIBUTOR",
           "WITH_RETAILER",

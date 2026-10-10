@@ -14,12 +14,12 @@ const sections = [
   { id: "journey", number: "01", title: "What we monitor", summary: "The status page follows the steps people take with VaahanSafe, so a service condition has a clear customer meaning." },
   { id: "conditions", number: "02", title: "How conditions are named", summary: "A condition describes the available evidence for a capability. Unknown is shown when that evidence is missing." },
   { id: "history", number: "03", title: "How the 90-day history works", summary: "Each mark represents one calendar day in India Standard Time. The history uses recorded Cloudflare checks, not estimated uptime." },
-  { id: "sources", number: "04", title: "Sources and timing", summary: "The infrastructure panel separates a direct Supabase read from the Cloudflare scheduled heartbeat. Service history comes from recorded public capability checks." },
+  { id: "sources", number: "04", title: "Sources and timing", summary: "Payments and notifications use provider access and processing checks recorded every ten minutes. Samples older than 25 minutes become unknown. These checks do not certify an individual payment or message delivery. The infrastructure panel reports the database heartbeat separately." },
 ] as const;
 
 const conditions = [
   { name: "Operational", color: "bg-[#48bd83]", description: "The configured public check is responding successfully." },
-  { name: "Degraded", color: "bg-[#d6a339]", description: "The capability remains reachable, but a recorded check indicates reduced performance." },
+  { name: "Degraded", color: "bg-[#d6a339]", description: "A recorded check cannot confirm normal operation, such as overdue processing or delivery receipts." },
   { name: "Partial outage", color: "bg-[#bd5a4b]", description: "Some of the capability is unavailable or failing." },
   { name: "Major outage", color: "bg-[#bd5a4b]", description: "A primary capability is unavailable." },
   { name: "Maintenance", color: "bg-[#718b88]", description: "A planned service window has been published." },

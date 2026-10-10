@@ -8,6 +8,7 @@ import { MedicalInformation } from "../projection/MedicalInformation";
 import { PrimarySafetyContact } from "../contacts/PrimarySafetyContact";
 import { SecondarySafetyContact } from "../contacts/SecondarySafetyContact";
 import type { PublicQrResolution } from "@vaahansafe/qr-core";
+import { ScanReportForm } from '../reports/ScanReportForm';
 
 export interface ActiveSafetyViewProps {
   resolution: PublicQrResolution;
@@ -64,19 +65,20 @@ export function ActiveSafetyView({ resolution }: ActiveSafetyViewProps) {
             Emergency Contacts ({profile.approvedEmergencyContacts.length})
           </span>
           <span className="text-[10px] font-mono text-emerald-700 dark:text-emerald-400 font-medium">
-            Active Relay
+            Approved contact options
           </span>
         </div>
 
         {primaryContact ? (
           <div className="space-y-2.5">
-            <PrimarySafetyContact contact={primaryContact} />
+            <PrimarySafetyContact contact={primaryContact} publicId={publicId} />
 
             {secondaryContacts.map((contact, idx) => (
               <SecondarySafetyContact
                 key={contact.id || idx}
                 contact={contact}
                 index={idx}
+                publicId={publicId}
               />
             ))}
           </div>
@@ -86,6 +88,7 @@ export function ActiveSafetyView({ resolution }: ActiveSafetyViewProps) {
           </div>
         )}
       </div>
+      <ScanReportForm publicId={publicId} siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ''} />
     </div>
   );
 }

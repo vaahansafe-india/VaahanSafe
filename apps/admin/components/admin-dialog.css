@@ -1,0 +1,462 @@
+.admin-dialog.admin-radix-dialog[data-ui="dialog-content"] {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow: hidden;
+  padding: 0;
+  box-sizing: border-box;
+  width: min(640px, calc(100vw - 40px));
+  max-width: 640px;
+  max-height: min(860px, calc(100vh - 56px));
+  max-height: min(860px, calc(100dvh - 56px));
+  min-width: 0;
+  left: 50%;
+  right: auto;
+  top: 50%;
+  bottom: auto;
+  transform: translate(-50%, -50%);
+  margin: 0;
+  border: 1px solid #deddd3;
+  border-radius: 12px;
+  background: #fffefb;
+  box-shadow: 0 24px 80px #2833242a;
+}
+.admin-dialog.admin-radix-dialog[data-ui="dialog-content"]
+  > div[aria-hidden="true"] {
+  display: none;
+}
+.admin-dialog-header {
+  flex: none;
+  padding: 22px 64px 20px 24px;
+  border-bottom: 1px solid #e6e5dc;
+  background: #fffefb;
+  min-width: 0;
+  z-index: 1;
+}
+.admin-dialog .admin-dialog-header h2 {
+  margin: 0;
+  font:
+    500 27px/1.2 AdminEditorial,
+    Georgia,
+    serif;
+  letter-spacing: -0.025em;
+  color: #293a29;
+  overflow-wrap: anywhere;
+}
+.admin-dialog .admin-dialog-header p {
+  font-size: 12px;
+  line-height: 1.65;
+  margin: 8px 0 0;
+  color: #8b9380;
+}
+.admin-dialog-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  padding: 22px 24px;
+  scrollbar-width: thin;
+  scrollbar-color: #ced2c2 transparent;
+  scroll-padding-block: 16px;
+}
+.admin-dialog-body:focus-visible {
+  outline: 2px solid #a2b18b;
+  outline-offset: -3px;
+}
+.admin-dialog-body > * {
+  min-width: 0;
+  max-width: 100%;
+}
+.admin-dialog-body p,
+.admin-dialog-body dd,
+.admin-dialog-body small {
+  overflow-wrap: anywhere;
+}
+.admin-dialog-footer {
+  flex: none;
+  border-top: 1px solid #e4e6da;
+  background: #f9faf4;
+  padding: 16px 24px;
+  z-index: 1;
+}
+.admin-dialog-footer > .admin-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-left: auto;
+  min-height: 42px;
+  max-width: 100%;
+  white-space: normal;
+  text-align: center;
+}
+.admin-dialog-action-row {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.admin-dialog-action-row .admin-button {
+  margin: 0;
+  min-height: 42px;
+  min-width: 96px;
+  font-size: 12px;
+  white-space: normal;
+  text-align: center;
+  justify-content: center;
+  display: inline-flex;
+  align-items: center;
+}
+.admin-dialog.admin-radix-dialog > [data-ui="surface-close"] {
+  top: 17px;
+  right: 17px;
+  width: 36px;
+  height: 36px;
+  border: 1px solid #e4e3da;
+  border-radius: 50%;
+  background: #faf9f5;
+  color: #828a78;
+}
+.admin-dialog.admin-radix-dialog > [data-ui="surface-close"]:hover {
+  background: #eef2e4;
+}
+.admin-dialog .admin-dialog-body input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  flex: none;
+  accent-color: #708557;
+}
+.admin-dialog .admin-dialog-body input:not([type="checkbox"]),
+.admin-dialog .admin-dialog-body textarea {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.inventory-production-dialog .admin-dialog-body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.production-format-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
+  padding: 14px 16px;
+  background: #f5f6ee;
+  border: 1px solid #e4e7d8;
+  border-radius: 7px;
+  gap: 12px;
+}
+.production-format-summary > div {
+  min-width: 0;
+}
+.production-format-summary dt {
+  font-size: 10px;
+  color: #939b84;
+  line-height: 1.5;
+}
+.production-format-summary dd {
+  font-size: 12px;
+  font-weight: 500;
+  margin: 5px 0 0;
+  color: #5b6d47;
+  line-height: 1.5;
+}
+.inventory-production-dialog .inventory-form-label {
+  font-size: 12px;
+  font-weight: 500;
+  margin: 0;
+  line-height: 1.7;
+  color: #3d4d32;
+}
+.inventory-production-dialog .inventory-form-label .admin-select-trigger {
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  margin: 8px 0 0;
+  font-size: 12px;
+}
+.inventory-production-dialog .inventory-form-label textarea {
+  margin: 8px 0 0;
+  min-height: 110px;
+  padding: 12px;
+  font-size: 12px;
+  line-height: 1.7;
+  border-color: #dcdfd0;
+  border-radius: 6px;
+  resize: vertical;
+}
+.production-field-help {
+  display: block;
+  font-size: 10px;
+  line-height: 1.7;
+  color: #9ca38f;
+  font-weight: 400;
+  margin-top: 7px;
+}
+.production-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.production-section-heading h3 {
+  font-size: 12px;
+  font-weight: 500;
+  color: #485c35;
+  margin: 0;
+}
+.production-section-heading > span {
+  font-size: 10px;
+  color: #99a187;
+}
+.inventory-production-dialog .inventory-print-review {
+  margin: 0;
+  max-height: min(220px, 28dvh);
+  border-color: #e1e4d7;
+  background: #fffefb;
+}
+.inventory-production-dialog .inventory-print-review > div {
+  gap: 14px;
+  padding: 12px 14px;
+  align-items: start;
+}
+.inventory-production-dialog .inventory-print-review strong {
+  font-size: 12px;
+  color: #435934;
+  line-height: 1.7;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.inventory-production-dialog .inventory-print-review span {
+  font-size: 11px;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+.inventory-production-dialog .production-confirmation {
+  padding: 12px 14px;
+  background: #f8f9f3;
+  border: 1px solid #e5e9d9;
+  border-radius: 6px;
+  align-items: flex-start;
+  margin: 0;
+  font-size: 12px !important;
+  line-height: 1.8;
+  gap: 10px;
+  color: #6a7856;
+}
+.inventory-production-dialog .production-confirmation input {
+  margin-top: 3px;
+}
+.production-confirmation span {
+  min-width: 0;
+}
+.production-confirmation-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.production-confirmation-copy strong {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.65;
+  color: #52663f;
+}
+.production-confirmation-copy > span {
+  font-size: 11px;
+  line-height: 1.7;
+  color: #8b9879;
+}
+.inventory-production-dialog .production-confirmation {
+  padding: 13px 14px;
+  gap: 11px;
+}
+.inventory-production-dialog .production-confirmation input {
+  margin-top: 3px;
+}
+.production-handling-note {
+  border-left: 2px solid #c3cfab;
+  padding: 2px 0 2px 12px;
+}
+.production-handling-note > strong {
+  font-size: 11px;
+  font-weight: 500;
+  color: #7e8e65;
+}
+.admin-dialog .production-handling-note p {
+  font-size: 11px;
+  line-height: 1.85;
+  margin: 5px 0 0;
+  color: #9ca58c;
+}
+.inventory-production-dialog .admin-notice {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.7;
+}
+.admin-dialog .inventory-sticker-stage {
+  min-width: 0;
+}
+.admin-dialog .inventory-spec-grid {
+  gap: 14px;
+}
+.admin-dialog .admin-password-form {
+  max-width: 100%;
+  min-width: 0;
+}
+.admin-dialog .admin-password-form .admin-button {
+  white-space: normal;
+  min-height: 42px;
+}
+@media (max-width: 639px) {
+  .admin-dialog.admin-radix-dialog[data-ui="dialog-content"] {
+    width: calc(100vw - 24px);
+    max-width: 520px;
+    max-height: calc(100vh - 32px);
+    max-height: calc(
+      100dvh - max(16px, env(safe-area-inset-top)) -
+        max(16px, env(safe-area-inset-bottom))
+    );
+    border-radius: 11px;
+    animation: none;
+  }
+  .admin-dialog-header {
+    padding: 20px 57px 16px 18px;
+  }
+  .admin-dialog .admin-dialog-header h2 {
+    font-size: 24px;
+    line-height: 1.18;
+  }
+  .admin-dialog .admin-dialog-header p {
+    font-size: 11px;
+    line-height: 1.65;
+    margin-top: 7px;
+  }
+  .admin-dialog-body {
+    padding: 18px;
+  }
+  .admin-dialog-footer {
+    padding: 13px 18px max(13px, env(safe-area-inset-bottom));
+  }
+  .admin-dialog.admin-radix-dialog > [data-ui="surface-close"] {
+    top: 16px;
+    right: 14px;
+    width: 34px;
+    height: 34px;
+  }
+  .admin-dialog-action-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
+    gap: 8px;
+  }
+  .admin-dialog-action-row .admin-button {
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    padding: 10px;
+    font-size: 11px;
+  }
+  .admin-dialog-action-row .admin-button:only-child {
+    grid-column: 1/-1;
+  }
+  .admin-dialog-footer > .admin-button {
+    width: 100%;
+    min-height: 44px;
+    font-size: 11px;
+  }
+  .production-format-summary {
+    grid-template-columns: 1fr 1fr;
+    padding: 12px;
+    gap: 12px;
+  }
+  .production-format-summary > div:last-child {
+    grid-column: 1/-1;
+    border-top: 1px solid #e2e7d4;
+    padding-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .production-format-summary > div:last-child dd {
+    margin-top: 0;
+    font-size: 11px;
+  }
+  .inventory-production-dialog .admin-dialog-body {
+    gap: 18px;
+  }
+  .inventory-production-dialog .production-confirmation {
+    font-size: 11px !important;
+    padding: 11px 12px;
+  }
+  .inventory-production-dialog .inventory-print-review > div {
+    padding: 11px 12px;
+  }
+  .inventory-production-dialog .inventory-print-review strong {
+    font-size: 11px;
+  }
+  .inventory-production-dialog .inventory-print-review span {
+    font-size: 10px;
+  }
+  .admin-dialog .production-handling-note p {
+    font-size: 10px;
+  }
+  .production-field-help {
+    font-size: 10px;
+  }
+  .inventory-production-dialog .production-confirmation {
+    padding: 12px;
+    gap: 10px;
+  }
+  .production-confirmation-copy {
+    gap: 5px;
+  }
+  .production-confirmation-copy strong {
+    font-size: 11px;
+    line-height: 1.7;
+  }
+  .production-confirmation-copy > span {
+    font-size: 10px;
+    line-height: 1.8;
+  }
+  .admin-dialog .inventory-spec-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .admin-dialog .inventory-record {
+    grid-template-columns: 100px minmax(0, 1fr);
+  }
+  .admin-dialog .admin-detail-grid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-height: 500px) {
+  .admin-dialog-header {
+    padding-top: 14px;
+    padding-bottom: 12px;
+  }
+  .admin-dialog .admin-dialog-header p {
+    display: none;
+  }
+  .admin-dialog-body {
+    padding-top: 14px;
+    padding-bottom: 14px;
+  }
+  .admin-dialog-footer {
+    padding-top: 11px;
+    padding-bottom: 11px;
+  }
+  .admin-dialog.admin-radix-dialog > [data-ui="surface-close"] {
+    top: 10px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .admin-dialog.admin-radix-dialog[data-ui="dialog-content"] {
+    animation: none !important;
+    transition: none !important;
+  }
+}

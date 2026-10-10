@@ -14,6 +14,7 @@ export * from "./ports/memory-object-store";
 export * from "./r2/r2-object-store";
 export * from "./r2/cloudflare-r2-rest-store";
 export * from "./r2/factory";
+export * from './r2/scan-report-store';
 export * from "./uploads/authorize-upload";
 export * from "./uploads/complete-upload";
 export * from "./uploads/server-upload";

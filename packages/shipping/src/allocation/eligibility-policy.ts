@@ -16,6 +16,7 @@ export interface PhysicalQrInventoryCandidate {
   visibleCode: string;
   batchId: string;
   status: string;
+  inventoryChannel?: "ONLINE_SYSTEM" | "OFFLINE_RETAIL";
   currentDistributorId?: string | null;
   currentRetailerId?: string | null;
   hasActiveReservation: boolean;
@@ -28,8 +29,14 @@ export interface EligibilityEvaluation {
 }
 
 export function evaluateQrInventoryEligibility(
-  sticker: PhysicalQrInventoryCandidate
+  sticker: PhysicalQrInventoryCandidate,
 ): EligibilityEvaluation {
+  if (sticker.inventoryChannel === "OFFLINE_RETAIL") {
+    return {
+      isEligible: false,
+      reason: "Offline retail identities cannot fill online orders",
+    };
+  }
   // 1. Status check: must be in PRINTED status
   if (sticker.status !== "PRINTED") {
     return {
@@ -42,7 +49,8 @@ export function evaluateQrInventoryEligibility(
   if (sticker.currentDistributorId || sticker.currentRetailerId) {
     return {
       isEligible: false,
-      reason: "Sticker is currently assigned to offline distribution/retail channels",
+      reason:
+        "Sticker is currently assigned to offline distribution/retail channels",
     };
   }
 
@@ -50,7 +58,8 @@ export function evaluateQrInventoryEligibility(
   if (sticker.hasActiveReservation) {
     return {
       isEligible: false,
-      reason: "Sticker currently has an active reservation for another fulfilment",
+      reason:
+        "Sticker currently has an active reservation for another fulfilment",
     };
   }
 

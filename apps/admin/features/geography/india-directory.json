@@ -1,0 +1,4073 @@
+{
+  "source": "https://igod.gov.in/sg/district/states",
+  "version": "2026-10-10",
+  "identifierSystem": "IGOD directory identifiers (not LGD codes)",
+  "states": [
+    {
+      "code": "AN",
+      "name": "Andaman and Nicobar Islands"
+    },
+    {
+      "code": "AP",
+      "name": "Andhra Pradesh"
+    },
+    {
+      "code": "AR",
+      "name": "Arunachal Pradesh"
+    },
+    {
+      "code": "AS",
+      "name": "Assam"
+    },
+    {
+      "code": "BR",
+      "name": "Bihar"
+    },
+    {
+      "code": "CH",
+      "name": "Chandigarh"
+    },
+    {
+      "code": "CG",
+      "name": "Chhattisgarh"
+    },
+    {
+      "code": "ND",
+      "name": "Dadra and Nagar Haveli and Daman and Diu"
+    },
+    {
+      "code": "DL",
+      "name": "Delhi"
+    },
+    {
+      "code": "GA",
+      "name": "Goa"
+    },
+    {
+      "code": "GJ",
+      "name": "Gujarat"
+    },
+    {
+      "code": "HR",
+      "name": "Haryana"
+    },
+    {
+      "code": "HP",
+      "name": "Himachal Pradesh"
+    },
+    {
+      "code": "JK",
+      "name": "Jammu and Kashmir"
+    },
+    {
+      "code": "JH",
+      "name": "Jharkhand"
+    },
+    {
+      "code": "KA",
+      "name": "Karnataka"
+    },
+    {
+      "code": "KL",
+      "name": "Kerala"
+    },
+    {
+      "code": "LA",
+      "name": "Ladakh"
+    },
+    {
+      "code": "LD",
+      "name": "Lakshadweep"
+    },
+    {
+      "code": "MP",
+      "name": "Madhya Pradesh"
+    },
+    {
+      "code": "MH",
+      "name": "Maharashtra"
+    },
+    {
+      "code": "MN",
+      "name": "Manipur"
+    },
+    {
+      "code": "ML",
+      "name": "Meghalaya"
+    },
+    {
+      "code": "MZ",
+      "name": "Mizoram"
+    },
+    {
+      "code": "NL",
+      "name": "Nagaland"
+    },
+    {
+      "code": "OD",
+      "name": "Odisha"
+    },
+    {
+      "code": "PY",
+      "name": "Puducherry"
+    },
+    {
+      "code": "PB",
+      "name": "Punjab"
+    },
+    {
+      "code": "RJ",
+      "name": "Rajasthan"
+    },
+    {
+      "code": "SK",
+      "name": "Sikkim"
+    },
+    {
+      "code": "TN",
+      "name": "Tamil Nadu"
+    },
+    {
+      "code": "TS",
+      "name": "Telangana"
+    },
+    {
+      "code": "TR",
+      "name": "Tripura"
+    },
+    {
+      "code": "UP",
+      "name": "Uttar Pradesh"
+    },
+    {
+      "code": "UK",
+      "name": "Uttarakhand"
+    },
+    {
+      "code": "WB",
+      "name": "West Bengal"
+    }
+  ],
+  "districts": [
+    {
+      "code": "czg3tXQBW7DqAzx4Vrus",
+      "state_code": "AN",
+      "name": "Nicobars"
+    },
+    {
+      "code": "xzg3tXQBW7DqAzx4Vrut",
+      "state_code": "AN",
+      "name": "North And Middle Andaman"
+    },
+    {
+      "code": "djg3tXQBW7DqAzx4Vrus",
+      "state_code": "AN",
+      "name": "South Andamans"
+    },
+    {
+      "code": "kPtyHYABE0OKm-I4FaeT",
+      "state_code": "AP",
+      "name": "Alluri Sitharama Raju"
+    },
+    {
+      "code": "lPt0HYABE0OKm-I4dae0",
+      "state_code": "AP",
+      "name": "Anakapalli"
+    },
+    {
+      "code": "4Dg3tXQBW7DqAzx4Vryt",
+      "state_code": "AP",
+      "name": "Ananthapuramu"
+    },
+    {
+      "code": "kvtzHYABE0OKm-I4s6cP",
+      "state_code": "AP",
+      "name": "Annamayya"
+    },
+    {
+      "code": "oQV1HYABkVu6g5kHHJks",
+      "state_code": "AP",
+      "name": "Bapatla"
+    },
+    {
+      "code": "4zg3tXQBW7DqAzx4Vryt",
+      "state_code": "AP",
+      "name": "Chittoor"
+    },
+    {
+      "code": "pQV3HYABkVu6g5kH8plR",
+      "state_code": "AP",
+      "name": "Dr. B.R. Ambedkar Konaseema"
+    },
+    {
+      "code": "Hjg3tXQBW7DqAzx4Vr2t",
+      "state_code": "AP",
+      "name": "East Godavari"
+    },
+    {
+      "code": "ogV2HYABkVu6g5kHZpkt",
+      "state_code": "AP",
+      "name": "Eluru"
+    },
+    {
+      "code": "5Tg3tXQBW7DqAzx4Vryt",
+      "state_code": "AP",
+      "name": "Guntur"
+    },
+    {
+      "code": "lvt3HYABE0OKm-I4CKex",
+      "state_code": "AP",
+      "name": "Kakinada"
+    },
+    {
+      "code": "Ozg3tXQBW7DqAzx4Vryt",
+      "state_code": "AP",
+      "name": "Krishna"
+    },
+    {
+      "code": "xzg3tXQBW7DqAzx4Vryt",
+      "state_code": "AP",
+      "name": "Kurnool"
+    },
+    {
+      "code": "ZzAF2ZsB15Llg5ed7TZt",
+      "state_code": "AP",
+      "name": "Markapuram Sub Districts"
+    },
+    {
+      "code": "pwV5HYABkVu6g5kHRpnL",
+      "state_code": "AP",
+      "name": "Nandyal"
+    },
+    {
+      "code": "qQV6HYABkVu6g5kHD5mx",
+      "state_code": "AP",
+      "name": "Ntr"
+    },
+    {
+      "code": "qgV6HYABkVu6g5kH_Zkj",
+      "state_code": "AP",
+      "name": "Palnadu"
+    },
+    {
+      "code": "rAV8HYABkVu6g5kHzZns",
+      "state_code": "AP",
+      "name": "Parvathipuram Manyam"
+    },
+    {
+      "code": "aDAF2ZsB15Llg5ed7Ta-",
+      "state_code": "AP",
+      "name": "Polavaram Sub Districts"
+    },
+    {
+      "code": "Jzg3tXQBW7DqAzx4Vryt",
+      "state_code": "AP",
+      "name": "Prakasam"
+    },
+    {
+      "code": "5jg3tXQBW7DqAzx4Vryt",
+      "state_code": "AP",
+      "name": "Sri Potti Sriramulu Nellore"
+    },
+    {
+      "code": "rQV-HYABkVu6g5kHepnx",
+      "state_code": "AP",
+      "name": "Sri Sathya Sai"
+    },
+    {
+      "code": "dDg3tXQBW7DqAzx4Vrus",
+      "state_code": "AP",
+      "name": "Srikakulam"
+    },
+    {
+      "code": "mvt_HYABE0OKm-I48aeR",
+      "state_code": "AP",
+      "name": "Tirupati"
+    },
+    {
+      "code": "cTg3tXQBW7DqAzx4Vrus",
+      "state_code": "AP",
+      "name": "Visakhapatnam"
+    },
+    {
+      "code": "xTg3tXQBW7DqAzx4Vrqs",
+      "state_code": "AP",
+      "name": "Vizianagaram"
+    },
+    {
+      "code": "aTg3tXQBW7DqAzx4Vryt",
+      "state_code": "AP",
+      "name": "West Godavari"
+    },
+    {
+      "code": "aDg3tXQBW7DqAzx4Vryt",
+      "state_code": "AP",
+      "name": "Y.S.R. Kadapa"
+    },
+    {
+      "code": "kzg3tXQBW7DqAzx4Vrus",
+      "state_code": "AR",
+      "name": "Anjaw"
+    },
+    {
+      "code": "mav7UpQB15Llg5edjlym",
+      "state_code": "AR",
+      "name": "Bichom Sub Districts"
+    },
+    {
+      "code": "wDg3tXQBW7DqAzx4Vrut",
+      "state_code": "AR",
+      "name": "Changlang"
+    },
+    {
+      "code": "Hzg3tXQBW7DqAzx4Vr2t",
+      "state_code": "AR",
+      "name": "Dibang Valley"
+    },
+    {
+      "code": "qTg3tXQBW7DqAzx4Vryt",
+      "state_code": "AR",
+      "name": "East Kameng"
+    },
+    {
+      "code": "qjg3tXQBW7DqAzx4Vryt",
+      "state_code": "AR",
+      "name": "East Siang"
+    },
+    {
+      "code": "czg3tXQBW7DqAzx4Vr2t",
+      "state_code": "AR",
+      "name": "Kamle Sub Districts"
+    },
+    {
+      "code": "mqv7UpQB15Llg5edj1we",
+      "state_code": "AR",
+      "name": "Keyi Panyor Sub Districts"
+    },
+    {
+      "code": "Jzg3tXQBW7DqAzx4Vr2t",
+      "state_code": "AR",
+      "name": "Kra Daadi"
+    },
+    {
+      "code": "IDg3tXQBW7DqAzx4Vr2t",
+      "state_code": "AR",
+      "name": "Kurung Kumey"
+    },
+    {
+      "code": "cTg3tXQBW7DqAzx4Vr2t",
+      "state_code": "AR",
+      "name": "Leparada Sub Districts"
+    },
+    {
+      "code": "2Tg3tXQBW7DqAzx4Vrqs",
+      "state_code": "AR",
+      "name": "Lohit"
+    },
+    {
+      "code": "_jg3tXQBW7DqAzx4Vryt",
+      "state_code": "AR",
+      "name": "Longding"
+    },
+    {
+      "code": "qzg3tXQBW7DqAzx4Vryt",
+      "state_code": "AR",
+      "name": "Lower Dibang Valley"
+    },
+    {
+      "code": "djg3tXQBW7DqAzx4Vr2t",
+      "state_code": "AR",
+      "name": "Lower Siang Sub Districts"
+    },
+    {
+      "code": "rDg3tXQBW7DqAzx4Vryt",
+      "state_code": "AR",
+      "name": "Lower Subansiri"
+    },
+    {
+      "code": "_zg3tXQBW7DqAzx4Vryt",
+      "state_code": "AR",
+      "name": "Namsai"
+    },
+    {
+      "code": "cDg3tXQBW7DqAzx4Vr2t",
+      "state_code": "AR",
+      "name": "Pakke Kessang Sub Districts"
+    },
+    {
+      "code": "ITg3tXQBW7DqAzx4Vr2t",
+      "state_code": "AR",
+      "name": "Papum Pare"
+    },
+    {
+      "code": "cjg3tXQBW7DqAzx4Vr2t",
+      "state_code": "AR",
+      "name": "Shi Yomi"
+    },
+    {
+      "code": "ZTg3tXQBW7DqAzx4Vr2t",
+      "state_code": "AR",
+      "name": "Siang"
+    },
+    {
+      "code": "Izg3tXQBW7DqAzx4Vr2t",
+      "state_code": "AR",
+      "name": "Tawang"
+    },
+    {
+      "code": "XTg3tXQBW7DqAzx4Vrus",
+      "state_code": "AR",
+      "name": "Tirap"
+    },
+    {
+      "code": "fjg3tXQBW7DqAzx4Vryt",
+      "state_code": "AR",
+      "name": "Upper Siang"
+    },
+    {
+      "code": "njg3tXQBW7DqAzx4Vrus",
+      "state_code": "AR",
+      "name": "Upper Subansiri"
+    },
+    {
+      "code": "JDg3tXQBW7DqAzx4Vr2t",
+      "state_code": "AR",
+      "name": "West Kameng"
+    },
+    {
+      "code": "Ijg3tXQBW7DqAzx4Vr2t",
+      "state_code": "AR",
+      "name": "West Siang"
+    },
+    {
+      "code": "NgXPjIoBF92NGf8XbNt8",
+      "state_code": "AS",
+      "name": "Bajali"
+    },
+    {
+      "code": "LTg3tXQBW7DqAzx4Vryt",
+      "state_code": "AS",
+      "name": "Baksa"
+    },
+    {
+      "code": "g76-uIsBC8DLsKxJhFEY",
+      "state_code": "AS",
+      "name": "Barpeta"
+    },
+    {
+      "code": "YKNEInUBxrox_Nfi_3yz",
+      "state_code": "AS",
+      "name": "Biswanath"
+    },
+    {
+      "code": "zjg3tXQBW7DqAzx4Vryt",
+      "state_code": "AS",
+      "name": "Bongaigaon"
+    },
+    {
+      "code": "kjg3tXQBW7DqAzx4Vrus",
+      "state_code": "AS",
+      "name": "Cachar"
+    },
+    {
+      "code": "6jg3tXQBW7DqAzx4Vryt",
+      "state_code": "AS",
+      "name": "Charaideo"
+    },
+    {
+      "code": "Nzg3tXQBW7DqAzx4Vryt",
+      "state_code": "AS",
+      "name": "Chirang"
+    },
+    {
+      "code": "hDg3tXQBW7DqAzx4Vryt",
+      "state_code": "AS",
+      "name": "Darrang"
+    },
+    {
+      "code": "hTg3tXQBW7DqAzx4Vryt",
+      "state_code": "AS",
+      "name": "Dhemaji"
+    },
+    {
+      "code": "hjg3tXQBW7DqAzx4Vryt",
+      "state_code": "AS",
+      "name": "Dhubri"
+    },
+    {
+      "code": "hzg3tXQBW7DqAzx4Vryt",
+      "state_code": "AS",
+      "name": "Dibrugarh"
+    },
+    {
+      "code": "jzg3tXQBW7DqAzx4Vryt",
+      "state_code": "AS",
+      "name": "Dima Hasao"
+    },
+    {
+      "code": "iDg3tXQBW7DqAzx4Vryt",
+      "state_code": "AS",
+      "name": "Goalpara"
+    },
+    {
+      "code": "Ljg3tXQBW7DqAzx4Vryt",
+      "state_code": "AS",
+      "name": "Golaghat"
+    },
+    {
+      "code": "Rzg3tXQBW7DqAzx4Vryt",
+      "state_code": "AS",
+      "name": "Hailakandi"
+    },
+    {
+      "code": "1b6-uIsBC8DLsKxJv1G1",
+      "state_code": "AS",
+      "name": "Hojai"
+    },
+    {
+      "code": "gTg3tXQBW7DqAzx4Vryt",
+      "state_code": "AS",
+      "name": "Jorhat"
+    },
+    {
+      "code": "iTg3tXQBW7DqAzx4Vryt",
+      "state_code": "AS",
+      "name": "Kamrup"
+    },
+    {
+      "code": "vnuZcYgB2SjI4rfpoZGf",
+      "state_code": "AS",
+      "name": "Kamrup Metro"
+    },
+    {
+      "code": "6r6-uIsBC8DLsKxJ1lG7",
+      "state_code": "AS",
+      "name": "Karbi Anglong"
+    },
+    {
+      "code": "uTg3tXQBW7DqAzx4Vrqs",
+      "state_code": "AS",
+      "name": "Kokrajhar"
+    },
+    {
+      "code": "izg3tXQBW7DqAzx4Vryt",
+      "state_code": "AS",
+      "name": "Lakhimpur"
+    },
+    {
+      "code": "qDg3tXQBW7DqAzx4Vrut",
+      "state_code": "AS",
+      "name": "Majuli"
+    },
+    {
+      "code": "kzg3tXQBW7DqAzx4Vryt",
+      "state_code": "AS",
+      "name": "Marigaon"
+    },
+    {
+      "code": "jDg3tXQBW7DqAzx4Vryt",
+      "state_code": "AS",
+      "name": "Nagaon"
+    },
+    {
+      "code": "3zg3tXQBW7DqAzx4Vrut",
+      "state_code": "AS",
+      "name": "Nalbari"
+    },
+    {
+      "code": "Qzg3tXQBW7DqAzx4Vryt",
+      "state_code": "AS",
+      "name": "Sivasagar"
+    },
+    {
+      "code": "jTg3tXQBW7DqAzx4Vryt",
+      "state_code": "AS",
+      "name": "Sonitpur"
+    },
+    {
+      "code": "dTg3tXQBW7DqAzx4Vr2t",
+      "state_code": "AS",
+      "name": "South Salmara Mancachar"
+    },
+    {
+      "code": "gjg3tXQBW7DqAzx4Vryt",
+      "state_code": "AS",
+      "name": "Sribhumi"
+    },
+    {
+      "code": "u8eEPYwBC8DLsKxJZ2wi",
+      "state_code": "AS",
+      "name": "Tamulpur Sub Districts"
+    },
+    {
+      "code": "jjg3tXQBW7DqAzx4Vryt",
+      "state_code": "AS",
+      "name": "Tinsukia"
+    },
+    {
+      "code": "wTg3tXQBW7DqAzx4Vrut",
+      "state_code": "AS",
+      "name": "Udalguri"
+    },
+    {
+      "code": "dDg3tXQBW7DqAzx4Vr2t",
+      "state_code": "AS",
+      "name": "West Karbi Anglong"
+    },
+    {
+      "code": "qjg3tXQBW7DqAzx4Vrut",
+      "state_code": "BR",
+      "name": "Araria"
+    },
+    {
+      "code": "xDg3tXQBW7DqAzx4Vrqs",
+      "state_code": "BR",
+      "name": "Arwal"
+    },
+    {
+      "code": "dL6-uIsBC8DLsKxJelF0",
+      "state_code": "BR",
+      "name": "Aurangabad"
+    },
+    {
+      "code": "uzg3tXQBW7DqAzx4Vrut",
+      "state_code": "BR",
+      "name": "Banka"
+    },
+    {
+      "code": "tjg3tXQBW7DqAzx4Vrqs",
+      "state_code": "BR",
+      "name": "Begusarai"
+    },
+    {
+      "code": "JTg3tXQBW7DqAzx4Vr2t",
+      "state_code": "BR",
+      "name": "Bhagalpur"
+    },
+    {
+      "code": "Jjg3tXQBW7DqAzx4Vr2t",
+      "state_code": "BR",
+      "name": "Bhojpur"
+    },
+    {
+      "code": "tjg3tXQBW7DqAzx4Vrut",
+      "state_code": "BR",
+      "name": "Buxar"
+    },
+    {
+      "code": "1Tg3tXQBW7DqAzx4Vrqs",
+      "state_code": "BR",
+      "name": "Darbhanga"
+    },
+    {
+      "code": "ujg3tXQBW7DqAzx4Vrqs",
+      "state_code": "BR",
+      "name": "Gaya"
+    },
+    {
+      "code": "uzg3tXQBW7DqAzx4Vrqs",
+      "state_code": "BR",
+      "name": "Gopalganj"
+    },
+    {
+      "code": "zTg3tXQBW7DqAzx4Vrqs",
+      "state_code": "BR",
+      "name": "Jamui"
+    },
+    {
+      "code": "Bjg3tXQBW7DqAzx4Vr2t",
+      "state_code": "BR",
+      "name": "Jehanabad"
+    },
+    {
+      "code": "rzg3tXQBW7DqAzx4Vrut",
+      "state_code": "BR",
+      "name": "Kaimur (Bhabua)"
+    },
+    {
+      "code": "DDg3tXQBW7DqAzx4Vr2t",
+      "state_code": "BR",
+      "name": "Katihar"
+    },
+    {
+      "code": "vDg3tXQBW7DqAzx4Vrqs",
+      "state_code": "BR",
+      "name": "Khagaria"
+    },
+    {
+      "code": "zjg3tXQBW7DqAzx4Vrqs",
+      "state_code": "BR",
+      "name": "Kishanganj"
+    },
+    {
+      "code": "zzg3tXQBW7DqAzx4Vrqs",
+      "state_code": "BR",
+      "name": "Lakhisarai"
+    },
+    {
+      "code": "DTg3tXQBW7DqAzx4Vr2t",
+      "state_code": "BR",
+      "name": "Madhepura"
+    },
+    {
+      "code": "1Dg3tXQBW7DqAzx4Vrqs",
+      "state_code": "BR",
+      "name": "Madhubani"
+    },
+    {
+      "code": "Xjg3tXQBW7DqAzx4Vrus",
+      "state_code": "BR",
+      "name": "Munger"
+    },
+    {
+      "code": "yDg3tXQBW7DqAzx4Vryt",
+      "state_code": "BR",
+      "name": "Muzaffarpur"
+    },
+    {
+      "code": "0Dg3tXQBW7DqAzx4Vrqs",
+      "state_code": "BR",
+      "name": "Nalanda"
+    },
+    {
+      "code": "sjg3tXQBW7DqAzx4Vrut",
+      "state_code": "BR",
+      "name": "Nawada"
+    },
+    {
+      "code": "vTg3tXQBW7DqAzx4Vrqs",
+      "state_code": "BR",
+      "name": "Pashchim Champaran"
+    },
+    {
+      "code": "tDg3tXQBW7DqAzx4Vrut",
+      "state_code": "BR",
+      "name": "Patna"
+    },
+    {
+      "code": "1jg3tXQBW7DqAzx4Vrqs",
+      "state_code": "BR",
+      "name": "Purbi Champaran"
+    },
+    {
+      "code": "bDg3tXQBW7DqAzx4Vrus",
+      "state_code": "BR",
+      "name": "Purnia"
+    },
+    {
+      "code": "yTg3tXQBW7DqAzx4Vryt",
+      "state_code": "BR",
+      "name": "Rohtas"
+    },
+    {
+      "code": "tzg3tXQBW7DqAzx4Vrut",
+      "state_code": "BR",
+      "name": "Saharsa"
+    },
+    {
+      "code": "0Tg3tXQBW7DqAzx4Vrqs",
+      "state_code": "BR",
+      "name": "Samastipur"
+    },
+    {
+      "code": "_Dg3tXQBW7DqAzx4Vryt",
+      "state_code": "BR",
+      "name": "Saran"
+    },
+    {
+      "code": "0jg3tXQBW7DqAzx4Vrqs",
+      "state_code": "BR",
+      "name": "Sheikhpura"
+    },
+    {
+      "code": "KDg3tXQBW7DqAzx4Vr2t",
+      "state_code": "BR",
+      "name": "Sheohar"
+    },
+    {
+      "code": "-zg3tXQBW7DqAzx4Vrut",
+      "state_code": "BR",
+      "name": "Sitamarhi"
+    },
+    {
+      "code": "pjg3tXQBW7DqAzx4Vrut",
+      "state_code": "BR",
+      "name": "Siwan"
+    },
+    {
+      "code": "sjg3tXQBW7DqAzx4Vrqs",
+      "state_code": "BR",
+      "name": "Supaul"
+    },
+    {
+      "code": "0zg3tXQBW7DqAzx4Vrqs",
+      "state_code": "BR",
+      "name": "Vaishali"
+    },
+    {
+      "code": "Azg3tXQBW7DqAzx4Vryt",
+      "state_code": "CG",
+      "name": "Balod"
+    },
+    {
+      "code": "_jg3tXQBW7DqAzx4Vrut",
+      "state_code": "CG",
+      "name": "Balodabazar-Bhatapara"
+    },
+    {
+      "code": "Kzg3tXQBW7DqAzx4Vr2t",
+      "state_code": "CG",
+      "name": "Balrampur-Ramanujganj"
+    },
+    {
+      "code": "LDg3tXQBW7DqAzx4Vryt",
+      "state_code": "CG",
+      "name": "Bastar"
+    },
+    {
+      "code": "LDg3tXQBW7DqAzx4Vr2t",
+      "state_code": "CG",
+      "name": "Bemetara"
+    },
+    {
+      "code": "szg3tXQBW7DqAzx4Vrut",
+      "state_code": "CG",
+      "name": "Bijapur"
+    },
+    {
+      "code": "LTg3tXQBW7DqAzx4Vr2t",
+      "state_code": "CG",
+      "name": "Bilaspur"
+    },
+    {
+      "code": "oDg3tXQBW7DqAzx4Vrus",
+      "state_code": "CG",
+      "name": "Dakshin Bastar Dantewada"
+    },
+    {
+      "code": "Szg3tXQBW7DqAzx4Vryt",
+      "state_code": "CG",
+      "name": "Dhamtari"
+    },
+    {
+      "code": "sDg3tXQBW7DqAzx4Vrut",
+      "state_code": "CG",
+      "name": "Durg"
+    },
+    {
+      "code": "_Tg3tXQBW7DqAzx4Vrut",
+      "state_code": "CG",
+      "name": "Gariyaband"
+    },
+    {
+      "code": "r3uOcYgB2SjI4rfpAJGX",
+      "state_code": "CG",
+      "name": "Gaurela-Pendra-Marwahi"
+    },
+    {
+      "code": "TDg3tXQBW7DqAzx4Vryt",
+      "state_code": "CG",
+      "name": "Janjgir-Champa"
+    },
+    {
+      "code": "Sjg3tXQBW7DqAzx4Vryt",
+      "state_code": "CG",
+      "name": "Jashpur"
+    },
+    {
+      "code": "Ljg3tXQBW7DqAzx4Vr2t",
+      "state_code": "CG",
+      "name": "Kabeerdham"
+    },
+    {
+      "code": "sXuOcYgB2SjI4rfp6JHE",
+      "state_code": "CG",
+      "name": "Khairagarh-Chhuikhadan-Gandai Sub Districts"
+    },
+    {
+      "code": "Ajg3tXQBW7DqAzx4Vryt",
+      "state_code": "CG",
+      "name": "Kondagaon"
+    },
+    {
+      "code": "976-uIsBC8DLsKxJ41HJ",
+      "state_code": "CG",
+      "name": "Korba"
+    },
+    {
+      "code": "Tjg3tXQBW7DqAzx4Vryt",
+      "state_code": "CG",
+      "name": "Korea"
+    },
+    {
+      "code": "Tzg3tXQBW7DqAzx4Vryt",
+      "state_code": "CG",
+      "name": "Mahasamund"
+    },
+    {
+      "code": "s3uPcYgB2SjI4rfplJHq",
+      "state_code": "CG",
+      "name": "Manendragarh-Chirmiri-Bharatpur(M C B) Sub Districts"
+    },
+    {
+      "code": "hwWUcYgBF92NGf8XIsYx",
+      "state_code": "CG",
+      "name": "Mohla-Manpur-Ambagarh Chouki"
+    },
+    {
+      "code": "MDg3tXQBW7DqAzx4Vr2t",
+      "state_code": "CG",
+      "name": "Mungeli"
+    },
+    {
+      "code": "0jg3tXQBW7DqAzx4Vryt",
+      "state_code": "CG",
+      "name": "Narayanpur"
+    },
+    {
+      "code": "UDg3tXQBW7DqAzx4Vryt",
+      "state_code": "CG",
+      "name": "Raigarh"
+    },
+    {
+      "code": "UTg3tXQBW7DqAzx4Vryt",
+      "state_code": "CG",
+      "name": "Raipur"
+    },
+    {
+      "code": "Ujg3tXQBW7DqAzx4Vryt",
+      "state_code": "CG",
+      "name": "Rajnandgaon"
+    },
+    {
+      "code": "hQWTcYgBF92NGf8Xe8YX",
+      "state_code": "CG",
+      "name": "Sakti Sub Districts"
+    },
+    {
+      "code": "tHuQcYgB2SjI4rfpOpGh",
+      "state_code": "CG",
+      "name": "Sarangarh-Bilaigarh Sub Districts"
+    },
+    {
+      "code": "_Dg3tXQBW7DqAzx4Vrut",
+      "state_code": "CG",
+      "name": "Sukma"
+    },
+    {
+      "code": "Xzg3tXQBW7DqAzx4Vryt",
+      "state_code": "CG",
+      "name": "Surajpur"
+    },
+    {
+      "code": "Uzg3tXQBW7DqAzx4Vryt",
+      "state_code": "CG",
+      "name": "Surguja"
+    },
+    {
+      "code": "TTg3tXQBW7DqAzx4Vryt",
+      "state_code": "CG",
+      "name": "Uttar Bastar Kanker"
+    },
+    {
+      "code": "Zjg3tXQBW7DqAzx4Vr2t",
+      "state_code": "CH",
+      "name": "Chandigarh"
+    },
+    {
+      "code": "tzg3tXQBW7DqAzx4Vrqs",
+      "state_code": "DL",
+      "name": "Central"
+    },
+    {
+      "code": "gGGq2J0Bzqy4jgdFIcgu",
+      "state_code": "DL",
+      "name": "Central North Sub Districts"
+    },
+    {
+      "code": "4zg3tXQBW7DqAzx4Vrut",
+      "state_code": "DL",
+      "name": "East"
+    },
+    {
+      "code": "2zg3tXQBW7DqAzx4Vrut",
+      "state_code": "DL",
+      "name": "New Delhi"
+    },
+    {
+      "code": "3Tg3tXQBW7DqAzx4Vrut",
+      "state_code": "DL",
+      "name": "North"
+    },
+    {
+      "code": "3jg3tXQBW7DqAzx4Vrut",
+      "state_code": "DL",
+      "name": "North East"
+    },
+    {
+      "code": "4Dg3tXQBW7DqAzx4Vrut",
+      "state_code": "DL",
+      "name": "North West"
+    },
+    {
+      "code": "gWGq2J0Bzqy4jgdFIchv",
+      "state_code": "DL",
+      "name": "Old Delhi Sub Districts"
+    },
+    {
+      "code": "hGGq2J0Bzqy4jgdFIcig",
+      "state_code": "DL",
+      "name": "Outer North Sub Districts"
+    },
+    {
+      "code": "1jg3tXQBW7DqAzx4Vrut",
+      "state_code": "DL",
+      "name": "South"
+    },
+    {
+      "code": "4jg3tXQBW7DqAzx4Vrut",
+      "state_code": "DL",
+      "name": "South East"
+    },
+    {
+      "code": "1zg3tXQBW7DqAzx4Vrut",
+      "state_code": "DL",
+      "name": "South West"
+    },
+    {
+      "code": "lL6_uIsBC8DLsKxJVlJ9",
+      "state_code": "DL",
+      "name": "West"
+    },
+    {
+      "code": "3ch56JsBzqy4jgdFAyLz",
+      "state_code": "GA",
+      "name": "Kushavati Sub Districts"
+    },
+    {
+      "code": "iDg3tXQBW7DqAzx4Vrus",
+      "state_code": "GA",
+      "name": "North Goa"
+    },
+    {
+      "code": "izg3tXQBW7DqAzx4Vrus",
+      "state_code": "GA",
+      "name": "South Goa"
+    },
+    {
+      "code": "azg3tXQBW7DqAzx4Vrus",
+      "state_code": "GJ",
+      "name": "Ahmedabad"
+    },
+    {
+      "code": "bTg3tXQBW7DqAzx4Vrus",
+      "state_code": "GJ",
+      "name": "Amreli"
+    },
+    {
+      "code": "cjg3tXQBW7DqAzx4Vrus",
+      "state_code": "GJ",
+      "name": "Anand"
+    },
+    {
+      "code": "7zg3tXQBW7DqAzx4Vryt",
+      "state_code": "GJ",
+      "name": "Arvalli"
+    },
+    {
+      "code": "6Tg3tXQBW7DqAzx4Vrut",
+      "state_code": "GJ",
+      "name": "Banas Kantha"
+    },
+    {
+      "code": "xTg3tXQBW7DqAzx4Vrut",
+      "state_code": "GJ",
+      "name": "Bharuch"
+    },
+    {
+      "code": "6Dg3tXQBW7DqAzx4Vrut",
+      "state_code": "GJ",
+      "name": "Bhavnagar"
+    },
+    {
+      "code": "Cjg3tXQBW7DqAzx4Vryt",
+      "state_code": "GJ",
+      "name": "Botad"
+    },
+    {
+      "code": "DDg3tXQBW7DqAzx4Vryt",
+      "state_code": "GJ",
+      "name": "Chhotaudepur"
+    },
+    {
+      "code": "6jg3tXQBW7DqAzx4Vrut",
+      "state_code": "GJ",
+      "name": "Dahod"
+    },
+    {
+      "code": "hDg3tXQBW7DqAzx4Vrus",
+      "state_code": "GJ",
+      "name": "Dangs"
+    },
+    {
+      "code": "Czg3tXQBW7DqAzx4Vryt",
+      "state_code": "GJ",
+      "name": "Devbhumi Dwarka"
+    },
+    {
+      "code": "6zg3tXQBW7DqAzx4Vrut",
+      "state_code": "GJ",
+      "name": "Gandhinagar"
+    },
+    {
+      "code": "DTg3tXQBW7DqAzx4Vryt",
+      "state_code": "GJ",
+      "name": "Gir Somnath"
+    },
+    {
+      "code": "tTg3tXQBW7DqAzx4Vrqs",
+      "state_code": "GJ",
+      "name": "Jamnagar"
+    },
+    {
+      "code": "Lzg3tXQBW7DqAzx4Vryt",
+      "state_code": "GJ",
+      "name": "Junagadh"
+    },
+    {
+      "code": "qTg3tXQBW7DqAzx4Vrqs",
+      "state_code": "GJ",
+      "name": "Kachchh"
+    },
+    {
+      "code": "7Dg3tXQBW7DqAzx4Vrut",
+      "state_code": "GJ",
+      "name": "Kheda"
+    },
+    {
+      "code": "7Tg3tXQBW7DqAzx4Vrut",
+      "state_code": "GJ",
+      "name": "Mahesana"
+    },
+    {
+      "code": "Djg3tXQBW7DqAzx4Vryt",
+      "state_code": "GJ",
+      "name": "Mahisagar"
+    },
+    {
+      "code": "EDg3tXQBW7DqAzx4Vryt",
+      "state_code": "GJ",
+      "name": "Morbi"
+    },
+    {
+      "code": "hTg3tXQBW7DqAzx4Vrus",
+      "state_code": "GJ",
+      "name": "Narmada"
+    },
+    {
+      "code": "2jg3tXQBW7DqAzx4Vrut",
+      "state_code": "GJ",
+      "name": "Navsari"
+    },
+    {
+      "code": "Mjg3tXQBW7DqAzx4Vryt",
+      "state_code": "GJ",
+      "name": "Panch Mahals"
+    },
+    {
+      "code": "MTg3tXQBW7DqAzx4Vr2t",
+      "state_code": "GJ",
+      "name": "Patan"
+    },
+    {
+      "code": "7jg3tXQBW7DqAzx4Vrut",
+      "state_code": "GJ",
+      "name": "Porbandar"
+    },
+    {
+      "code": "7zg3tXQBW7DqAzx4Vrut",
+      "state_code": "GJ",
+      "name": "Rajkot"
+    },
+    {
+      "code": "8Dg3tXQBW7DqAzx4Vrut",
+      "state_code": "GJ",
+      "name": "Sabar Kantha"
+    },
+    {
+      "code": "8Tg3tXQBW7DqAzx4Vrut",
+      "state_code": "GJ",
+      "name": "Surat"
+    },
+    {
+      "code": "8jg3tXQBW7DqAzx4Vrut",
+      "state_code": "GJ",
+      "name": "Surendranagar"
+    },
+    {
+      "code": "Dzg3tXQBW7DqAzx4Vryt",
+      "state_code": "GJ",
+      "name": "Tapi"
+    },
+    {
+      "code": "9Dg3tXQBW7DqAzx4Vrut",
+      "state_code": "GJ",
+      "name": "Vadodara"
+    },
+    {
+      "code": "8zg3tXQBW7DqAzx4Vrut",
+      "state_code": "GJ",
+      "name": "Valsad"
+    },
+    {
+      "code": "vLg7zZoB15Llg5edQ9ua",
+      "state_code": "GJ",
+      "name": "Vav-Tharad Sub Districts"
+    },
+    {
+      "code": "MTg3tXQBW7DqAzx4Vrus",
+      "state_code": "HP",
+      "name": "Bilaspur"
+    },
+    {
+      "code": "NTg3tXQBW7DqAzx4Vr2t",
+      "state_code": "HP",
+      "name": "Chamba"
+    },
+    {
+      "code": "0L6-uIsBC8DLsKxJu1Eo",
+      "state_code": "HP",
+      "name": "Hamirpur"
+    },
+    {
+      "code": "Njg3tXQBW7DqAzx4Vr2t",
+      "state_code": "HP",
+      "name": "Kangra"
+    },
+    {
+      "code": "Vzg3tXQBW7DqAzx4Vrus",
+      "state_code": "HP",
+      "name": "Kinnaur"
+    },
+    {
+      "code": "ZDg3tXQBW7DqAzx4Vrus",
+      "state_code": "HP",
+      "name": "Kullu"
+    },
+    {
+      "code": "4Tg3tXQBW7DqAzx4Vrut",
+      "state_code": "HP",
+      "name": "Lahaul And Spiti"
+    },
+    {
+      "code": "ZTg3tXQBW7DqAzx4Vrus",
+      "state_code": "HP",
+      "name": "Mandi"
+    },
+    {
+      "code": "UDg3tXQBW7DqAzx4Vrus",
+      "state_code": "HP",
+      "name": "Shimla"
+    },
+    {
+      "code": "Mjg3tXQBW7DqAzx4Vrus",
+      "state_code": "HP",
+      "name": "Sirmaur"
+    },
+    {
+      "code": "Zjg3tXQBW7DqAzx4Vrus",
+      "state_code": "HP",
+      "name": "Solan"
+    },
+    {
+      "code": "Nzg3tXQBW7DqAzx4Vr2t",
+      "state_code": "HP",
+      "name": "Una"
+    },
+    {
+      "code": "Mjg3tXQBW7DqAzx4Vr2t",
+      "state_code": "HR",
+      "name": "Ambala"
+    },
+    {
+      "code": "dzg3tXQBW7DqAzx4Vrus",
+      "state_code": "HR",
+      "name": "Bhiwani"
+    },
+    {
+      "code": "Kjg3tXQBW7DqAzx4Vr2t",
+      "state_code": "HR",
+      "name": "Charkhi Dadri"
+    },
+    {
+      "code": "cDg3tXQBW7DqAzx4Vryt",
+      "state_code": "HR",
+      "name": "Faridabad"
+    },
+    {
+      "code": "eDg3tXQBW7DqAzx4Vrus",
+      "state_code": "HR",
+      "name": "Fatehabad"
+    },
+    {
+      "code": "-jg3tXQBW7DqAzx4Vryt",
+      "state_code": "HR",
+      "name": "Gurugram"
+    },
+    {
+      "code": "eTIs3psB15Llg5edStgf",
+      "state_code": "HR",
+      "name": "Hansi Sub Districts"
+    },
+    {
+      "code": "eTg3tXQBW7DqAzx4Vrus",
+      "state_code": "HR",
+      "name": "Hisar"
+    },
+    {
+      "code": "lDg3tXQBW7DqAzx4Vryt",
+      "state_code": "HR",
+      "name": "Jhajjar"
+    },
+    {
+      "code": "ejg3tXQBW7DqAzx4Vrus",
+      "state_code": "HR",
+      "name": "Jind"
+    },
+    {
+      "code": "ezg3tXQBW7DqAzx4Vrus",
+      "state_code": "HR",
+      "name": "Kaithal"
+    },
+    {
+      "code": "fDg3tXQBW7DqAzx4Vrus",
+      "state_code": "HR",
+      "name": "Karnal"
+    },
+    {
+      "code": "fTg3tXQBW7DqAzx4Vrus",
+      "state_code": "HR",
+      "name": "Kurukshetra"
+    },
+    {
+      "code": "3Dg3tXQBW7DqAzx4Vrqs",
+      "state_code": "HR",
+      "name": "Mahendragarh"
+    },
+    {
+      "code": "Bzg3tXQBW7DqAzx4Vr2t",
+      "state_code": "HR",
+      "name": "Nuh"
+    },
+    {
+      "code": "Mzg3tXQBW7DqAzx4Vr2t",
+      "state_code": "HR",
+      "name": "Palwal"
+    },
+    {
+      "code": "lTg3tXQBW7DqAzx4Vryt",
+      "state_code": "HR",
+      "name": "Panchkula"
+    },
+    {
+      "code": "ljg3tXQBW7DqAzx4Vryt",
+      "state_code": "HR",
+      "name": "Panipat"
+    },
+    {
+      "code": "fjg3tXQBW7DqAzx4Vrus",
+      "state_code": "HR",
+      "name": "Rewari"
+    },
+    {
+      "code": "lzg3tXQBW7DqAzx4Vryt",
+      "state_code": "HR",
+      "name": "Rohtak"
+    },
+    {
+      "code": "fzg3tXQBW7DqAzx4Vrus",
+      "state_code": "HR",
+      "name": "Sirsa"
+    },
+    {
+      "code": "NDg3tXQBW7DqAzx4Vr2t",
+      "state_code": "HR",
+      "name": "Sonipat"
+    },
+    {
+      "code": "1zg3tXQBW7DqAzx4Vrqs",
+      "state_code": "HR",
+      "name": "Yamunanagar"
+    },
+    {
+      "code": "wTg3tXQBW7DqAzx4Vrqs",
+      "state_code": "JH",
+      "name": "Bokaro"
+    },
+    {
+      "code": "ujg3tXQBW7DqAzx4Vrut",
+      "state_code": "JH",
+      "name": "Chatra"
+    },
+    {
+      "code": "OTg3tXQBW7DqAzx4Vr2t",
+      "state_code": "JH",
+      "name": "Deoghar"
+    },
+    {
+      "code": "rTg3tXQBW7DqAzx4Vryt",
+      "state_code": "JH",
+      "name": "Dhanbad"
+    },
+    {
+      "code": "5Tg3tXQBW7DqAzx4Vrut",
+      "state_code": "JH",
+      "name": "Dumka"
+    },
+    {
+      "code": "Ojg3tXQBW7DqAzx4Vr2t",
+      "state_code": "JH",
+      "name": "East Singhbum"
+    },
+    {
+      "code": "KTg3tXQBW7DqAzx4Vr2t",
+      "state_code": "JH",
+      "name": "Garhwa"
+    },
+    {
+      "code": "Yjg3tXQBW7DqAzx4Vryt",
+      "state_code": "JH",
+      "name": "Giridih"
+    },
+    {
+      "code": "Xzg3tXQBW7DqAzx4Vrus",
+      "state_code": "JH",
+      "name": "Godda"
+    },
+    {
+      "code": "rjg3tXQBW7DqAzx4Vryt",
+      "state_code": "JH",
+      "name": "Gumla"
+    },
+    {
+      "code": "bjg3tXQBW7DqAzx4Vrus",
+      "state_code": "JH",
+      "name": "Hazaribagh"
+    },
+    {
+      "code": "yjg3tXQBW7DqAzx4Vryt",
+      "state_code": "JH",
+      "name": "Jamtara"
+    },
+    {
+      "code": "zzg3tXQBW7DqAzx4Vryt",
+      "state_code": "JH",
+      "name": "Khunti"
+    },
+    {
+      "code": "Ozg3tXQBW7DqAzx4Vr2t",
+      "state_code": "JH",
+      "name": "Koderma"
+    },
+    {
+      "code": "bzg3tXQBW7DqAzx4Vrus",
+      "state_code": "JH",
+      "name": "Latehar"
+    },
+    {
+      "code": "cTg3tXQBW7DqAzx4Vryt",
+      "state_code": "JH",
+      "name": "Lohardaga"
+    },
+    {
+      "code": "Pb6_uIsBC8DLsKxJDVIy",
+      "state_code": "JH",
+      "name": "Pakur"
+    },
+    {
+      "code": "PDg3tXQBW7DqAzx4Vr2t",
+      "state_code": "JH",
+      "name": "Palamu"
+    },
+    {
+      "code": "3Tg3tXQBW7DqAzx4Vrqs",
+      "state_code": "JH",
+      "name": "Ramgarh"
+    },
+    {
+      "code": "BTg3tXQBW7DqAzx4Vr2t",
+      "state_code": "JH",
+      "name": "Ranchi"
+    },
+    {
+      "code": "QDg3tXQBW7DqAzx4Vryt",
+      "state_code": "JH",
+      "name": "Sahebganj"
+    },
+    {
+      "code": "Mzg3tXQBW7DqAzx4Vrus",
+      "state_code": "JH",
+      "name": "Saraikela Kharsawan"
+    },
+    {
+      "code": "PTg3tXQBW7DqAzx4Vr2t",
+      "state_code": "JH",
+      "name": "Simdega"
+    },
+    {
+      "code": "mDg3tXQBW7DqAzx4Vryt",
+      "state_code": "JH",
+      "name": "West Singhbhum"
+    },
+    {
+      "code": "TTg3tXQBW7DqAzx4Vrus",
+      "state_code": "JK",
+      "name": "Anantnag"
+    },
+    {
+      "code": "wjg3tXQBW7DqAzx4Vrqs",
+      "state_code": "JK",
+      "name": "Bandipora"
+    },
+    {
+      "code": "Mzg3tXQBW7DqAzx4Vryt",
+      "state_code": "JK",
+      "name": "Baramulla"
+    },
+    {
+      "code": "NDg3tXQBW7DqAzx4Vryt",
+      "state_code": "JK",
+      "name": "Budgam"
+    },
+    {
+      "code": "9Dg3tXQBW7DqAzx4Vryt",
+      "state_code": "JK",
+      "name": "Doda"
+    },
+    {
+      "code": "uDg3tXQBW7DqAzx4Vrqs",
+      "state_code": "JK",
+      "name": "Ganderbal"
+    },
+    {
+      "code": "zDg3tXQBW7DqAzx4Vrqs",
+      "state_code": "JK",
+      "name": "Jammu"
+    },
+    {
+      "code": "9jg3tXQBW7DqAzx4Vryt",
+      "state_code": "JK",
+      "name": "Kathua"
+    },
+    {
+      "code": "0Dg3tXQBW7DqAzx4Vryt",
+      "state_code": "JK",
+      "name": "Kishtwar"
+    },
+    {
+      "code": "3jg3tXQBW7DqAzx4Vrqs",
+      "state_code": "JK",
+      "name": "Kulgam"
+    },
+    {
+      "code": "Tjg3tXQBW7DqAzx4Vrus",
+      "state_code": "JK",
+      "name": "Kupwara"
+    },
+    {
+      "code": "gzg3tXQBW7DqAzx4Vryt",
+      "state_code": "JK",
+      "name": "Poonch"
+    },
+    {
+      "code": "ODg3tXQBW7DqAzx4Vr2t",
+      "state_code": "JK",
+      "name": "Pulwama"
+    },
+    {
+      "code": "jzg3tXQBW7DqAzx4Vrus",
+      "state_code": "JK",
+      "name": "Rajouri"
+    },
+    {
+      "code": "0zg3tXQBW7DqAzx4Vryt",
+      "state_code": "JK",
+      "name": "Ramban"
+    },
+    {
+      "code": "-Dg3tXQBW7DqAzx4Vryt",
+      "state_code": "JK",
+      "name": "Reasi"
+    },
+    {
+      "code": "kDg3tXQBW7DqAzx4Vrus",
+      "state_code": "JK",
+      "name": "Samba"
+    },
+    {
+      "code": "cDg3tXQBW7DqAzx4Vrus",
+      "state_code": "JK",
+      "name": "Shopian"
+    },
+    {
+      "code": "Njg3tXQBW7DqAzx4Vryt",
+      "state_code": "JK",
+      "name": "Srinagar"
+    },
+    {
+      "code": "wzg3tXQBW7DqAzx4Vrqs",
+      "state_code": "JK",
+      "name": "Udhampur"
+    },
+    {
+      "code": "WTg3tXQBW7DqAzx4Vrus",
+      "state_code": "KA",
+      "name": "Bagalkote"
+    },
+    {
+      "code": "wTg3tXQBW7DqAzx4Vryt",
+      "state_code": "KA",
+      "name": "Ballari"
+    },
+    {
+      "code": "uDg3tXQBW7DqAzx4Vrut",
+      "state_code": "KA",
+      "name": "Belagavi"
+    },
+    {
+      "code": "pzg3tXQBW7DqAzx4Vrut",
+      "state_code": "KA",
+      "name": "Bengaluru Rural"
+    },
+    {
+      "code": "ATg3tXQBW7DqAzx4Vryt",
+      "state_code": "KA",
+      "name": "Bengaluru South"
+    },
+    {
+      "code": "Zzg3tXQBW7DqAzx4Vr2t",
+      "state_code": "KA",
+      "name": "Bengaluru Urban"
+    },
+    {
+      "code": "Wjg3tXQBW7DqAzx4Vrus",
+      "state_code": "KA",
+      "name": "Bidar"
+    },
+    {
+      "code": "BTg3tXQBW7DqAzx4Vryt",
+      "state_code": "KA",
+      "name": "Chamarajanagar"
+    },
+    {
+      "code": "ozg3tXQBW7DqAzx4Vrus",
+      "state_code": "KA",
+      "name": "Chikkaballapura"
+    },
+    {
+      "code": "dzg3tXQBW7DqAzx4Vryt",
+      "state_code": "KA",
+      "name": "Chikkamagaluru"
+    },
+    {
+      "code": "vzg3tXQBW7DqAzx4Vrut",
+      "state_code": "KA",
+      "name": "Chitradurga"
+    },
+    {
+      "code": "aDg3tXQBW7DqAzx4Vr2t",
+      "state_code": "KA",
+      "name": "Dakshina Kannada"
+    },
+    {
+      "code": "Zjg3tXQBW7DqAzx4Vryt",
+      "state_code": "KA",
+      "name": "Davanagere"
+    },
+    {
+      "code": "BDg3tXQBW7DqAzx4Vryt",
+      "state_code": "KA",
+      "name": "Dharwad"
+    },
+    {
+      "code": "oTg3tXQBW7DqAzx4Vrus",
+      "state_code": "KA",
+      "name": "Gadag"
+    },
+    {
+      "code": "Pjg3tXQBW7DqAzx4Vr2t",
+      "state_code": "KA",
+      "name": "Hassan"
+    },
+    {
+      "code": "9Tg3tXQBW7DqAzx4Vrut",
+      "state_code": "KA",
+      "name": "Haveri"
+    },
+    {
+      "code": "sTg3tXQBW7DqAzx4Vrut",
+      "state_code": "KA",
+      "name": "Kalaburagi"
+    },
+    {
+      "code": "rzg3tXQBW7DqAzx4Vryt",
+      "state_code": "KA",
+      "name": "Kodagu"
+    },
+    {
+      "code": "2Tg3tXQBW7DqAzx4Vrut",
+      "state_code": "KA",
+      "name": "Kolar"
+    },
+    {
+      "code": "qDg3tXQBW7DqAzx4Vryt",
+      "state_code": "KA",
+      "name": "Koppal"
+    },
+    {
+      "code": "MDg3tXQBW7DqAzx4Vryt",
+      "state_code": "KA",
+      "name": "Mandya"
+    },
+    {
+      "code": "eTg3tXQBW7DqAzx4Vryt",
+      "state_code": "KA",
+      "name": "Mysuru"
+    },
+    {
+      "code": "xDg3tXQBW7DqAzx4Vryt",
+      "state_code": "KA",
+      "name": "Raichur"
+    },
+    {
+      "code": "kTg3tXQBW7DqAzx4Vryt",
+      "state_code": "KA",
+      "name": "Shivamogga"
+    },
+    {
+      "code": "ODg3tXQBW7DqAzx4Vryt",
+      "state_code": "KA",
+      "name": "Tumakuru"
+    },
+    {
+      "code": "2Dg3tXQBW7DqAzx4Vrut",
+      "state_code": "KA",
+      "name": "Udupi"
+    },
+    {
+      "code": "xDg3tXQBW7DqAzx4Vrut",
+      "state_code": "KA",
+      "name": "Uttara Kannada"
+    },
+    {
+      "code": "v3ubcYgB2SjI4rfp_5GV",
+      "state_code": "KA",
+      "name": "Vijayanagara"
+    },
+    {
+      "code": "kb6_uIsBC8DLsKxJU1IT",
+      "state_code": "KA",
+      "name": "Vijayapura"
+    },
+    {
+      "code": "Pzg3tXQBW7DqAzx4Vr2t",
+      "state_code": "KA",
+      "name": "Yadgir"
+    },
+    {
+      "code": "QDg3tXQBW7DqAzx4Vr2t",
+      "state_code": "KL",
+      "name": "Alappuzha"
+    },
+    {
+      "code": "mTg3tXQBW7DqAzx4Vrus",
+      "state_code": "KL",
+      "name": "Ernakulam"
+    },
+    {
+      "code": "9zg3tXQBW7DqAzx4Vrut",
+      "state_code": "KL",
+      "name": "Idukki"
+    },
+    {
+      "code": "QTg3tXQBW7DqAzx4Vr2t",
+      "state_code": "KL",
+      "name": "Kannur"
+    },
+    {
+      "code": "NDg3tXQBW7DqAzx4Vrus",
+      "state_code": "KL",
+      "name": "Kasaragod"
+    },
+    {
+      "code": "Qjg3tXQBW7DqAzx4Vr2t",
+      "state_code": "KL",
+      "name": "Kollam"
+    },
+    {
+      "code": "UTg3tXQBW7DqAzx4Vrus",
+      "state_code": "KL",
+      "name": "Kottayam"
+    },
+    {
+      "code": "Ujg3tXQBW7DqAzx4Vrus",
+      "state_code": "KL",
+      "name": "Kozhikode"
+    },
+    {
+      "code": "Azg3tXQBW7DqAzx4Vrus",
+      "state_code": "KL",
+      "name": "Malappuram"
+    },
+    {
+      "code": "9jg3tXQBW7DqAzx4Vrut",
+      "state_code": "KL",
+      "name": "Palakkad"
+    },
+    {
+      "code": "Uzg3tXQBW7DqAzx4Vrus",
+      "state_code": "KL",
+      "name": "Pathanamthitta"
+    },
+    {
+      "code": "VDg3tXQBW7DqAzx4Vrus",
+      "state_code": "KL",
+      "name": "Thiruvananthapuram"
+    },
+    {
+      "code": "VTg3tXQBW7DqAzx4Vrus",
+      "state_code": "KL",
+      "name": "Thrissur"
+    },
+    {
+      "code": "NTg3tXQBW7DqAzx4Vrus",
+      "state_code": "KL",
+      "name": "Wayanad"
+    },
+    {
+      "code": "njg3tXQBW7DqAzx4Vryt",
+      "state_code": "LA",
+      "name": "Kargil"
+    },
+    {
+      "code": "ijg3tXQBW7DqAzx4Vrus",
+      "state_code": "LA",
+      "name": "Leh Ladakh"
+    },
+    {
+      "code": "pTg3tXQBW7DqAzx4Vrus",
+      "state_code": "LD",
+      "name": "Lakshadweep District"
+    },
+    {
+      "code": "xzg3tXQBW7DqAzx4Vrqs",
+      "state_code": "MH",
+      "name": "Ahilyanagar"
+    },
+    {
+      "code": "jDg3tXQBW7DqAzx4Vrus",
+      "state_code": "MH",
+      "name": "Akola"
+    },
+    {
+      "code": "jTg3tXQBW7DqAzx4Vrus",
+      "state_code": "MH",
+      "name": "Amravati"
+    },
+    {
+      "code": "_Tg3tXQBW7DqAzx4Vryt",
+      "state_code": "MH",
+      "name": "Beed"
+    },
+    {
+      "code": "Qzg3tXQBW7DqAzx4Vr2t",
+      "state_code": "MH",
+      "name": "Bhandara"
+    },
+    {
+      "code": "gDg3tXQBW7DqAzx4Vrus",
+      "state_code": "MH",
+      "name": "Buldhana"
+    },
+    {
+      "code": "mTg3tXQBW7DqAzx4Vryt",
+      "state_code": "MH",
+      "name": "Chandrapur"
+    },
+    {
+      "code": "lDg3tXQBW7DqAzx4Vrus",
+      "state_code": "MH",
+      "name": "Chhatrapati Sambhajinagar"
+    },
+    {
+      "code": "rDg3tXQBW7DqAzx4Vrqs",
+      "state_code": "MH",
+      "name": "Dharashiv"
+    },
+    {
+      "code": "cjg3tXQBW7DqAzx4Vryt",
+      "state_code": "MH",
+      "name": "Dhule"
+    },
+    {
+      "code": "qjg3tXQBW7DqAzx4Vrqs",
+      "state_code": "MH",
+      "name": "Gadchiroli"
+    },
+    {
+      "code": "RDg3tXQBW7DqAzx4Vr2t",
+      "state_code": "MH",
+      "name": "Gondia"
+    },
+    {
+      "code": "sDg3tXQBW7DqAzx4Vryt",
+      "state_code": "MH",
+      "name": "Hingoli"
+    },
+    {
+      "code": "qzg3tXQBW7DqAzx4Vrqs",
+      "state_code": "MH",
+      "name": "Jalgaon"
+    },
+    {
+      "code": "yDg3tXQBW7DqAzx4Vrqs",
+      "state_code": "MH",
+      "name": "Jalna"
+    },
+    {
+      "code": "RTg3tXQBW7DqAzx4Vr2t",
+      "state_code": "MH",
+      "name": "Kolhapur"
+    },
+    {
+      "code": "lTg3tXQBW7DqAzx4Vrus",
+      "state_code": "MH",
+      "name": "Latur"
+    },
+    {
+      "code": "YDg3tXQBW7DqAzx4Vrus",
+      "state_code": "MH",
+      "name": "Mumbai"
+    },
+    {
+      "code": "yTg3tXQBW7DqAzx4Vrqs",
+      "state_code": "MH",
+      "name": "Mumbai Suburban"
+    },
+    {
+      "code": "Rjg3tXQBW7DqAzx4Vr2t",
+      "state_code": "MH",
+      "name": "Nagpur"
+    },
+    {
+      "code": "ljg3tXQBW7DqAzx4Vrus",
+      "state_code": "MH",
+      "name": "Nanded"
+    },
+    {
+      "code": "sTg3tXQBW7DqAzx4Vryt",
+      "state_code": "MH",
+      "name": "Nandurbar"
+    },
+    {
+      "code": "Bjg3tXQBW7DqAzx4Vryt",
+      "state_code": "MH",
+      "name": "Nashik"
+    },
+    {
+      "code": "Kjg3tXQBW7DqAzx4Vryt",
+      "state_code": "MH",
+      "name": "Palghar"
+    },
+    {
+      "code": "rzg3tXQBW7DqAzx4Vrqs",
+      "state_code": "MH",
+      "name": "Parbhani"
+    },
+    {
+      "code": "mjg3tXQBW7DqAzx4Vryt",
+      "state_code": "MH",
+      "name": "Pune"
+    },
+    {
+      "code": "rTg3tXQBW7DqAzx4Vrqs",
+      "state_code": "MH",
+      "name": "Raigad"
+    },
+    {
+      "code": "Rzg3tXQBW7DqAzx4Vr2t",
+      "state_code": "MH",
+      "name": "Ratnagiri"
+    },
+    {
+      "code": "sDg3tXQBW7DqAzx4Vrqs",
+      "state_code": "MH",
+      "name": "Sangli"
+    },
+    {
+      "code": "Bzg3tXQBW7DqAzx4Vryt",
+      "state_code": "MH",
+      "name": "Satara"
+    },
+    {
+      "code": "-Dg3tXQBW7DqAzx4Vrut",
+      "state_code": "MH",
+      "name": "Sindhudurg"
+    },
+    {
+      "code": "sTg3tXQBW7DqAzx4Vrqs",
+      "state_code": "MH",
+      "name": "Solapur"
+    },
+    {
+      "code": "SDg3tXQBW7DqAzx4Vr2t",
+      "state_code": "MH",
+      "name": "Thane"
+    },
+    {
+      "code": "CDg3tXQBW7DqAzx4Vryt",
+      "state_code": "MH",
+      "name": "Wardha"
+    },
+    {
+      "code": "CTg3tXQBW7DqAzx4Vryt",
+      "state_code": "MH",
+      "name": "Washim"
+    },
+    {
+      "code": "QTg3tXQBW7DqAzx4Vryt",
+      "state_code": "MH",
+      "name": "Yavatmal"
+    },
+    {
+      "code": "hjg3tXQBW7DqAzx4Vrus",
+      "state_code": "ML",
+      "name": "East Garo Hills"
+    },
+    {
+      "code": "8Dg3tXQBW7DqAzx4Vryt",
+      "state_code": "ML",
+      "name": "East Jaintia Hills"
+    },
+    {
+      "code": "MDg3tXQBW7DqAzx4Vrus",
+      "state_code": "ML",
+      "name": "East Khasi Hills"
+    },
+    {
+      "code": "Q6NEInUBxrox_Nfi_3ix",
+      "state_code": "ML",
+      "name": "Eastern West Khasi Hills Sub Districts"
+    },
+    {
+      "code": "PTg3tXQBW7DqAzx4Vryt",
+      "state_code": "ML",
+      "name": "North Garo Hills"
+    },
+    {
+      "code": "2zg3tXQBW7DqAzx4Vrqs",
+      "state_code": "ML",
+      "name": "Ri Bhoi"
+    },
+    {
+      "code": "Pjg3tXQBW7DqAzx4Vrus",
+      "state_code": "ML",
+      "name": "South Garo Hills"
+    },
+    {
+      "code": "nTg3tXQBW7DqAzx4Vrus",
+      "state_code": "ML",
+      "name": "South West Garo Hills"
+    },
+    {
+      "code": "PDg3tXQBW7DqAzx4Vryt",
+      "state_code": "ML",
+      "name": "South West Khasi Hills"
+    },
+    {
+      "code": "3zg3tXQBW7DqAzx4Vrqs",
+      "state_code": "ML",
+      "name": "West Garo Hills"
+    },
+    {
+      "code": "qDg3tXQBW7DqAzx4Vrqs",
+      "state_code": "ML",
+      "name": "West Jaintia Hills"
+    },
+    {
+      "code": "Lzg3tXQBW7DqAzx4Vrus",
+      "state_code": "ML",
+      "name": "West Khasi Hills"
+    },
+    {
+      "code": "1Dg3tXQBW7DqAzx4Vrut",
+      "state_code": "MN",
+      "name": "Bishnupur"
+    },
+    {
+      "code": "rjg3tXQBW7DqAzx4Vrut",
+      "state_code": "MN",
+      "name": "Chandel"
+    },
+    {
+      "code": "aTg3tXQBW7DqAzx4Vr2t",
+      "state_code": "MN",
+      "name": "Churachandpur"
+    },
+    {
+      "code": "yTg3tXQBW7DqAzx4Vrut",
+      "state_code": "MN",
+      "name": "Imphal East"
+    },
+    {
+      "code": "STg3tXQBW7DqAzx4Vr2t",
+      "state_code": "MN",
+      "name": "Imphal West"
+    },
+    {
+      "code": "dzg3tXQBW7DqAzx4Vr2t",
+      "state_code": "MN",
+      "name": "Jiribam Sub Districts"
+    },
+    {
+      "code": "Jjg3tXQBW7DqAzx4Vryt",
+      "state_code": "MN",
+      "name": "Kakching"
+    },
+    {
+      "code": "eDg3tXQBW7DqAzx4Vr2t",
+      "state_code": "MN",
+      "name": "Kamjong"
+    },
+    {
+      "code": "-Tg3tXQBW7DqAzx4Vryt",
+      "state_code": "MN",
+      "name": "Kangpokpi"
+    },
+    {
+      "code": "eTg3tXQBW7DqAzx4Vr2t",
+      "state_code": "MN",
+      "name": "Noney Sub Districts"
+    },
+    {
+      "code": "ejg3tXQBW7DqAzx4Vr2t",
+      "state_code": "MN",
+      "name": "Pherzawl"
+    },
+    {
+      "code": "Sjg3tXQBW7DqAzx4Vr2t",
+      "state_code": "MN",
+      "name": "Senapati"
+    },
+    {
+      "code": "mzg3tXQBW7DqAzx4Vryt",
+      "state_code": "MN",
+      "name": "Tamenglong"
+    },
+    {
+      "code": "ezg3tXQBW7DqAzx4Vr2t",
+      "state_code": "MN",
+      "name": "Tengnoupal"
+    },
+    {
+      "code": "nDg3tXQBW7DqAzx4Vryt",
+      "state_code": "MN",
+      "name": "Thoubal"
+    },
+    {
+      "code": "fzg3tXQBW7DqAzx4Vryt",
+      "state_code": "MN",
+      "name": "Ukhrul"
+    },
+    {
+      "code": "7Tg3tXQBW7DqAzx4Vryt",
+      "state_code": "MP",
+      "name": "Agar-Malwa"
+    },
+    {
+      "code": "rjg3tXQBW7DqAzx4Vrqs",
+      "state_code": "MP",
+      "name": "Alirajpur"
+    },
+    {
+      "code": "WDg3tXQBW7DqAzx4Vrus",
+      "state_code": "MP",
+      "name": "Anuppur"
+    },
+    {
+      "code": "ATg3tXQBW7DqAzx4Vr2t",
+      "state_code": "MP",
+      "name": "Ashoknagar"
+    },
+    {
+      "code": "2Tg3tXQBW7DqAzx4Vryt",
+      "state_code": "MP",
+      "name": "Balaghat"
+    },
+    {
+      "code": "Ozg3tXQBW7DqAzx4Vrus",
+      "state_code": "MP",
+      "name": "Barwani"
+    },
+    {
+      "code": "Ejg3tXQBW7DqAzx4Vrus",
+      "state_code": "MP",
+      "name": "Betul"
+    },
+    {
+      "code": "2zg3tXQBW7DqAzx4Vryt",
+      "state_code": "MP",
+      "name": "Bhind"
+    },
+    {
+      "code": "PDg3tXQBW7DqAzx4Vrus",
+      "state_code": "MP",
+      "name": "Bhopal"
+    },
+    {
+      "code": "Ajg3tXQBW7DqAzx4Vr2t",
+      "state_code": "MP",
+      "name": "Burhanpur"
+    },
+    {
+      "code": "5Dg3tXQBW7DqAzx4Vrqs",
+      "state_code": "MP",
+      "name": "Chhatarpur"
+    },
+    {
+      "code": "5Tg3tXQBW7DqAzx4Vrqs",
+      "state_code": "MP",
+      "name": "Chhindwara"
+    },
+    {
+      "code": "KDg3tXQBW7DqAzx4Vryt",
+      "state_code": "MP",
+      "name": "Damoh"
+    },
+    {
+      "code": "6Dg3tXQBW7DqAzx4Vrqs",
+      "state_code": "MP",
+      "name": "Datia"
+    },
+    {
+      "code": "6jg3tXQBW7DqAzx4Vrqs",
+      "state_code": "MP",
+      "name": "Dewas"
+    },
+    {
+      "code": "3Tg3tXQBW7DqAzx4Vryt",
+      "state_code": "MP",
+      "name": "Dhar"
+    },
+    {
+      "code": "Sjg3tXQBW7DqAzx4Vrus",
+      "state_code": "MP",
+      "name": "Dindori"
+    },
+    {
+      "code": "7Tg3tXQBW7DqAzx4Vrqs",
+      "state_code": "MP",
+      "name": "Guna"
+    },
+    {
+      "code": "5jg3tXQBW7DqAzx4Vrqs",
+      "state_code": "MP",
+      "name": "Gwalior"
+    },
+    {
+      "code": "3zg3tXQBW7DqAzx4Vryt",
+      "state_code": "MP",
+      "name": "Harda"
+    },
+    {
+      "code": "RDg3tXQBW7DqAzx4Vrus",
+      "state_code": "MP",
+      "name": "Indore"
+    },
+    {
+      "code": "4jg3tXQBW7DqAzx4Vryt",
+      "state_code": "MP",
+      "name": "Jabalpur"
+    },
+    {
+      "code": "Ljg3tXQBW7DqAzx4Vrus",
+      "state_code": "MP",
+      "name": "Jhabua"
+    },
+    {
+      "code": "5Dg3tXQBW7DqAzx4Vryt",
+      "state_code": "MP",
+      "name": "Katni"
+    },
+    {
+      "code": "RTg3tXQBW7DqAzx4Vrus",
+      "state_code": "MP",
+      "name": "Khandwa (East Nimar)"
+    },
+    {
+      "code": "6Dg3tXQBW7DqAzx4Vryt",
+      "state_code": "MP",
+      "name": "Khargone (West Nimar)"
+    },
+    {
+      "code": "Db6-uIsBC8DLsKxJ8lLy",
+      "state_code": "MP",
+      "name": "Maihar Sub Districts"
+    },
+    {
+      "code": "7zg3tXQBW7DqAzx4Vrqs",
+      "state_code": "MP",
+      "name": "Mandla"
+    },
+    {
+      "code": "6Tg3tXQBW7DqAzx4Vryt",
+      "state_code": "MP",
+      "name": "Mandsaur"
+    },
+    {
+      "code": "NQXNjIoBF92NGf8XtttX",
+      "state_code": "MP",
+      "name": "MAUGANJ"
+    },
+    {
+      "code": "8Dg3tXQBW7DqAzx4Vrqs",
+      "state_code": "MP",
+      "name": "Morena"
+    },
+    {
+      "code": "7jg3tXQBW7DqAzx4Vrqs",
+      "state_code": "MP",
+      "name": "Narmadapuram"
+    },
+    {
+      "code": "Azg3tXQBW7DqAzx4Vr2t",
+      "state_code": "MP",
+      "name": "Narsimhapur"
+    },
+    {
+      "code": "Rjg3tXQBW7DqAzx4Vrus",
+      "state_code": "MP",
+      "name": "Neemuch"
+    },
+    {
+      "code": "6zg3tXQBW7DqAzx4Vryt",
+      "state_code": "MP",
+      "name": "Niwari"
+    },
+    {
+      "code": "QL6_uIsBC8DLsKxJEFIQ",
+      "state_code": "MP",
+      "name": "Pandhurna Sub Districts"
+    },
+    {
+      "code": "8Tg3tXQBW7DqAzx4Vrqs",
+      "state_code": "MP",
+      "name": "Panna"
+    },
+    {
+      "code": "Rzg3tXQBW7DqAzx4Vrus",
+      "state_code": "MP",
+      "name": "Raisen"
+    },
+    {
+      "code": "BDg3tXQBW7DqAzx4Vr2t",
+      "state_code": "MP",
+      "name": "Rajgarh"
+    },
+    {
+      "code": "8jg3tXQBW7DqAzx4Vrqs",
+      "state_code": "MP",
+      "name": "Ratlam"
+    },
+    {
+      "code": "-zg3tXQBW7DqAzx4Vrqs",
+      "state_code": "MP",
+      "name": "Rewa"
+    },
+    {
+      "code": "5zg3tXQBW7DqAzx4Vrqs",
+      "state_code": "MP",
+      "name": "Sagar"
+    },
+    {
+      "code": "8zg3tXQBW7DqAzx4Vrqs",
+      "state_code": "MP",
+      "name": "Satna"
+    },
+    {
+      "code": "Szg3tXQBW7DqAzx4Vrus",
+      "state_code": "MP",
+      "name": "Sehore"
+    },
+    {
+      "code": "Ojg3tXQBW7DqAzx4Vryt",
+      "state_code": "MP",
+      "name": "Seoni"
+    },
+    {
+      "code": "9Dg3tXQBW7DqAzx4Vrqs",
+      "state_code": "MP",
+      "name": "Shahdol"
+    },
+    {
+      "code": "9Tg3tXQBW7DqAzx4Vrqs",
+      "state_code": "MP",
+      "name": "Shajapur"
+    },
+    {
+      "code": "SDg3tXQBW7DqAzx4Vrus",
+      "state_code": "MP",
+      "name": "Sheopur"
+    },
+    {
+      "code": "KTg3tXQBW7DqAzx4Vryt",
+      "state_code": "MP",
+      "name": "Shivpuri"
+    },
+    {
+      "code": "TDg3tXQBW7DqAzx4Vrus",
+      "state_code": "MP",
+      "name": "Sidhi"
+    },
+    {
+      "code": "yDg3tXQBW7DqAzx4Vrut",
+      "state_code": "MP",
+      "name": "Singrauli"
+    },
+    {
+      "code": "9jg3tXQBW7DqAzx4Vrqs",
+      "state_code": "MP",
+      "name": "Tikamgarh"
+    },
+    {
+      "code": "9zg3tXQBW7DqAzx4Vrqs",
+      "state_code": "MP",
+      "name": "Ujjain"
+    },
+    {
+      "code": "Fjg3tXQBW7DqAzx4Vrus",
+      "state_code": "MP",
+      "name": "Umaria"
+    },
+    {
+      "code": "-Dg3tXQBW7DqAzx4Vrqs",
+      "state_code": "MP",
+      "name": "Vidisha"
+    },
+    {
+      "code": "mjg3tXQBW7DqAzx4Vrus",
+      "state_code": "MZ",
+      "name": "Aizawl"
+    },
+    {
+      "code": "mDg3tXQBW7DqAzx4Vrus",
+      "state_code": "MZ",
+      "name": "Champhai"
+    },
+    {
+      "code": "kaNEInUBxrox_Nfi_32z",
+      "state_code": "MZ",
+      "name": "Hnahthial Sub Districts"
+    },
+    {
+      "code": "eKNEInUBxrox_Nfi_3yz",
+      "state_code": "MZ",
+      "name": "Khawzawl Sub Districts"
+    },
+    {
+      "code": "ZDg3tXQBW7DqAzx4Vryt",
+      "state_code": "MZ",
+      "name": "Kolasib"
+    },
+    {
+      "code": "vTg3tXQBW7DqAzx4Vrut",
+      "state_code": "MZ",
+      "name": "Lawngtlai"
+    },
+    {
+      "code": "dDg3tXQBW7DqAzx4Vryt",
+      "state_code": "MZ",
+      "name": "Lunglei"
+    },
+    {
+      "code": "ZTg3tXQBW7DqAzx4Vryt",
+      "state_code": "MZ",
+      "name": "Mamit"
+    },
+    {
+      "code": "JaNEInUBxrox_Nfi_3uy",
+      "state_code": "MZ",
+      "name": "Saitual Sub Districts"
+    },
+    {
+      "code": "RTg3tXQBW7DqAzx4Vryt",
+      "state_code": "MZ",
+      "name": "Serchhip"
+    },
+    {
+      "code": "mzg3tXQBW7DqAzx4Vrus",
+      "state_code": "MZ",
+      "name": "Siaha"
+    },
+    {
+      "code": "p76-uIsBC8DLsKxJnFFU",
+      "state_code": "ND",
+      "name": "Dadra And Nagar Haveli"
+    },
+    {
+      "code": "5jg3tXQBW7DqAzx4Vrut",
+      "state_code": "ND",
+      "name": "Daman"
+    },
+    {
+      "code": "5zg3tXQBW7DqAzx4Vrut",
+      "state_code": "ND",
+      "name": "Diu"
+    },
+    {
+      "code": "t3uWcYgB2SjI4rfpAZHy",
+      "state_code": "NL",
+      "name": "Chumoukedima"
+    },
+    {
+      "code": "pzg3tXQBW7DqAzx4Vryt",
+      "state_code": "NL",
+      "name": "Dimapur"
+    },
+    {
+      "code": "Szg3tXQBW7DqAzx4Vr2t",
+      "state_code": "NL",
+      "name": "Kiphire"
+    },
+    {
+      "code": "Yzg3tXQBW7DqAzx4Vryt",
+      "state_code": "NL",
+      "name": "Kohima"
+    },
+    {
+      "code": "ejg3tXQBW7DqAzx4Vryt",
+      "state_code": "NL",
+      "name": "Longleng"
+    },
+    {
+      "code": "veeQapYB15Llg5ed5nOV",
+      "state_code": "NL",
+      "name": "Meluri Sub Districts"
+    },
+    {
+      "code": "xjg3tXQBW7DqAzx4Vrqs",
+      "state_code": "NL",
+      "name": "Mokokchung"
+    },
+    {
+      "code": "sjg3tXQBW7DqAzx4Vryt",
+      "state_code": "NL",
+      "name": "Mon"
+    },
+    {
+      "code": "tnuVcYgB2SjI4rfpRpEh",
+      "state_code": "NL",
+      "name": "Niuland Sub Districts"
+    },
+    {
+      "code": "BvMK33sBnAUp6yMBF92e",
+      "state_code": "NL",
+      "name": "Noklak"
+    },
+    {
+      "code": "Zzg3tXQBW7DqAzx4Vryt",
+      "state_code": "NL",
+      "name": "Peren"
+    },
+    {
+      "code": "pjg3tXQBW7DqAzx4Vryt",
+      "state_code": "NL",
+      "name": "Phek"
+    },
+    {
+      "code": "uXuWcYgB2SjI4rfpz5Hl",
+      "state_code": "NL",
+      "name": "Shamator"
+    },
+    {
+      "code": "unuXcYgB2SjI4rfpq5Fc",
+      "state_code": "NL",
+      "name": "Tseminyu"
+    },
+    {
+      "code": "szg3tXQBW7DqAzx4Vryt",
+      "state_code": "NL",
+      "name": "Tuensang"
+    },
+    {
+      "code": "pTg3tXQBW7DqAzx4Vryt",
+      "state_code": "NL",
+      "name": "Wokha"
+    },
+    {
+      "code": "YTg3tXQBW7DqAzx4Vryt",
+      "state_code": "NL",
+      "name": "Zunheboto"
+    },
+    {
+      "code": "TDg3tXQBW7DqAzx4Vr2t",
+      "state_code": "OD",
+      "name": "Anugola"
+    },
+    {
+      "code": "XDg3tXQBW7DqAzx4Vryt",
+      "state_code": "OD",
+      "name": "Balangir"
+    },
+    {
+      "code": "XTg3tXQBW7DqAzx4Vryt",
+      "state_code": "OD",
+      "name": "Baleshwar"
+    },
+    {
+      "code": "Xjg3tXQBW7DqAzx4Vryt",
+      "state_code": "OD",
+      "name": "Baragada"
+    },
+    {
+      "code": "tDg3tXQBW7DqAzx4Vryt",
+      "state_code": "OD",
+      "name": "Bhadrak"
+    },
+    {
+      "code": "TTg3tXQBW7DqAzx4Vr2t",
+      "state_code": "OD",
+      "name": "Boudh"
+    },
+    {
+      "code": "Tjg3tXQBW7DqAzx4Vr2t",
+      "state_code": "OD",
+      "name": "Debagada"
+    },
+    {
+      "code": "Tzg3tXQBW7DqAzx4Vr2t",
+      "state_code": "OD",
+      "name": "Dhenkanal"
+    },
+    {
+      "code": "tTg3tXQBW7DqAzx4Vryt",
+      "state_code": "OD",
+      "name": "Gajapati"
+    },
+    {
+      "code": "1Dg3tXQBW7DqAzx4Vryt",
+      "state_code": "OD",
+      "name": "Ganjam"
+    },
+    {
+      "code": "czg3tXQBW7DqAzx4Vryt",
+      "state_code": "OD",
+      "name": "Jagatsinghapur"
+    },
+    {
+      "code": "gTg3tXQBW7DqAzx4Vrus",
+      "state_code": "OD",
+      "name": "Jajpur"
+    },
+    {
+      "code": "UDg3tXQBW7DqAzx4Vr2t",
+      "state_code": "OD",
+      "name": "Jharsuguda"
+    },
+    {
+      "code": "tjg3tXQBW7DqAzx4Vryt",
+      "state_code": "OD",
+      "name": "Kalahandi"
+    },
+    {
+      "code": "tzg3tXQBW7DqAzx4Vryt",
+      "state_code": "OD",
+      "name": "Kandhamala"
+    },
+    {
+      "code": "nTg3tXQBW7DqAzx4Vryt",
+      "state_code": "OD",
+      "name": "Kataka"
+    },
+    {
+      "code": "UTg3tXQBW7DqAzx4Vr2t",
+      "state_code": "OD",
+      "name": "Kendrapada"
+    },
+    {
+      "code": "Ujg3tXQBW7DqAzx4Vr2t",
+      "state_code": "OD",
+      "name": "Kendujhar"
+    },
+    {
+      "code": "uDg3tXQBW7DqAzx4Vryt",
+      "state_code": "OD",
+      "name": "Khordha"
+    },
+    {
+      "code": "Uzg3tXQBW7DqAzx4Vr2t",
+      "state_code": "OD",
+      "name": "Koraput"
+    },
+    {
+      "code": "1Tg3tXQBW7DqAzx4Vryt",
+      "state_code": "OD",
+      "name": "Malkangiri"
+    },
+    {
+      "code": "uTg3tXQBW7DqAzx4Vryt",
+      "state_code": "OD",
+      "name": "Mayurbhanj"
+    },
+    {
+      "code": "1Tg3tXQBW7DqAzx4Vrut",
+      "state_code": "OD",
+      "name": "Nabarangpur"
+    },
+    {
+      "code": "gjg3tXQBW7DqAzx4Vrus",
+      "state_code": "OD",
+      "name": "Nayagada"
+    },
+    {
+      "code": "1jg3tXQBW7DqAzx4Vryt",
+      "state_code": "OD",
+      "name": "Nuapada"
+    },
+    {
+      "code": "rTg3tXQBW7DqAzx4Vrut",
+      "state_code": "OD",
+      "name": "Puri"
+    },
+    {
+      "code": "ujg3tXQBW7DqAzx4Vryt",
+      "state_code": "OD",
+      "name": "Rayagada"
+    },
+    {
+      "code": "qzg3tXQBW7DqAzx4Vrut",
+      "state_code": "OD",
+      "name": "Sambalpur"
+    },
+    {
+      "code": "VDg3tXQBW7DqAzx4Vr2t",
+      "state_code": "OD",
+      "name": "Subarnapur"
+    },
+    {
+      "code": "1zg3tXQBW7DqAzx4Vryt",
+      "state_code": "OD",
+      "name": "Sundaragada"
+    },
+    {
+      "code": "2Dg3tXQBW7DqAzx4Vryt",
+      "state_code": "PB",
+      "name": "Amritsar"
+    },
+    {
+      "code": "VTg3tXQBW7DqAzx4Vr2t",
+      "state_code": "PB",
+      "name": "Barnala"
+    },
+    {
+      "code": "Vjg3tXQBW7DqAzx4Vr2t",
+      "state_code": "PB",
+      "name": "Bathinda"
+    },
+    {
+      "code": "2jg3tXQBW7DqAzx4Vryt",
+      "state_code": "PB",
+      "name": "Faridkot"
+    },
+    {
+      "code": "3Dg3tXQBW7DqAzx4Vryt",
+      "state_code": "PB",
+      "name": "Fatehgarh Sahib"
+    },
+    {
+      "code": "8jg3tXQBW7DqAzx4Vryt",
+      "state_code": "PB",
+      "name": "Fazilka"
+    },
+    {
+      "code": "Vzg3tXQBW7DqAzx4Vr2t",
+      "state_code": "PB",
+      "name": "Ferozepur"
+    },
+    {
+      "code": "nDg3tXQBW7DqAzx4Vrus",
+      "state_code": "PB",
+      "name": "Gurdaspur"
+    },
+    {
+      "code": "rDg3tXQBW7DqAzx4Vrut",
+      "state_code": "PB",
+      "name": "Hoshiarpur"
+    },
+    {
+      "code": "4Dg3tXQBW7DqAzx4Vrqs",
+      "state_code": "PB",
+      "name": "Jalandhar"
+    },
+    {
+      "code": "WDg3tXQBW7DqAzx4Vr2t",
+      "state_code": "PB",
+      "name": "Kapurthala"
+    },
+    {
+      "code": "WTg3tXQBW7DqAzx4Vr2t",
+      "state_code": "PB",
+      "name": "Ludhiana"
+    },
+    {
+      "code": "4Tg3tXQBW7DqAzx4Vryt",
+      "state_code": "PB",
+      "name": "Malerkotla"
+    },
+    {
+      "code": "3jg3tXQBW7DqAzx4Vryt",
+      "state_code": "PB",
+      "name": "Mansa"
+    },
+    {
+      "code": "-jg3tXQBW7DqAzx4Vrut",
+      "state_code": "PB",
+      "name": "Moga"
+    },
+    {
+      "code": "_zg3tXQBW7DqAzx4Vrut",
+      "state_code": "PB",
+      "name": "Pathankot"
+    },
+    {
+      "code": "szg3tXQBW7DqAzx4Vrqs",
+      "state_code": "PB",
+      "name": "Patiala"
+    },
+    {
+      "code": "Wjg3tXQBW7DqAzx4Vr2t",
+      "state_code": "PB",
+      "name": "Rupnagar"
+    },
+    {
+      "code": "iTg3tXQBW7DqAzx4Vrus",
+      "state_code": "PB",
+      "name": "S.A.S Nagar"
+    },
+    {
+      "code": "pDg3tXQBW7DqAzx4Vrus",
+      "state_code": "PB",
+      "name": "Sangrur"
+    },
+    {
+      "code": "wXudcYgB2SjI4rfpXJFk",
+      "state_code": "PB",
+      "name": "Shahid Bhagat Singh Nagar"
+    },
+    {
+      "code": "Kzg3tXQBW7DqAzx4Vryt",
+      "state_code": "PB",
+      "name": "Sri Muktsar Sahib"
+    },
+    {
+      "code": "ojg3tXQBW7DqAzx4Vrus",
+      "state_code": "PB",
+      "name": "Tarn Taran"
+    },
+    {
+      "code": "CDg3tXQBW7DqAzx4Vr2t",
+      "state_code": "PY",
+      "name": "Karaikal"
+    },
+    {
+      "code": "Cjg3tXQBW7DqAzx4Vr2t",
+      "state_code": "PY",
+      "name": "Puducherry"
+    },
+    {
+      "code": "uzg3tXQBW7DqAzx4Vryt",
+      "state_code": "RJ",
+      "name": "Ajmer"
+    },
+    {
+      "code": "yzg3tXQBW7DqAzx4Vrut",
+      "state_code": "RJ",
+      "name": "Alwar"
+    },
+    {
+      "code": "e76-uIsBC8DLsKxJf1ED",
+      "state_code": "RJ",
+      "name": "Balotra"
+    },
+    {
+      "code": "zTg3tXQBW7DqAzx4Vryt",
+      "state_code": "RJ",
+      "name": "Banswara"
+    },
+    {
+      "code": "gL6-uIsBC8DLsKxJglGp",
+      "state_code": "RJ",
+      "name": "Baran"
+    },
+    {
+      "code": "pjg3tXQBW7DqAzx4Vrqs",
+      "state_code": "RJ",
+      "name": "Barmer"
+    },
+    {
+      "code": "hb6-uIsBC8DLsKxJhVGs",
+      "state_code": "RJ",
+      "name": "Beawar"
+    },
+    {
+      "code": "djg3tXQBW7DqAzx4Vryt",
+      "state_code": "RJ",
+      "name": "Bharatpur"
+    },
+    {
+      "code": "zDg3tXQBW7DqAzx4Vrut",
+      "state_code": "RJ",
+      "name": "Bhilwara"
+    },
+    {
+      "code": "lzg3tXQBW7DqAzx4Vrus",
+      "state_code": "RJ",
+      "name": "Bikaner"
+    },
+    {
+      "code": "vDg3tXQBW7DqAzx4Vryt",
+      "state_code": "RJ",
+      "name": "Bundi"
+    },
+    {
+      "code": "zjg3tXQBW7DqAzx4Vrut",
+      "state_code": "RJ",
+      "name": "Chittorgarh"
+    },
+    {
+      "code": "ezg3tXQBW7DqAzx4Vryt",
+      "state_code": "RJ",
+      "name": "Churu"
+    },
+    {
+      "code": "wzg3tXQBW7DqAzx4Vrut",
+      "state_code": "RJ",
+      "name": "Dausa"
+    },
+    {
+      "code": "rb6-uIsBC8DLsKxJoFE8",
+      "state_code": "RJ",
+      "name": "Deeg"
+    },
+    {
+      "code": "vTg3tXQBW7DqAzx4Vryt",
+      "state_code": "RJ",
+      "name": "Dholpur"
+    },
+    {
+      "code": "t76-uIsBC8DLsKxJplF3",
+      "state_code": "RJ",
+      "name": "Didwana-Kuchaman Sub Districts"
+    },
+    {
+      "code": "oDg3tXQBW7DqAzx4Vryt",
+      "state_code": "RJ",
+      "name": "Dungarpur"
+    },
+    {
+      "code": "wDg3tXQBW7DqAzx4Vryt",
+      "state_code": "RJ",
+      "name": "Ganganagar"
+    },
+    {
+      "code": "vjg3tXQBW7DqAzx4Vryt",
+      "state_code": "RJ",
+      "name": "Hanumangarh"
+    },
+    {
+      "code": "oTg3tXQBW7DqAzx4Vryt",
+      "state_code": "RJ",
+      "name": "Jaipur"
+    },
+    {
+      "code": "xTg3tXQBW7DqAzx4Vryt",
+      "state_code": "RJ",
+      "name": "Jaisalmer"
+    },
+    {
+      "code": "xjg3tXQBW7DqAzx4Vryt",
+      "state_code": "RJ",
+      "name": "Jalore"
+    },
+    {
+      "code": "zzg3tXQBW7DqAzx4Vrut",
+      "state_code": "RJ",
+      "name": "Jhalawar"
+    },
+    {
+      "code": "yjg3tXQBW7DqAzx4Vrqs",
+      "state_code": "RJ",
+      "name": "Jhunjhunu"
+    },
+    {
+      "code": "0zg3tXQBW7DqAzx4Vrut",
+      "state_code": "RJ",
+      "name": "Jodhpur"
+    },
+    {
+      "code": "Tzg3tXQBW7DqAzx4Vrus",
+      "state_code": "RJ",
+      "name": "Karauli"
+    },
+    {
+      "code": "8L6-uIsBC8DLsKxJ21HX",
+      "state_code": "RJ",
+      "name": "Khairthal-Tijara"
+    },
+    {
+      "code": "qTg3tXQBW7DqAzx4Vrut",
+      "state_code": "RJ",
+      "name": "Kota"
+    },
+    {
+      "code": "-L6-uIsBC8DLsKxJ5FGr",
+      "state_code": "RJ",
+      "name": "Kotputli-Behror"
+    },
+    {
+      "code": "ojg3tXQBW7DqAzx4Vryt",
+      "state_code": "RJ",
+      "name": "Nagaur"
+    },
+    {
+      "code": "ozg3tXQBW7DqAzx4Vryt",
+      "state_code": "RJ",
+      "name": "Pali"
+    },
+    {
+      "code": "SL6_uIsBC8DLsKxJFVJu",
+      "state_code": "RJ",
+      "name": "Phalodi"
+    },
+    {
+      "code": "dTg3tXQBW7DqAzx4Vryt",
+      "state_code": "RJ",
+      "name": "Pratapgarh"
+    },
+    {
+      "code": "vzg3tXQBW7DqAzx4Vryt",
+      "state_code": "RJ",
+      "name": "Rajsamand"
+    },
+    {
+      "code": "Y76_uIsBC8DLsKxJJ1Lx",
+      "state_code": "RJ",
+      "name": "Salumbar"
+    },
+    {
+      "code": "0Dg3tXQBW7DqAzx4Vrut",
+      "state_code": "RJ",
+      "name": "Sawai Madhopur"
+    },
+    {
+      "code": "0Tg3tXQBW7DqAzx4Vrut",
+      "state_code": "RJ",
+      "name": "Sikar"
+    },
+    {
+      "code": "0jg3tXQBW7DqAzx4Vrut",
+      "state_code": "RJ",
+      "name": "Sirohi"
+    },
+    {
+      "code": "kDg3tXQBW7DqAzx4Vryt",
+      "state_code": "RJ",
+      "name": "Tonk"
+    },
+    {
+      "code": "pDg3tXQBW7DqAzx4Vryt",
+      "state_code": "RJ",
+      "name": "Udaipur"
+    },
+    {
+      "code": "7jg3tXQBW7DqAzx4Vryt",
+      "state_code": "SK",
+      "name": "Gangtok Sub Districts"
+    },
+    {
+      "code": "wjg3tXQBW7DqAzx4Vrut",
+      "state_code": "SK",
+      "name": "Gyalshing Sub Districts"
+    },
+    {
+      "code": "F76-uIsBC8DLsKxJ91IV",
+      "state_code": "SK",
+      "name": "Mangan"
+    },
+    {
+      "code": "wDg3tXQBW7DqAzx4Vrqs",
+      "state_code": "SK",
+      "name": "Namchi Sub Districts"
+    },
+    {
+      "code": "XqNEInUBxrox_Nfi_3Sw",
+      "state_code": "SK",
+      "name": "Pakyong Sub Districts"
+    },
+    {
+      "code": "DAWa_YIBF92NGf8XiZkK",
+      "state_code": "SK",
+      "name": "Soreng"
+    },
+    {
+      "code": "Pjg3tXQBW7DqAzx4Vryt",
+      "state_code": "TN",
+      "name": "Ariyalur"
+    },
+    {
+      "code": "bzg3tXQBW7DqAzx4Vr2t",
+      "state_code": "TN",
+      "name": "Chengalpattu"
+    },
+    {
+      "code": "Pzg3tXQBW7DqAzx4Vryt",
+      "state_code": "TN",
+      "name": "Chennai"
+    },
+    {
+      "code": "Gzg3tXQBW7DqAzx4Vr2t",
+      "state_code": "TN",
+      "name": "Coimbatore"
+    },
+    {
+      "code": "YDg3tXQBW7DqAzx4Vryt",
+      "state_code": "TN",
+      "name": "Cuddalore"
+    },
+    {
+      "code": "ETg3tXQBW7DqAzx4Vr2t",
+      "state_code": "TN",
+      "name": "Dharmapuri"
+    },
+    {
+      "code": "Djg3tXQBW7DqAzx4Vr2t",
+      "state_code": "TN",
+      "name": "Dindigul"
+    },
+    {
+      "code": "QTg3tXQBW7DqAzx4Vrus",
+      "state_code": "TN",
+      "name": "Erode"
+    },
+    {
+      "code": "bTg3tXQBW7DqAzx4Vr2t",
+      "state_code": "TN",
+      "name": "Kallakurichi"
+    },
+    {
+      "code": "XDg3tXQBW7DqAzx4Vrus",
+      "state_code": "TN",
+      "name": "Kancheepuram"
+    },
+    {
+      "code": "azg3tXQBW7DqAzx4Vryt",
+      "state_code": "TN",
+      "name": "Kanniyakumari"
+    },
+    {
+      "code": "Wzg3tXQBW7DqAzx4Vrus",
+      "state_code": "TN",
+      "name": "Karur"
+    },
+    {
+      "code": "bDg3tXQBW7DqAzx4Vryt",
+      "state_code": "TN",
+      "name": "Krishnagiri"
+    },
+    {
+      "code": "bzg3tXQBW7DqAzx4Vryt",
+      "state_code": "TN",
+      "name": "Madurai"
+    },
+    {
+      "code": "PmUH33sBNf80hyXhYgAC",
+      "state_code": "TN",
+      "name": "Mayiladuthurai"
+    },
+    {
+      "code": "bTg3tXQBW7DqAzx4Vryt",
+      "state_code": "TN",
+      "name": "Nagapattinam"
+    },
+    {
+      "code": "Gjg3tXQBW7DqAzx4Vr2t",
+      "state_code": "TN",
+      "name": "Namakkal"
+    },
+    {
+      "code": "FDg3tXQBW7DqAzx4Vr2t",
+      "state_code": "TN",
+      "name": "Perambalur"
+    },
+    {
+      "code": "QDg3tXQBW7DqAzx4Vrus",
+      "state_code": "TN",
+      "name": "Pudukkottai"
+    },
+    {
+      "code": "Fzg3tXQBW7DqAzx4Vr2t",
+      "state_code": "TN",
+      "name": "Ramanathapuram"
+    },
+    {
+      "code": "azg3tXQBW7DqAzx4Vr2t",
+      "state_code": "TN",
+      "name": "Ranipet Sub Districts"
+    },
+    {
+      "code": "EDg3tXQBW7DqAzx4Vr2t",
+      "state_code": "TN",
+      "name": "Salem"
+    },
+    {
+      "code": "Pzg3tXQBW7DqAzx4Vrus",
+      "state_code": "TN",
+      "name": "Sivaganga"
+    },
+    {
+      "code": "bjg3tXQBW7DqAzx4Vr2t",
+      "state_code": "TN",
+      "name": "Tenkasi"
+    },
+    {
+      "code": "GTg3tXQBW7DqAzx4Vr2t",
+      "state_code": "TN",
+      "name": "Thanjavur"
+    },
+    {
+      "code": "NTg3tXQBW7DqAzx4Vryt",
+      "state_code": "TN",
+      "name": "The Nilgiris"
+    },
+    {
+      "code": "Ejg3tXQBW7DqAzx4Vr2t",
+      "state_code": "TN",
+      "name": "Theni"
+    },
+    {
+      "code": "STg3tXQBW7DqAzx4Vryt",
+      "state_code": "TN",
+      "name": "Thiruvallur"
+    },
+    {
+      "code": "FTg3tXQBW7DqAzx4Vr2t",
+      "state_code": "TN",
+      "name": "Thiruvarur"
+    },
+    {
+      "code": "Rjg3tXQBW7DqAzx4Vryt",
+      "state_code": "TN",
+      "name": "Thoothukkudi"
+    },
+    {
+      "code": "Fjg3tXQBW7DqAzx4Vr2t",
+      "state_code": "TN",
+      "name": "Tiruchirappalli"
+    },
+    {
+      "code": "GDg3tXQBW7DqAzx4Vr2t",
+      "state_code": "TN",
+      "name": "Tirunelveli"
+    },
+    {
+      "code": "bDg3tXQBW7DqAzx4Vr2t",
+      "state_code": "TN",
+      "name": "Tirupathur"
+    },
+    {
+      "code": "ajg3tXQBW7DqAzx4Vryt",
+      "state_code": "TN",
+      "name": "Tiruppur"
+    },
+    {
+      "code": "HDg3tXQBW7DqAzx4Vr2t",
+      "state_code": "TN",
+      "name": "Tiruvannamalai"
+    },
+    {
+      "code": "bjg3tXQBW7DqAzx4Vryt",
+      "state_code": "TN",
+      "name": "Vellore"
+    },
+    {
+      "code": "Ezg3tXQBW7DqAzx4Vr2t",
+      "state_code": "TN",
+      "name": "Viluppuram"
+    },
+    {
+      "code": "HTg3tXQBW7DqAzx4Vr2t",
+      "state_code": "TN",
+      "name": "Virudhunagar"
+    },
+    {
+      "code": "4Tg3tXQBW7DqAzx4Vrqs",
+      "state_code": "TR",
+      "name": "Dhalai"
+    },
+    {
+      "code": "Qjg3tXQBW7DqAzx4Vryt",
+      "state_code": "TR",
+      "name": "Gomati"
+    },
+    {
+      "code": "YDg3tXQBW7DqAzx4Vr2t",
+      "state_code": "TR",
+      "name": "Khowai"
+    },
+    {
+      "code": "6zg3tXQBW7DqAzx4Vrqs",
+      "state_code": "TR",
+      "name": "North Tripura"
+    },
+    {
+      "code": "Xjg3tXQBW7DqAzx4Vr2t",
+      "state_code": "TR",
+      "name": "Sepahijala"
+    },
+    {
+      "code": "Qjg3tXQBW7DqAzx4Vrus",
+      "state_code": "TR",
+      "name": "South Tripura"
+    },
+    {
+      "code": "-Tg3tXQBW7DqAzx4Vrut",
+      "state_code": "TR",
+      "name": "Unakoti"
+    },
+    {
+      "code": "Xzg3tXQBW7DqAzx4Vr2t",
+      "state_code": "TR",
+      "name": "West Tripura"
+    },
+    {
+      "code": "dTg3tXQBW7DqAzx4Vrus",
+      "state_code": "TS",
+      "name": "Adilabad"
+    },
+    {
+      "code": "ETg3tXQBW7DqAzx4Vryt",
+      "state_code": "TS",
+      "name": "Bhadradri Kothagudem"
+    },
+    {
+      "code": "kAWecYgBF92NGf8XrMaa",
+      "state_code": "TS",
+      "name": "Hanumakonda"
+    },
+    {
+      "code": "0Tg3tXQBW7DqAzx4Vryt",
+      "state_code": "TS",
+      "name": "Hyderabad"
+    },
+    {
+      "code": "Fjg3tXQBW7DqAzx4Vryt",
+      "state_code": "TS",
+      "name": "Jagitial"
+    },
+    {
+      "code": "Ejg3tXQBW7DqAzx4Vryt",
+      "state_code": "TS",
+      "name": "Jangoan"
+    },
+    {
+      "code": "Ezg3tXQBW7DqAzx4Vryt",
+      "state_code": "TS",
+      "name": "Jayashankar Bhupalapally"
+    },
+    {
+      "code": "Fzg3tXQBW7DqAzx4Vryt",
+      "state_code": "TS",
+      "name": "Jogulamba Gadwal"
+    },
+    {
+      "code": "FDg3tXQBW7DqAzx4Vryt",
+      "state_code": "TS",
+      "name": "Kamareddy"
+    },
+    {
+      "code": "zDg3tXQBW7DqAzx4Vryt",
+      "state_code": "TS",
+      "name": "Karimnagar"
+    },
+    {
+      "code": "yzg3tXQBW7DqAzx4Vryt",
+      "state_code": "TS",
+      "name": "Khammam"
+    },
+    {
+      "code": "FTg3tXQBW7DqAzx4Vryt",
+      "state_code": "TS",
+      "name": "Kumuram Bheem Asifabad"
+    },
+    {
+      "code": "GDg3tXQBW7DqAzx4Vryt",
+      "state_code": "TS",
+      "name": "Mahabubabad"
+    },
+    {
+      "code": "Wzg3tXQBW7DqAzx4Vr2t",
+      "state_code": "TS",
+      "name": "Mahabubnagar"
+    },
+    {
+      "code": "GTg3tXQBW7DqAzx4Vryt",
+      "state_code": "TS",
+      "name": "Mancherial"
+    },
+    {
+      "code": "RDg3tXQBW7DqAzx4Vryt",
+      "state_code": "TS",
+      "name": "Medak"
+    },
+    {
+      "code": "Gzg3tXQBW7DqAzx4Vryt",
+      "state_code": "TS",
+      "name": "Medchal Malkajgiri"
+    },
+    {
+      "code": "JjoHcXcBn1ysIAOzI5PX",
+      "state_code": "TS",
+      "name": "Mulugu"
+    },
+    {
+      "code": "HDg3tXQBW7DqAzx4Vryt",
+      "state_code": "TS",
+      "name": "Nagarkurnool"
+    },
+    {
+      "code": "ADg3tXQBW7DqAzx4Vr2t",
+      "state_code": "TS",
+      "name": "Nalgonda"
+    },
+    {
+      "code": "FToGcXcBn1ysIAOzR5Mf",
+      "state_code": "TS",
+      "name": "Narayanpet"
+    },
+    {
+      "code": "Hjg3tXQBW7DqAzx4Vryt",
+      "state_code": "TS",
+      "name": "Nirmal"
+    },
+    {
+      "code": "XDg3tXQBW7DqAzx4Vr2t",
+      "state_code": "TS",
+      "name": "Nizamabad"
+    },
+    {
+      "code": "JDg3tXQBW7DqAzx4Vryt",
+      "state_code": "TS",
+      "name": "Peddapalli"
+    },
+    {
+      "code": "Gjg3tXQBW7DqAzx4Vryt",
+      "state_code": "TS",
+      "name": "Rajanna Sircilla"
+    },
+    {
+      "code": "uTg3tXQBW7DqAzx4Vrut",
+      "state_code": "TS",
+      "name": "Ranga Reddy"
+    },
+    {
+      "code": "XTg3tXQBW7DqAzx4Vr2t",
+      "state_code": "TS",
+      "name": "Sangareddy"
+    },
+    {
+      "code": "HTg3tXQBW7DqAzx4Vryt",
+      "state_code": "TS",
+      "name": "Siddipet"
+    },
+    {
+      "code": "Hzg3tXQBW7DqAzx4Vryt",
+      "state_code": "TS",
+      "name": "Suryapet"
+    },
+    {
+      "code": "IDg3tXQBW7DqAzx4Vryt",
+      "state_code": "TS",
+      "name": "Vikarabad"
+    },
+    {
+      "code": "JTg3tXQBW7DqAzx4Vryt",
+      "state_code": "TS",
+      "name": "Wanaparthy"
+    },
+    {
+      "code": "NzoIcXcBn1ysIAOzaJOs",
+      "state_code": "TS",
+      "name": "Warangal"
+    },
+    {
+      "code": "Ijg3tXQBW7DqAzx4Vryt",
+      "state_code": "TS",
+      "name": "Yadadri Bhuvanagiri"
+    },
+    {
+      "code": "jjg3tXQBW7DqAzx4Vrus",
+      "state_code": "UK",
+      "name": "Almora"
+    },
+    {
+      "code": "VDg3tXQBW7DqAzx4Vryt",
+      "state_code": "UK",
+      "name": "Bageshwar"
+    },
+    {
+      "code": "Yzg3tXQBW7DqAzx4Vr2t",
+      "state_code": "UK",
+      "name": "Chamoli"
+    },
+    {
+      "code": "ZDg3tXQBW7DqAzx4Vr2t",
+      "state_code": "UK",
+      "name": "Champawat"
+    },
+    {
+      "code": "gzg3tXQBW7DqAzx4Vrus",
+      "state_code": "UK",
+      "name": "Dehradun"
+    },
+    {
+      "code": "VTg3tXQBW7DqAzx4Vryt",
+      "state_code": "UK",
+      "name": "Haridwar"
+    },
+    {
+      "code": "Vjg3tXQBW7DqAzx4Vryt",
+      "state_code": "UK",
+      "name": "Nainital"
+    },
+    {
+      "code": "Vzg3tXQBW7DqAzx4Vryt",
+      "state_code": "UK",
+      "name": "Pauri Garhwal"
+    },
+    {
+      "code": "WDg3tXQBW7DqAzx4Vryt",
+      "state_code": "UK",
+      "name": "Pithoragarh"
+    },
+    {
+      "code": "WTg3tXQBW7DqAzx4Vryt",
+      "state_code": "UK",
+      "name": "Rudraprayag"
+    },
+    {
+      "code": "Wjg3tXQBW7DqAzx4Vryt",
+      "state_code": "UK",
+      "name": "Tehri Garhwal"
+    },
+    {
+      "code": "Wzg3tXQBW7DqAzx4Vryt",
+      "state_code": "UK",
+      "name": "Udham Singh Nagar"
+    },
+    {
+      "code": "kTg3tXQBW7DqAzx4Vrus",
+      "state_code": "UK",
+      "name": "Uttarkashi"
+    },
+    {
+      "code": "-Tg3tXQBW7DqAzx4Vrqs",
+      "state_code": "UP",
+      "name": "Agra"
+    },
+    {
+      "code": "-jg3tXQBW7DqAzx4Vrqs",
+      "state_code": "UP",
+      "name": "Aligarh"
+    },
+    {
+      "code": "YTg3tXQBW7DqAzx4Vrus",
+      "state_code": "UP",
+      "name": "Ambedkar Nagar"
+    },
+    {
+      "code": "tDg3tXQBW7DqAzx4Vrqs",
+      "state_code": "UP",
+      "name": "Amethi"
+    },
+    {
+      "code": "ajg3tXQBW7DqAzx4Vr2t",
+      "state_code": "UP",
+      "name": "Amroha"
+    },
+    {
+      "code": "BTg3tXQBW7DqAzx4Vrus",
+      "state_code": "UP",
+      "name": "Auraiya"
+    },
+    {
+      "code": "dr6-uIsBC8DLsKxJelG2",
+      "state_code": "UP",
+      "name": "Ayodhya"
+    },
+    {
+      "code": "_Dg3tXQBW7DqAzx4Vrqs",
+      "state_code": "UP",
+      "name": "Azamgarh"
+    },
+    {
+      "code": "Bjg3tXQBW7DqAzx4Vrus",
+      "state_code": "UP",
+      "name": "Baghpat"
+    },
+    {
+      "code": "GTg3tXQBW7DqAzx4Vrus",
+      "state_code": "UP",
+      "name": "Bahraich"
+    },
+    {
+      "code": "YTg3tXQBW7DqAzx4Vr2t",
+      "state_code": "UP",
+      "name": "Ballia"
+    },
+    {
+      "code": "Zzg3tXQBW7DqAzx4Vrus",
+      "state_code": "UP",
+      "name": "Balrampur"
+    },
+    {
+      "code": "_jg3tXQBW7DqAzx4Vrqs",
+      "state_code": "UP",
+      "name": "Banda"
+    },
+    {
+      "code": "Bzg3tXQBW7DqAzx4Vrus",
+      "state_code": "UP",
+      "name": "Bara Banki"
+    },
+    {
+      "code": "CDg3tXQBW7DqAzx4Vrus",
+      "state_code": "UP",
+      "name": "Bareilly"
+    },
+    {
+      "code": "_zg3tXQBW7DqAzx4Vrqs",
+      "state_code": "UP",
+      "name": "Basti"
+    },
+    {
+      "code": "aDg3tXQBW7DqAzx4Vrus",
+      "state_code": "UP",
+      "name": "Bhadohi"
+    },
+    {
+      "code": "CTg3tXQBW7DqAzx4Vrus",
+      "state_code": "UP",
+      "name": "Bijnor"
+    },
+    {
+      "code": "_Tg3tXQBW7DqAzx4Vrqs",
+      "state_code": "UP",
+      "name": "Budaun"
+    },
+    {
+      "code": "Cjg3tXQBW7DqAzx4Vrus",
+      "state_code": "UP",
+      "name": "Bulandshahr"
+    },
+    {
+      "code": "Czg3tXQBW7DqAzx4Vrus",
+      "state_code": "UP",
+      "name": "Chandauli"
+    },
+    {
+      "code": "Qzg3tXQBW7DqAzx4Vrus",
+      "state_code": "UP",
+      "name": "Chitrakoot"
+    },
+    {
+      "code": "DDg3tXQBW7DqAzx4Vrus",
+      "state_code": "UP",
+      "name": "Deoria"
+    },
+    {
+      "code": "pTg3tXQBW7DqAzx4Vrqs",
+      "state_code": "UP",
+      "name": "Etah"
+    },
+    {
+      "code": "ADg3tXQBW7DqAzx4Vrus",
+      "state_code": "UP",
+      "name": "Etawah"
+    },
+    {
+      "code": "DTg3tXQBW7DqAzx4Vrus",
+      "state_code": "UP",
+      "name": "Farrukhabad"
+    },
+    {
+      "code": "Djg3tXQBW7DqAzx4Vrus",
+      "state_code": "UP",
+      "name": "Fatehpur"
+    },
+    {
+      "code": "Dzg3tXQBW7DqAzx4Vrus",
+      "state_code": "UP",
+      "name": "Firozabad"
+    },
+    {
+      "code": "EDg3tXQBW7DqAzx4Vrus",
+      "state_code": "UP",
+      "name": "Gautam Buddha Nagar"
+    },
+    {
+      "code": "Kjg3tXQBW7DqAzx4Vrus",
+      "state_code": "UP",
+      "name": "Ghaziabad"
+    },
+    {
+      "code": "Kzg3tXQBW7DqAzx4Vrus",
+      "state_code": "UP",
+      "name": "Ghazipur"
+    },
+    {
+      "code": "ATg3tXQBW7DqAzx4Vrus",
+      "state_code": "UP",
+      "name": "Gonda"
+    },
+    {
+      "code": "ETg3tXQBW7DqAzx4Vrus",
+      "state_code": "UP",
+      "name": "Gorakhpur"
+    },
+    {
+      "code": "Ajg3tXQBW7DqAzx4Vrus",
+      "state_code": "UP",
+      "name": "Hamirpur"
+    },
+    {
+      "code": "pzg3tXQBW7DqAzx4Vrqs",
+      "state_code": "UP",
+      "name": "Hapur"
+    },
+    {
+      "code": "Nzg3tXQBW7DqAzx4Vrus",
+      "state_code": "UP",
+      "name": "Hardoi"
+    },
+    {
+      "code": "2Dg3tXQBW7DqAzx4Vrqs",
+      "state_code": "UP",
+      "name": "Hathras"
+    },
+    {
+      "code": "LDg3tXQBW7DqAzx4Vrus",
+      "state_code": "UP",
+      "name": "Jalaun"
+    },
+    {
+      "code": "2jg3tXQBW7DqAzx4Vrqs",
+      "state_code": "UP",
+      "name": "Jaunpur"
+    },
+    {
+      "code": "4jg3tXQBW7DqAzx4Vrqs",
+      "state_code": "UP",
+      "name": "Jhansi"
+    },
+    {
+      "code": "ODg3tXQBW7DqAzx4Vrus",
+      "state_code": "UP",
+      "name": "Kannauj"
+    },
+    {
+      "code": "6Tg3tXQBW7DqAzx4Vrqs",
+      "state_code": "UP",
+      "name": "Kanpur Dehat"
+    },
+    {
+      "code": "yzg3tXQBW7DqAzx4Vrqs",
+      "state_code": "UP",
+      "name": "Kanpur Nagar"
+    },
+    {
+      "code": "Vjg3tXQBW7DqAzx4Vrus",
+      "state_code": "UP",
+      "name": "Kasganj"
+    },
+    {
+      "code": "Gjg3tXQBW7DqAzx4Vrus",
+      "state_code": "UP",
+      "name": "Kaushambi"
+    },
+    {
+      "code": "Gzg3tXQBW7DqAzx4Vrus",
+      "state_code": "UP",
+      "name": "Kheri"
+    },
+    {
+      "code": "7Dg3tXQBW7DqAzx4Vrqs",
+      "state_code": "UP",
+      "name": "Kushinagar"
+    },
+    {
+      "code": "HDg3tXQBW7DqAzx4Vrus",
+      "state_code": "UP",
+      "name": "Lalitpur"
+    },
+    {
+      "code": "HTg3tXQBW7DqAzx4Vrus",
+      "state_code": "UP",
+      "name": "Lucknow"
+    },
+    {
+      "code": "Ezg3tXQBW7DqAzx4Vrus",
+      "state_code": "UP",
+      "name": "Mahoba"
+    },
+    {
+      "code": "Hjg3tXQBW7DqAzx4Vrus",
+      "state_code": "UP",
+      "name": "Mahrajganj"
+    },
+    {
+      "code": "Hzg3tXQBW7DqAzx4Vrus",
+      "state_code": "UP",
+      "name": "Mainpuri"
+    },
+    {
+      "code": "Gr6-uIsBC8DLsKxJ91Ll",
+      "state_code": "UP",
+      "name": "Mathura"
+    },
+    {
+      "code": "FTg3tXQBW7DqAzx4Vrus",
+      "state_code": "UP",
+      "name": "Mau"
+    },
+    {
+      "code": "IDg3tXQBW7DqAzx4Vrus",
+      "state_code": "UP",
+      "name": "Meerut"
+    },
+    {
+      "code": "ITg3tXQBW7DqAzx4Vrus",
+      "state_code": "UP",
+      "name": "Mirzapur"
+    },
+    {
+      "code": "LTg3tXQBW7DqAzx4Vrus",
+      "state_code": "UP",
+      "name": "Moradabad"
+    },
+    {
+      "code": "Ijg3tXQBW7DqAzx4Vrus",
+      "state_code": "UP",
+      "name": "Muzaffarnagar"
+    },
+    {
+      "code": "Izg3tXQBW7DqAzx4Vrus",
+      "state_code": "UP",
+      "name": "Pilibhit"
+    },
+    {
+      "code": "JDg3tXQBW7DqAzx4Vrus",
+      "state_code": "UP",
+      "name": "Pratapgarh"
+    },
+    {
+      "code": "BDg3tXQBW7DqAzx4Vrus",
+      "state_code": "UP",
+      "name": "Prayagraj"
+    },
+    {
+      "code": "4zg3tXQBW7DqAzx4Vrqs",
+      "state_code": "UP",
+      "name": "Rae Bareli"
+    },
+    {
+      "code": "JTg3tXQBW7DqAzx4Vrus",
+      "state_code": "UP",
+      "name": "Rampur"
+    },
+    {
+      "code": "Yjg3tXQBW7DqAzx4Vr2t",
+      "state_code": "UP",
+      "name": "Saharanpur"
+    },
+    {
+      "code": "5Dg3tXQBW7DqAzx4Vrut",
+      "state_code": "UP",
+      "name": "Sambhal"
+    },
+    {
+      "code": "Jjg3tXQBW7DqAzx4Vrus",
+      "state_code": "UP",
+      "name": "Sant Kabir Nagar"
+    },
+    {
+      "code": "OTg3tXQBW7DqAzx4Vrus",
+      "state_code": "UP",
+      "name": "Shahjahanpur"
+    },
+    {
+      "code": "vDg3tXQBW7DqAzx4Vrut",
+      "state_code": "UP",
+      "name": "Shamli"
+    },
+    {
+      "code": "aTg3tXQBW7DqAzx4Vrus",
+      "state_code": "UP",
+      "name": "Shrawasti"
+    },
+    {
+      "code": "Jzg3tXQBW7DqAzx4Vrus",
+      "state_code": "UP",
+      "name": "Siddharthnagar"
+    },
+    {
+      "code": "Fzg3tXQBW7DqAzx4Vrus",
+      "state_code": "UP",
+      "name": "Sitapur"
+    },
+    {
+      "code": "PTg3tXQBW7DqAzx4Vrus",
+      "state_code": "UP",
+      "name": "Sonbhadra"
+    },
+    {
+      "code": "GDg3tXQBW7DqAzx4Vrus",
+      "state_code": "UP",
+      "name": "Sultanpur"
+    },
+    {
+      "code": "KDg3tXQBW7DqAzx4Vrus",
+      "state_code": "UP",
+      "name": "Unnao"
+    },
+    {
+      "code": "jr6_uIsBC8DLsKxJUVLd",
+      "state_code": "UP",
+      "name": "Varanasi"
+    },
+    {
+      "code": "-zg3tXQBW7DqAzx4Vryt",
+      "state_code": "WB",
+      "name": "Alipurduar"
+    },
+    {
+      "code": "Yjg3tXQBW7DqAzx4Vrus",
+      "state_code": "WB",
+      "name": "Bankura"
+    },
+    {
+      "code": "vjg3tXQBW7DqAzx4Vrqs",
+      "state_code": "WB",
+      "name": "Birbhum"
+    },
+    {
+      "code": "Ojg3tXQBW7DqAzx4Vrus",
+      "state_code": "WB",
+      "name": "Cooch Behar"
+    },
+    {
+      "code": "ADg3tXQBW7DqAzx4Vryt",
+      "state_code": "WB",
+      "name": "Dakshin Dinajpur"
+    },
+    {
+      "code": "gDg3tXQBW7DqAzx4Vryt",
+      "state_code": "WB",
+      "name": "Darjeeling"
+    },
+    {
+      "code": "eDg3tXQBW7DqAzx4Vryt",
+      "state_code": "WB",
+      "name": "Hooghly"
+    },
+    {
+      "code": "wzg3tXQBW7DqAzx4Vryt",
+      "state_code": "WB",
+      "name": "Howrah"
+    },
+    {
+      "code": "fTg3tXQBW7DqAzx4Vryt",
+      "state_code": "WB",
+      "name": "Jalpaiguri"
+    },
+    {
+      "code": "vzg3tXQBW7DqAzx4Vrqs",
+      "state_code": "WB",
+      "name": "Jhargram"
+    },
+    {
+      "code": "8zg3tXQBW7DqAzx4Vryt",
+      "state_code": "WB",
+      "name": "Kalimpong"
+    },
+    {
+      "code": "fDg3tXQBW7DqAzx4Vr2t",
+      "state_code": "WB",
+      "name": "Kolkata Sub Districts"
+    },
+    {
+      "code": "nzg3tXQBW7DqAzx4Vryt",
+      "state_code": "WB",
+      "name": "Malda"
+    },
+    {
+      "code": "vjg3tXQBW7DqAzx4Vrut",
+      "state_code": "WB",
+      "name": "Murshidabad"
+    },
+    {
+      "code": "I76-uIsBC8DLsKxJ_1Kp",
+      "state_code": "WB",
+      "name": "Nadia"
+    },
+    {
+      "code": "3Dg3tXQBW7DqAzx4Vrut",
+      "state_code": "WB",
+      "name": "North 24 Parganas"
+    },
+    {
+      "code": "9Tg3tXQBW7DqAzx4Vryt",
+      "state_code": "WB",
+      "name": "Paschim Bardhaman"
+    },
+    {
+      "code": "wjg3tXQBW7DqAzx4Vryt",
+      "state_code": "WB",
+      "name": "Paschim Medinipur"
+    },
+    {
+      "code": "Dzg3tXQBW7DqAzx4Vr2t",
+      "state_code": "WB",
+      "name": "Purba Bardhaman"
+    },
+    {
+      "code": "xjg3tXQBW7DqAzx4Vrut",
+      "state_code": "WB",
+      "name": "Purba Medinipur"
+    },
+    {
+      "code": "yjg3tXQBW7DqAzx4Vrut",
+      "state_code": "WB",
+      "name": "Purulia"
+    },
+    {
+      "code": "fL6_uIsBC8DLsKxJO1JB",
+      "state_code": "WB",
+      "name": "South 24 Parganas"
+    },
+    {
+      "code": "STg3tXQBW7DqAzx4Vrus",
+      "state_code": "WB",
+      "name": "Uttar Dinajpur"
+    }
+  ]
+}

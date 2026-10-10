@@ -22,6 +22,8 @@ import type { AdminIdentity } from "../lib/contracts";
 import { AdminSidebar } from "./navigation";
 import { useAdminRouteProgress, AdminPageTransition } from "./loading";
 
+import { CommandPalette } from "./CommandPalette";
+
 export function AdminShell({
   identity,
   children,
@@ -36,7 +38,8 @@ export function AdminShell({
     ADMIN_MODULES.find((m) => m.key === pathname.split("/")[1]) ||
     ADMIN_MODULES[0]!;
   const [open, setOpen] = useState(false),
-    [collapsed, setCollapsed] = useState(false);
+    [collapsed, setCollapsed] = useState(false),
+    [commandOpen, setCommandOpen] = useState(false);
 
   useEffect(() => {
     setOpen(false);
@@ -58,12 +61,12 @@ export function AdminShell({
     const shortcut = (event: KeyboardEvent) => {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
-        router.push("/search");
+        setCommandOpen((v) => !v);
       }
     };
     document.addEventListener("keydown", shortcut);
     return () => document.removeEventListener("keydown", shortcut);
-  }, [router]);
+  }, []);
 
   const initials = identity.name
     .split(/\s+/)
@@ -127,16 +130,17 @@ export function AdminShell({
             </nav>
           </div>
           <div className="topbar-actions">
-            <Link
+            <button
+              type="button"
               className="admin-search-trigger"
-              href="/search"
+              onClick={() => setCommandOpen(true)}
               aria-label="Search records"
-              title="Search records"
+              title="Quick command switcher (Ctrl K)"
             >
               <VaahanIcon name="search" size={16} />
               <span className="admin-search-trigger-text">Search records</span>
               <kbd>Ctrl K</kbd>
-            </Link>
+            </button>
             <a
               href="https://status.vaahansafe.com"
               target="_blank"
@@ -215,6 +219,11 @@ export function AdminShell({
           <span>Access controlled · Changes audited</span>
         </footer>
       </div>
+      <CommandPalette
+        open={commandOpen}
+        onOpenChange={setCommandOpen}
+        identity={identity}
+      />
     </div>
   );
 }

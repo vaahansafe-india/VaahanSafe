@@ -91,13 +91,35 @@ export function parseVaahanSafeQrPayload(raw: string): QrPayloadParseResult {
 
   // 4. Exact Host Allowlisting (no lookalikes!)
   const host = parsedUrl.hostname.toLowerCase();
-  if (!ALLOWED_HOSTS.has(host)) {
+  const legacyHost = host === "www.vaahansafe.com" || host === "vaahansafe.com";
+  if (!ALLOWED_HOSTS.has(host) && !legacyHost) {
     return { valid: false, rawPayload: trimmed, reason: "NOT_VAAHANSAFE_HOST" };
   }
 
   // 5. Path Structure Validation (must be single segment /[publicId])
   const pathname = parsedUrl.pathname.replace(/^\/+|\/+$/g, "");
   const segments = pathname ? pathname.split("/") : [];
+
+  // First offline batch printed the owned website's /v/VS-XXXXXXXX route.
+  // Restrict compatibility to that exact route; other website paths are rejected.
+  if (legacyHost) {
+    if (
+      parsedUrl.username ||
+      parsedUrl.password ||
+      parsedUrl.port ||
+      parsedUrl.search ||
+      parsedUrl.hash ||
+      segments.length !== 2 ||
+      segments[0] !== "v" ||
+      !/^VS-[A-Z0-9]{8}$/.test(segments[1] || "")
+    )
+      return { valid: false, rawPayload: trimmed, reason: "INVALID_PATH" };
+    return {
+      valid: true,
+      rawPayload: trimmed,
+      publicId: segments[1]!.slice(3),
+    };
+  }
 
   if (segments.length !== 1 || !segments[0]) {
     return { valid: false, rawPayload: trimmed, reason: "INVALID_PATH" };

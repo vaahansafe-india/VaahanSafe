@@ -19,8 +19,9 @@ export interface RecordScanEventParams {
 }
 
 function getHeader(
-  headers: Headers | Record<string, string | string[] | undefined> | null | undefined,
-  name: string
+  headers:
+    Headers | Record<string, string | string[] | undefined> | null | undefined,
+  name: string,
 ): string | null {
   if (!headers) return null;
   if ("get" in headers && typeof headers.get === "function") {
@@ -37,7 +38,8 @@ export function parseUserAgentFamily(userAgent: string): string {
   if (/iphone|ipad|ipod/i.test(userAgent)) return "Mobile Safari";
   if (/android.*mobile/i.test(userAgent)) return "Chrome Mobile";
   if (/android/i.test(userAgent)) return "Android Tablet";
-  if (/chrome/i.test(userAgent) && !/edge|opr/i.test(userAgent)) return "Chrome";
+  if (/chrome/i.test(userAgent) && !/edge|opr/i.test(userAgent))
+    return "Chrome";
   if (/safari/i.test(userAgent) && !/chrome/i.test(userAgent)) return "Safari";
   if (/firefox/i.test(userAgent)) return "Firefox";
   if (/edg/i.test(userAgent)) return "Edge";
@@ -49,19 +51,21 @@ export function parseUserAgentFamily(userAgent: string): string {
  * Safe to fire-and-forget or await in server components without error propagation.
  */
 export async function recordPublicScanEventSafely(
-  params: RecordScanEventParams
+  params: RecordScanEventParams,
 ): Promise<void> {
   const { db, qrId, state, headers } = params;
 
   try {
-    const purpose = getHeader(headers, "purpose") || getHeader(headers, "sec-purpose") || "";
+    const purpose =
+      getHeader(headers, "purpose") || getHeader(headers, "sec-purpose") || "";
     const userAgent = getHeader(headers, "user-agent") || "";
 
     // 1. Filter out prefetch and automated crawlers / bots
     const isPrefetch = purpose.toLowerCase() === "prefetch";
-    const isBot = /bot|crawler|spider|crawling|slurp|facebookexternalhit|bingpreview/i.test(
-      userAgent
-    );
+    const isBot =
+      /bot|crawler|spider|crawling|slurp|facebookexternalhit|bingpreview/i.test(
+        userAgent,
+      );
 
     if (isPrefetch || isBot) {
       return;
@@ -80,6 +84,9 @@ export async function recordPublicScanEventSafely(
       case "LOST_DAMAGED":
         scanResult = "RESOLVED_BLOCKED";
         break;
+      case "SETUP_REQUIRED":
+        // Staged offline inventory has no scan-history entitlement yet.
+        return;
       case "ACTIVATION_AVAILABLE":
         scanResult = "RESOLVED_INACTIVE";
         break;
@@ -91,7 +98,9 @@ export async function recordPublicScanEventSafely(
 
     const city = getHeader(headers, "cf-ipcity") || null;
     const region =
-      getHeader(headers, "cf-region") || getHeader(headers, "cf-ipregion") || null;
+      getHeader(headers, "cf-region") ||
+      getHeader(headers, "cf-ipregion") ||
+      null;
     const uaFamily = parseUserAgentFamily(userAgent);
     const eventId = `qse_${crypto.randomUUID().replace(/-/g, "").slice(0, 16)}`;
 
@@ -100,7 +109,7 @@ export async function recordPublicScanEventSafely(
     if (resolvedQrId && !resolvedQrId.startsWith("qr_")) {
       const sticker = await db.queryFirst<{ id: string }>(
         `SELECT id FROM qr_stickers WHERE public_id = ? OR id = ? LIMIT 1`,
-        [resolvedQrId, resolvedQrId]
+        [resolvedQrId, resolvedQrId],
       );
       if (!sticker) {
         // Unknown or non-existent QR identifier: skip inserting to respect foreign key constraint
@@ -115,7 +124,7 @@ export async function recordPublicScanEventSafely(
       `INSERT INTO qr_scan_events (
          id, qr_id, scan_type, result, city, state, user_agent_family, referrer_class, created_at
        ) VALUES (?, ?, 'PUBLIC_RESOLVE', ?, ?, ?, ?, 'DIRECT_SCAN', ?)`,
-      [eventId, resolvedQrId, scanResult, city, region, uaFamily, nowIso]
+      [eventId, resolvedQrId, scanResult, city, region, uaFamily, nowIso],
     );
 
     // Notify vehicle owner on active QR scans
@@ -135,7 +144,7 @@ export async function recordPublicScanEventSafely(
            JOIN qr_stickers s ON a.qr_id = s.id
            WHERE a.qr_id = ? AND a.ended_at IS NULL
            LIMIT 1`,
-          [resolvedQrId]
+          [resolvedQrId],
         );
 
         if (assignment?.user_id) {
@@ -150,12 +159,21 @@ export async function recordPublicScanEventSafely(
                source_id, dedupe_key, status, created_at, dispatched_at
              ) VALUES (?, 'QR_SCANNED', ?, 'SAFETY', 'HIGH', 'QR_SCANNED_V1', 1, '{}', 'SYSTEM', ?, ?, 'PROCESSED', ?, ?)
              ON CONFLICT(dedupe_key) DO NOTHING`,
-            [notifIntentId, assignment.user_id, eventId, dedupeKey, nowIso, nowIso]
+            [
+              notifIntentId,
+              assignment.user_id,
+              eventId,
+              dedupeKey,
+              nowIso,
+              nowIso,
+            ],
           );
 
           const locationText = [city, region].filter(Boolean).join(", ");
           const scanLocationStr = locationText ? ` near ${locationText}` : "";
-          const vehicleName = `${assignment.make || ""} ${assignment.model || ""}`.trim() || "vehicle";
+          const vehicleName =
+            `${assignment.make || ""} ${assignment.model || ""}`.trim() ||
+            "vehicle";
 
           await db.execute(
             `INSERT INTO notifications (
@@ -171,12 +189,15 @@ export async function recordPublicScanEventSafely(
               `Someone scanned the VaahanSafe QR on your ${vehicleName} (${assignment.registration_number})${scanLocationStr}.`,
               `/vehicles/${assignment.vehicle_id}`,
               nowIso,
-            ]
+            ],
           );
         }
       } catch (notifErr) {
         if (process.env.NODE_ENV !== "production") {
-          console.warn("[VaahanSafe QR Telemetry] Scan notification skipped:", notifErr);
+          console.warn(
+            "[VaahanSafe QR Telemetry] Scan notification skipped:",
+            notifErr,
+          );
         }
       }
     }

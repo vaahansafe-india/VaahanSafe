@@ -15,6 +15,7 @@ const nextConfig: NextConfig = {
     "@vaahansafe/database",
     "@vaahansafe/storage",
     "@vaahansafe/notifications",
+    "@vaahansafe/qr-core",
   ],
   async headers() {
     return [

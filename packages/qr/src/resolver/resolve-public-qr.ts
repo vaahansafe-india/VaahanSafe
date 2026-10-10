@@ -167,6 +167,15 @@ export async function resolvePublicQr(
   const publicState = mapInternalToPublicResolverState(row.qr_status);
 
   // 5. Non-Active States Handling
+  if (publicState === "SETUP_REQUIRED") {
+    return {
+      qrId: row.qr_id,
+      publicId: row.public_id,
+      visibleCode: row.visible_code,
+      state: publicState,
+      meta: getPublicResolverMeta(publicState, { publicId: row.public_id }),
+    };
+  }
   if (publicState === "ACTIVATION_AVAILABLE") {
     return {
       qrId: row.qr_id,
@@ -268,20 +277,22 @@ export async function resolvePublicQr(
         : await db!.query<ContactQueryResultRow>(
             `SELECT id, name, relationship_label, phone, priority, allow_call, allow_message
          FROM emergency_contacts
-         WHERE emergency_profile_id = ? AND is_enabled = 1 AND allow_call = 1
+         WHERE emergency_profile_id = ? AND is_enabled = 1 AND (allow_call = 1 OR allow_message = 1)
          ORDER BY priority ASC
          LIMIT 3`,
             [row.emergency_profile_id],
           );
 
       contacts = contactRows
-        .filter((c) => c && c.name && c.phone && c.allow_call === 1)
+        .filter((c) => c && c.name && c.phone && (c.allow_call === 1 || c.allow_message === 1))
         .map((c) => ({
           id: c.id,
           name: c.name.trim(),
           relationship: c.relationship_label?.trim() || "Emergency Contact",
           phone: c.phone.trim(),
           isPriority: c.priority === 1,
+          allowCall: c.allow_call === 1,
+          allowMessage: c.allow_message === 1,
         }));
     }
 

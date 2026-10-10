@@ -41,10 +41,10 @@ export function ScanPrivacyDialog({ isOpen, onClose }: ScanPrivacyDialogProps) {
             </span>
             <div>
               <div className="font-semibold text-foreground">
-                No Precise GPS or Location Tracking
+                Location and Photos Shared by Choice
               </div>
               <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">
-                We never request, track, or record the scanner&apos;s physical GPS coordinates. Any geographic metadata shown is coarse edge-network region only.
+                Ordinary scans use a coarse network region. A finder can explicitly share their GPS location and vehicle or parking photos when sending a report. GPS accuracy is shown; this is not continuous vehicle tracking. Report details are available for 90 days.
               </p>
             </div>
           </div>
@@ -74,7 +74,7 @@ export function ScanPrivacyDialog({ isOpen, onClose }: ScanPrivacyDialogProps) {
                 Privacy-Preserving Contact Relay
               </div>
               <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">
-                Emergency calls are relayed through secure routing. The scanning finder never sees the owner&apos;s personal mobile number.
+                The public safety page offers Call and WhatsApp only for emergency contacts whose permissions allow those actions. WhatsApp opens a message for the finder to review and send.
               </p>
             </div>
           </div>

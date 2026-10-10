@@ -34,6 +34,12 @@ export async function POST(
     assertSameOrigin(request);
     const { module } = await params;
     const identity = await requireAdmin(module, { stepUp: module === "flags" });
+    if (module === "distributors" || module === "retailers")
+      throw new AdminError(
+        400,
+        "PARTNER_WORKFLOW_REQUIRED",
+        "Use the dedicated distributor or retailer workspace to manage the supply network, location and contacts.",
+      );
     if (!canMutateModule(identity.role, module))
       throw new AdminError(
         403,
@@ -62,7 +68,13 @@ export async function POST(
     const allowed: Record<string, string[]> = {
       distributors: ["reference_code", "name", "city", "status"],
       retailers: ["reference_code", "name", "city", "status"],
-      support: ["reference_code", "subject", "priority", "status", "customer_user_id"],
+      support: [
+        "reference_code",
+        "subject",
+        "priority",
+        "status",
+        "customer_user_id",
+      ],
       incidents: ["title", "summary", "impact", "status"],
       documents: ["title", "asset_key", "status"],
       flags: ["name", "description", "enabled"],
@@ -85,8 +97,17 @@ export async function POST(
       values.kind = module === "distributors" ? "DISTRIBUTOR" : "RETAILER";
     if (module === "support") {
       if (values.customer_user_id === "") delete values.customer_user_id;
-      if (values.customer_user_id && !/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(values.customer_user_id))
-        throw new AdminError(400, "INVALID_CUSTOMER", "Choose a valid customer account ID.");
+      if (
+        values.customer_user_id &&
+        !/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(
+          values.customer_user_id,
+        )
+      )
+        throw new AdminError(
+          400,
+          "INVALID_CUSTOMER",
+          "Choose a valid customer account ID.",
+        );
     }
     if (
       module === "documents" &&

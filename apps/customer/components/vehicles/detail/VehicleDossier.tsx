@@ -60,6 +60,9 @@ export function VehicleDossier({ vehicle }: VehicleDossierProps) {
 
       {/* 03. Structured Fact Strip */}
       <VehicleFactStrip vehicle={vehicle} />
+      <Link href={`/vehicles/${vehicle.id}/documents`} className="flex min-h-16 items-center justify-between gap-3 rounded-md border border-border bg-card px-5 py-4 hover:bg-muted/30">
+        <span className="flex items-center gap-3"><VaahanIcon name="file" size={20}/><span><span className="block text-sm font-medium">Document Vault</span><span className="mt-1 block text-xs text-muted-foreground">Registration, insurance, PUC and other private stored copies</span></span></span><VaahanIcon name="arrow-right" size={17}/>
+      </Link>
 
       {/* 04. Split: Attention Surface & Readiness Compass */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">

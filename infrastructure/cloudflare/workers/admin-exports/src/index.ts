@@ -6,6 +6,9 @@ import {
   canExport,
   csvCell,
   exportRows,
+  INVENTORY_EXPORT_FIELDS,
+  DISTRIBUTOR_EXPORT_FIELDS,
+  RETAILER_EXPORT_FIELDS,
 } from "../../../../../apps/admin/lib/exports";
 interface Env {
   SUPABASE_URL: string;
@@ -104,32 +107,86 @@ export async function processExportJobs(env: Env) {
         Date.parse(job.expires_at) <= Date.now()
       )
         throw new Error("Export access expired");
-      const module = getAdminModule(job.module_key)!;
-      const lines = [module.fields!.map(csvCell).join(",")];
+      const exportModule = getAdminModule(job.module_key)!;
+      const lines = [
+        (job.module_key === "inventory"
+          ? INVENTORY_EXPORT_FIELDS
+          : job.module_key === "distributors"
+            ? DISTRIBUTOR_EXPORT_FIELDS
+            : job.module_key === "retailers"
+              ? RETAILER_EXPORT_FIELDS
+              : exportModule.fields!
+        )
+          .map(csvCell)
+          .join(","),
+      ];
       let count = 0;
-      for (let offset = 0; offset <= 10000; offset += 500) {
-        const query = new URLSearchParams({
-          select: module.fields!.join(","),
-          order: "id.asc",
-          limit: "500",
-          offset: String(offset),
-        });
-        if (job.module_key === "distributors" || job.module_key === "retailers")
-          query.set(
-            "kind",
-            `eq.${job.module_key === "distributors" ? "DISTRIBUTOR" : "RETAILER"}`,
+      if (job.module_key === "inventory") {
+        let cursor: Record<string, unknown> | null = null;
+        for (let page = 0; page <= 20; page++) {
+          const rows = await api<Record<string, unknown>[]>(
+            env,
+            "rpc/admin_inventory_export_page",
+            "POST",
+            { p_job: job.id, p_cursor: cursor },
           );
-        if (job.module_key === "fraud") query.set("outcome", "neq.SUCCESS");
-        const rows = await api<Record<string, unknown>[]>(
-          env,
-          `${module.table}?${query}`,
-        );
-        if (count + rows.length > 10000)
-          throw new Error("Export exceeds 10000-row limit");
-        lines.push(...exportRows(job.module_key, rows));
-        count += rows.length;
-        if (rows.length < 500) break;
-      }
+          if (count + rows.length > 10000)
+            throw new Error("Export exceeds 10000-row limit");
+          lines.push(...exportRows("inventory", rows));
+          count += rows.length;
+          if (rows.length < 500) break;
+          const last = rows.at(-1)!;
+          cursor = { created_at: last.created_at, id: last.id };
+        }
+      } else if (
+        job.module_key === "distributors" ||
+        job.module_key === "retailers"
+      ) {
+        let cursor: Record<string, unknown> | null = null;
+        for (let page = 0; page <= 20; page++) {
+          const rows = await api<Record<string, unknown>[]>(
+            env,
+            job.module_key === "distributors"
+              ? "rpc/admin_distributor_export_page"
+              : "rpc/admin_retailer_export_page",
+            "POST",
+            { p_job: job.id, p_cursor: cursor },
+          );
+          if (count + rows.length > 10000)
+            throw new Error("Export exceeds 10000-row limit");
+          lines.push(...exportRows(job.module_key, rows));
+          count += rows.length;
+          if (rows.length < 500) break;
+          const last = rows.at(-1)!;
+          cursor = { created_at: last.created_at, id: last.id };
+        }
+      } else
+        for (let offset = 0; offset <= 10000; offset += 500) {
+          const query = new URLSearchParams({
+            select: exportModule.fields!.join(","),
+            order: "id.asc",
+            limit: "500",
+            offset: String(offset),
+          });
+          if (
+            job.module_key === "distributors" ||
+            job.module_key === "retailers"
+          )
+            query.set(
+              "kind",
+              `eq.${job.module_key === "distributors" ? "DISTRIBUTOR" : "RETAILER"}`,
+            );
+          if (job.module_key === "fraud") query.set("outcome", "neq.SUCCESS");
+          const rows = await api<Record<string, unknown>[]>(
+            env,
+            `${exportModule.table}?${query}`,
+          );
+          if (count + rows.length > 10000)
+            throw new Error("Export exceeds 10000-row limit");
+          lines.push(...exportRows(job.module_key, rows));
+          count += rows.length;
+          if (rows.length < 500) break;
+        }
       const key = `admin-exports/${job.actor_id}/${job.id}.csv`;
       await env.EXPORT_STORAGE.put(key, lines.join("\r\n"), {
         httpMetadata: { contentType: "text/csv; charset=utf-8" },
@@ -141,8 +198,9 @@ export async function processExportJobs(env: Env) {
     }
   }
 }
-export default {
+const exportWorker = {
   async scheduled(_event: unknown, env: Env) {
     await processExportJobs(env);
   },
 };
+export default exportWorker;

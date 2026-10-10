@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import dynamic from "next/dynamic";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useCustomerRouter } from "@/lib/use-customer-router";
@@ -100,6 +100,10 @@ export function ScanHistoryController({
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
   const [isPrivacyDialogOpen, setIsPrivacyDialogOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const requestedReport = searchParams.get('report');
+  useEffect(()=>{
+    if(requestedReport){const found=initialData.events.find(event=>event.report?.id===requestedReport);if(found)setSelectedEvent(found);}
+  },[requestedReport,initialData.events]);
 
   // Sync state with URL params
   const updateUrlParams = (newFilters: ScanHistoryFilterState) => {

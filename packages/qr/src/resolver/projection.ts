@@ -18,6 +18,8 @@ export interface PublicEmergencyContact {
   relationship: string;
   phone: string;
   isPriority: boolean;
+  allowCall?: boolean;
+  allowMessage?: boolean;
 }
 
 /**

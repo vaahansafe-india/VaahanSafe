@@ -23,6 +23,7 @@
  */
 
 export type QrLifecycleState =
+  | "INVENTORY"
   | "PRINTED"
   | "IN_TRANSIT_DISTRIBUTOR"
   | "WITH_DISTRIBUTOR"
@@ -35,6 +36,7 @@ export type QrLifecycleState =
   | "BLOCKED";
 
 export const CANONICAL_QR_LIFECYCLE_STATES: readonly QrLifecycleState[] = [
+  "INVENTORY",
   "PRINTED",
   "IN_TRANSIT_DISTRIBUTOR",
   "WITH_DISTRIBUTOR",
@@ -56,6 +58,7 @@ export function isValidLifecycleState(state: string): state is QrLifecycleState 
  */
 export function isInventoryState(state: QrLifecycleState): boolean {
   return [
+    "INVENTORY",
     "PRINTED",
     "IN_TRANSIT_DISTRIBUTOR",
     "WITH_DISTRIBUTOR",

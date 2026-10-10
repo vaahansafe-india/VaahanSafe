@@ -245,9 +245,12 @@ export async function POST(req: NextRequest) {
             id: string;
             public_id: string;
           }>(
-            `SELECT id, public_id
-             FROM qr_stickers
-             WHERE status IN ('PRINTED', 'ALLOCATED')
+            `SELECT s.id, s.public_id
+             FROM qr_stickers s JOIN qr_batches b ON b.id = s.batch_id
+             WHERE s.status = 'PRINTED' AND b.inventory_channel = 'ONLINE_SYSTEM'
+               AND s.current_distributor_id IS NULL AND s.current_retailer_id IS NULL
+               AND NOT EXISTS (SELECT 1 FROM qr_assignments a WHERE a.qr_id = s.id AND a.ended_at IS NULL)
+               AND NOT EXISTS (SELECT 1 FROM qr_reservations r WHERE r.qr_sticker_id = s.id AND r.status IN ('RESERVED', 'ALLOCATED'))
              LIMIT 1`,
           );
           const candidate = availableStickers[0];

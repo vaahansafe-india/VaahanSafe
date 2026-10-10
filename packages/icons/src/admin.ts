@@ -16,6 +16,7 @@ export const adminIcons = {
   chart: ChartLineData01Icon,
   settings: Settings01Icon,
   database: Database01Icon,
+  storage: Database01Icon,
   server: CloudServerIcon,
   activity: Activity01Icon,
   refresh: RefreshIcon,

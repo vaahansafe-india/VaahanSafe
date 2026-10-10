@@ -34,6 +34,20 @@ export class Msg91WhatsAppAdapter implements IWhatsAppService, WhatsAppProvider 
     private namespace = process.env.MSG91_WHATSAPP_NAMESPACE || "",
   ) {}
 
+  /** Inspect provider approval without sending a message. Unknown contracts fail closed. */
+  async getTemplateApproval(name: 'vhn_vehicle_report_v1' | 'vhn_vehicle_emergency_report_v1'): Promise<'PENDING'|'APPROVED'|'REJECTED'|'PAUSED'|'DISABLED'> {
+    const response=await fetch(`https://control.msg91.com/api/v5/whatsapp/get-template-client/${this.senderNumber}?template_name=${name}&pagination=false`,{
+      headers:{authkey:this.authKey},signal:AbortSignal.timeout(8000),
+    });
+    const data=await response.json() as {status?:string;hasError?:boolean;data?:{name:string;namespace:string;languages:{language:string;status:string;is_disabled:number;variables:string[]}[]}[]};
+    if(!response.ok||data.status!=='success'||data.hasError||!Array.isArray(data.data))return 'PENDING';
+    const contract=data.data.find(t=>t.name===name&&t.namespace===this.namespace)?.languages?.find(t=>t.language==='en');
+    if(!contract||typeof contract.status!=='string'||!Array.isArray(contract.variables)||contract.variables.join(',')!=='body_1,body_2,body_3,body_4,body_5')return 'PENDING';
+    if(contract.is_disabled)return 'DISABLED';
+    const status=contract.status.toUpperCase();
+    return ['APPROVED','REJECTED','PAUSED','DISABLED'].includes(status)?status as 'APPROVED'|'REJECTED'|'PAUSED'|'DISABLED':'PENDING';
+  }
+
   async sendMessage(options: SendWhatsAppMessageOptions): Promise<WhatsAppMessageResult> {
     const raw = options.recipientPhone.replace(/[\s()+-]/g, "");
     const phone = /^[6-9]\d{9}$/.test(raw) ? `91${raw}` : raw;

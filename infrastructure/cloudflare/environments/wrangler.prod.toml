@@ -20,6 +20,10 @@ binding = "PRIVATE_STORAGE"
 bucket_name = "vaahansafe-prod-private"
 
 [[r2_buckets]]
+binding = "SCAN_REPORT_STORAGE"
+bucket_name = "vaahansafe-prod-private"
+
+[[r2_buckets]]
 binding = "EXPORT_STORAGE"
 bucket_name = "vaahansafe-prod-exports"
 

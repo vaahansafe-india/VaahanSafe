@@ -5,9 +5,10 @@ import type { PublicEmergencyContact } from "@vaahansafe/qr-core";
 export interface SecondarySafetyContactProps {
   contact: PublicEmergencyContact;
   index: number;
+  publicId?: string;
 }
 
-export function SecondarySafetyContact({ contact, index }: SecondarySafetyContactProps) {
+export function SecondarySafetyContact({ contact, index, publicId }: SecondarySafetyContactProps) {
   return (
     <div className="w-full p-3.5 rounded-xl bg-card border border-border/70 flex items-center justify-between gap-3 shadow-xs">
       <div className="space-y-0.5 min-w-0 flex-1">
@@ -24,7 +25,7 @@ export function SecondarySafetyContact({ contact, index }: SecondarySafetyContac
         </p>
       </div>
 
-      <ContactAction phone={contact.phone} isPrimary={false} label="Call" />
+      <ContactAction phone={contact.phone} isPrimary={false} label="Call" allowCall={contact.allowCall} allowMessage={contact.allowMessage} publicId={publicId} />
     </div>
   );
 }

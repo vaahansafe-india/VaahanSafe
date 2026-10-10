@@ -13,7 +13,7 @@ async function deriveKey(keyHex: string, salt: Uint8Array) {
     throw new Error("Activation export encryption is not configured");
   const key = await crypto.subtle.importKey(
     "raw",
-    bytes(keyHex) as unknown as BufferSource,
+    bytes(keyHex) as any,
     "HKDF",
     false,
     ["deriveKey"],
@@ -22,8 +22,8 @@ async function deriveKey(keyHex: string, salt: Uint8Array) {
     {
       name: "HKDF",
       hash: "SHA-256",
-      salt: salt as unknown as BufferSource,
-      info: encoder.encode(purpose) as unknown as BufferSource,
+      salt: salt as any,
+      info: encoder.encode(purpose) as any,
     },
     key,
     { name: "AES-GCM", length: 256 },
@@ -42,13 +42,11 @@ export async function encryptActivationManifest(
   const data = await crypto.subtle.encrypt(
     {
       name: "AES-GCM",
-      iv: iv as unknown as BufferSource,
-      additionalData: encoder.encode(
-        `${purpose}:${batchId}`,
-      ) as unknown as BufferSource,
+      iv: iv as any,
+      additionalData: encoder.encode(`${purpose}:${batchId}`) as any,
     },
     key,
-    encoder.encode(plaintext) as unknown as BufferSource,
+    encoder.encode(plaintext) as any,
   );
   return JSON.stringify({
     version: "v1",
@@ -79,15 +77,13 @@ export async function decryptActivationManifest(
   const data = await crypto.subtle.decrypt(
     {
       name: "AES-GCM",
-      iv: iv as unknown as BufferSource,
-      additionalData: encoder.encode(
-        `${purpose}:${batchId}`,
-      ) as unknown as BufferSource,
+      iv: iv as any,
+      additionalData: encoder.encode(`${purpose}:${batchId}`) as any,
     },
     key,
     Uint8Array.from(atob(envelope.ciphertext), (c) =>
       c.charCodeAt(0),
-    ) as unknown as BufferSource,
+    ) as any,
   );
   return new TextDecoder().decode(data);
 }

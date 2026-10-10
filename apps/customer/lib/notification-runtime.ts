@@ -1,5 +1,5 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
-import { SupabaseNotificationOutbox } from "@vaahansafe/database";
+import { SupabaseNotificationOutbox, getAuthoritativeDatabaseClient } from "@vaahansafe/database";
 import {
   Msg91WhatsAppAdapter,
   SmtpEmailAdapter,
@@ -25,9 +25,15 @@ export function verifyNotificationSchedule(request: Request, now = Date.now()) {
 }
 export async function runNotificationDelivery() {
   const smtp = new SmtpEmailAdapter();
+  const whatsapp = new Msg91WhatsAppAdapter();
+  await Promise.all(['vhn_vehicle_report_v1','vhn_vehicle_emergency_report_v1'].map(async name=>{
+    let status:string='PENDING';
+    try {status=await whatsapp.getTemplateApproval(name as 'vhn_vehicle_report_v1'|'vhn_vehicle_emergency_report_v1');}catch{console.warn('[ScanReport] Template approval check unavailable');}
+    await getAuthoritativeDatabaseClient().execute('UPDATE scan_report_template_approvals SET status = ?, checked_at = clock_timestamp() WHERE template_name = ?',[status,name]);
+  }));
   return drainNotificationOutbox({
     store: new SupabaseNotificationOutbox(),
-    whatsapp: new Msg91WhatsAppAdapter(),
+    whatsapp,
     email: {
       sendEmail: async (options) => {
         const result = await smtp.sendEmail(options);

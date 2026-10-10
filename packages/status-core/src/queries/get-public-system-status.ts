@@ -8,7 +8,8 @@ interface ProbeResult {
   latencyMs: number;
   ok: boolean;
   statusText: string;
-  targetUrl: string;
+  state?: ServiceState;
+  checkedAt?: string;
 }
 
 async function getDatabaseHeartbeat(): Promise<NonNullable<PublicSystemStatusDto["databaseHeartbeat"]>> {
@@ -63,11 +64,11 @@ async function getDatabaseHeartbeat(): Promise<NonNullable<PublicSystemStatusDto
 /**
  * Probes an HTTP endpoint measuring roundtrip latency in milliseconds.
  */
-async function probeEndpoint(url: string, timeoutMs = 3000): Promise<ProbeResult> {
+async function probeEndpoint(url: string, timeoutMs = 3000, scheduledCapability = false): Promise<ProbeResult> {
   const start = Date.now();
   try {
     let res = await fetch(url, {
-      method: "HEAD",
+      method: scheduledCapability ? "GET" : "HEAD",
       signal: AbortSignal.timeout(timeoutMs),
       redirect: "manual",
       headers: { "Cache-Control": "no-cache" },
@@ -81,11 +82,25 @@ async function probeEndpoint(url: string, timeoutMs = 3000): Promise<ProbeResult
       });
     }
     const latency = Math.max(1, Date.now() - start);
+    if (scheduledCapability) {
+      const data = await res.json() as { status?: string; checkedAt?: string; latencyMs?: number };
+      const age = data.checkedAt ? Date.now() - Date.parse(data.checkedAt) : Number.NaN;
+      const fresh = Number.isFinite(age) && age >= -120_000 && age <= 25 * 60_000;
+      const state: ServiceState = !fresh ? "UNKNOWN"
+        : data.status === "OPERATIONAL" && res.ok ? "OPERATIONAL"
+        : data.status === "DOWN" ? "PARTIAL OUTAGE"
+        : data.status === "DEGRADED" ? "DEGRADED" : "UNKNOWN";
+      return {
+        latencyMs: fresh && typeof data.latencyMs === "number" && Number.isFinite(data.latencyMs) && data.latencyMs >= 0 ? data.latencyMs : latency,
+        ok: state === "OPERATIONAL", state,
+        checkedAt: fresh ? data.checkedAt : undefined,
+        statusText: `Scheduled check: ${state}`,
+      };
+    }
     return {
       latencyMs: latency,
       ok: res.ok,
       statusText: `HTTP ${res.status}`,
-      targetUrl: url,
     };
   } catch {
     const latency = Math.max(1, Date.now() - start);
@@ -93,7 +108,6 @@ async function probeEndpoint(url: string, timeoutMs = 3000): Promise<ProbeResult
       latencyMs: latency,
       ok: false,
       statusText: "Connection Timeout / Unreachable",
-      targetUrl: url,
     };
   }
 }
@@ -140,7 +154,10 @@ export async function getPublicSystemStatus(db?: DatabaseClient): Promise<Public
         if (appUrl) probe = await probeEndpoint(appUrl);
         break;
       case "payments":
-        if (process.env.STATUS_PAYMENTS_HEALTH_URL) probe = await probeEndpoint(process.env.STATUS_PAYMENTS_HEALTH_URL);
+        if (process.env.STATUS_PAYMENTS_HEALTH_URL) probe = await probeEndpoint(process.env.STATUS_PAYMENTS_HEALTH_URL, 5000, true);
+        break;
+      case "customer-analytics":
+        if (process.env.STATUS_ANALYTICS_HEALTH_URL) probe = await probeEndpoint(process.env.STATUS_ANALYTICS_HEALTH_URL, 5000, true);
         break;
       case "retail-activation":
         if (activateUrl) probe = await probeEndpoint(activateUrl);
@@ -149,8 +166,9 @@ export async function getPublicSystemStatus(db?: DatabaseClient): Promise<Public
         if (qrUrl) probe = await probeEndpoint(qrUrl);
         break;
       case "notifications":
+        if (process.env.STATUS_NOTIFICATIONS_HEALTH_URL) probe = await probeEndpoint(process.env.STATUS_NOTIFICATIONS_HEALTH_URL, 5000, true);
+        break;
       default:
-        if (process.env.STATUS_NOTIFICATIONS_HEALTH_URL) probe = await probeEndpoint(process.env.STATUS_NOTIFICATIONS_HEALTH_URL);
         break;
     }
     return { slug: service.slug, probe };
@@ -169,9 +187,9 @@ export async function getPublicSystemStatus(db?: DatabaseClient): Promise<Public
   // 4. Enrich Services with Real Live Telemetry
   const enrichedServices: PublicStatusServiceDto[] = baseServices.map((service) => {
     const probe = probeMap.get(service.slug);
-    let state: ServiceState = !probe ? "UNKNOWN"
+    let state: ServiceState = probe?.state ?? (!probe ? "UNKNOWN"
       : !probe.ok ? "DEGRADED"
-      : service.state === "UNKNOWN" ? "OPERATIONAL" : service.state;
+      : service.state === "UNKNOWN" ? "OPERATIONAL" : service.state);
 
     if (activeMaintenance.some((window) => window.state === "IN_PROGRESS"
       && window.affectedServiceSlugs.includes(service.slug))
@@ -193,8 +211,7 @@ export async function getPublicSystemStatus(db?: DatabaseClient): Promise<Public
       ...service,
       state,
       latencyMs: probe?.latencyMs,
-      lastProbeAt: probe ? now.toISOString() : undefined,
-      targetUrl: probe?.targetUrl,
+      lastProbeAt: probe?.state ? probe.checkedAt : probe ? now.toISOString() : undefined,
       probeStatus: probe?.statusText,
     };
   });

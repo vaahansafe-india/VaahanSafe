@@ -60,6 +60,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     const now = new Date().toISOString();
 
     if (!profile) {
+      if(contactId)return NextResponse.json({error:'This contact is no longer available. Please refresh and try again.'},{status:404});
       const newProfileId = `ep_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
       await db.execute(
         `INSERT INTO emergency_profiles (
@@ -75,7 +76,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
 
     if (contactId && typeof contactId === "string") {
       // Update existing contact
-      await db.execute(
+      const updated = await db.execute(
         `UPDATE emergency_contacts SET
            name = ?,
            relationship_label = ?,
@@ -97,6 +98,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
           profile.id,
         ]
       );
+      if(updated.rowsAffected!==1)return NextResponse.json({error:'This contact is no longer available. Please refresh and try again.'},{status:404});
     } else {
       // Insert new contact
       const newContactId = `cnt_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;

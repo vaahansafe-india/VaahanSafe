@@ -1,0 +1,23 @@
+import {beforeEach,describe,it,expect,vi} from 'vitest';
+import {NextRequest} from 'next/server';
+const f=vi.hoisted(()=>({analytics:vi.fn(),auth:vi.fn(),query:vi.fn()}));
+vi.mock('@/features/analytics/server',()=>({getAnalytics:f.analytics,AnalyticsError:class AnalyticsError extends Error{constructor(public status:number){super('Unavailable');}}}));
+vi.mock('@/lib/session',()=>({getAuthenticatedCustomer:f.auth}));
+vi.mock('@vaahansafe/database',()=>({getAuthoritativeDatabaseClient:()=>({queryFirst:f.query})}));
+vi.mock('@/features/analytics/filters',async()=>await import('../apps/customer/features/analytics/filters'));
+vi.mock('@/features/analytics/sql',async()=>await import('../apps/customer/features/analytics/sql'));
+vi.mock('@/features/analytics/csv',async()=>await import('../apps/customer/features/analytics/csv'));
+vi.mock('@/features/analytics/scan-model',async()=>await import('../apps/customer/features/analytics/scan-model'));
+import {GET as scanExport} from '../apps/customer/app/api/analytics/scan-export/route';
+import {GET as storageExport} from '../apps/customer/app/api/analytics/storage-export/route';
+import {AnalyticsError} from '@/features/analytics/server';
+const owner='00000000-0000-4000-8000-000000000001',session='00000000-0000-4000-8000-000000000002',scope=owner+':'+session;
+beforeEach(()=>{f.analytics.mockReset();f.auth.mockReset().mockResolvedValue({phoneVerified:true,user:{id:owner},session:{id:session}});f.query.mockReset();f.analytics.mockResolvedValue({scope,data:{total:1,successful:1,partial:0,unsuccessful:0,previousTotal:0,versions:{currentBytes:100,previousBytes:0},byVehicle:[]}});});
+const request=(type:string)=>new NextRequest('http://localhost:3001/api/analytics/export?type='+type);
+describe('Private server exports',()=>{
+ it.each([scanExport,storageExport])('preserves authorization failure and never queries raw records',async handler=>{f.analytics.mockRejectedValue(new AnalyticsError(401));const r=await handler(request('summary'));expect(r.status).toBe(401);expect(f.query).not.toHaveBeenCalled();expect(r.headers.get('Cache-Control')).toBe('private, no-store');});
+ it.each([[scanExport,'history'],[storageExport,'documents']] as const)('rejects an account/session transition between checks',async(handler,type)=>{f.auth.mockResolvedValue({phoneVerified:true,user:{id:owner},session:{id:'different'}});const r=await handler(request(type));expect(r.status).toBe(401);expect(f.query).not.toHaveBeenCalled();});
+ it.each([[scanExport,'history','events'],[storageExport,'documents','documents']] as const)('bounds raw export records at 1,000',async(handler,type,key)=>{f.query.mockResolvedValue({data:{[key]:Array.from({length:1001},()=>({}))}});const r=await handler(request(type));expect(r.status).toBe(400);expect(await r.text()).toContain('1,000');});
+ it('returns only safe selected scan fields and neutralizes a malicious CSV title',async()=>{f.query.mockResolvedValue({data:{events:[{timestamp:'2026-10-10T00:00:00Z',qrLabel:'=CMD()',vehicleName:'Vehicle',vehicleLabel:'AP••••1234',state:'Telangana',city:null,result:'RESOLVED_ACTIVE',device:'Chrome',ip_hash:'PRIVATE',token:'SECRET'}]}});const r=await scanExport(request('history'));expect(r.status).toBe(200);expect(r.headers.get('X-VaahanSafe-Scope')).toBe(scope);expect(r.headers.get('X-Content-Type-Options')).toBe('nosniff');const csv=await r.text();expect(csv).toContain("'=CMD()");expect(csv).not.toContain('PRIVATE');expect(csv).not.toContain('SECRET');});
+ it('rejects unsupported report types before invoking services',async()=>{const r=await scanExport(request('all-secrets'));expect(r.status).toBe(400);expect(f.analytics).not.toHaveBeenCalled();});
+});

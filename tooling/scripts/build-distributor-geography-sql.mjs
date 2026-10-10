@@ -1,0 +1,10 @@
+import fs from 'node:fs/promises';
+const path='supabase/migrations/20261010062510_distributor_operations.sql';
+const directory=JSON.parse(await fs.readFile('apps/admin/features/geography/india-directory.json','utf8'));
+const quote=v=>`'${v.replaceAll("'","''")}'`;
+const marker='-- GEOGRAPHY_REFERENCE_DATA: generated from the complete official IGOD snapshot by tooling.';
+let sql=await fs.readFile(path,'utf8');sql=sql.slice(0,sql.indexOf(marker))+marker+'\n';
+sql+='-- Source: '+directory.source+'; snapshot '+directory.version+'; identifiers are IGOD, not LGD codes.\n';
+sql+='INSERT INTO public.admin_geo_states(code,name,source_version) VALUES\n'+directory.states.map(s=>`(${quote(s.code)},${quote(s.name)},${quote(directory.version)})`).join(',\n')+';\n';
+sql+='INSERT INTO public.admin_geo_districts(code,state_code,name,source_version) VALUES\n'+directory.districts.map(d=>`(${quote(d.code)},${quote(d.state_code)},${quote(d.name)},${quote(directory.version)})`).join(',\n')+';\nCOMMIT;\n';
+await fs.writeFile(path,sql);console.log('Generated geography reference inserts:',directory.states.length,directory.districts.length);

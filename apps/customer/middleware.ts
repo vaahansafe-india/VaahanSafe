@@ -18,6 +18,10 @@ export function middleware(request: NextRequest) {
     pathname === "/auth/callback" ||
     pathname.startsWith("/images") ||
     pathname.startsWith("/fonts/") ||
+    pathname === "/pdfjs/pdf.worker-6.4.299.min.mjs" ||
+    pathname.startsWith("/pdfjs/6.4.299/") ||
+    pathname === "/shared/documents" ||
+    pathname === "/api/document-shares/access" ||
     pathname.match(/\.(png|jpg|jpeg|svg|webp|ico|txt)$/) ||
     pathname === "/favicon.ico" ||
     isDiscoveryPath(pathname)

@@ -52,7 +52,7 @@ export const CUSTOMER_QUERY_PARAMS: Record<
   vehicles: [],
   orders: [],
   payments: [],
-  "scan-history": ["period", "vehicle", "qr", "type", "device", "search"],
+  "scan-history": ["period", "vehicle", "qr", "type", "device", "search", "report"],
   notifications: ["view", "status", "category", "vehicle", "attention", "q"],
   "emergency-contacts": [],
   subscription: ["vehicle"],

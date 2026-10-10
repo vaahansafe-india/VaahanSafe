@@ -64,6 +64,16 @@ export const EmergencyScanAlertVariablesSchema = z.object({
 });
 export type EmergencyScanAlertVariables = z.infer<typeof EmergencyScanAlertVariablesSchema>;
 
+export const VehicleScanReportVariablesSchema = z.object({
+  vehicleMaskedReg: z.string().min(1).max(24),
+  scannedAtFormatted: z.string().min(1).max(100),
+  reportId: z.string().regex(/^report_[a-f0-9-]{36}$/),
+  reason: z.enum(['PARKING','EMERGENCY','LIGHTS_ON','DAMAGE','OTHER']),
+  locationText: z.string().min(1).max(400),
+  photoCount: z.number().int().min(0).max(3),
+});
+export type VehicleScanReportVariables = z.infer<typeof VehicleScanReportVariablesSchema>;
+
 export const SecurityChangedVariablesSchema = z.object({
   changeType: z.string().min(1),
   occurredAt: z.string().min(1),

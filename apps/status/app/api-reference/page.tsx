@@ -14,6 +14,7 @@ const fields = [
   { name: "headline / description", purpose: "Plain-language summary of the current condition." },
   { name: "generatedAt / isStale", purpose: "Response timestamp and freshness signal." },
   { name: "services", purpose: "Public capabilities, their current states, and available probe details." },
+  { name: "services[].lastProbeAt / latencyMs", purpose: "For payments and notifications, the scheduled provider check time and duration. Samples older than 25 minutes report UNKNOWN." },
   { name: "serviceHistories", purpose: "Ninety daily marks per service with actual recorded check counts." },
   { name: "activeIncidents / activeMaintenance", purpose: "Published current events and planned windows." },
   { name: "databaseHeartbeat", purpose: "Direct database status and scheduled heartbeat details, when available." },

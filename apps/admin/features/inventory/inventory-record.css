@@ -1,0 +1,897 @@
+.inventory-full-detail {
+  max-width: 1240px;
+  padding-bottom: 32px;
+}
+.inventory-full-detail .record-card-heading h2 {
+  font-size: 14px;
+}
+.inventory-full-detail .record-facts > div {
+  font-size: 12px;
+}
+.inventory-full-detail .record-facts dt {
+  font-size: 11px;
+}
+.inventory-full-detail .record-context {
+  font-size: 12px;
+}
+.inventory-full-detail .record-event-list strong,
+.inventory-full-detail .record-audit-list strong {
+  font-size: 12px;
+}
+.inventory-full-detail .record-event-list p,
+.inventory-full-detail .record-audit-list p,
+.inventory-full-detail .record-body-copy,
+.inventory-full-detail .record-security-row p {
+  font-size: 11px;
+}
+.inventory-full-detail .record-footnote {
+  font-size: 11px;
+}
+.inventory-full-detail .record-summary small {
+  font-size: 11px;
+}
+.inventory-full-detail .record-summary span {
+  font-size: 10px;
+}
+.inventory-full-detail .record-section-nav {
+  font-size: 12px;
+}
+.inventory-full-detail .record-section-nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+}
+@media (max-width: 600px) {
+  .inventory-full-detail .record-card-heading h2 {
+    font-size: 13px;
+  }
+  .inventory-full-detail .record-facts > div {
+    font-size: 12px;
+  }
+  .inventory-full-detail .record-facts dt {
+    font-size: 11px;
+  }
+  .inventory-full-detail .record-context {
+    font-size: 10px;
+  }
+  .inventory-full-detail .record-summary span {
+    font-size: 9px;
+  }
+  .inventory-full-detail .record-summary small {
+    font-size: 10px;
+  }
+  .inventory-full-detail .record-summary strong {
+    font-size: 16px;
+  }
+  .inventory-full-detail .record-section-nav {
+    font-size: 11px;
+  }
+  .inventory-full-detail .record-copy {
+    font-size: 10px;
+    min-height: 28px;
+  }
+  .inventory-full-detail .record-card-heading > span {
+    font-size: 9px;
+  }
+  .inventory-full-detail .record-technical summary {
+    font-size: 11px;
+  }
+}
+.inventory-full-detail .inventory-header {
+  margin-bottom: 16px;
+}
+.inventory-full-detail .inventory-header h1 {
+  font-size: 36px;
+  letter-spacing: -0.02em;
+}
+.inventory-full-detail .inventory-header > div {
+  min-width: 0;
+}
+.inventory-full-detail .inventory-back {
+  margin-bottom: 16px;
+}
+.record-context {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  color: #848a7a;
+  font-size: 11px;
+  padding-bottom: 20px;
+}
+.record-context > span + span {
+  border-left: 1px solid #dadfd1;
+  padding-left: 12px;
+}
+.record-context strong {
+  font-weight: 500;
+  color: #526344;
+}
+.record-context .inventory-state {
+  font-size: 10px;
+  padding: 5px 9px;
+}
+.record-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0;
+  border: 1px solid #deddd3;
+  border-radius: 8px;
+  background: #fffefb;
+  margin-bottom: 20px;
+}
+.record-summary > div {
+  padding: 17px 20px;
+  border-right: 1px solid #e8e7df;
+  min-width: 0;
+}
+.record-summary > div:last-child {
+  border: 0;
+}
+.record-summary span {
+  font-size: 9px;
+  color: #909582;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  display: block;
+}
+.record-summary strong {
+  font-size: 17px;
+  font-weight: 500;
+  display: block;
+  color: #3a4c30;
+  margin: 7px 0;
+}
+.record-summary small {
+  font-size: 10px;
+  color: #919685;
+  line-height: 1.6;
+  display: block;
+}
+.record-section-nav {
+  display: flex;
+  gap: 22px;
+  overflow-x: auto;
+  white-space: nowrap;
+  border-bottom: 1px solid #deddd3;
+  margin-bottom: 22px;
+  font-size: 11px;
+  padding: 0 2px 12px;
+  scrollbar-width: thin;
+}
+.record-section-nav a {
+  padding: 7px 0;
+  color: #7b846c;
+}
+.record-section-nav a:hover {
+  color: #2d4427;
+}
+.record-section-nav a:focus-visible {
+  outline: 2px solid #789263;
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+.record-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(330px, 1fr);
+  gap: 22px;
+  align-items: start;
+}
+.record-main-column,
+.record-preview-column {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.record-card {
+  min-width: 0;
+  background: #fffefb;
+  border: 1px solid #deddd3;
+  border-radius: 9px;
+  overflow: hidden;
+  scroll-margin-top: 82px;
+}
+.record-card-heading {
+  padding: 18px 22px;
+  border-bottom: 1px solid #ebeae3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.record-card-heading h2 {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.5;
+  margin: 0;
+  color: #33452e;
+}
+.record-card-heading > span {
+  font-size: 9px;
+  color: #929787;
+  text-align: right;
+  line-height: 1.5;
+}
+.record-facts {
+  padding: 6px 22px;
+  margin: 0;
+}
+.record-facts > div {
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr);
+  align-items: start;
+  gap: 14px;
+  border-bottom: 1px solid #efeee8;
+  padding: 13px 0;
+  font-size: 11px;
+  line-height: 1.7;
+}
+.record-facts > div:last-child {
+  border: 0;
+}
+.record-facts dt {
+  color: #8d9383;
+  font-size: 10px;
+}
+.record-facts dd {
+  margin: 0;
+  color: #46543b;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 12px;
+}
+.record-facts a {
+  color: #6b7b55;
+  text-decoration: none;
+}
+.record-facts a:hover {
+  text-decoration: underline;
+}
+.record-facts .record-code {
+  font-family: AdminMono, monospace;
+  font-weight: 500;
+}
+.record-copy {
+  color: #7e8c67;
+  font-size: 9px;
+  flex: none;
+  padding: 2px 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.record-technical {
+  margin: 0 22px;
+  border-top: 1px solid #eeede5;
+  padding: 15px 0;
+}
+.record-technical summary {
+  font-size: 10px;
+  color: #7f896e;
+  cursor: pointer;
+}
+.record-technical .record-facts {
+  padding: 8px 0 0;
+}
+.record-technical .record-facts > div {
+  grid-template-columns: 110px minmax(0, 1fr);
+  font-size: 10px;
+}
+.record-event-list,
+.record-audit-list {
+  list-style: none;
+  margin: 0;
+  padding: 20px 22px;
+}
+.record-event-list li {
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr) minmax(80px, 140px);
+  gap: 14px;
+  position: relative;
+  padding-bottom: 20px;
+}
+.record-event-list li:last-child {
+  padding-bottom: 0;
+}
+.record-event-dot {
+  margin-top: 4px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #819c62;
+  outline: 4px solid #f1f4e8;
+  position: relative;
+}
+.record-event-list li:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: 3px;
+  top: 18px;
+  bottom: 7px;
+  width: 1px;
+  background: #dde4d1;
+}
+.record-event-list strong,
+.record-audit-list strong {
+  font-size: 11px;
+  font-weight: 500;
+  color: #425536;
+}
+.record-event-list p,
+.record-audit-list p {
+  font-size: 10px;
+  color: #8a927d;
+  line-height: 1.8;
+  margin: 5px 0 0;
+  overflow-wrap: anywhere;
+}
+.record-event-list small {
+  font-size: 9px;
+  color: #a2a793;
+  display: block;
+  margin-top: 7px;
+}
+.record-event-list time,
+.record-audit-list time {
+  font-size: 9px;
+  line-height: 1.8;
+  color: #9a9f8d;
+  text-align: right;
+}
+.record-card-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  min-width: 0;
+}
+.record-small-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 19px 20px 0;
+  min-width: 0;
+}
+.record-small-status strong {
+  font-size: 11px;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+.record-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #b4b7a6;
+  flex: none;
+}
+.record-dot.positive {
+  background: #7f9a5d;
+}
+.record-body-copy {
+  padding: 0 20px;
+  font-size: 10px;
+  color: #8c9380;
+  line-height: 1.9;
+  margin: 10px 0;
+}
+.record-footnote {
+  font-size: 10px;
+  color: #909784;
+  line-height: 1.8;
+  padding: 0 20px;
+  margin: 12px 0 18px;
+  overflow-wrap: anywhere;
+}
+.record-security-row {
+  display: flex;
+  gap: 16px;
+  align-items: start;
+  padding: 22px;
+}
+.record-security-count {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  background: #edf1e3;
+  border: 1px solid #dfe6d0;
+  color: #749251;
+  border-radius: 8px;
+  font-size: 19px;
+}
+.record-security-count.warning {
+  color: #a96540;
+  background: #f9eee3;
+  border-color: #eddbc9;
+}
+.record-security-row strong {
+  font-size: 11px;
+  font-weight: 500;
+}
+.record-security-row p {
+  font-size: 10px;
+  color: #929885;
+  line-height: 1.9;
+  margin: 6px 0 0;
+}
+.record-replacement {
+  border-top: 1px solid #ecebe3;
+  margin: 0 22px;
+  padding: 16px 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  font-size: 10px;
+  line-height: 1.8;
+}
+.record-replacement > span {
+  color: #9a9e8d;
+}
+.record-replacement strong {
+  font-weight: 400;
+  color: #7c856e;
+}
+.record-audit-list {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+.record-audit-list li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 125px;
+  gap: 20px;
+  padding: 18px 0;
+  border-bottom: 1px solid #ecebe3;
+}
+.record-audit-list li:last-child {
+  border: 0;
+}
+.record-event-scope {
+  display: inline-block;
+  font-size: 8px;
+  color: #8a9478;
+  border: 1px solid #e0e6d3;
+  border-radius: 4px;
+  padding: 1px 5px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+.record-physical .inventory-sticker-spec {
+  padding: 18px 20px 0;
+  min-width: 0;
+}
+.record-physical .inventory-sticker-stage {
+  padding: 22px 16px;
+  background: #f0f0e7;
+  border: 0;
+  border-radius: 6px;
+}
+.record-physical .inventory-sticker-svg {
+  max-width: 335px;
+  box-shadow: 0 3px 11px #25321b14;
+}
+.record-physical .inventory-sticker-spec > p {
+  font-size: 9px;
+  text-align: center;
+  line-height: 1.8;
+  margin: 9px 0;
+}
+.record-sticker-caption {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 9px;
+  color: #8b937a;
+  padding: 6px 0 12px;
+}
+.record-sticker-caption > span + span {
+  border-left: 1px solid #d6dcc8;
+  padding-left: 12px;
+}
+.record-spec-details > summary {
+  font-size: 10px;
+  color: #71835a;
+  cursor: pointer;
+  padding: 12px 0;
+  border-top: 1px solid #e5e7da;
+}
+.record-spec-details .inventory-spec-grid {
+  margin-top: 10px;
+}
+.record-spec-details .inventory-muted {
+  font-size: 9px;
+  display: block;
+  margin-bottom: 12px;
+}
+.record-production-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 15px 20px 0;
+  font-size: 10px;
+  color: #849171;
+}
+.record-print-actions {
+  display: flex;
+  gap: 10px;
+  padding: 15px 20px;
+}
+.record-print-actions .admin-button {
+  flex: 1;
+  justify-content: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  min-height: 42px;
+  margin: 0;
+}
+.record-manufacturing-note {
+  padding: 0 20px 20px;
+  font-size: 9px;
+  line-height: 1.9;
+  color: #a0a68f;
+  margin: 0;
+}
+.record-scan-metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 20px;
+}
+.record-scan-metrics > div {
+  padding-left: 20px;
+  border-left: 1px solid #e4e8d8;
+}
+.record-scan-metrics > div:first-child {
+  padding-left: 0;
+  border: 0;
+}
+.record-scan-metrics strong {
+  font-size: 25px;
+  font-weight: 500;
+  color: #6f8655;
+  display: block;
+}
+.record-scan-metrics span {
+  font-size: 9px;
+  color: #9ca48c;
+  display: block;
+  margin-top: 6px;
+}
+.record-print-job {
+  padding: 18px 20px;
+  border-bottom: 1px solid #eeede4;
+  font-size: 10px;
+}
+.record-print-job:last-child {
+  border: 0;
+}
+.record-print-job a {
+  font:
+    10px AdminMono,
+    monospace;
+  color: #71875c;
+  display: block;
+  margin-bottom: 10px;
+  overflow-wrap: anywhere;
+}
+.record-print-job p {
+  font-size: 10px;
+  line-height: 1.8;
+  color: #8e977e;
+  margin: 8px 0;
+}
+.record-print-job small {
+  font-size: 9px;
+  color: #a6ac98;
+}
+.record-empty {
+  padding: 22px;
+  color: #a1a891;
+  font-size: 10px;
+  line-height: 1.9;
+  margin: 0;
+}
+.record-empty > svg {
+  color: #b3bca1;
+  margin-bottom: 12px;
+}
+.record-empty strong {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  color: #869372;
+}
+.record-empty p {
+  font-size: 10px;
+  line-height: 1.9;
+  margin: 6px 0 0;
+}
+.record-copy-notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  font-size: 11px;
+  background: #eff3e6;
+  border: 1px solid #dee6d0;
+  border-radius: 6px;
+  margin-bottom: 18px;
+}
+@media (max-width: 1050px) {
+  .record-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(310px, 0.85fr);
+    gap: 18px;
+  }
+  .record-card-pair {
+    grid-template-columns: 1fr;
+  }
+  .record-summary > div {
+    padding: 14px;
+  }
+  .record-summary strong {
+    font-size: 16px;
+  }
+  .record-facts > div {
+    grid-template-columns: 112px minmax(0, 1fr);
+    gap: 12px;
+  }
+  .record-event-list li {
+    grid-template-columns: 8px minmax(0, 1fr);
+    gap: 12px;
+  }
+  .record-event-list time {
+    grid-column: 2;
+    text-align: left;
+  }
+  .record-card-heading {
+    padding: 16px 18px;
+  }
+  .record-facts {
+    padding: 4px 18px;
+  }
+  .record-physical .inventory-sticker-spec {
+    padding: 16px 16px 0;
+  }
+}
+@media (max-width: 850px) {
+  .record-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .record-main-column,
+  .record-preview-column {
+    display: contents;
+  }
+  .record-layout > div > section,
+  .record-layout > aside > section {
+    width: 100%;
+  }
+  .record-layout #overview {
+    order: 1;
+  }
+  .record-layout #physical {
+    order: 2;
+  }
+  .record-layout #lifecycle {
+    order: 3;
+  }
+  .record-layout .record-card-pair {
+    order: 4;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+  }
+  .record-layout #security {
+    order: 5;
+  }
+  .record-layout #scans {
+    order: 6;
+  }
+  .record-layout #prints {
+    order: 7;
+  }
+  .record-layout #audit {
+    order: 8;
+  }
+  .record-physical .inventory-sticker-svg {
+    max-width: 360px;
+  }
+  .record-section-nav {
+    gap: 20px;
+  }
+  .record-technical .record-facts > div {
+    grid-template-columns: 115px minmax(0, 1fr);
+  }
+}
+@media (max-width: 600px) {
+  .inventory-full-detail .inventory-header {
+    flex-direction: row;
+    align-items: start;
+    gap: 12px;
+  }
+  .inventory-full-detail .inventory-header h1 {
+    font-size: 29px;
+    overflow-wrap: anywhere;
+  }
+  .inventory-full-detail .inventory-header > div > p:last-child {
+    font-size: 11px;
+    line-height: 1.7;
+  }
+  .inventory-full-detail .inventory-header .admin-button {
+    font-size: 10px;
+    padding: 9px 10px;
+    min-height: 38px;
+    white-space: nowrap;
+    margin-top: 21px;
+    flex: none;
+  }
+  .record-context {
+    font-size: 9px;
+    gap: 9px;
+    padding-bottom: 16px;
+    line-height: 1.6;
+  }
+  .record-context > span:last-child {
+    border: 0;
+    padding-left: 0;
+    flex-basis: 100%;
+  }
+  .record-context .inventory-state {
+    font-size: 9px;
+  }
+  .record-summary {
+    grid-template-columns: 1fr 1fr;
+    margin-bottom: 17px;
+  }
+  .record-summary > div {
+    padding: 13px 14px;
+  }
+  .record-summary > div:nth-child(2) {
+    border-right: 0;
+  }
+  .record-summary > div:nth-child(-n + 2) {
+    border-bottom: 1px solid #e8e7df;
+  }
+  .record-summary span {
+    font-size: 8px;
+    letter-spacing: 0.035em;
+  }
+  .record-summary strong {
+    font-size: 15px;
+    margin: 6px 0;
+  }
+  .record-summary small {
+    font-size: 9px;
+  }
+  .record-section-nav {
+    font-size: 10px;
+    gap: 20px;
+    padding-bottom: 10px;
+    margin-bottom: 18px;
+  }
+  .record-card-heading {
+    padding: 15px 16px;
+    gap: 10px;
+  }
+  .record-card-heading h2 {
+    font-size: 12px;
+  }
+  .record-card-heading > span {
+    font-size: 8px;
+    max-width: 45%;
+  }
+  .record-facts {
+    padding: 4px 16px;
+  }
+  .record-facts > div {
+    grid-template-columns: 102px minmax(0, 1fr);
+    gap: 12px;
+    font-size: 10px;
+    padding: 12px 0;
+  }
+  .record-facts dt {
+    font-size: 9px;
+  }
+  .record-facts dd {
+    gap: 7px;
+    line-height: 1.8;
+  }
+  .record-technical {
+    margin: 0 16px;
+  }
+  .record-technical .record-facts > div {
+    grid-template-columns: 1fr;
+    gap: 5px;
+  }
+  .record-facts .inventory-mono {
+    font-size: 10px;
+  }
+  .record-layout .record-card-pair {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+  .record-event-list,
+  .record-audit-list {
+    padding: 18px 16px;
+  }
+  .record-event-list li {
+    grid-template-columns: 8px minmax(0, 1fr);
+    gap: 8px 12px;
+    padding-bottom: 22px;
+  }
+  .record-event-list time {
+    font-size: 9px;
+  }
+  .record-audit-list {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  .record-audit-list li {
+    grid-template-columns: 1fr;
+    gap: 9px;
+    padding: 16px 0;
+  }
+  .record-audit-list time {
+    text-align: left;
+    font-size: 9px;
+  }
+  .record-audit-list p {
+    line-height: 1.9;
+  }
+  .record-physical .inventory-sticker-spec {
+    padding: 16px 14px 0;
+  }
+  .record-physical .inventory-sticker-stage {
+    padding: 20px 12px;
+  }
+  .record-print-actions {
+    padding: 14px 16px;
+    gap: 8px;
+  }
+  .record-print-actions .admin-button {
+    font-size: 10px;
+    min-height: 44px;
+    padding: 10px 8px;
+  }
+  .record-manufacturing-note {
+    padding: 0 16px 16px;
+  }
+  .record-production-status {
+    padding-left: 16px;
+  }
+  .record-security-row {
+    padding: 18px 16px;
+  }
+  .record-replacement {
+    margin: 0 16px;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .record-scan-metrics {
+    padding: 18px 16px;
+  }
+  .record-sticker-caption {
+    gap: 8px;
+    font-size: 8px;
+  }
+  .record-sticker-caption > span + span {
+    padding-left: 8px;
+  }
+  .record-copy {
+    padding: 4px 0;
+    min-width: 30px;
+  }
+  .record-small-status {
+    padding-left: 16px;
+  }
+  .record-body-copy,
+  .record-footnote {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}

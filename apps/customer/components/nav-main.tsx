@@ -37,6 +37,7 @@ export interface NavMainItem {
   url: string
   icon?: CustomerIcon | React.ComponentType<{ className?: string }>
   isActive?: boolean
+  exact?: boolean
   badge?: string
   isLifecycleRail?: boolean
   items?: NavSubItem[]
@@ -66,6 +67,7 @@ export function NavMain({
           const isItemActive = Boolean(
             pathname &&
               (pathname === item.url ||
+                (!item.exact && !hasChildren && pathname.startsWith(`${item.url}/`)) ||
                 item.items?.some(
                   (sub) =>
                     pathname === sub.url || pathname.startsWith(`${sub.url}/`)

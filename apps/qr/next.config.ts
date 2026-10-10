@@ -10,6 +10,7 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     return [
+      { source: '/:publicId', headers: [{key:'Permissions-Policy',value:'camera=(self), geolocation=(self), microphone=()'}] },
       {
         source: "/fonts/:font*.woff2",
         headers: [

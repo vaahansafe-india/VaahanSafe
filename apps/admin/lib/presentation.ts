@@ -43,6 +43,7 @@ export function columnLabel(key: string) {
         created_at: "Created",
         requires_step_up: "Step-up",
         lifecycle_state: "QR lifecycle",
+        inventory_channel: "Use channel",
       } as Record<string, string>
     )[key] || key.replaceAll("_", " ")
   );
@@ -74,3 +75,28 @@ export function displayValue(
   if (typeof value === "number") return value.toLocaleString("en-IN");
   return String(value);
 }
+
+export function maskPhone(phone?: string | null): string {
+  if (!phone) return "—";
+  const digits = String(phone).replace(/\D/g, "");
+  return `+91 ••••••${digits.slice(-4)}`;
+}
+
+export function maskEmail(email?: string | null): string {
+  if (!email) return "—";
+  const parts = String(email).split("@");
+  return parts[1] ? `${parts[0]?.slice(0, 1)}•••@${parts[1]}` : "—";
+}
+
+export function maskVehiclePlate(plate?: string | null): string {
+  if (!plate) return "—";
+  const str = String(plate).toUpperCase().replace(/[\s\-_.]/g, "");
+  return str.length >= 6 ? `${str.slice(0, 4)}••••${str.slice(-2)}` : str;
+}
+
+export function maskName(name?: string | null): string {
+  if (!name) return "—";
+  const words = name.trim().split(/\s+/);
+  return words.map((w) => (w.length > 2 ? `${w[0]}•••` : w)).join(" ");
+}
+

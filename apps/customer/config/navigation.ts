@@ -7,6 +7,7 @@ export interface AppNavigationItem {
   icon: VaahanIconName;
   badge?: string;
   description?: string;
+  exact?: boolean;
   children?: readonly AppNavigationItem[];
 }
 
@@ -45,6 +46,13 @@ export const CUSTOMER_NAVIGATION: readonly AppNavigationGroup[] = [
         href: "/vehicles",
         icon: "vehicle",
         description: "Registered vehicle identities",
+      },
+      {
+        id: "documents",
+        label: "Documents",
+        href: "/documents",
+        icon: "file",
+        description: "Private vehicle Document Vault",
       },
       {
         id: "qr",
@@ -131,10 +139,32 @@ export const CUSTOMER_NAVIGATION: readonly AppNavigationGroup[] = [
     label: "ACTIVITY",
     items: [
       {
+        id: "usage-analytics",
+        label: "Usage & Analytics",
+        href: "/analytics",
+        icon: "activity",
+        description: "Vehicle, QR, document and account usage",
+        exact: true,
+      },
+      {
+        id: "scan-analytics",
+        label: "Scan Analytics",
+        href: "/analytics/scans",
+        icon: "qr-scan",
+        description: "Recorded QR activity and outcomes",
+      },
+      {
+        id: "storage-analytics",
+        label: "Storage Analytics",
+        href: "/analytics/storage",
+        icon: "database",
+        description: "Private document storage and lifecycle",
+      },
+      {
         id: "scan-history",
         label: "Scan History",
         href: "/scan-history",
-        icon: "activity",
+        icon: "history",
         description: "Audit trail of QR scans & safety events",
       },
       {
@@ -165,6 +195,7 @@ export const CUSTOMER_NAVIGATION: readonly AppNavigationGroup[] = [
  * Determines whether a navigation item or sub-item is active
  */
 export function isNavActive(pathname: string, item: AppNavigationItem): boolean {
+  if (item.exact) return pathname === item.href;
   if (item.href === "/dashboard") {
     return pathname === "/dashboard" || pathname === "/";
   }

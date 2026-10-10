@@ -14,6 +14,7 @@ export interface TransitionEvaluation {
 }
 
 const ALLOWED_TRANSITIONS: Record<QrLifecycleState, readonly QrLifecycleState[]> = {
+  INVENTORY: ["PRINTED", "BLOCKED", "LOST_DAMAGED"],
   PRINTED: [
     "IN_TRANSIT_DISTRIBUTOR",
     "WITH_DISTRIBUTOR",

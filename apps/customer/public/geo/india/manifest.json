@@ -1,0 +1,21 @@
+{
+  "dataset": "DataMeet India state boundaries",
+  "source": "https://raw.githubusercontent.com/datameet/maps/b3fbbde595310b397a55d718e0958ce249a4fa1f/docs/data/geojson/states.geojson",
+  "revision": "b3fbbde595310b397a55d718e0958ce249a4fa1f",
+  "retrievedAt": "2026-10-10T13:43:48.262Z",
+  "sourceChecksum": "efef67f6d4bf892b3a46090f18861ce20330f3378428197225a43310ff64377f",
+  "checksum": "1c288ede08040365f831ac9bdb3daa04dc0f7a7ab24e15b4cc451da53aa2f19a",
+  "asset": "/geo/india/states.1c288ede0804.geo.json",
+  "bytes": 94159,
+  "license": "CC BY 2.5 India",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.5/in/",
+  "licenseEvidence": "https://github.com/datameet/maps/blob/b3fbbde595310b397a55d718e0958ce249a4fa1f/docs/states/index.html",
+  "attribution": "DataMeet Community Maps Project",
+  "simplification": "mapshaper 0.6.113 weighted 1%, keep-shapes, 0.005 degree precision; D3 winding normalization",
+  "adminLevel": 1,
+  "limitations": [
+    "Historical boundaries: Jammu & Kashmir includes the later Ladakh territory. Neither current JK nor Ladakh counts are painted on that polygon.",
+    "Dadra & Nagar Haveli and Daman & Diu are two source polygons mapped to current combined region IN-DH.",
+    "Source documents pre-delimitation/shift issues; this coarse analytics map is not a navigational or legal boundary map."
+  ]
+}
