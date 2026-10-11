@@ -1,7 +1,9 @@
 "use client";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "@vaahansafe/ui/components/sonner";
+import { VaahanIcon } from "@vaahansafe/icons";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -108,9 +110,7 @@ function OperationConfirm({
   );
 }
 export function TransferActions({
-  id,
   transfer,
-  onChanged,
 }: {
   id: string;
   transfer: DistributorDetail["transfers"][number];
@@ -118,47 +118,7 @@ export function TransferActions({
 }) {
   return (
     <div className="dist-actions">
-      {transfer.status === "REQUESTED" ? (
-        <>
-          <OperationConfirm
-            id={id}
-            label="Record dispatch"
-            description="Confirm the reserved identities have physically left central inventory. This records in-transit custody."
-            body={{
-              action: "transfer-status",
-              transfer: transfer.id,
-              from: "REQUESTED",
-              to: "IN_TRANSIT",
-            }}
-            onChanged={onChanged}
-          />
-          <OperationConfirm
-            id={id}
-            label="Cancel request"
-            description="Cancel this undispatched request and release its inventory reservation."
-            body={{
-              action: "transfer-status",
-              transfer: transfer.id,
-              from: "REQUESTED",
-              to: "CANCELLED",
-            }}
-            onChanged={onChanged}
-          />
-        </>
-      ) : (
-        <OperationConfirm
-          id={id}
-          label="Acknowledge receipt"
-          description="Confirm all reserved identities were received by the distributor. This updates recorded custody and preserves lifecycle history."
-          body={{
-            action: "transfer-status",
-            transfer: transfer.id,
-            from: "IN_TRANSIT",
-            to: "RECEIVED",
-          }}
-          onChanged={onChanged}
-        />
-      )}
+      <Link href={`/transfers/${transfer.id}`}>Manage transfer →</Link>
     </div>
   );
 }
@@ -271,7 +231,14 @@ export function RetailerManager({
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <button role="combobox" aria-expanded={open}>
-            {retailer?.name || "+ Link an existing retailer"}
+            {retailer ? (
+              <span>{retailer.name}</span>
+            ) : (
+              <>
+                <VaahanIcon name="plus" size={13} />
+                <span>Link an existing retailer</span>
+              </>
+            )}
           </button>
         </PopoverTrigger>
         <PopoverContent>

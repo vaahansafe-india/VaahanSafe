@@ -18,6 +18,7 @@ import { StickerPreview } from "./StickerPreview";
 import { stateLabel } from "./InventoryFilters";
 import { PrintDialog } from "./PrintDialog";
 import { InventoryFullRecord } from "./InventoryFullRecord";
+import { RetailActivationReadiness } from "./RetailActivationReadiness";
 export const dateLabel = (at: string | null) =>
   at
     ? new Intl.DateTimeFormat("en-IN", {
@@ -119,6 +120,7 @@ export function DetailContent({
           )}
         </dl>
       </section>
+      <RetailActivationReadiness detail={detail} />
       <section id="lifecycle" className="inventory-sheet-lifecycle">
         <h3>Lifecycle · latest 20 events</h3>
         {detail.history.length ? (
@@ -175,6 +177,7 @@ export function DetailContent({
             <p>
               {r.custodian || "No distributor or retailer custody recorded."}
             </p>
+            {detail.activeTransfer && <p>Reserved in <Link href={`/transfers/${detail.activeTransfer.id}`}>{detail.activeTransfer.reference}</Link> · {stateLabel(detail.activeTransfer.status)}</p>}
             <p>Current lifecycle: {stateLabel(r.lifecycle)}</p>
           </section>
           <section id="activation">

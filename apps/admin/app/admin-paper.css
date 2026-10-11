@@ -2633,13 +2633,18 @@ input[type="checkbox"] {
   padding-inline: 32px;
   border-color: #e4dfd5;
 }
-.admin-radix-dialog {
-  z-index: 150;
+[data-ui="dialog-content"],
+[data-ui="alert-dialog-content"],
+.admin-radix-dialog,
+.tr-dialog,
+.dist-alert,
+.batches-dialog-content {
+  z-index: 150 !important;
   border-radius: 12px;
-  gap: 12px;
 }
-[data-ui="dialog-overlay"] {
-  z-index: 140;
+[data-ui="dialog-overlay"],
+[data-ui="alert-dialog-overlay"] {
+  z-index: 140 !important;
   background: #252e2655;
   backdrop-filter: blur(3px);
 }

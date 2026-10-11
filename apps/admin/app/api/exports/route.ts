@@ -9,6 +9,8 @@ import { canExport } from "../../../lib/exports";
 import { parseInventoryFilters } from "../../../features/inventory/inventory.filters";
 import { parseDistributorFilters } from "../../../features/distributors/distributor.filters";
 import { parseRetailerFilters } from "../../../features/retailers/retailer.filters";
+import { parseTransferFilters } from "../../../features/transfers/transfer.filters";
+import { transferRpc } from "../../../features/transfers/server/transfers";
 import { retailerRpc } from "../../../features/retailers/server/retailers";
 import {
   distributorRpc,
@@ -35,6 +37,39 @@ export async function POST(request: Request) {
         "EXPORT_UNAVAILABLE",
         "Report generation is temporarily unavailable. Please try again later.",
       );
+    if (body.moduleKey === "transfers") {
+      await assertDistributorExportAvailable("transfers");
+      if (
+        body.ids != null &&
+        (!Array.isArray(body.ids) ||
+          body.ids.length < 1 ||
+          body.ids.length > 100 ||
+          body.ids.some(
+            (id: unknown) =>
+              typeof id !== "string" || !/^[A-Za-z0-9_-]{1,100}$/.test(id),
+          ))
+      )
+        throw new AdminError(
+          400,
+          "INVALID_SELECTION",
+          "Select between 1 and 100 transfers.",
+        );
+      return adminResponse(
+        {
+          id: await transferRpc(identity, "admin_request_transfer_export", {
+            p_filters: parseTransferFilters(
+              new URLSearchParams(
+                typeof body.filters === "string" ? body.filters : "",
+              ),
+            ),
+            p_ids: body.ids ? [...new Set(body.ids)] : null,
+            p_request: crypto.randomUUID(),
+          }),
+          status: "QUEUED",
+        },
+        202,
+      );
+    }
     if (body.moduleKey === "distributors" || body.moduleKey === "retailers") {
       await assertDistributorExportAvailable(body.moduleKey);
       if (

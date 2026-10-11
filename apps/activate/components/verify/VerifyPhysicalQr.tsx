@@ -5,6 +5,10 @@ import { ActivationCodeInput } from "./ActivationCodeInput";
 import { Button } from "@vaahansafe/ui/components";
 import { VaahanIcon } from "@vaahansafe/icons";
 import type { VerifyProofResultDto } from "@/lib/types";
+import {
+  isActivationProofInput,
+  normalizeActivationProofInput,
+} from "@/lib/activation-proof-input";
 
 interface VerifyPhysicalQrProps {
   publicId: string;
@@ -27,7 +31,7 @@ export function VerifyPhysicalQr({
 
   const handleVerifySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!scratchCode.trim() || isLoading || isLocked) return;
+    if (!isActivationProofInput(scratchCode) || isLoading || isLocked) return;
 
     setIsLoading(true);
     setError(null);
@@ -38,7 +42,7 @@ export function VerifyPhysicalQr({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           publicId,
-          scratchCode: scratchCode.trim(),
+          scratchCode: normalizeActivationProofInput(scratchCode),
         }),
       });
 
@@ -51,10 +55,15 @@ export function VerifyPhysicalQr({
           setIsLocked(true);
           setLockedUntil(data.lockedUntil || null);
         }
-        setError(data.error || "We couldn't verify this activation code. Please verify the characters and try again.");
+        setError(
+          data.error ||
+            "We couldn't verify this activation code. Please verify the characters and try again.",
+        );
       }
     } catch {
-      setError("Connection error. Could not reach the verification service. Please try again.");
+      setError(
+        "Connection error. Could not reach the verification service. Please try again.",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -67,11 +76,13 @@ export function VerifyPhysicalQr({
       {/* Header */}
       <div className="space-y-2">
         <h2 className="font-serif text-3xl sm:text-4xl text-foreground font-normal tracking-tight">
-          Enter Scratch Security Code
+          Enter your private activation code
         </h2>
 
         <p className="text-xs sm:text-sm text-muted-foreground max-w-lg leading-relaxed">
-          Scratch the silver security panel on your sticker packaging to reveal your 6-character code.
+          Reveal the private activation code under the scratch panel and enter
+          it in full. Current retail stickers use 16 characters, printed in four
+          groups. You can paste the code with or without hyphens.
         </p>
       </div>
 
@@ -102,7 +113,10 @@ export function VerifyPhysicalQr({
       <form onSubmit={handleVerifySubmit} className="space-y-5">
         <ActivationCodeInput
           value={scratchCode}
-          onChange={setScratchCode}
+          onChange={(value) => {
+            setScratchCode(value);
+            setError(null);
+          }}
           disabled={isLoading || isLocked}
           error={error}
         />
@@ -114,7 +128,8 @@ export function VerifyPhysicalQr({
               <span>Temporary Verification Lock</span>
             </div>
             <p className="leading-relaxed pl-5 text-[11px]">
-              Multiple failed attempts detected. For this sticker&apos;s protection, verification is locked temporarily.
+              Multiple failed attempts detected. For this sticker&apos;s
+              protection, verification is locked temporarily.
               {lockedUntil && (
                 <span className="block pt-1 font-mono">
                   Unlocks around: {new Date(lockedUntil).toLocaleTimeString()}
@@ -126,7 +141,9 @@ export function VerifyPhysicalQr({
 
         <Button
           type="submit"
-          disabled={isLoading || isLocked || !scratchCode.trim()}
+          disabled={
+            isLoading || isLocked || !isActivationProofInput(scratchCode)
+          }
           className="w-full h-12 rounded-sm bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-semibold transition-colors shadow-sm disabled:opacity-50"
         >
           {isLoading ? (
@@ -142,7 +159,8 @@ export function VerifyPhysicalQr({
 
       {/* Security microcopy note */}
       <div className="border-t border-border pt-3 text-[11px] font-mono text-muted-foreground leading-relaxed">
-        This code verifies possession of the physical QR. It does not prove vehicle ownership.
+        This code verifies possession of the physical QR. It does not prove
+        vehicle ownership.
       </div>
     </div>
   );

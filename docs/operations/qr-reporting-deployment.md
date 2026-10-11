@@ -83,6 +83,33 @@ in Vercel; credentials were not retrieved from Cloudflare or rotated. Deployment
 remains held at the user's request. Saved settings do not alter the currently
 deployed release.
 
+### Production report failure — 2026-10-11
+
+The user deployed commit `6db3f05`, but `/api/scan-reports` returned HTTP 503.
+Vercel logs at 00:02 IST showed the generic report-service warning, a 20 ms
+function execution and no external API calls. The QR project's hosted
+environment search confirmed `SESSION_SECRET` was absent. The API requires this
+secret (at least 32 characters) before invoking Turnstile verification or any
+report/storage operation. This setting was missed in the earlier hosted
+environment synchronization.
+
+The existing ignored `apps/qr/.env.production` secret satisfies the length check.
+An invalid-token production configuration probe reproduced HTTP 503 without
+creating reports or notifications. After the user's explicit approval, the
+existing secret was saved as a QR Production Secret and redeployment of commit
+`6db3f05` completed (`2QiXYzM24ig2vhucHjF6VxyQMm3f`), assigned to
+`qr.vaahansafe.com`. Vercel reported Ready at 00:09 IST on 2026-10-11.
+
+Post-deployment checks passed: the public page returned HTTP 200 with the expected
+widget key and reporting entry; the same invalid-token configuration probe now
+returned HTTP 403 with the expected security-check message instead of HTTP 503.
+This confirms the missing protection configuration no longer blocks verification.
+The probe stops before database, storage and notification work. A full successful
+production report with photos remains unverified and requires a fresh Turnstile
+token from the user; these checks created no report or notification.
+The browser's Turnstile success badge does not prove that the report API's
+server-side configuration is complete.
+
 ## Validation
 
 ```powershell

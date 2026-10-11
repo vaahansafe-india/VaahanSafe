@@ -43,6 +43,7 @@ export async function assertDistributorExportAvailable(
         };
         const bindings = result.result?.bindings || [];
         if (
+          (moduleKey !== "transfers" || bindings.some(b=>b.name==='TRANSFER_EXPORTS_ENABLED'&&b.type==='plain_text'&&b.text==='true')) &&
           (moduleKey !== "retailers" ||
             bindings.some(
               (b) =>

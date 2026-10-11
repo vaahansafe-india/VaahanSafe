@@ -19,6 +19,7 @@ const schema = z.discriminatedUnion("action", [
   z
     .object({
       action: z.literal("request-transfer"),
+      requestId: z.string().uuid().optional(),
       source: id,
       batch: id,
       quantity: z.number().int().min(1).max(5000),
@@ -78,8 +79,8 @@ export async function POST(
 ) {
   try {
     assertSameOrigin(request);
-    const identity = await requireAdmin("retailers"),
-      retailer = validRetailerId((await params).id);
+    let identity = await requireAdmin("retailers");
+    const retailer = validRetailerId((await params).id);
     if (!canManageRetailers(identity.role))
       throw new AdminError(403, "FORBIDDEN", "Your role cannot manage stock.");
     const parsed = schema.safeParse(await request.json());
@@ -89,12 +90,17 @@ export async function POST(
         "INVALID_REQUEST",
         "Check the operation, quantities and required reason.",
       );
-    const b = parsed.data,
-      args = {
-        p_id: retailer,
-        p_reason: b.reason,
-        p_request: crypto.randomUUID(),
-      };
+    const b = parsed.data;
+    if (b.action === "request-transfer" || b.action === "transfer-status")
+      identity = await requireAdmin("retailers", { stepUp: true });
+    const args = {
+      p_id: retailer,
+      p_reason: b.reason,
+      p_request:
+        b.action === "request-transfer"
+          ? b.requestId || crypto.randomUUID()
+          : crypto.randomUUID(),
+    };
     let result;
     switch (b.action) {
       case "request-transfer":

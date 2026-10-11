@@ -163,6 +163,7 @@ export const ADMIN_MODULES: AdminModule[] = [
     icon: "check",
     roles: ops,
     table: "admin_stock_reconciliations",
+    search: ["id"],
     fields: [
       "id",
       "partner_id",

@@ -2,6 +2,7 @@
 import { useEffect, useId, useState } from "react";
 import { GeographyCombobox } from "../../geography/GeographyCombobox";
 import { AdminSelect } from "../../../components/AdminSelect";
+import { AdminDatePicker } from "../../../components/AdminDatePicker";
 import { DistributorCombobox } from "./DistributorCombobox";
 import { EMPTY_RETAILER_FILTERS } from "../retailer.filters";
 import type { RetailerFilters as Filters } from "../retailer.types";
@@ -108,16 +109,17 @@ export function RetailerFilters({
         ["week", "Active in last 7 days"],
         ["quiet", "No activations in 30 days"],
       ])}
-      <fieldset>
+      <fieldset className="dist-fieldset">
         <legend>Created</legend>
         {(["from", "to"] as const).map((k) => (
           <div key={k} className="dist-field">
             <label htmlFor={`${id}-${k}`}>{k === "from" ? "From" : "To"}</label>
-            <input
+            <AdminDatePicker
               id={`${id}-${k}`}
-              type="date"
+              label={k === "from" ? "Created from date" : "Created to date"}
+              placeholder={k === "from" ? "From date…" : "To date…"}
               value={value[k]}
-              onChange={(e) => onChange({ ...value, [k]: e.target.value })}
+              onChange={(dateStr) => onChange({ ...value, [k]: dateStr })}
             />
           </div>
         ))}

@@ -6,6 +6,7 @@ import type { InventoryDetail, InventorySelection } from "../inventory.types";
 import { inventoryDate } from "../inventory.presentation";
 import { stateLabel } from "./InventoryFilters";
 import { StickerPreview } from "./StickerPreview";
+import { RetailActivationReadiness } from "./RetailActivationReadiness";
 
 export function InventoryFullRecord({
   detail,
@@ -231,6 +232,7 @@ export function InventoryFullRecord({
             </section>
             <section className="record-card" id="activation">
               {cardTitle("Owner activation")}
+              <RetailActivationReadiness detail={detail} />
               <div className="record-small-status">
                 <span
                   className={`record-dot ${r.activatedAt ? "positive" : ""}`}

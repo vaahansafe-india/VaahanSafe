@@ -32,7 +32,7 @@ const stages: Array<{
     number: "02",
     short: "Code",
     label: "Security Code",
-    description: "Enter 6-digit scratch code",
+    description: "Enter the full private activation code",
   },
   {
     id: "IDENTITY",

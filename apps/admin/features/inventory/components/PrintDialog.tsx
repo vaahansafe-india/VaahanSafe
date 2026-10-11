@@ -6,6 +6,7 @@ import { AdminDialog } from "../../../components/AdminDialog";
 import { AdminSelect } from "../../../components/AdminSelect";
 import { VEHICLE_STICKER_V1 } from "../print/sticker-template";
 import { EmailVerification } from "../../../components/EmailVerification";
+import { VaahanIcon } from "@vaahansafe/icons";
 import { getAdminData } from "../../../lib/client-api";
 import type {
   InventorySelection,
@@ -13,6 +14,7 @@ import type {
   StickerTemplate,
 } from "../inventory.types";
 import { stateLabel } from "./InventoryFilters";
+import { VerifiedPrintStockRelease } from "./VerifiedPrintStockRelease";
 export async function postInventory<T>(url: string, body: unknown): Promise<T> {
   const response = await fetch(url, {
     method: "POST",
@@ -86,10 +88,11 @@ export function PrintDialog({
     );
   const footer = job ? (
     <Link
-      className="admin-button primary"
+      className="admin-button primary inline-flex items-center gap-1.5"
       href={`/inventory/print-jobs/${job.id}`}
     >
-      Open secure print job ↗
+      <span>Open secure print job</span>
+      <VaahanIcon name="external-link" size={13} />
     </Link>
   ) : (
     <div className="admin-dialog-action-row">
@@ -101,6 +104,15 @@ export function PrintDialog({
           className="admin-button primary"
           disabled={busy || !allowed || !confirmed || reason.trim().length < 10}
           onClick={() => void create()}
+          title={
+            !confirmed
+              ? "Please confirm you reviewed the identities"
+              : reason.trim().length < 10
+                ? `Production reason requires at least 10 characters (${reason.trim().length}/10 entered)`
+                : !allowed
+                  ? "Selected identities are not eligible"
+                  : "Create production print job"
+          }
         >
           {busy ? "Creating…" : "Create print job"}
         </button>
@@ -221,9 +233,24 @@ export function PrintDialog({
               maxLength={500}
               placeholder="Describe the manufacturing run or why a reprint is required…"
             />
-            <span id="production-reason-help" className="production-field-help">
-              Describe the print run or replacement need. Minimum 10 characters.
-            </span>
+            <div id="production-reason-help" className="flex items-center justify-between text-xs mt-1 text-muted-foreground">
+              <span>
+                Describe the print run or replacement need. Minimum 10 characters.
+              </span>
+              <span
+                className={`font-semibold ${
+                  reason.trim().length === 0
+                    ? "text-muted-foreground"
+                    : reason.trim().length < 10
+                      ? "text-amber-600"
+                      : "text-emerald-700"
+                }`}
+              >
+                {reason.trim().length < 10
+                  ? `${reason.trim().length}/10 chars (need ${10 - reason.trim().length} more)`
+                  : `${reason.trim().length}/500 chars`}
+              </span>
+            </div>
           </label>
           <label className="inventory-check production-confirmation">
             <input
@@ -401,9 +428,18 @@ export function PrintJobPage({ id }: { id: string }) {
                 </ol>
               </details>
             </section>
+            {job.mode === "PRINT" && job.status === "COMPLETED" && <VerifiedPrintStockRelease id={id} />}
             {!["COMPLETED", "CANCELLED"].includes(job.status) && (
               <section className="inventory-panel">
                 <h2>Confirm physical outcome</h2>
+                <p>
+                  Downloaded stickers remain inactive. After verified printing,
+                  review the batch readiness, record delivery to the distributor
+                  and retailer in <Link href="/transfers">Transfers</Link>, then
+                  use <Link href="/retailers">Record retail sale</Link> on the
+                  retailer page. The customer can then verify the private code
+                  and connect their vehicle on the activation page.
+                </p>
                 <p>
                   Confirm completion only after inspecting the physical
                   stickers, QR scans and opaque scratch coverage. A file

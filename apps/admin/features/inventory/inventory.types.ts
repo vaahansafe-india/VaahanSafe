@@ -70,6 +70,8 @@ export interface PrintJob {
   reason: string;
 }
 export interface InventoryDetail {
+  stockRelease?: { released: boolean; transferReady: boolean };
+  activeTransfer?:{id:string;reference:string;status:string}|null;
   row: InventoryRow;
   template: StickerTemplate;
   history: {

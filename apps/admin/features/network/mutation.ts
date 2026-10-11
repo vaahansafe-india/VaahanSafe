@@ -19,9 +19,12 @@ export async function mutateNetwork(
     );
   }
   if (!response.ok || !result.success)
-    throw new Error(
-      result.error?.message ||
-        "We couldn't save this change. Please try again.",
+    throw Object.assign(
+      new Error(
+        result.error?.message ||
+          "We couldn't save this change. Please try again.",
+      ),
+      { code: result.error?.code },
     );
   return result.data;
 }

@@ -12,6 +12,7 @@ export function AdminDatePicker({
   id,
   disabled,
   placeholder = "Pick a date",
+  modal = false,
 }: {
   value?: string;
   onChange: (value: string) => void;
@@ -19,11 +20,20 @@ export function AdminDatePicker({
   id?: string;
   disabled?: boolean;
   placeholder?: string;
+  modal?: boolean;
 }) {
   const [open, setOpen] = React.useState(false);
 
   const selectedDate = React.useMemo(() => {
     if (!value) return undefined;
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+    if (match && match[1] && match[2] && match[3]) {
+      const year = Number(match[1]);
+      const month = Number(match[2]) - 1;
+      const day = Number(match[3]);
+      const d = new Date(year, month, day);
+      return isNaN(d.getTime()) ? undefined : d;
+    }
     const parsed = parseISO(value);
     return isValid(parsed) ? parsed : undefined;
   }, [value]);
@@ -43,7 +53,7 @@ export function AdminDatePicker({
   };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={setOpen} modal={modal}>
       <PopoverTrigger asChild>
         <button
           type="button"
@@ -107,7 +117,7 @@ export function AdminDatePicker({
         </button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-auto p-0 border border-[#deddd3] bg-[#fffefb] shadow-xl rounded-lg z-[100]"
+        className="w-auto p-0 border border-[#deddd3] bg-[#fffefb] shadow-2xl rounded-lg z-[300]"
         align="start"
         sideOffset={6}
       >

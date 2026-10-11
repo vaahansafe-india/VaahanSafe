@@ -46,9 +46,12 @@ export async function mutateDistributor(
     );
   }
   if (!response.ok || !result.success)
-    throw new Error(
-      result.error?.message ||
-        "We couldn't save this change. Please try again.",
+    throw Object.assign(
+      new Error(
+        result.error?.message ||
+          "We couldn't save this change. Please try again.",
+      ),
+      { code: result.error?.code },
     );
   return result.data;
 }
@@ -282,11 +285,7 @@ export function DistributorForm({
               key={name}
               aria-current={isCurrent ? "step" : undefined}
               className={
-                isCurrent
-                  ? "dist-step-current"
-                  : isDone
-                    ? "dist-step-done"
-                    : ""
+                isCurrent ? "dist-step-current" : isDone ? "dist-step-done" : ""
               }
             >
               <span>
@@ -378,7 +377,9 @@ export function DistributorForm({
               <button
                 type="button"
                 className="dist-btn dist-add-territory-btn"
-                disabled={!area.district_code || values.territories.length >= 30}
+                disabled={
+                  !area.district_code || values.territories.length >= 30
+                }
                 onClick={() => {
                   if (
                     !values.territories.some(
@@ -401,8 +402,8 @@ export function DistributorForm({
               <div className="dist-territory-empty">
                 <span>
                   No service territories added yet. Select a state and district
-                  above and click <strong>Add service area</strong>. At least one
-                  coverage district is required.
+                  above and click <strong>Add service area</strong>. At least
+                  one coverage district is required.
                 </span>
               </div>
             ) : (

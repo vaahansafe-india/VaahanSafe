@@ -14,6 +14,7 @@ import {
   CommandItem,
 } from "@vaahansafe/ui/components/command";
 import { getAdminData } from "../../../lib/client-api";
+import { VaahanIcon } from "@vaahansafe/icons";
 import type { DistributorOption } from "../retailer.types";
 import { normalizeRetailerSearch } from "../retailer.filters";
 export function DistributorCombobox({
@@ -79,7 +80,7 @@ export function DistributorCombobox({
             {value
               ? current?.name || "Selected distributor"
               : "Search distributors…"}
-            <span aria-hidden>⌄</span>
+            <VaahanIcon name="chevron-down" size={11} className="opacity-60" />
           </button>
         </PopoverTrigger>
         <PopoverContent
@@ -134,7 +135,9 @@ export function DistributorCombobox({
                       {o.state_name || "Location setup required"}
                     </small>
                   </div>
-                  {value === o.id && <span aria-hidden>✓</span>}
+                  {value === o.id && (
+                    <VaahanIcon name="check" size={13} className="text-emerald-700" />
+                  )}
                 </CommandItem>
               ))}
             </CommandList>

@@ -14,6 +14,7 @@ const schema = z.discriminatedUnion("action", [
   z
     .object({
       action: z.literal("request-transfer"),
+      requestId: z.string().uuid().optional(),
       batch: id,
       quantity: z.number().int().min(1).max(5000),
       reason,
@@ -86,8 +87,8 @@ export async function POST(
 ) {
   try {
     assertSameOrigin(request);
-    const identity = await requireAdmin("distributors"),
-      { id: distributor } = await params;
+    let identity = await requireAdmin("distributors");
+    const { id: distributor } = await params;
     if (!canManageDistributors(identity.role))
       throw new AdminError(
         403,
@@ -101,12 +102,17 @@ export async function POST(
         "INVALID_REQUEST",
         "Check the operation, quantities, and required reason.",
       );
-    const b = parsed.data,
-      args = {
-        p_id: distributor,
-        p_reason: b.reason,
-        p_request: crypto.randomUUID(),
-      };
+    const b = parsed.data;
+    if (b.action === "request-transfer" || b.action === "transfer-status")
+      identity = await requireAdmin("distributors", { stepUp: true });
+    const args = {
+      p_id: distributor,
+      p_reason: b.reason,
+      p_request:
+        b.action === "request-transfer"
+          ? b.requestId || crypto.randomUUID()
+          : crypto.randomUUID(),
+    };
     let result;
     switch (b.action) {
       case "request-transfer":

@@ -40,6 +40,12 @@ export async function inventoryRpc(
     ...args,
   });
   if (error) {
+    if (/RELEASE_PRINT_INCOMPLETE|RELEASE_STOCK_CHANGED|STOCK_ALREADY_RELEASED/.test(error.message))
+      throw new AdminError(409, "STOCK_CHANGED", "This job cannot be released in its current state. Refresh and review verified printing, stock custody and existing reservations.");
+    if (/INVALID_STOCK_RELEASE|REQUEST_CONFLICT/.test(error.message))
+      throw new AdminError(409, "INVALID_RELEASE", "Review the confirmed stickers and operational reason before trying again.");
+    if (/ADMIN_REQUIRED/.test(error.message))
+      throw new AdminError(403, "FORBIDDEN", "An authorized operations administrator with fresh email verification is required.");
     if (/JOB_EXPIRED/.test(error.message))
       throw new AdminError(
         410,
@@ -240,7 +246,11 @@ export async function getInventoryDetail(
     getActiveTemplate(),
     printEligibility(identity, { mode: "ids", ids: [id] }),
   ]);
+  const activeTransfer=await db.queryFirst<{id:string;reference:string;status:string}>(`SELECT t.id,t.reference_code AS reference,t.status FROM admin_stock_transfer_items i JOIN admin_stock_transfers t ON t.id=i.transfer_id WHERE i.qr_id=? AND i.released_at IS NULL LIMIT 1`,[id]);
+  const stockRelease = await db.queryFirst<{ released: boolean; transferReady: boolean }>(`SELECT EXISTS(SELECT 1 FROM admin_print_stock_release_items WHERE qr_id=?) AS released,public.retail_stock_ready(?) AS "transferReady"`, [id, id]);
   return {
+    stockRelease: stockRelease || undefined,
+    activeTransfer,
     row,
     history,
     attempts,

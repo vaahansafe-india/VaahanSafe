@@ -9,6 +9,7 @@ import {
   INVENTORY_EXPORT_FIELDS,
   DISTRIBUTOR_EXPORT_FIELDS,
   RETAILER_EXPORT_FIELDS,
+  TRANSFER_EXPORT_FIELDS,
 } from "../../../../../apps/admin/lib/exports";
 interface Env {
   SUPABASE_URL: string;
@@ -109,13 +110,15 @@ export async function processExportJobs(env: Env) {
         throw new Error("Export access expired");
       const exportModule = getAdminModule(job.module_key)!;
       const lines = [
-        (job.module_key === "inventory"
-          ? INVENTORY_EXPORT_FIELDS
-          : job.module_key === "distributors"
-            ? DISTRIBUTOR_EXPORT_FIELDS
-            : job.module_key === "retailers"
-              ? RETAILER_EXPORT_FIELDS
-              : exportModule.fields!
+        (job.module_key === "transfers"
+          ? TRANSFER_EXPORT_FIELDS
+          : job.module_key === "inventory"
+            ? INVENTORY_EXPORT_FIELDS
+            : job.module_key === "distributors"
+              ? DISTRIBUTOR_EXPORT_FIELDS
+              : job.module_key === "retailers"
+                ? RETAILER_EXPORT_FIELDS
+                : exportModule.fields!
         )
           .map(csvCell)
           .join(","),
@@ -140,15 +143,18 @@ export async function processExportJobs(env: Env) {
         }
       } else if (
         job.module_key === "distributors" ||
-        job.module_key === "retailers"
+        job.module_key === "retailers" ||
+        job.module_key === "transfers"
       ) {
         let cursor: Record<string, unknown> | null = null;
         for (let page = 0; page <= 20; page++) {
           const rows = await api<Record<string, unknown>[]>(
             env,
-            job.module_key === "distributors"
-              ? "rpc/admin_distributor_export_page"
-              : "rpc/admin_retailer_export_page",
+            job.module_key === "transfers"
+              ? "rpc/admin_transfer_export_page"
+              : job.module_key === "distributors"
+                ? "rpc/admin_distributor_export_page"
+                : "rpc/admin_retailer_export_page",
             "POST",
             { p_job: job.id, p_cursor: cursor },
           );

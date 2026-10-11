@@ -1,25 +1,20 @@
 import { NextResponse } from "next/server";
-import { getEligibleVehicles } from "@/lib/activation-service";
-import { parseSessionCookie, validateSessionToken } from "@vaahansafe/auth";
-import { getSessionRepository, getVehicleRepository } from "@vaahansafe/database";
+import { getActivationUser, getEligibleVehicles } from "@/lib/activation-service";
+import { getVehicleRepository } from "@vaahansafe/database";
 import { vehicleRegistrationSchema } from "@vaahansafe/validation";
 
 export async function GET(req: Request) {
   try {
-    const cookieHeader = req.headers.get("cookie");
-    const rawSessionToken = parseSessionCookie(cookieHeader);
-
-    if (!rawSessionToken) {
+    const user = await getActivationUser(req.headers.get("cookie"));
+    if (!user) {
       return NextResponse.json({ error: "Authentication required." }, { status: 401 });
     }
 
-    const sessionRepo = getSessionRepository();
-    const activeSession = await validateSessionToken(rawSessionToken, sessionRepo);
-    if (!activeSession) {
-      return NextResponse.json({ error: "Invalid or expired session." }, { status: 401 });
+    if (!user.phoneVerified) {
+      return NextResponse.json({ error: "Verify your mobile number before choosing a vehicle.", code: "PHONE_REQUIRED" }, { status: 403 });
     }
 
-    const vehicles = await getEligibleVehicles(activeSession.userId);
+    const vehicles = await getEligibleVehicles(user.id);
     return NextResponse.json({ vehicles });
   } catch (err) {
     console.error("[VaahanSafe Activate] Get vehicles error:", err);
@@ -32,17 +27,13 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
-    const cookieHeader = req.headers.get("cookie");
-    const rawSessionToken = parseSessionCookie(cookieHeader);
-
-    if (!rawSessionToken) {
+    const user = await getActivationUser(req.headers.get("cookie"));
+    if (!user) {
       return NextResponse.json({ error: "Authentication required." }, { status: 401 });
     }
 
-    const sessionRepo = getSessionRepository();
-    const activeSession = await validateSessionToken(rawSessionToken, sessionRepo);
-    if (!activeSession) {
-      return NextResponse.json({ error: "Invalid or expired session." }, { status: 401 });
+    if (!user.phoneVerified) {
+      return NextResponse.json({ error: "Verify your mobile number before adding a vehicle.", code: "PHONE_REQUIRED" }, { status: 403 });
     }
 
     const body = await req.json();
@@ -75,7 +66,7 @@ export async function POST(req: Request) {
 
     const savedVehicle = await vehicleRepo.save({
       id: vehicleId,
-      customerId: activeSession.userId,
+      customerId: user.id,
       registrationNumber: parsedReg.data,
       make,
       model,

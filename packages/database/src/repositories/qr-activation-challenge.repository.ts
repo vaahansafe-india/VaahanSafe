@@ -83,7 +83,7 @@ export class D1QrActivationChallengeRepository implements QrActivationChallengeR
        FROM qr_activation_challenges
        WHERE challenge_token_hash = ?
          AND consumed_at IS NULL
-         AND datetime(expires_at) > datetime('now')`,
+         AND ${this.db.dialect === "postgres" ? "expires_at > CURRENT_TIMESTAMP" : "datetime(expires_at) > datetime('now')"}`,
       [tokenHash]
     );
     return row ? this.mapRowToDomain(row) : null;
@@ -93,7 +93,7 @@ export class D1QrActivationChallengeRepository implements QrActivationChallengeR
     const res = await this.db.execute(
       `UPDATE qr_activation_challenges
        SET user_id = ?
-       WHERE id = ? AND consumed_at IS NULL AND datetime(expires_at) > datetime('now')`,
+       WHERE id = ? AND consumed_at IS NULL AND ${this.db.dialect === "postgres" ? "expires_at > CURRENT_TIMESTAMP" : "datetime(expires_at) > datetime('now')"}`,
       [userId, id]
     );
     return (res.rowsAffected ?? 0) > 0;

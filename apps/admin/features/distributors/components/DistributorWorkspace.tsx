@@ -646,11 +646,16 @@ export function DistributorStatus({ row }: { row: DistributorRow }) {
         {row.status === "ACTIVE" ? "Active" : "Suspended"}
       </span>
       <small>
-        {row.verification_status === "VERIFIED"
-          ? "✓ Verified"
-          : row.verification_status === "PENDING"
-            ? "Verification pending"
-            : "Requires correction"}
+        {row.verification_status === "VERIFIED" ? (
+          <span className="inline-flex items-center gap-1 text-emerald-800">
+            <VaahanIcon name="check" size={11} />
+            <span>Verified</span>
+          </span>
+        ) : row.verification_status === "PENDING" ? (
+          "Verification pending"
+        ) : (
+          "Requires correction"
+        )}
       </small>
       {row.reconciliation_issues > 0 && (
         <small className="dist-attention">

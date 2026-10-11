@@ -41,18 +41,34 @@ export function csvCell(value: unknown) {
 }
 export function exportRows(key: string, rows: Record<string, unknown>[]) {
   const fields =
-    key === "inventory"
-      ? INVENTORY_EXPORT_FIELDS
-      : key === "distributors"
-        ? DISTRIBUTOR_EXPORT_FIELDS
-        : key === "retailers"
-          ? RETAILER_EXPORT_FIELDS
-          : getAdminModule(key)?.fields || [];
+    key === "transfers"
+      ? TRANSFER_EXPORT_FIELDS
+      : key === "inventory"
+        ? INVENTORY_EXPORT_FIELDS
+        : key === "distributors"
+          ? DISTRIBUTOR_EXPORT_FIELDS
+          : key === "retailers"
+            ? RETAILER_EXPORT_FIELDS
+            : getAdminModule(key)?.fields || [];
   return rows.map((row) => {
     const masked = maskAdminRow(row);
     return fields.map((field) => csvCell(masked[field])).join(",");
   });
 }
+export const TRANSFER_EXPORT_FIELDS = [
+  "reference_code",
+  "source_name",
+  "destination_name",
+  "quantity",
+  "status",
+  "received_quantity",
+  "damaged_quantity",
+  "missing_quantity",
+  "carrier",
+  "tracking_reference",
+  "expected_arrival",
+  "created_at",
+];
 export const INVENTORY_EXPORT_FIELDS = [
   "visible_code",
   "public_id",

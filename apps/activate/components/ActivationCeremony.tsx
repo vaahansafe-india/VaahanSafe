@@ -227,6 +227,7 @@ export function ActivationCeremony({
       case "IDENTITY":
         return (
           <ActivationAuth
+            existingUser={user}
             onAuthenticated={handleAuthenticated}
           />
         );
@@ -319,6 +320,16 @@ export function ActivationCeremony({
                   selectedVehicleRef={selectedVehicleDisplay}
                 />
               </nav>
+
+              {user?.phoneVerified && stage !== "ACTIVE" && (
+                <div role="status" className="mb-6 flex flex-col gap-1 border border-border bg-card/50 px-4 py-3 text-sm sm:px-5">
+                  <p className="font-medium">Continuing with your existing account</p>
+                  <p className="break-words text-muted-foreground">
+                    {user.name ? `${user.name} · ` : ""}{user.maskedPhone} · Mobile verified.
+                    {" "}You don&apos;t need another OTP. This QR will use the same account.
+                  </p>
+                </div>
+              )}
 
               <div className="activation-stage-layout">
                 <section className="activation-stage-content">

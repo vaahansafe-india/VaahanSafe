@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
@@ -25,6 +25,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@vaahansafe/ui/components/dropdown-menu";
+import { VaahanIcon, type VaahanIconName } from "@vaahansafe/icons";
 import type { AdminIdentity } from "../../../lib/contracts";
 import { AdminDialog } from "../../../components/AdminDialog";
 import { getAdminData } from "../../../lib/client-api";
@@ -39,6 +40,7 @@ import {
 import { uniqueDistributorRows } from "../../distributors/distributor.filters";
 import { RetailerForm } from "./RetailerForm";
 import { RetailerTransfer } from "./RetailerTransfer";
+import { RetailerSaleDialog, RetailerSales } from "./RetailerSale";
 import {
   RetailerConfirm,
   RetailerReconcile,
@@ -86,27 +88,44 @@ function SupplyCard({ detail }: { detail: Detail }) {
   const p = detail.parent;
   return (
     <>
-      <h2>Supplied by</h2>
+      <div className="flex items-center justify-between gap-2 mb-2">
+        <h2 className="!mb-0">Supplied by</h2>
+        {p && (
+          <span
+            className={`dist-badge ${p.status === "ACTIVE" ? "success" : "attention"}`}
+          >
+            {p.status === "ACTIVE" ? "Active distributor" : "Inactive distributor"}
+          </span>
+        )}
+      </div>
       {p ? (
         <>
-          <p>
-            <strong>{p.name}</strong>
-            <br />
-            {p.reference_code}
-            <br />
-            {p.city} · {p.state_name}
-            <br />
-            {p.status === "ACTIVE" ? "Active" : "Distributor unavailable"}
+          <p className="!my-1.5">
+            <strong className="text-sm font-semibold text-stone-900 block">
+              {p.name}
+            </strong>
+            <span className="text-xs text-stone-500 block">
+              {p.reference_code}
+            </span>
+            <span className="text-xs text-stone-600 block">
+              {p.city} · {p.state_name}
+            </span>
           </p>
-          <p>
+          <p className="text-xs text-stone-600 !my-2">
             {detail.territory_match
-              ? "Outlet is within the configured service territory."
-              : "Outlet territory needs review against current distributor coverage."}
+              ? "✓ Outlet is within the confirmed service territory."
+              : "⚠ Outlet territory needs review against current distributor coverage."}
           </p>
-          <Link href={`/distributors/${p.id}`}>Open distributor →</Link>
+          <Link
+            href={`/distributors/${p.id}`}
+            className="inline-flex items-center gap-1.5 text-xs font-medium text-amber-900 hover:underline mt-1"
+          >
+            <span>Open distributor</span>
+            <VaahanIcon name="arrow-right" size={12} />
+          </Link>
         </>
       ) : (
-        <p>Supply network setup required.</p>
+        <p className="text-xs text-stone-500">Supply network setup required.</p>
       )}
     </>
   );
@@ -114,20 +133,42 @@ function SupplyCard({ detail }: { detail: Detail }) {
 function ContactCard({ detail }: { detail: Detail }) {
   const r = detail.retailer;
   return (
-    <>
-      <h2>Primary contact</h2>
-      {detail.contacts_allowed ? (
-        <p>
+    <div className="dist-contact-card mt-3">
+      <div className="dist-contact-info">
+        <h3 className="text-xs font-semibold text-stone-500 uppercase tracking-wider !mb-1">
+          Primary contact
+        </h3>
+        <strong className="text-sm font-semibold text-stone-900 block">
           {r.contact_name || "Contact setup required"}
-          <br />
-          {r.contact_phone}
-          <br />
-          {r.contact_email || "Email not provided"}
-        </p>
-      ) : (
-        <p>Contact information is restricted to operations administrators.</p>
-      )}
-    </>
+        </strong>
+        {detail.contacts_allowed ? (
+          <div className="dist-contact-links mt-2">
+            {r.contact_phone && (
+              <a
+                href={`tel:${r.contact_phone}`}
+                className="dist-contact-link inline-flex items-center gap-1.5"
+              >
+                <VaahanIcon name="phone" size={13} />
+                <span>{r.contact_phone}</span>
+              </a>
+            )}
+            {r.contact_email && (
+              <a
+                href={`mailto:${r.contact_email}`}
+                className="dist-contact-link inline-flex items-center gap-1.5"
+              >
+                <VaahanIcon name="mail" size={13} />
+                <span>{r.contact_email}</span>
+              </a>
+            )}
+          </div>
+        ) : (
+          <p className="text-xs text-stone-500 mt-1">
+            Contact information is restricted to operations administrators.
+          </p>
+        )}
+      </div>
+    </div>
   );
 }
 export function RetailerPreview({
@@ -275,10 +316,18 @@ function History({
             </div>
           )}
           {rows.length === 0 && !query.isError && (
-            <p>
-              No {section === "activity" ? "audit events" : section} recorded
-              yet.
-            </p>
+            <div className="dist-empty-state">
+              <div className="dist-empty-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="m7.5 4.27 9 5.15"/>
+                  <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/>
+                  <path d="m3.3 7 8.7 5 8.7-5"/>
+                  <path d="M12 22V12"/>
+                </svg>
+              </div>
+              <h3>No {section === "activity" ? "audit events" : section} recorded</h3>
+              <p>Entries will appear here as operational movements and events occur.</p>
+            </div>
           )}
           {rows.map((row) => (
             <div className="dist-history-row" key={row.id}>
@@ -349,6 +398,7 @@ const TABS = [
   "overview",
   "inventory",
   "transfers",
+  "sales",
   "activations",
   "reconciliation",
   "location",
@@ -356,6 +406,18 @@ const TABS = [
   "activity",
   "audit",
 ];
+const RETAILER_TAB_ICONS: Record<string, VaahanIconName> = {
+  overview: "home",
+  inventory: "package",
+  transfers: "route",
+  sales: "package-check",
+  activations: "package-check",
+  reconciliation: "shield-check",
+  location: "map-pin",
+  contacts: "user",
+  activity: "activity",
+  audit: "history",
+};
 export function RetailerDetail({
   initial,
   identity,
@@ -371,55 +433,121 @@ export function RetailerDetail({
     client = useQueryClient(),
     [edit, setEdit] = useState(false),
     [transfer, setTransfer] = useState(false),
+    [sale, setSale] = useState(false),
     [statusAction, setStatusAction] = useState<
       "status" | "verification" | null
     >(null),
-    manage = canManageRetailers(identity.role);
+    manage = canManageRetailers(identity.role),
+    tabsListRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!tabsListRef.current) return;
+    const activeEl = tabsListRef.current.querySelector<HTMLElement>(
+      `[data-tab-name="${tab}"]`,
+    );
+    if (activeEl) {
+      activeEl.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+        inline: "center",
+      });
+    }
+  }, [tab]);
   const changed = () => {
     void Promise.all([
       client.invalidateQueries({ queryKey: ["retailers"] }),
       client.invalidateQueries({ queryKey: ["distributors"] }),
       client.invalidateQueries({ queryKey: ["retailer-distributor"] }),
+      client.invalidateQueries({ queryKey: ["inventory"] }),
+      client.invalidateQueries({ queryKey: ["transfers"] }),
     ]);
   };
   const nextStatus = r.status === "ACTIVE" ? "SUSPENDED" : "ACTIVE";
   return (
     <section className="dist-workspace retail-workspace">
-      <Link href="/retailers">← Retailers</Link>
-      <header className="dist-header">
-        <div>
+      <Link href="/retailers" className="dist-back-link">
+        <VaahanIcon name="arrow-left" size={14} />
+        <span>Retailers</span>
+      </Link>
+      <header className="dist-header retail-header">
+        <div className="retail-header-main">
           <p className="dist-eyebrow">Local fulfilment partner</p>
-          <h1>{r.name}</h1>
-          <small>{r.reference_code}</small>
-          <p>
-            {r.city} · {r.district_name} · {r.state_name}
-          </p>
-          <p>Supplied by {r.distributor_name || "Supply setup required"}</p>
-          <RetailerStatus row={r} />
+          <div className="retail-title-wrap">
+            <h1 className="retail-title">{r.name}</h1>
+            <span className="retail-reference-pill">{r.reference_code}</span>
+          </div>
+          <div className="retail-meta-line">
+            <span className="retail-meta-item">
+              <VaahanIcon name="map-pin" size={13} />
+              <span>
+                {r.city} · {r.district_name} · {r.state_name}
+              </span>
+            </span>
+            <span className="retail-meta-dot" aria-hidden="true">
+              ·
+            </span>
+            <span className="retail-meta-item">
+              <VaahanIcon name="route" size={13} />
+              <span>
+                Supplied by{" "}
+                <strong>{r.distributor_name || "Supply setup required"}</strong>
+              </span>
+            </span>
+          </div>
+          <div className="retail-header-badges">
+            <RetailerStatus row={r} />
+          </div>
         </div>
-        <div className="dist-actions">
+        <div className="dist-actions retail-header-actions">
           <button
+            type="button"
+            className="dist-btn"
             disabled={query.isFetching}
             onClick={() => void query.refetch()}
+            title="Refresh retailer details"
           >
-            {query.isFetching ? "Refreshing…" : "Refresh"}
+            <VaahanIcon
+              name="refresh"
+              size={13}
+              className={query.isFetching ? "animate-spin" : ""}
+            />
+            <span>Refresh</span>
           </button>
           {manage && (
             <>
               <button
-                className="dist-primary"
+                type="button"
+                className="dist-btn"
+                disabled={
+                  r.status !== "ACTIVE" ||
+                  r.verification_status !== "VERIFIED" ||
+                  r.distributor_status !== "ACTIVE"
+                }
+                onClick={() => setSale(true)}
+                title="Record retail sale"
+              >
+                <VaahanIcon name="receipt" size={13} />
+                <span>Record retail sale</span>
+              </button>
+              <button
+                type="button"
+                className="dist-btn dist-primary"
                 disabled={
                   r.status !== "ACTIVE" ||
                   r.verification_status !== "VERIFIED" ||
                   r.distributor_status !== "ACTIVE"
                 }
                 onClick={() => setTransfer(true)}
+                title="Send stock to retailer"
               >
-                Send stock
+                <VaahanIcon name="plus" size={13} />
+                <span>Send stock</span>
               </button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button>More ⌄</button>
+                  <button type="button" className="dist-btn" title="More actions">
+                    <span>More</span>
+                    <VaahanIcon name="chevron-down" size={11} className="opacity-60" />
+                  </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem onSelect={() => setEdit(true)}>
@@ -505,42 +633,60 @@ export function RetailerDetail({
           window.history.pushState(null, "", `/retailers/${r.id}?tab=${value}`)
         }
       >
-        <TabsList className="dist-tabs">
-          {TABS.map((t) => (
-            <TabsTrigger value={t} key={t}>
-              {t.charAt(0).toUpperCase() + t.slice(1)}
-            </TabsTrigger>
-          ))}
-        </TabsList>
+        <div className="retail-tabs-container">
+          <TabsList ref={tabsListRef} className="dist-tabs retail-tabs">
+            {TABS.map((t) => (
+              <TabsTrigger value={t} key={t} data-tab-name={t}>
+                <VaahanIcon
+                  name={RETAILER_TAB_ICONS[t] || "circle"}
+                  size={13}
+                  className="opacity-70"
+                />
+                <span>{t.charAt(0).toUpperCase() + t.slice(1)}</span>
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </div>
         <TabsContent value="overview">
           <div className="dist-detail-grid">
             <section>
               <SupplyCard detail={detail} />
             </section>
             <section>
-              <h2>Local operations</h2>
-              <p>
-                {r.on_hand} on hand · {r.reserved} reserved
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <h2 className="!mb-0">Local operations</h2>
+                <span className="dist-badge">{r.available} available</span>
+              </div>
+              <p className="!my-1.5 text-xs leading-relaxed text-stone-700">
+                <strong>{r.on_hand}</strong> on hand · <strong>{r.reserved}</strong> reserved
                 <br />
-                {r.available} available · {r.in_transit} incoming
+                <strong>{r.available}</strong> available · <strong>{r.in_transit}</strong> incoming
               </p>
-              <p>
+              <p className="text-xs text-stone-500 !my-2">
                 Low stock threshold: {r.stock_threshold || "Not configured"}
                 <br />
                 Last receipt: {timeLabel(r.last_receipt_at)}
               </p>
-              <Link href={`/retailers/${r.id}?tab=transfers`}>
-                View replenishment →
+              <Link
+                href={`/retailers/${r.id}?tab=transfers`}
+                className="inline-flex items-center gap-1.5 text-xs font-medium text-amber-900 hover:underline mt-1"
+              >
+                <span>View replenishment</span>
+                <VaahanIcon name="arrow-right" size={12} />
               </Link>
             </section>
             <section>
-              <h2>Activation activity</h2>
-              <p>
-                {r.activations_today} today · {r.activations_7d} / 7d ·{" "}
-                {r.activations_30d} / 30d
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <h2 className="!mb-0">Activation activity</h2>
+                <span className="dist-badge success">{r.activations_today} today</span>
+              </div>
+              <p className="!my-1.5 text-xs leading-relaxed text-stone-700">
+                <strong>{r.activations_today}</strong> today · <strong>{r.activations_7d}</strong> / 7d · <strong>{r.activations_30d}</strong> / 30d
               </p>
-              <p>Last activation: {timeLabel(r.last_activation_at)}</p>
-              <p>
+              <p className="text-xs text-stone-500 !my-2">
+                Last activation: {timeLabel(r.last_activation_at)}
+              </p>
+              <p className="text-[11px] text-stone-500 leading-normal">
                 Attributed from retained retailer custody on offline retail
                 identities. Sales and customer orders are not inferred from
                 activations.
@@ -550,12 +696,15 @@ export function RetailerDetail({
         </TabsContent>
         <TabsContent value="inventory">
           <section className="dist-detail-panel">
-            <h2>Inventory custody</h2>
-            <p>
-              {r.available} available · {r.reserved} reserved · {r.in_transit}{" "}
-              incoming
-            </p>
-            <div className="dist-actions">
+            <div className="dist-panel-head">
+              <div>
+                <h2>Inventory custody</h2>
+                <p className="dist-panel-desc">
+                  {r.available} available · {r.reserved} reserved · {r.in_transit} incoming
+                </p>
+              </div>
+            </div>
+            <div className="dist-actions" style={{ marginBottom: 16 }}>
               {detail.inventory.map((v) => (
                 <span className="dist-badge" key={v.status}>
                   {v.status.replaceAll("_", " ")} · {v.quantity}
@@ -572,12 +721,16 @@ export function RetailerDetail({
         </TabsContent>
         <TabsContent value="transfers">
           <section className="dist-detail-panel">
-            <h2>Replenishment and stock movement</h2>
-            <p>
-              Reservations, dispatch and physical receipt are recorded
-              separately. Transfers without identity reservations require
-              operational review.
-            </p>
+            <div className="dist-panel-head">
+              <div>
+                <h2>Replenishment and stock movement</h2>
+                <p className="dist-panel-desc">
+                  Reservations, dispatch and physical receipt are recorded
+                  separately. Transfers without identity reservations require
+                  operational review.
+                </p>
+              </div>
+            </div>
             <History
               id={r.id}
               section="transfers"
@@ -588,12 +741,16 @@ export function RetailerDetail({
         </TabsContent>
         <TabsContent value="activations">
           <section className="dist-detail-panel">
-            <h2>Attributed activations</h2>
-            <p>
-              {r.activations_today} today · {r.activations_7d} / 7d ·{" "}
-              {r.activations_30d} / 30d. Owner contact and vehicle information
-              are excluded from this operational history.
-            </p>
+            <div className="dist-panel-head">
+              <div>
+                <h2>Attributed activations</h2>
+                <p className="dist-panel-desc">
+                  {r.activations_today} today · {r.activations_7d} / 7d ·{" "}
+                  {r.activations_30d} / 30d. Owner contact and vehicle information
+                  are excluded from this operational history.
+                </p>
+              </div>
+            </div>
             <History
               id={r.id}
               section="activations"
@@ -602,15 +759,20 @@ export function RetailerDetail({
             />
           </section>
         </TabsContent>
+        <TabsContent value="sales"><RetailerSales id={r.id} /></TabsContent>
         <TabsContent value="reconciliation">
           <section className="dist-detail-panel">
-            <h2>Physical stock reconciliation</h2>
-            <p>
-              {r.reconciliation_issues} open discrepancies ·{" "}
-              {r.unresolved_variance} identities in unresolved variance.
-              Recorded counts preserve custody; review does not automatically
-              adjust inventory.
-            </p>
+            <div className="dist-panel-head">
+              <div>
+                <h2>Physical stock reconciliation</h2>
+                <p className="dist-panel-desc">
+                  {r.reconciliation_issues} open discrepancies ·{" "}
+                  {r.unresolved_variance} identities in unresolved variance.
+                  Recorded counts preserve custody; review does not automatically
+                  adjust inventory.
+                </p>
+              </div>
+            </div>
             {manage && (
               <RetailerReconcile detail={detail} onChanged={changed} />
             )}
@@ -624,25 +786,143 @@ export function RetailerDetail({
         </TabsContent>
         <TabsContent value="location">
           <section className="dist-detail-panel">
-            <h2>Outlet location</h2>
-            <p>
-              {r.address_line_1}
-              <br />
-              {r.address_line_2}
-              <br />
-              {r.city} · {r.district_name}
-              <br />
-              {r.state_name} · {r.postal_code || "Postal code not provided"}
-            </p>
-            <p>Landmark: {r.landmark || "Not recorded"}</p>
-            <SupplyCard detail={detail} />
+            <div className="dist-panel-head">
+              <div>
+                <h2>Outlet location</h2>
+                <p className="dist-panel-desc">
+                  Physical store address, landmark, and territory mapping.
+                </p>
+              </div>
+            </div>
+            <div className="retail-location-grid">
+              <div className="dist-contact-card">
+                <div className="dist-contact-badge">
+                  <VaahanIcon name="map-pin" size={16} />
+                </div>
+                <div className="dist-contact-info">
+                  <strong>Retail store location</strong>
+                  <p className="text-xs text-stone-700 my-1 leading-relaxed">
+                    {r.address_line_1}
+                    {r.address_line_2 && (
+                      <>
+                        <br />
+                        {r.address_line_2}
+                      </>
+                    )}
+                    <br />
+                    {r.city} · {r.district_name}
+                    <br />
+                    {r.state_name} · {r.postal_code || "Postal code not provided"}
+                  </p>
+                  {r.landmark && (
+                    <p className="dist-landmark-text mt-1">
+                      Landmark: {r.landmark}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <div className="dist-contact-card retail-parent-contact-card">
+                <div className="dist-contact-badge secondary">
+                  <VaahanIcon name="route" size={16} />
+                </div>
+                <div className="dist-contact-info w-full">
+                  <SupplyCard detail={detail} />
+                </div>
+              </div>
+            </div>
           </section>
         </TabsContent>
         <TabsContent value="contacts">
           <section className="dist-detail-panel">
-            <ContactCard detail={detail} />
+            <div className="dist-panel-head">
+              <div>
+                <h2>Primary contact</h2>
+                <p className="dist-panel-desc">
+                  Direct retail outlet liaison and operational point of contact.
+                </p>
+              </div>
+              {manage && (
+                <div className="dist-panel-actions">
+                  <button
+                    type="button"
+                    className="dist-btn"
+                    onClick={() => setEdit(true)}
+                  >
+                    <VaahanIcon name="edit" size={13} />
+                    <span>Update contact</span>
+                  </button>
+                </div>
+              )}
+            </div>
+            {detail.contacts_allowed ? (
+              <div className="retail-contacts-grid">
+                <div className="dist-contact-card">
+                  <div className="dist-contact-badge">
+                    <VaahanIcon name="user" size={16} />
+                  </div>
+                  <div className="dist-contact-info">
+                    <strong>{r.contact_name || "Contact setup required"}</strong>
+                    <span className="dist-contact-role">
+                      Retail Outlet Manager / Primary Liaison
+                    </span>
+                    <div className="dist-contact-links">
+                      {r.contact_phone && (
+                        <a
+                          href={`tel:${r.contact_phone}`}
+                          className="dist-contact-link inline-flex items-center gap-1.5"
+                        >
+                          <VaahanIcon name="phone" size={13} />
+                          <span>{r.contact_phone}</span>
+                        </a>
+                      )}
+                      {r.contact_email && (
+                        <a
+                          href={`mailto:${r.contact_email}`}
+                          className="dist-contact-link inline-flex items-center gap-1.5"
+                        >
+                          <VaahanIcon name="mail" size={13} />
+                          <span>{r.contact_email}</span>
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {detail.parent && (
+                  <div className="dist-contact-card retail-parent-contact-card">
+                    <div className="dist-contact-badge secondary">
+                      <VaahanIcon name="route" size={16} />
+                    </div>
+                    <div className="dist-contact-info">
+                      <strong>{detail.parent.name}</strong>
+                      <span className="dist-contact-role">
+                        Supplying Regional Distributor ({detail.parent.reference_code})
+                      </span>
+                      <p className="text-xs text-stone-600 my-1">
+                        {detail.parent.city} · {detail.parent.state_name}
+                      </p>
+                      <Link
+                        href={`/distributors/${detail.parent.id}?tab=contacts`}
+                        className="dist-contact-link inline-flex items-center gap-1.5"
+                      >
+                        <span>View distributor contacts</span>
+                        <VaahanIcon name="arrow-right" size={11} />
+                      </Link>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="dist-contact-restricted">
+                <VaahanIcon name="shield-alert" size={16} />
+                <p>Contact information is restricted to operations administrators.</p>
+              </div>
+            )}
             {detail.contacts_allowed && (
-              <p>Internal note: {r.notes || "Not recorded"}</p>
+              <div className="dist-notes-box">
+                <h3>Internal administrative notes</h3>
+                <p>{r.notes || "No internal administrative notes recorded."}</p>
+              </div>
             )}
           </section>
         </TabsContent>
@@ -668,6 +948,7 @@ export function RetailerDetail({
           onSaved={changed}
         />
       )}{" "}
+      {sale && <RetailerSaleDialog retailer={r} onClose={() => setSale(false)} onChanged={changed} />}
       {transfer && (
         <RetailerTransfer
           retailer={r}

@@ -24,6 +24,7 @@ import {
   TabsContent,
 } from "@vaahansafe/ui/components/tabs";
 import { toast } from "@vaahansafe/ui/components/sonner";
+import { VaahanIcon, type VaahanIconName } from "@vaahansafe/icons";
 import { getAdminData } from "../../../lib/client-api";
 import type { AdminIdentity } from "../../../lib/contracts";
 import type { DistributorDetail as Detail } from "../distributor.types";
@@ -150,6 +151,17 @@ const SECTIONS = [
   "activity",
   "audit",
 ];
+const TAB_ICONS: Record<string, VaahanIconName> = {
+  overview: "home",
+  inventory: "package",
+  transfers: "route",
+  retailers: "layers",
+  territory: "map-pin",
+  reconciliation: "shield-check",
+  contacts: "user",
+  activity: "activity",
+  audit: "history",
+};
 export function DistributorDetailWorkspace({
   identity,
   initial,
@@ -227,7 +239,10 @@ export function DistributorDetailWorkspace({
   if (!query.data)
     return (
       <section className="dist-workspace dist-error" role="alert">
-        <Link href="/distributors">← Distributors</Link>
+        <Link href="/distributors" className="dist-back-link">
+          <VaahanIcon name="arrow-left" size={14} />
+          <span>Distributors</span>
+        </Link>
         <h1>Could not load this distributor.</h1>
         <button onClick={() => void query.refetch()}>Retry</button>
       </section>
@@ -243,7 +258,10 @@ export function DistributorDetailWorkspace({
     manage = canManageDistributors(identity.role);
   return (
     <section className="dist-workspace">
-      <Link href="/distributors">← Distributors</Link>
+      <Link href="/distributors" className="dist-back-link">
+        <VaahanIcon name="arrow-left" size={14} />
+        <span>Distributors</span>
+      </Link>
       <header className="dist-header">
         <div>
           <p className="dist-eyebrow">Regional distribution</p>
@@ -255,18 +273,40 @@ export function DistributorDetailWorkspace({
           <DistributorStatus row={p} />
         </div>
         <div className="dist-actions">
-          <button onClick={refresh} disabled={query.isFetching}>
-            Refresh
+          <button
+            type="button"
+            className="dist-btn"
+            onClick={refresh}
+            disabled={query.isFetching}
+            title="Refresh distributor details"
+          >
+            <VaahanIcon
+              name="refresh"
+              size={13}
+              className={query.isFetching ? "animate-spin" : ""}
+            />
+            <span>Refresh</span>
           </button>
           {manage && (
             <>
-              <button onClick={() => setEditing(true)}>Edit distributor</button>
               <button
-                className="dist-primary"
+                type="button"
+                className="dist-btn"
+                onClick={() => setEditing(true)}
+                title="Edit distributor details"
+              >
+                <VaahanIcon name="edit" size={13} />
+                <span>Edit distributor</span>
+              </button>
+              <button
+                type="button"
+                className="dist-btn dist-primary"
                 disabled={p.status !== "ACTIVE"}
                 onClick={() => setTransfer(true)}
+                title="Transfer stock to distributor"
               >
-                Transfer stock
+                <VaahanIcon name="plus" size={13} />
+                <span>Transfer stock</span>
               </button>
             </>
           )}
@@ -294,232 +334,433 @@ export function DistributorDetailWorkspace({
           {SECTIONS.filter(
             (s) =>
               s !== "contacts" || canReadDistributorContacts(identity.role),
-          ).map((s) => (
-            <TabsTrigger key={s} value={s}>
-              {s[0]!.toUpperCase() + s.slice(1)}
-            </TabsTrigger>
-          ))}
+          ).map((s) => {
+            const count =
+              s === "transfers"
+                ? detail.transfers.length
+                : s === "retailers"
+                  ? p.retailer_count
+                  : s === "territory"
+                    ? detail.territories.length
+                    : s === "reconciliation" && p.reconciliation_issues > 0
+                      ? p.reconciliation_issues
+                      : null;
+            return (
+              <TabsTrigger key={s} value={s}>
+                <VaahanIcon
+                  name={TAB_ICONS[s] || "circle"}
+                  size={13}
+                  className="opacity-70"
+                />
+                <span>{s[0]!.toUpperCase() + s.slice(1)}</span>
+                {count !== null && count !== undefined && (
+                  <span
+                    className={`dist-tab-pill${s === "reconciliation" && p.reconciliation_issues > 0 ? " alert" : ""}`}
+                  >
+                    {count}
+                  </span>
+                )}
+              </TabsTrigger>
+            );
+          })}
         </TabsList>
         <TabsContent value="overview">
           <div className="dist-detail-grid">
-            <section>
-              <h2>Physical location</h2>
-              <p>
-                {p.address_line_1 || "Address setup required"}
-                <br />
-                {p.address_line_2}
-                <br />
-                {p.city}, {p.district_name}
-                <br />
-                {p.state_name} {p.postal_code}
-              </p>
-              {p.landmark && <p>Nearby landmark: {p.landmark}</p>}
-              <p>Legal name: {p.legal_name || "Not recorded"}</p>
+            <section className="dist-card-section">
+              <div className="dist-card-header">
+                <h2>Physical location</h2>
+              </div>
+              <div className="dist-card-body">
+                <p className="dist-address-text">
+                  <strong>{p.address_line_1 || "Address setup required"}</strong>
+                  {p.address_line_2 && (
+                    <>
+                      <br />
+                      {p.address_line_2}
+                    </>
+                  )}
+                  <br />
+                  {p.city}, {p.district_name}
+                  <br />
+                  {p.state_name} {p.postal_code}
+                </p>
+                {p.landmark && (
+                  <p className="dist-landmark-text">
+                    Nearby landmark: {p.landmark}
+                  </p>
+                )}
+                <div className="dist-meta-row">
+                  <span>Legal entity</span>
+                  <strong>{p.legal_name || "Not recorded"}</strong>
+                </div>
+              </div>
             </section>
-            <section>
-              <h2>Service territory</h2>
-              {detail.territories.map((t) => (
-                <TerritoryLabel key={t.district_code} area={t} />
-              ))}
-              {!detail.territories.length && (
-                <p>Service territory setup required.</p>
-              )}
-              <p>
-                {p.open_transfers} open transfers · {p.retailer_count}{" "}
-                associated retailers
-              </p>
-            </section>
-            <section>
-              <h2>Operational review</h2>
-              <p>
-                {p.reconciliation_issues
-                  ? p.reconciliation_issues + " reconciliations require review."
-                  : "No recorded open stock discrepancy."}
-              </p>
-              <p>
-                Verification:{" "}
-                {p.verification_status.replaceAll("_", " ").toLowerCase()}
-              </p>
-              {manage && (
-                <div className="dist-actions">
-                  <button
-                    onClick={() =>
-                      setStatusAction({
-                        status: p.status === "ACTIVE" ? "SUSPENDED" : "ACTIVE",
-                        label:
-                          p.status === "ACTIVE"
-                            ? "Distributor suspended"
-                            : "Distributor reactivated",
-                      })
-                    }
-                  >
-                    {p.status === "ACTIVE"
-                      ? "Suspend distributor"
-                      : "Reactivate distributor"}
-                  </button>
-                  {p.verification_status !== "VERIFIED" ? (
-                    <button
-                      onClick={() =>
-                        setStatusAction({
-                          verification: "VERIFIED",
-                          label: "Distributor verified",
-                        })
-                      }
-                    >
-                      Verify distributor
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() =>
-                        setStatusAction({
-                          verification: "REQUIRES_CORRECTION",
-                          label: "Verification requires correction",
-                        })
-                      }
-                    >
-                      Revoke verification
-                    </button>
+            <section className="dist-card-section">
+              <div className="dist-card-header">
+                <h2>Service territory</h2>
+              </div>
+              <div className="dist-card-body">
+                <div className="dist-territory-chips">
+                  {detail.territories.map((t) => (
+                    <TerritoryLabel key={t.district_code} area={t} />
+                  ))}
+                  {!detail.territories.length && (
+                    <p className="dist-panel-desc">Service territory setup required.</p>
                   )}
                 </div>
-              )}
+                <div className="dist-meta-row">
+                  <span>Open transfers</span>
+                  <strong>{p.open_transfers}</strong>
+                </div>
+                <div className="dist-meta-row">
+                  <span>Associated retailers</span>
+                  <strong>{p.retailer_count}</strong>
+                </div>
+              </div>
+            </section>
+            <section className="dist-card-section">
+              <div className="dist-card-header">
+                <h2>Operational review</h2>
+              </div>
+              <div className="dist-card-body">
+                <div className="dist-meta-row">
+                  <span>Verification status</span>
+                  <strong>{p.verification_status.replaceAll("_", " ").toLowerCase()}</strong>
+                </div>
+                <p className="dist-panel-desc">
+                  {p.reconciliation_issues
+                    ? `${p.reconciliation_issues} reconciliations require review.`
+                    : "No recorded open stock discrepancy."}
+                </p>
+                {manage && (
+                  <div className="dist-actions dist-card-actions">
+                    <button
+                      onClick={() =>
+                        setStatusAction({
+                          status: p.status === "ACTIVE" ? "SUSPENDED" : "ACTIVE",
+                          label:
+                            p.status === "ACTIVE"
+                              ? "Distributor suspended"
+                              : "Distributor reactivated",
+                        })
+                      }
+                    >
+                      {p.status === "ACTIVE"
+                        ? "Suspend distributor"
+                        : "Reactivate distributor"}
+                    </button>
+                    {p.verification_status !== "VERIFIED" ? (
+                      <button
+                        className="dist-primary"
+                        onClick={() =>
+                          setStatusAction({
+                            verification: "VERIFIED",
+                            label: "Distributor verified",
+                          })
+                        }
+                      >
+                        Verify distributor
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() =>
+                          setStatusAction({
+                            verification: "REQUIRES_CORRECTION",
+                            label: "Verification requires correction",
+                          })
+                        }
+                      >
+                        Revoke verification
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
             </section>
           </div>
         </TabsContent>
         <TabsContent value="inventory">
           <section className="dist-detail-panel">
-            <h2>Recorded custody</h2>
-            <p>
-              Counts reflect current custody records. QR activation and service
-              entitlement remain separate.
-            </p>
-            <dl className="dist-summary">
-              {detail.inventory.map((v) => (
-                <div key={v.status}>
-                  <dt>{v.status.replaceAll("_", " ").toLowerCase()}</dt>
-                  <dd>{v.quantity.toLocaleString("en-IN")}</dd>
+            <div className="dist-panel-head">
+              <div>
+                <h2>Recorded custody</h2>
+                <p className="dist-panel-desc">
+                  Counts reflect current physical custody records. QR activation and service entitlement remain separate.
+                </p>
+              </div>
+              {manage && p.status === "ACTIVE" && (
+                <div className="dist-panel-actions">
+                  <button className="dist-primary" onClick={() => setTransfer(true)}>
+                    <VaahanIcon name="plus" size={13} />
+                    <span>Transfer stock</span>
+                  </button>
                 </div>
-              ))}
-            </dl>
-            {!detail.inventory.length && (
-              <p>
-                No QR inventory is currently recorded in this distributor’s
-                custody.
-              </p>
+              )}
+            </div>
+            <div className="dist-inventory-stats">
+              <div className="dist-stat-card">
+                <span className="dist-stat-label">On hand</span>
+                <strong className="dist-stat-value">{p.on_hand.toLocaleString("en-IN")}</strong>
+                <small className="dist-stat-hint">Physical stock in node</small>
+              </div>
+              <div className="dist-stat-card">
+                <span className="dist-stat-label">Variance units</span>
+                <strong className="dist-stat-value">{p.unresolved_variance.toLocaleString("en-IN")}</strong>
+                <small className="dist-stat-hint">Unresolved variance</small>
+              </div>
+              <div className="dist-stat-card">
+                <span className="dist-stat-label">In transit</span>
+                <strong className="dist-stat-value">{p.in_transit.toLocaleString("en-IN")}</strong>
+                <small className="dist-stat-hint">Incoming movements</small>
+              </div>
+              <div className="dist-stat-card">
+                <span className="dist-stat-label">Open transfers</span>
+                <strong className="dist-stat-value">{p.open_transfers.toLocaleString("en-IN")}</strong>
+                <small className="dist-stat-hint">Pending movements</small>
+              </div>
+            </div>
+            {detail.inventory.length ? (
+              <dl className="dist-summary">
+                {detail.inventory.map((v) => (
+                  <div key={v.status}>
+                    <dt>{v.status.replaceAll("_", " ").toLowerCase()}</dt>
+                    <dd>{v.quantity.toLocaleString("en-IN")}</dd>
+                  </div>
+                ))}
+              </dl>
+            ) : (
+              <div className="dist-empty-state">
+                <div className="dist-empty-icon">
+                  <VaahanIcon name="package" size={24} />
+                </div>
+                <h3>No QR inventory recorded</h3>
+                <p>
+                  No physical QR sticker stock is currently recorded in this distributor’s custody.
+                </p>
+                {manage && p.status === "ACTIVE" && (
+                  <button className="dist-primary" onClick={() => setTransfer(true)}>
+                    <VaahanIcon name="plus" size={13} />
+                    <span>Transfer stock into custody</span>
+                  </button>
+                )}
+              </div>
             )}
-            <p>
-              {p.in_transit} identities incoming · {p.open_transfers} open
-              transfers
-            </p>
           </section>
         </TabsContent>
         <TabsContent value="transfers">
           <section className="dist-detail-panel">
-            <h2>Stock movements</h2>
-            <p>
-              Request, dispatch, and acknowledge receipt through the verified
-              custody workflow.
-            </p>
+            <div className="dist-panel-head">
+              <div>
+                <h2>Stock movements</h2>
+                <p className="dist-panel-desc">
+                  Request, dispatch, and acknowledge receipt through the verified custody workflow.
+                </p>
+              </div>
+              {manage && p.status === "ACTIVE" && (
+                <div className="dist-panel-actions">
+                  <button className="dist-primary" onClick={() => setTransfer(true)}>
+                    <VaahanIcon name="plus" size={13} />
+                    <span>Request stock transfer</span>
+                  </button>
+                </div>
+              )}
+            </div>
             {detail.transfers.length ? (
-              detail.transfers.map((t) => (
-                <article className="dist-history-row" key={t.id}>
-                  <div>
-                    <strong>{t.reference_code}</strong>
-                    <p>
-                      {t.source_name || "VaahanSafe central inventory"} →{" "}
-                      {t.destination_name}
-                    </p>
-                    <small>
-                      {t.quantity} identities · {t.status} ·{" "}
-                      {new Date(t.created_at).toLocaleDateString("en-IN")}
-                    </small>
-                  </div>
-                  {manage &&
-                    t.destination_partner_id === id &&
-                    ["REQUESTED", "IN_TRANSIT"].includes(t.status) && (
-                      <TransferActions
-                        id={id}
-                        transfer={t}
-                        onChanged={refresh}
-                      />
-                    )}
-                </article>
-              ))
+              <div className="dist-transfers-list">
+                {detail.transfers.map((t) => (
+                  <article className="dist-transfer-card" key={t.id}>
+                    <div>
+                      <div className="dist-transfer-top">
+                        <span className="dist-code-pill">{t.reference_code}</span>
+                        <span
+                          className={`dist-transfer-badge ${
+                            t.status === "IN_TRANSIT"
+                              ? "in-transit"
+                              : t.status === "RECEIVED"
+                                ? "received"
+                                : "requested"
+                          }`}
+                        >
+                          {t.status.replaceAll("_", " ")}
+                        </span>
+                      </div>
+                      <div className="dist-transfer-route">
+                        <span>{t.source_name || "VaahanSafe central inventory"}</span>
+                        <VaahanIcon name="arrow-right" size={13} className="opacity-60" />
+                        <span>{t.destination_name}</span>
+                      </div>
+                      <div className="dist-transfer-meta">
+                        <span><strong>{t.quantity.toLocaleString("en-IN")}</strong> identities</span>
+                        <span>·</span>
+                        <span>{new Date(t.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</span>
+                      </div>
+                    </div>
+                    {manage &&
+                      t.destination_partner_id === id &&
+                      ["REQUESTED", "IN_TRANSIT"].includes(t.status) && (
+                        <div className="dist-transfer-actions">
+                          <TransferActions
+                            id={id}
+                            transfer={t}
+                            onChanged={refresh}
+                          />
+                        </div>
+                      )}
+                  </article>
+                ))}
+              </div>
             ) : (
-              <p>No recorded transfers.</p>
+              <div className="dist-empty-state">
+                <div className="dist-empty-icon">
+                  <VaahanIcon name="route" size={24} />
+                </div>
+                <h3>No recorded stock movements</h3>
+                <p>
+                  QR stock dispatched from central inventory or transferred between nodes
+                  will appear here with lot references, custody timeline, and receipt acknowledgement.
+                </p>
+                {manage && p.status === "ACTIVE" && (
+                  <button className="dist-primary" onClick={() => setTransfer(true)}>
+                    <VaahanIcon name="plus" size={13} />
+                    <span>Request stock transfer</span>
+                  </button>
+                )}
+              </div>
             )}
             <DistributorHistoryMore query={transfers} />
           </section>
         </TabsContent>
         <TabsContent value="retailers">
           <section className="dist-detail-panel">
-            <h2>Retailer network</h2>
-            <RetailerManager id={id} manage={manage} onChanged={refresh} />
-            {detail.retailers.map((r) => (
-              <article key={r.id} className="dist-history-row">
-                <div>
-                  <strong>{r.name}</strong>
-                  <p>
-                    {r.reference_code} · {r.city} · {r.status}
-                  </p>
+            <div className="dist-panel-head">
+              <div>
+                <h2>Retailer network</h2>
+                <p className="dist-panel-desc">
+                  Associated local fulfilment outlets supplied by this distributor.
+                </p>
+              </div>
+              <div className="dist-panel-actions">
+                <RetailerManager id={id} manage={manage} onChanged={refresh} />
+              </div>
+            </div>
+            {detail.retailers.length ? (
+              <div className="dist-retailers-grid">
+                {detail.retailers.map((r) => (
+                  <article key={r.id} className="dist-history-card">
+                    <div>
+                      <strong>{r.name}</strong>
+                      <p>
+                        {r.reference_code} · {r.city} · {r.status}
+                      </p>
+                    </div>
+                    <span className="dist-stat-chip">{r.stock} in custody</span>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <div className="dist-empty-state">
+                <div className="dist-empty-icon">
+                  <VaahanIcon name="layers" size={24} />
                 </div>
-                <span>{r.stock} in custody</span>
-              </article>
-            ))}
-            {!detail.retailers.length && (
-              <p>No retailers are associated with this distributor yet.</p>
+                <h3>No retailers associated yet</h3>
+                <p>
+                  Link local retailer partners to this distributor to enable verified dispatch and offline retail activations.
+                </p>
+              </div>
             )}
             <DistributorHistoryMore query={retailers} />
           </section>
         </TabsContent>
         <TabsContent value="territory">
           <section className="dist-detail-panel">
-            <h2>Service territory</h2>
-            <p>
-              Coverage is separate from the physical address. District coverage
-              is non-exclusive.
-            </p>
-            {detail.territories.map((t) => (
-              <TerritoryLabel key={t.district_code} area={t} />
-            ))}
-            {manage && (
-              <button onClick={() => setEditing(true)}>
-                Manage territories
-              </button>
+            <div className="dist-panel-head">
+              <div>
+                <h2>Service territory</h2>
+                <p className="dist-panel-desc">
+                  Coverage is separate from physical address. District coverage is non-exclusive.
+                </p>
+              </div>
+              {manage && (
+                <div className="dist-panel-actions">
+                  <button onClick={() => setEditing(true)}>
+                    Manage territories
+                  </button>
+                </div>
+              )}
+            </div>
+            {detail.territories.length ? (
+              <div className="dist-territory-chips">
+                {detail.territories.map((t) => (
+                  <TerritoryLabel key={t.district_code} area={t} />
+                ))}
+              </div>
+            ) : (
+              <div className="dist-empty-state">
+                <div className="dist-empty-icon">
+                  <VaahanIcon name="map-pin" size={24} />
+                </div>
+                <h3>No service territory configured</h3>
+                <p>Assign states and districts to authorize fulfilment operations.</p>
+                {manage && (
+                  <button onClick={() => setEditing(true)}>Assign territory</button>
+                )}
+              </div>
             )}
           </section>
         </TabsContent>
         <TabsContent value="reconciliation">
           <section className="dist-detail-panel">
-            <h2>Stock reconciliation</h2>
+            <div className="dist-panel-head">
+              <div>
+                <h2>Stock reconciliation</h2>
+                <p className="dist-panel-desc">
+                  Compare physical counts against system recorded custody. Review does not overwrite custody without verified reason.
+                </p>
+              </div>
+            </div>
             <ReconciliationForm
               id={id}
               expected={p.on_hand}
               manage={manage}
               onChanged={refresh}
             />
-            {detail.reconciliations.map((r) => (
-              <article key={r.id} className="dist-history-row">
-                <div>
-                  <strong>
-                    {r.status} ·{" "}
-                    {new Date(r.updated_at).toLocaleDateString("en-IN")}
-                  </strong>
-                  <p>
-                    Expected {r.expected_quantity} · Counted{" "}
-                    {r.counted_quantity} · Variance {r.variance}
-                  </p>
+            {detail.reconciliations.length ? (
+              <div className="dist-reconciliations-list">
+                {detail.reconciliations.map((r) => (
+                  <article key={r.id} className="dist-history-card">
+                    <div>
+                      <div className="dist-transfer-top">
+                        <span className={`dist-transfer-badge ${r.status === "CLOSED" ? "received" : "requested"}`}>
+                          {r.status}
+                        </span>
+                        <small>{new Date(r.updated_at).toLocaleDateString("en-IN")}</small>
+                      </div>
+                      <p className="dist-reconcile-counts">
+                        Expected <strong>{r.expected_quantity}</strong> · Counted{" "}
+                        <strong>{r.counted_quantity}</strong> · Variance{" "}
+                        <strong className={r.variance !== 0 ? "text-amber-700" : ""}>
+                          {r.variance > 0 ? `+${r.variance}` : r.variance}
+                        </strong>
+                      </p>
+                    </div>
+                    {manage && r.status !== "CLOSED" && (
+                      <ReconciliationAction
+                        id={id}
+                        record={r}
+                        onChanged={refresh}
+                      />
+                    )}
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <div className="dist-empty-state">
+                <div className="dist-empty-icon">
+                  <VaahanIcon name="shield-check" size={24} />
                 </div>
-                {manage && r.status !== "CLOSED" && (
-                  <ReconciliationAction
-                    id={id}
-                    record={r}
-                    onChanged={refresh}
-                  />
-                )}
-              </article>
-            ))}
-            {!detail.reconciliations.length && (
-              <p>No stock counts have been recorded.</p>
+                <h3>No stock counts recorded</h3>
+                <p>Periodic physical counts help verify custody integrity and flag variances.</p>
+              </div>
             )}
             <DistributorHistoryMore query={reconciliations} />
           </section>
@@ -527,38 +768,70 @@ export function DistributorDetailWorkspace({
         {canReadDistributorContacts(identity.role) && (
           <TabsContent value="contacts">
             <section className="dist-detail-panel">
-              <h2>Primary contact</h2>
-              <p>
-                {p.contact_name || "Contact setup required"}
-                <br />
-                {p.contact_role}
-                <br />
-                {p.contact_phone}
-                <br />
-                {p.contact_email}
-              </p>
-              {manage && (
-                <button onClick={() => setEditing(true)}>Update contact</button>
-              )}
-              <h3>Internal notes</h3>
-              <p>{p.notes || "None recorded."}</p>
+              <div className="dist-panel-head">
+                <div>
+                  <h2>Primary contact</h2>
+                  <p className="dist-panel-desc">Direct business liaison and operational point of contact.</p>
+                </div>
+                {manage && (
+                  <div className="dist-panel-actions">
+                    <button onClick={() => setEditing(true)}>
+                      <VaahanIcon name="edit" size={13} />
+                      <span>Update contact</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+              <div className="dist-contact-card">
+                <div className="dist-contact-info">
+                  <strong>{p.contact_name || "Contact setup required"}</strong>
+                  <span className="dist-contact-role">{p.contact_role || "Operations Liaison"}</span>
+                  <div className="dist-contact-links">
+                    {p.contact_phone && (
+                      <a href={`tel:${p.contact_phone}`} className="dist-contact-link">
+                        <VaahanIcon name="phone" size={13} />
+                        <span>{p.contact_phone}</span>
+                      </a>
+                    )}
+                    {p.contact_email && (
+                      <a href={`mailto:${p.contact_email}`} className="dist-contact-link">
+                        <VaahanIcon name="mail" size={13} />
+                        <span>{p.contact_email}</span>
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className="dist-notes-box">
+                <h3>Internal notes</h3>
+                <p>{p.notes || "No internal administrative notes recorded."}</p>
+              </div>
             </section>
           </TabsContent>
         )}
         <TabsContent value="activity">
           <section className="dist-detail-panel">
-            <h2>Recent activity</h2>
+            <div className="dist-panel-head">
+              <div>
+                <h2>Recent activity</h2>
+                <p className="dist-panel-desc">Operational timeline and custody updates.</p>
+              </div>
+            </div>
             <Activity detail={detail} />
             <DistributorHistoryMore query={activity} />
           </section>
         </TabsContent>
         <TabsContent value="audit">
           <section className="dist-detail-panel">
-            <h2>Audit history</h2>
-            <p>
-              Material changes retain the administrator, reason and timestamp.
-              Private contact fields are excluded from audit payloads.
-            </p>
+            <div className="dist-panel-head">
+              <div>
+                <h2>Audit history</h2>
+                <p className="dist-panel-desc">
+                  Material changes retain the administrator, reason and timestamp.
+                  Private contact fields are excluded from audit payloads.
+                </p>
+              </div>
+            </div>
             <Activity detail={detail} />
             <DistributorHistoryMore query={activity} />
           </section>
@@ -655,21 +928,34 @@ function Activity({
   compact?: boolean;
 }) {
   return detail.activity.length ? (
-    <ol className="dist-activity">
+    <ul className="dist-activity-feed">
       {detail.activity.slice(0, compact ? 3 : 20).map((e) => (
-        <li key={e.id}>
-          <strong>
-            {e.action.replaceAll("distributor.", "").replaceAll("_", " ")}
-          </strong>
-          <small>
-            {e.actor_name} · {new Date(e.created_at).toLocaleString("en-IN")}
-          </small>
-          {e.reason && <p>{e.reason}</p>}
+        <li key={e.id} className="dist-activity-item">
+          <div className="dist-activity-indicator" />
+          <div className="dist-activity-content">
+            <div className="dist-activity-header">
+              <strong>
+                {e.action.replaceAll("distributor.", "").replaceAll("_", " ")}
+              </strong>
+              <small>{new Date(e.created_at).toLocaleString("en-IN")}</small>
+            </div>
+            {e.reason && <p>{e.reason}</p>}
+            {e.actor_name && <small className="dist-actor-badge">{e.actor_name}</small>}
+          </div>
         </li>
       ))}
-    </ol>
+    </ul>
   ) : (
-    <p>No distributor activity recorded yet.</p>
+    <div className="dist-empty-state">
+      <div className="dist-empty-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <polyline points="12 6 12 12 14 14"/>
+        </svg>
+      </div>
+      <h3>No distributor activity recorded</h3>
+      <p>Operational updates and verified status changes will be recorded here.</p>
+    </div>
   );
 }
 import {

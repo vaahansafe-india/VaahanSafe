@@ -40,7 +40,7 @@ export class D1QrActivationAttemptRepository implements QrActivationAttemptRepos
       `SELECT COUNT(*) as count
        FROM qr_activation_attempts
        WHERE qr_id = ?
-         AND datetime(created_at) >= datetime('now', '-' || ? || ' seconds')`,
+         AND ${this.db.dialect === "postgres" ? "created_at >= CURRENT_TIMESTAMP - (? * INTERVAL '1 second')" : "datetime(created_at) >= datetime('now', '-' || ? || ' seconds')"}`,
       [qrId, windowSeconds]
     );
     return row?.count ?? 0;

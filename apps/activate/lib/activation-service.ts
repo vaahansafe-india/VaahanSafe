@@ -1,6 +1,7 @@
 import {
   getAuthoritativeDatabaseClient,
   getUserRepository,
+  getAuthIdentityRepository,
   getSessionRepository,
   getVehicleRepository,
   getQrRepository,
@@ -31,45 +32,14 @@ import type {
   EligibleVehicleDto,
   ActivationCommitResultDto,
 } from "./types";
+import { isActivationProofInput, normalizeActivationProofInput } from "./activation-proof-input";
+import { activationQrLookup } from "./activation-qr-id";
+import { hasVerifiedActivationMobile } from "./activation-account-policy";
+export { normalizePublicId } from "./activation-qr-id";
 
 /**
  * Normalizes user-entered or scanned QR ID into canonical format (e.g. vs_99a8b7c6d5e4).
  */
-export function normalizePublicId(input: string): string {
-  if (!input || typeof input !== "string") return "";
-  let cleaned = input.trim();
-
-  // If full URL was pasted/scanned, extract the last path segment
-  if (cleaned.includes("/")) {
-    try {
-      const url = new URL(cleaned.startsWith("http") ? cleaned : `https://${cleaned}`);
-      const segments = url.pathname.split("/").filter(Boolean);
-      const lastSegment = segments[segments.length - 1];
-      if (lastSegment) {
-        cleaned = lastSegment;
-      }
-    } catch {
-      const parts = cleaned.split("/").filter(Boolean);
-      const lastPart = parts[parts.length - 1];
-      if (lastPart) {
-        cleaned = lastPart;
-      }
-    }
-  }
-
-  // Strip query params or hash if any
-  const queryPart = cleaned.split("?")[0] ?? "";
-  cleaned = (queryPart.split("#")[0] ?? "").trim();
-
-  // If uppercase VS- prefix (visible code), map to vs_ prefix
-  if (cleaned.toUpperCase().startsWith("VS-")) {
-    cleaned = `vs_${cleaned.slice(3).toLowerCase()}`;
-  } else if (cleaned.toUpperCase().startsWith("VS_")) {
-    cleaned = `vs_${cleaned.slice(3).toLowerCase()}`;
-  }
-
-  return cleaned.toLowerCase();
-}
 
 /**
  * Stage 01: Recognize Retail QR & evaluate eligibility safely.
@@ -79,7 +49,7 @@ export async function recognizeRetailQr(
   rawInput: string,
   currentUserId?: string
 ): Promise<RecognizeResultDto> {
-  const publicId = normalizePublicId(rawInput);
+  const { publicId, visibleCode } = activationQrLookup(rawInput);
   if (!publicId || publicId.length < 5) {
     return {
       status: "INVALID",
@@ -100,7 +70,7 @@ export async function recognizeRetailQr(
      FROM qr_stickers s
      LEFT JOIN qr_assignments a ON s.id = a.qr_id AND a.ended_at IS NULL
      WHERE s.public_id = ? OR s.visible_code = ?`,
-    [publicId, `VS-${publicId.replace(/^vs_/, "").toUpperCase()}`]
+    [publicId, visibleCode]
   );
 
   if (!sticker) {
@@ -184,8 +154,8 @@ export async function verifyActivationProof(params: {
 }): Promise<
   VerifyProofResultDto & { challengeToken?: string; publicId?: string; visibleCode?: string }
 > {
-  const publicId = normalizePublicId(params.publicId);
-  const candidateSecret = params.scratchCode?.trim();
+  const { publicId, visibleCode } = activationQrLookup(params.publicId);
+  const candidateSecret = isActivationProofInput(params.scratchCode) ? normalizeActivationProofInput(params.scratchCode) : "";
 
   if (!publicId || !candidateSecret) {
     return {
@@ -200,8 +170,8 @@ export async function verifyActivationProof(params: {
     public_id: string;
     visible_code: string;
     status: string;
-  }>(`SELECT id, public_id, visible_code, status FROM qr_stickers WHERE public_id = ?`, [
-    publicId,
+  }>(`SELECT id, public_id, visible_code, status FROM qr_stickers WHERE public_id = ? OR visible_code = ?`, [
+    publicId, visibleCode,
   ]);
 
   if (!sticker) {
@@ -327,36 +297,10 @@ export async function getActivationSession(
   cookieHeader: string | null | undefined
 ): Promise<ActivationSessionDto> {
   const db = getAuthoritativeDatabaseClient();
-  const sessionRepo = getSessionRepository(db);
-  const userRepo = getUserRepository(db);
   const challengeRepo = getQrActivationChallengeRepository(db);
 
   // 1. Resolve User Session if present
-  const rawSessionToken = parseSessionCookie(cookieHeader);
-  let authenticatedUser: ActivationSessionDto["user"] = null;
-
-  if (rawSessionToken) {
-    const activeSession = await validateSessionToken(rawSessionToken, sessionRepo);
-    if (activeSession) {
-      const user = await userRepo.findById(activeSession.userId);
-      if (user) {
-        const rawPhone = user.phone || "";
-        const maskedPhone =
-          rawPhone.length >= 10
-            ? `${rawPhone.slice(0, 3)} ••••• ${rawPhone.slice(-4)}`
-            : null;
-        const isPhoneVerified = Boolean(user.phone && user.onboardingState !== "PHONE_REQUIRED");
-        authenticatedUser = {
-          id: user.id,
-          name: user.name || null,
-          phone: user.phone || null,
-          phoneVerified: isPhoneVerified,
-          email: user.email || null,
-          maskedPhone,
-        };
-      }
-    }
-  }
+  const authenticatedUser = await getActivationUser(cookieHeader);
 
   // 2. Resolve Activation Challenge if present
   const rawChallengeToken = parseCookie(cookieHeader, ACTIVATION_CHALLENGE_COOKIE_NAME);
@@ -403,6 +347,30 @@ export async function getActivationSession(
     stage,
     challenge: challengeDto,
     user: authenticatedUser,
+  };
+}
+
+/** Resolve the existing account from a valid server session, never a supplied ID. */
+export async function getActivationUser(
+  cookieHeader: string | null | undefined,
+): Promise<ActivationSessionDto["user"]> {
+  const rawToken = parseSessionCookie(cookieHeader);
+  if (!rawToken) return null;
+  const db = getAuthoritativeDatabaseClient();
+  const session = await validateSessionToken(rawToken, getSessionRepository(db));
+  if (!session) return null;
+  const [user, identities] = await Promise.all([
+    getUserRepository(db).findById(session.userId),
+    getAuthIdentityRepository(db).findByUserId(session.userId),
+  ]);
+  if (!user || user.status !== "ACTIVE") return null;
+  return {
+    id: user.id,
+    name: user.name || null,
+    phone: user.phone || null,
+    email: user.email || null,
+    phoneVerified: hasVerifiedActivationMobile(user, identities),
+    maskedPhone: user.phone ? `+91 ••••• ${user.phone.slice(-4)}` : null,
   };
 }
 
@@ -480,7 +448,8 @@ export async function activateRetailQr(params: {
 
   // 2. Re-verify Authenticated User & Mobile Verification
   const user = await userRepo.findById(params.userId);
-  const isUserPhoneVerified = Boolean(user?.phone && user?.onboardingState !== "PHONE_REQUIRED");
+  const identities = await getAuthIdentityRepository(db).findByUserId(params.userId);
+  const isUserPhoneVerified = hasVerifiedActivationMobile(user, identities);
   if (!user || !isUserPhoneVerified) {
     return {
       success: false,
@@ -560,9 +529,12 @@ export async function activateRetailQr(params: {
             JOIN vehicles v ON v.id = ? AND v.user_id = ? AND v.status != 'DELETED'
             JOIN users u ON u.id = v.user_id
             WHERE s.id = ? AND s.status = 'SOLD' AND sec.consumed_at IS NULL
-              AND ch.id = ? AND ch.consumed_at IS NULL AND datetime(ch.expires_at) > datetime('now')
+              AND ch.id = ? AND ch.consumed_at IS NULL AND ${db.dialect === "postgres" ? "ch.expires_at > CURRENT_TIMESTAMP" : "datetime(ch.expires_at) > datetime('now')"}
               AND (ch.user_id IS NULL OR ch.user_id = u.id)
-              AND u.primary_phone IS NOT NULL AND u.onboarding_status != 'PHONE_REQUIRED'
+              AND u.status = 'ACTIVE' AND u.onboarding_status IN ('PROFILE_REQUIRED', 'COMPLETED')
+              AND EXISTS (SELECT 1 FROM auth_identities ai WHERE ai.user_id = u.id
+                AND ai.provider = 'PHONE' AND ai.${db.dialect === "postgres" ? "provider_user_id" : "provider_subject"} = u.primary_phone
+                AND ai.verified_at IS NOT NULL)
               AND NOT EXISTS (SELECT 1 FROM qr_assignments a WHERE a.vehicle_id = v.id AND a.ended_at IS NULL)
             FOR UPDATE OF s, v`,
       params: [assignmentId, now, now, vehicle.id, user.id, sticker.id, challenge.id],

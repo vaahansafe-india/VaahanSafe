@@ -8,13 +8,14 @@ import type { ActivationSessionUserDto } from "@/lib/types";
 import { useOtpAvailability } from "@vaahansafe/ui/lib/use-otp-availability";
 
 interface ActivationAuthProps {
+  existingUser?: ActivationSessionUserDto | null;
   onAuthenticated: (user: ActivationSessionUserDto) => void;
 }
 
-export function ActivationAuth({ onAuthenticated }: ActivationAuthProps) {
+export function ActivationAuth({ existingUser, onAuthenticated }: ActivationAuthProps) {
   const availability = useOtpAvailability("/api/activate/auth/send-otp");
   const [step, setStep] = useState<"phone" | "otp">("phone");
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState(() => existingUser?.phone?.replace(/^\+91/, "") || "");
   const [maskedPhone, setMaskedPhone] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -98,7 +99,10 @@ export function ActivationAuth({ onAuthenticated }: ActivationAuthProps) {
         </h2>
 
         <p className="text-xs sm:text-sm text-muted-foreground max-w-lg leading-relaxed">
-          Enter your WhatsApp mobile number. We&apos;ll send a six-digit code to verify your account. Scanners will never see this number.
+          {existingUser
+            ? "Verify your mobile number to continue with your signed-in account."
+            : "Verify your mobile number to sign in. If you already have an account, we'll continue with it; otherwise, we'll create one after verification."}
+          {" "}We&apos;ll send a six-digit code on WhatsApp. Scanners will never see this number.
         </p>
       </div>
 

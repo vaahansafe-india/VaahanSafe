@@ -1,0 +1,66 @@
+-- Every fixture and temporarily refreshed session lives in a rolled-back subtransaction.
+DO $checks$
+DECLARE sid uuid; actor text; original_role text; b text; q text; spare text; code text; job uuid:=gen_random_uuid(); request uuid:=gen_random_uuid(); release uuid; d text; r text; t text; denied boolean; i integer; baseline_entitlements integer; baseline_assignments integer;
+BEGIN
+ IF EXISTS(SELECT 1 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='public' AND p.proname IN ('retail_stock_ready','verified_print_release_candidates','admin_print_stock_release_status','admin_release_verified_print_stock') AND (prosecdef OR has_function_privilege('anon',p.oid,'EXECUTE') OR has_function_privilege('authenticated',p.oid,'EXECUTE'))) THEN RAISE EXCEPTION 'PUBLIC_RELEASE_RPC'; END IF;
+ IF has_table_privilege('anon','public.admin_print_stock_releases','SELECT') OR has_table_privilege('authenticated','public.admin_print_stock_release_items','INSERT') OR EXISTS(SELECT 1 FROM pg_class WHERE oid IN('public.admin_print_stock_releases'::regclass,'public.admin_print_stock_release_items'::regclass) AND NOT relrowsecurity) THEN RAISE EXCEPTION 'PUBLIC_RELEASE_LEDGER'; END IF;
+ SELECT s.id,a.id,a.role INTO sid,actor,original_role FROM public.admin_sessions s JOIN public.admin_users a ON a.id=s.admin_id WHERE s.revoked_at IS NULL AND s.expires_at>now() AND s.created_at>now()-interval '4 hours' AND s.email_verified_at IS NOT NULL AND a.status='ACTIVE' AND a.role IN ('SUPER_ADMIN','OPS_ADMIN') ORDER BY s.created_at DESC LIMIT 1;
+ IF sid IS NULL THEN RAISE EXCEPTION 'AUTHENTICATED_SESSION_REQUIRED'; END IF;
+ UPDATE public.admin_sessions SET step_up_at=now() WHERE id=sid;
+ SELECT count(*) INTO baseline_entitlements FROM public.service_entitlements; SELECT count(*) INTO baseline_assignments FROM public.qr_assignments;
+ b:='batch_'||gen_random_uuid()::text; q:='qr_'||gen_random_uuid()::text; spare:='qr_'||gen_random_uuid()::text; code:='VS-CHECK-'||upper(replace(gen_random_uuid()::text,'-','')); d:='partner_'||gen_random_uuid()::text; r:='partner_'||gen_random_uuid()::text;
+ INSERT INTO public.admin_partners(id,reference_code,name,kind,city,verification_status) VALUES(d,'CHECK-'||gen_random_uuid()::text,'Rollback distributor','DISTRIBUTOR','Rollback','VERIFIED');
+ INSERT INTO public.admin_partners(id,reference_code,name,kind,city,verification_status,parent_distributor_id) VALUES(r,'CHECK-'||gen_random_uuid()::text,'Rollback retailer','RETAILER','Rollback','VERIFIED',d);
+ INSERT INTO public.qr_batches(id,reference_code,quantity,status,inventory_channel) VALUES(b,'CHECK-'||gen_random_uuid()::text,2,'DRAFT','OFFLINE_RETAIL');
+ INSERT INTO public.qr_stickers(id,public_id,visible_code,batch_id,status,lifecycle_state) VALUES(q,replace(gen_random_uuid()::text,'-',''),code,b,'PRINTED','PRINTED'),(spare,replace(gen_random_uuid()::text,'-',''),'VS-CHECK-'||gen_random_uuid()::text,b,'INVENTORY','INVENTORY');
+ INSERT INTO public.qr_activation_secrets(id,qr_id,secret_hash) VALUES('secret_'||gen_random_uuid()::text,q,replace(gen_random_uuid()::text,'-',''));
+ INSERT INTO public.qr_print_jobs(id,reference_code,actor_id,template_version,template_snapshot,mode,quantity,status,reason,request_id,completed_at)
+ SELECT job,'CHECK-'||gen_random_uuid()::text,actor,version,specification,'PRINT',1,'COMPLETED','Rollback verified printing',gen_random_uuid(),now() FROM public.qr_print_templates WHERE active LIMIT 1;
+ INSERT INTO public.qr_print_items(job_id,qr_id,sequence,printed_at) VALUES(job,q,1,now());
+ IF public.retail_stock_ready(q) OR EXISTS(SELECT 1 FROM public.transfer_eligible(NULL,b)) THEN RAISE EXCEPTION 'DRAFT_STOCK_AUTO_RELEASED'; END IF;
+ UPDATE public.admin_users SET role='READ_ONLY_ANALYST' WHERE id=actor;
+ denied:=false; BEGIN PERFORM public.admin_release_verified_print_stock(sid,job,'Release security check',request); EXCEPTION WHEN OTHERS THEN denied:=SQLERRM='ADMIN_REQUIRED'; END; IF NOT denied THEN RAISE EXCEPTION 'READONLY_RELEASE'; END IF;
+ UPDATE public.admin_users SET role=original_role WHERE id=actor;
+ UPDATE public.admin_sessions SET step_up_at=now()-interval '11 minutes' WHERE id=sid;
+ denied:=false; BEGIN PERFORM public.admin_release_verified_print_stock(sid,job,'Release security check',request); EXCEPTION WHEN OTHERS THEN denied:=SQLERRM='ADMIN_REQUIRED'; END; IF NOT denied THEN RAISE EXCEPTION 'STEPUP_BYPASS'; END IF;
+ UPDATE public.admin_sessions SET step_up_at=now() WHERE id=sid;
+ FOR i IN 1..8 LOOP
+  IF i=1 THEN UPDATE public.qr_print_jobs SET status='PRINTING' WHERE id=job;
+  ELSIF i=2 THEN UPDATE public.qr_print_items SET printed_at=NULL WHERE job_id=job;
+  ELSIF i=3 THEN UPDATE public.qr_batches SET status='QUARANTINED' WHERE id=b;
+  ELSIF i=4 THEN UPDATE public.qr_activation_secrets SET consumed_at=now() WHERE qr_id=q;
+  ELSIF i=5 THEN UPDATE public.qr_stickers SET current_distributor_id=d WHERE id=q;
+  ELSIF i=6 THEN UPDATE public.qr_print_jobs SET mode='REPRINT' WHERE id=job;
+  ELSIF i=7 THEN UPDATE public.qr_activation_secrets SET locked_until=now()+interval '10 minutes' WHERE qr_id=q;
+  ELSIF i=8 THEN UPDATE public.qr_print_jobs SET quantity=2 WHERE id=job; END IF;
+  denied:=false; BEGIN PERFORM public.admin_release_verified_print_stock(sid,job,'Release eligibility check',request); EXCEPTION WHEN OTHERS THEN denied:=SQLERRM IN ('RELEASE_STOCK_CHANGED','RELEASE_PRINT_INCOMPLETE'); END;
+  IF NOT denied OR EXISTS(SELECT 1 FROM public.admin_print_stock_releases WHERE print_job_id=job) THEN RAISE EXCEPTION 'RELEASE_GATE_BYPASS_%',i; END IF;
+  UPDATE public.qr_print_jobs SET status='COMPLETED',mode='PRINT',quantity=1 WHERE id=job; UPDATE public.qr_print_items SET printed_at=now() WHERE job_id=job;
+  UPDATE public.qr_batches SET status='DRAFT' WHERE id=b; UPDATE public.qr_activation_secrets SET consumed_at=NULL,locked_until=NULL WHERE qr_id=q; UPDATE public.qr_stickers SET current_distributor_id=NULL WHERE id=q;
+ END LOOP;
+ release:=public.admin_release_verified_print_stock(sid,job,'Verified units for distribution',request);
+ IF public.admin_release_verified_print_stock(sid,job,'Verified units for distribution',request)<>release THEN RAISE EXCEPTION 'RELEASE_NOT_IDEMPOTENT'; END IF;
+ denied:=false; BEGIN PERFORM public.admin_release_verified_print_stock(sid,job,'Different release reason',request); EXCEPTION WHEN OTHERS THEN denied:=SQLERRM='REQUEST_CONFLICT'; END; IF NOT denied THEN RAISE EXCEPTION 'RETRY_CONFLICT_BYPASS'; END IF;
+ denied:=false; BEGIN PERFORM public.admin_release_verified_print_stock(sid,job,'Second release attempt',gen_random_uuid()); EXCEPTION WHEN OTHERS THEN denied:=SQLERRM='STOCK_ALREADY_RELEASED'; END; IF NOT denied THEN RAISE EXCEPTION 'DOUBLE_RELEASE'; END IF;
+ IF (SELECT count(*) FROM public.transfer_eligible(NULL,b))<>1 OR public.retail_stock_ready(spare) OR (SELECT status FROM public.qr_batches WHERE id=b)<>'DRAFT' OR (SELECT status FROM public.qr_stickers WHERE id=spare)<>'INVENTORY' THEN RAISE EXCEPTION 'ENTIRE_BATCH_RELEASED'; END IF;
+ IF public.admin_print_stock_release_status(sid,job)::text LIKE '%secret%' THEN RAISE EXCEPTION 'PRIVATE_PROOF_LEAK'; END IF;
+ IF public.admin_distributor_transfer_options(sid) IS DISTINCT FROM public.admin_transfer_options(sid,NULL,'inventory') THEN RAISE EXCEPTION 'STOCK_SELECTOR_MISMATCH'; END IF;
+ denied:=false; BEGIN PERFORM public.admin_transfer_command(sid,NULL,NULL,'request',jsonb_build_object('destination',d,'allocations',jsonb_build_array(jsonb_build_object('batch',b,'quantity',2))),'Physical custody check',gen_random_uuid()); EXCEPTION WHEN OTHERS THEN denied:=SQLERRM='INSUFFICIENT_STOCK'; END; IF NOT denied THEN RAISE EXCEPTION 'UNPRINTED_UNIT_RESERVED'; END IF;
+ t:=public.admin_transfer_command(sid,NULL,NULL,'request',jsonb_build_object('destination',d,'allocations',jsonb_build_array(jsonb_build_object('batch',b,'quantity',1))),'Physical custody check',gen_random_uuid());
+ UPDATE public.qr_batches SET status='QUARANTINED' WHERE id=b;
+ denied:=false; BEGIN PERFORM public.admin_transfer_command(sid,t,1,'approve','{}','Quarantine gate check',gen_random_uuid()); EXCEPTION WHEN OTHERS THEN denied:=SQLERRM='STOCK_CHANGED'; END; IF NOT denied THEN RAISE EXCEPTION 'QUARANTINE_BYPASS'; END IF;
+ UPDATE public.qr_batches SET status='DRAFT' WHERE id=b;
+ PERFORM public.admin_transfer_command(sid,t,1,'approve','{}','Physical custody approval',gen_random_uuid());
+ PERFORM public.admin_transfer_command(sid,t,2,'dispatch','{}','Physical dispatch verified',gen_random_uuid());
+ PERFORM public.admin_transfer_command(sid,t,3,'receive',jsonb_build_object('received',jsonb_build_array(code),'finalReceipt',true),'Physical receipt verified',gen_random_uuid());
+ IF (SELECT count(*) FROM public.transfer_eligible(d,b))<>1 THEN RAISE EXCEPTION 'RECEIVED_UNIT_NOT_ELIGIBLE'; END IF;
+ t:=public.admin_transfer_command(sid,NULL,NULL,'request',jsonb_build_object('source',d,'destination',r,'allocations',jsonb_build_array(jsonb_build_object('batch',b,'quantity',1))),'Retail custody check',gen_random_uuid());
+ PERFORM public.admin_transfer_command(sid,t,1,'approve','{}','Retail custody approval',gen_random_uuid());
+ PERFORM public.admin_transfer_command(sid,t,2,'dispatch','{}','Retail dispatch verified',gen_random_uuid());
+ PERFORM public.admin_transfer_command(sid,t,3,'receive',jsonb_build_object('received',jsonb_build_array(code),'finalReceipt',true),'Retail receipt verified',gen_random_uuid());
+ IF (SELECT count(*) FROM public.retail_sale_eligible(r))<>1 THEN RAISE EXCEPTION 'RELEASED_RETAIL_UNIT_NOT_SELLABLE'; END IF;
+ PERFORM public.admin_record_retail_sale(sid,r,ARRAY[code],'CHECK-RECEIPT','Physical retail sale verified',gen_random_uuid());
+ IF (SELECT status FROM public.qr_stickers WHERE id=q)<>'SOLD' OR EXISTS(SELECT 1 FROM public.qr_activation_secrets WHERE qr_id=q AND consumed_at IS NOT NULL) OR (SELECT count(*) FROM public.service_entitlements)<>baseline_entitlements OR (SELECT count(*) FROM public.qr_assignments)<>baseline_assignments THEN RAISE EXCEPTION 'PRINT_RELEASE_ENABLED_SERVICE'; END IF;
+ IF NOT EXISTS(SELECT 1 FROM public.admin_audit_logs WHERE request_id=request AND action='inventory.stock_released') THEN RAISE EXCEPTION 'RELEASE_AUDIT_MISSING'; END IF;
+ denied:=false; BEGIN UPDATE public.admin_print_stock_releases SET quantity=2 WHERE id=release; EXCEPTION WHEN OTHERS THEN denied:=true; END; IF NOT denied THEN RAISE EXCEPTION 'MUTABLE_RELEASE'; END IF;
+END; $checks$;

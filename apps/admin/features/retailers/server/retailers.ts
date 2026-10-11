@@ -30,6 +30,10 @@ export async function retailerRpc<T>(
     .abortSignal(AbortSignal.timeout(15000));
   if (error) {
     const m = error.message;
+    if (/SALE_STOCK_CHANGED|REQUEST_CONFLICT|RECEIPT_ALREADY_RECORDED/.test(m))
+      throw new AdminError(409, "SALE_CHANGED", "A sticker or receipt has already changed or been recorded. Refresh stock and check the sales history before continuing.");
+    if (/SALE_PARTNER_UNAVAILABLE/.test(m))
+      throw new AdminError(409, "SALE_RESTRICTED", "Recording a sale requires an active, verified retailer and an active supplying distributor.");
     if (/RETAILER_CHANGED/.test(m))
       throw new AdminError(
         409,

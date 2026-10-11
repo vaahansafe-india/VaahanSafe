@@ -1,0 +1,6 @@
+.inventory-retail-readiness { padding: 16px; margin: 12px 0; border: 1px solid var(--paper-line); border-radius: 8px; background: var(--paper-panel); }
+.record-card > .inventory-retail-readiness { margin: 16px; }
+.inventory-retail-readiness h3 { margin: 0; font-size: 13px; font-weight: 600; line-height: 1.5; }
+.inventory-retail-readiness p { margin: 8px 0 14px; font-size: 12px; line-height: 1.65; color: var(--paper-muted); }
+.inventory-retail-readiness .admin-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.inventory-retail-readiness .admin-button { max-width: 100%; white-space: normal; text-align: center; line-height: 1.5; }

@@ -1,0 +1,127 @@
+.retail-sale-dialog {
+  width: min(640px, calc(100vw - 24px));
+}
+.retail-sale-form {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+.retail-sale-form > label:not(.retail-sale-confirm) {
+  font-weight: 600;
+  margin-top: 8px;
+}
+.retail-sale-form > input,
+.retail-sale-form > textarea {
+  width: 100%;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--paper-line);
+  border-radius: 8px;
+  background: var(--paper-panel);
+  color: inherit;
+  font: inherit;
+}
+.retail-sale-note,
+.retail-sale-empty {
+  padding: 14px;
+  border: 1px solid var(--paper-line);
+  border-radius: 10px;
+  line-height: 1.6;
+}
+.retail-sale-stock {
+  max-height: 280px;
+  overflow: auto;
+  border: 1px solid var(--paper-line);
+  border-radius: 10px;
+}
+.retail-sale-option {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  border-bottom: 1px solid var(--paper-line);
+  cursor: pointer;
+}
+.retail-sale-option span {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.retail-sale-option small,
+.retail-sale-form > small {
+  color: var(--paper-muted);
+}
+.retail-sale-option input,
+.retail-sale-confirm input {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  accent-color: var(--paper-accent);
+}
+.retail-sale-confirm {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px 0;
+  line-height: 1.6;
+}
+.retail-sale-confirm input {
+  margin-top: 4px;
+}
+.retail-sale-selected {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.retail-sale-selected button {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.retail-sale-history > div {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.retail-sale-history summary {
+  cursor: pointer;
+}
+.retail-sale-dialog .admin-dialog-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+@media (max-width: 600px) {
+  .retail-sale-dialog .admin-dialog-footer > button {
+    flex: 1 1 150px;
+    white-space: normal;
+    min-height: 44px;
+  }
+}
+
+.retail-sale-dialog .dist-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid var(--paper-line);
+  border-radius: 6px;
+  padding: 10px 14px;
+  min-height: 40px;
+  font: inherit;
+  background: var(--paper-panel);
+  cursor: pointer;
+}
+.retail-sale-dialog .dist-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.retail-sale-dialog .dist-primary {
+  background: var(--paper-accent);
+  color: white;
+  border-color: var(--paper-accent);
+}
+.retail-sale-dialog :is(button, input, textarea, a):focus-visible {
+  outline: 2px solid var(--paper-accent);
+  outline-offset: 3px;
+}

@@ -22,6 +22,7 @@ import {
   DropdownMenuTrigger,
 } from "@vaahansafe/ui/components/dropdown-menu";
 import { toast } from "@vaahansafe/ui/components/sonner";
+import { VaahanIcon } from "@vaahansafe/icons";
 import { AdminSelect } from "../../../components/AdminSelect";
 import { getAdminData } from "../../../lib/client-api";
 import { canExport } from "../../../lib/exports";
@@ -54,24 +55,40 @@ export function RetailerStatus({ row }: { row: RetailerRow }) {
   return (
     <div className="dist-statuses">
       <span
-        className={`dist-badge${row.status === "SUSPENDED" ? " dist-badge-attention" : ""}`}
+        className={`dist-badge ${row.status === "ACTIVE" ? "success" : "attention"}`}
       >
-        {row.status === "ACTIVE" ? "Active" : "Suspended"}
+        <VaahanIcon name={row.status === "ACTIVE" ? "check" : "alert"} size={11} />
+        <span>{row.status === "ACTIVE" ? "Active" : "Suspended"}</span>
       </span>
-      <small>
-        {row.verification_status === "VERIFIED"
-          ? "Verified"
-          : row.verification_status === "PENDING"
-            ? "Verification pending"
-            : "Requires correction"}
-      </small>
+      <span
+        className={`dist-badge ${
+          row.verification_status === "VERIFIED"
+            ? "success"
+            : row.verification_status === "PENDING"
+              ? "neutral"
+              : "attention"
+        }`}
+      >
+        <VaahanIcon
+          name={row.verification_status === "VERIFIED" ? "check" : "alert"}
+          size={11}
+        />
+        <span>
+          {row.verification_status === "VERIFIED"
+            ? "Verified"
+            : row.verification_status === "PENDING"
+              ? "Verification pending"
+              : "Requires correction"}
+        </span>
+      </span>
       {signals
         .filter((s) => s !== "Suspended" && s !== "Verification required")
         .slice(0, 2)
         .map((s) => (
-          <small className="dist-attention" key={s}>
-            {s}
-          </small>
+          <span className="dist-badge attention" key={s}>
+            <VaahanIcon name="alert" size={11} />
+            <span>{s}</span>
+          </span>
         ))}
     </div>
   );
@@ -194,7 +211,9 @@ export function RetailerWorkspace({
   const actions = (r: RetailerRow) => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button aria-label={`Actions for ${r.name}`}>⋯</button>
+        <button aria-label={`Actions for ${r.name}`}>
+          <VaahanIcon name="more-horizontal" size={13} />
+        </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem asChild>
@@ -262,16 +281,31 @@ export function RetailerWorkspace({
         </div>
         <div className="dist-actions">
           <button
+            type="button"
+            className="dist-btn"
             disabled={list.isFetching || summary.isFetching}
             onClick={refresh}
+            title="Refresh retailer list"
           >
-            {list.isFetching || summary.isFetching ? "Refreshing…" : "Refresh"}
+            <VaahanIcon
+              name="refresh"
+              size={13}
+              className={list.isFetching || summary.isFetching ? "animate-spin" : ""}
+            />
+            <span>Refresh</span>
           </button>
           {canExport(identity.role, "retailers") && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button disabled={exporting}>
-                  {exporting ? "Requesting…" : "Export ⌄"}
+                <button
+                  type="button"
+                  className="dist-btn dist-btn-export"
+                  disabled={exporting}
+                  title="Export reports"
+                >
+                  <VaahanIcon name="download" size={13} />
+                  <span>{exporting ? "Requesting…" : "Export"}</span>
+                  <VaahanIcon name="chevron-down" size={11} className="opacity-60" />
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
@@ -288,8 +322,14 @@ export function RetailerWorkspace({
             </DropdownMenu>
           )}
           {canManageRetailers(identity.role) && (
-            <button className="dist-primary" onClick={() => setCreating(true)}>
-              + New retailer
+            <button
+              type="button"
+              className="dist-btn dist-primary"
+              onClick={() => setCreating(true)}
+              title="Create new retailer record"
+            >
+              <VaahanIcon name="plus" size={13} />
+              <span>New retailer</span>
             </button>
           )}
         </div>
@@ -409,7 +449,8 @@ export function RetailerWorkspace({
                     className="dist-primary"
                     onClick={() => setCreating(true)}
                   >
-                    + Add first retailer
+                    <VaahanIcon name="plus" size={13} />
+                    <span>Add first retailer</span>
                   </button>
                 )
               )}

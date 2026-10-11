@@ -7,6 +7,7 @@ import '../features/inventory/inventory-record.css';
 import '../features/batches/batches.css';
 import '../features/distributors/distributors.css';
 import '../features/retailers/retailers.css';
+import '../features/transfers/transfers.css';
 import '../components/admin-dialog.css';
 import { Toaster } from "@vaahansafe/ui/components/sonner";
 import { AdminMotion } from "../components/AdminMotion";

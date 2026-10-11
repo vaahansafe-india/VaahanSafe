@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useId, useState } from "react";
 import { toast } from "@vaahansafe/ui/components/sonner";
 import {
@@ -153,47 +154,8 @@ export function RetailerHistoryActions({
 }) {
   return (
     <div className="dist-actions">
-      {section === "transfers" && row.status === "REQUESTED" && (
-        <>
-          <RetailerConfirm
-            id={id}
-            label="Dispatch"
-            description={`Dispatch ${row.quantity} identities from ${row.source_name || "the recorded distributor"}. Availability, verification and custody are rechecked on the server.`}
-            body={{
-              action: "transfer-status",
-              transfer: row.id,
-              from: row.status,
-              to: "IN_TRANSIT",
-            }}
-            onChanged={onChanged}
-          />
-          <RetailerConfirm
-            id={id}
-            label="Cancel request"
-            description="Release the reservation without moving stock."
-            body={{
-              action: "transfer-status",
-              transfer: row.id,
-              from: row.status,
-              to: "CANCELLED",
-            }}
-            onChanged={onChanged}
-          />
-        </>
-      )}
-      {section === "transfers" && row.status === "IN_TRANSIT" && (
-        <RetailerConfirm
-          id={id}
-          label="Acknowledge receipt"
-          description={`Record physical receipt of ${row.quantity} identities. Retailer custody is recorded; owner activation and entitlements remain separate.`}
-          body={{
-            action: "transfer-status",
-            transfer: row.id,
-            from: row.status,
-            to: "RECEIVED",
-          }}
-          onChanged={onChanged}
-        />
+      {section === "transfers" && (
+        <Link href={`/transfers/${row.id}`}>Manage transfer →</Link>
       )}
       {section === "reconciliations" && row.status !== "CLOSED" && (
         <RetailerConfirm

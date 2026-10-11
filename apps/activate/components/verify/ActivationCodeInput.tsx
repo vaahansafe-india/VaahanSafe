@@ -3,6 +3,10 @@
 import React, { useState } from "react";
 import { Input } from "@vaahansafe/ui/components";
 import { VaahanIcon } from "@vaahansafe/icons";
+import {
+  isActivationProofInput,
+  MAX_ACTIVATION_PROOF_INPUT_LENGTH,
+} from "@/lib/activation-proof-input";
 
 interface ActivationCodeInputProps {
   value: string;
@@ -20,8 +24,7 @@ export function ActivationCodeInput({
   const [showSecret, setShowSecret] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const cleaned = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 12);
-    onChange(cleaned);
+    onChange(e.target.value.toUpperCase());
   };
 
   return (
@@ -37,7 +40,11 @@ export function ActivationCodeInput({
           type="button"
           onClick={() => setShowSecret((prev) => !prev)}
           className="text-[11px] font-mono text-muted-foreground hover:text-foreground inline-flex items-center gap-1 transition-colors"
-          tabIndex={-1}
+          disabled={disabled}
+          aria-controls="scratch-code-input"
+          aria-label={
+            showSecret ? "Hide activation code" : "Show activation code"
+          }
         >
           <VaahanIcon name={showSecret ? "eye-off" : "eye"} size={13} />
           <span>{showSecret ? "Hide" : "Show"}</span>
@@ -50,25 +57,36 @@ export function ActivationCodeInput({
           type={showSecret ? "text" : "password"}
           value={value}
           onChange={handleInputChange}
-          placeholder="•••• ••••"
+          placeholder="Enter the complete printed code"
           disabled={disabled}
-          maxLength={12}
+          maxLength={MAX_ACTIVATION_PROOF_INPUT_LENGTH}
+          aria-invalid={!!error || (!!value && !isActivationProofInput(value))}
+          aria-describedby="scratch-code-help"
           autoComplete="off"
           autoCorrect="off"
           autoCapitalize="characters"
           spellCheck={false}
-          className="h-13 px-4 font-mono text-base sm:text-lg tracking-[0.3em] uppercase text-center rounded-sm border-border bg-background focus-visible:ring-[#cc785c]"
+          className="h-13 min-w-0 w-full px-3 sm:px-4 font-mono text-sm sm:text-lg tracking-[0.05em] sm:tracking-[0.15em] uppercase text-center rounded-sm border-border bg-background focus-visible:ring-[#cc785c]"
         />
       </div>
 
       {error ? (
-        <p className="text-xs text-destructive flex items-center gap-1.5 font-medium pt-0.5">
+        <p
+          id="scratch-code-help"
+          role="alert"
+          className="text-xs text-destructive flex items-center gap-1.5 font-medium pt-0.5"
+        >
           <VaahanIcon name="alert" size={13} />
           <span>{error}</span>
         </p>
       ) : (
-        <p className="text-[11px] font-mono text-muted-foreground pt-0.5">
-          This code verifies possession of the physical QR.
+        <p
+          id="scratch-code-help"
+          className="text-[11px] font-mono text-muted-foreground pt-0.5"
+        >
+          {value && !isActivationProofInput(value)
+            ? "Enter the complete printed letters and numbers. Spaces and hyphens are accepted."
+            : "Use the full private activation code printed under the scratch panel. Hyphens and spaces are optional."}
         </p>
       )}
     </div>

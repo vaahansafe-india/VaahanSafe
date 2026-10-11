@@ -3,6 +3,10 @@ import { verifyActivationProof } from "@/lib/activation-service";
 import { serializeChallengeCookie } from "@/lib/crypto-helpers";
 import { parseSessionCookie, validateSessionToken } from "@vaahansafe/auth";
 import { getSessionRepository } from "@vaahansafe/database";
+import {
+  isActivationProofInput,
+  normalizeActivationProofInput,
+} from "@/lib/activation-proof-input";
 
 export async function POST(req: Request) {
   try {
@@ -10,10 +14,19 @@ export async function POST(req: Request) {
     const publicId = body?.publicId || body?.id;
     const scratchCode = body?.scratchCode || body?.code;
 
-    if (!publicId || !scratchCode) {
+    if (
+      typeof publicId !== "string" ||
+      !publicId ||
+      publicId.length > 256 ||
+      !isActivationProofInput(scratchCode)
+    ) {
       return NextResponse.json(
-        { success: false, error: "QR code and activation code are required." },
-        { status: 400 }
+        {
+          success: false,
+          error:
+            "Enter the QR identity and complete private activation code printed on your sticker.",
+        },
+        { status: 400 },
       );
     }
 
@@ -30,7 +43,10 @@ export async function POST(req: Request) {
 
     if (rawSessionToken) {
       const sessionRepo = getSessionRepository();
-      const activeSession = await validateSessionToken(rawSessionToken, sessionRepo);
+      const activeSession = await validateSessionToken(
+        rawSessionToken,
+        sessionRepo,
+      );
       if (activeSession) {
         currentUserId = activeSession.userId;
       }
@@ -38,7 +54,7 @@ export async function POST(req: Request) {
 
     const result = await verifyActivationProof({
       publicId,
-      scratchCode,
+      scratchCode: normalizeActivationProofInput(scratchCode),
       clientIp,
       userAgent,
       currentUserId,
@@ -52,7 +68,7 @@ export async function POST(req: Request) {
           isLocked: result.isLocked,
           lockedUntil: result.lockedUntil,
         },
-        { status: result.isLocked ? 429 : 400 }
+        { status: result.isLocked ? 429 : 400 },
       );
     }
 
@@ -72,9 +88,10 @@ export async function POST(req: Request) {
     return NextResponse.json(
       {
         success: false,
-        error: "We couldn't verify this activation code right now. Please try again.",
+        error:
+          "We couldn't verify this activation code right now. Please try again.",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
