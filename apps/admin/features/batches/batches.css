@@ -1728,3 +1728,538 @@
     margin-top: 0;
   }
 }
+
+/* ==========================================================
+   VAAHANSAFE ADMIN — BATCH DETAIL WORKSPACE (RESPONSIVE)
+   ========================================================== */
+
+.batches-full-detail {
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 24px 28px 64px;
+}
+
+.batches-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--batch-muted, #74796f);
+  text-decoration: none;
+  margin-bottom: 20px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  background: var(--batch-panel, #fbfaf6);
+  border: 1px solid var(--batch-line-subtle, #eae8dd);
+  transition: all 0.15s ease;
+  width: fit-content;
+}
+
+.batches-back-link:hover {
+  color: var(--batch-ink, #24352b);
+  background: var(--batch-panel-alt, #f6f4ed);
+  border-color: var(--batch-line, #dedcd0);
+  transform: translateX(-2px);
+}
+
+.batches-full-page {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Detail Header */
+.batches-full-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.batches-full-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.batches-full-title {
+  font-family: AdminInter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: clamp(26px, 3.5vw, 34px);
+  font-weight: 700;
+  color: var(--batch-ink, #24352b);
+  letter-spacing: -0.025em;
+  margin: 0;
+  line-height: 1.15;
+}
+
+.batches-full-subtitle {
+  font-size: 13px;
+  color: var(--batch-muted, #74796f);
+  margin: 8px 0 0;
+  line-height: 1.5;
+}
+
+.batches-full-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Badges & Pills */
+.batches-state-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: #edf5eb;
+  color: #276738;
+  border: 1px solid #c9e5c5;
+  white-space: nowrap;
+}
+
+.batches-state-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.batches-channel-pill {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.batches-channel-pill.is-offline {
+  background: #f1ede4;
+  color: #685d4d;
+  border: 1px solid #ded6c8;
+}
+
+.batches-channel-pill.is-online {
+  background: #e8eff7;
+  color: #2e547c;
+  border: 1px solid #c8dbec;
+}
+
+/* Manufacturing Stage Strip */
+.batches-stage-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin: 0 0 28px;
+}
+
+.batches-stage-item {
+  background: var(--batch-panel, #fbfaf6);
+  border: 1px solid var(--batch-line-subtle, #eae8dd);
+  border-radius: 8px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: all 0.2s ease;
+  min-width: 0;
+}
+
+.batches-stage-item:hover {
+  background: var(--batch-paper, #fffefb);
+  border-color: var(--batch-line, #dedcd0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.batches-stage-item span {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--batch-muted, #74796f);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.batches-stage-item strong {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--batch-ink, #24352b);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.25;
+}
+
+.batches-stage-item small {
+  font-size: 11.5px;
+  color: #3b704c;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Full Grid Layout */
+.batches-full-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.8fr) minmax(320px, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.batches-full-main {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+}
+
+.batches-full-side {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+}
+
+/* Card Styling */
+.batches-full-card {
+  background: var(--batch-paper, #fffefb);
+  border: 1px solid var(--batch-line, #dedcd0);
+  border-radius: 8px;
+  padding: 22px 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.batches-full-card h2 {
+  font-family: AdminInter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--batch-ink, #24352b);
+  letter-spacing: -0.01em;
+  margin: 0 0 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--batch-line-subtle, #eae8dd);
+}
+
+.batches-card-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--batch-line-subtle, #eae8dd);
+  flex-wrap: wrap;
+}
+
+.batches-card-header-row h2 {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.batches-link-btn {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--batch-accent, #5d7554);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.15s ease;
+}
+
+.batches-link-btn:hover {
+  color: var(--batch-accent-hover, #4a6042);
+  text-decoration: underline;
+}
+
+/* Spec List (Two-column layout) */
+.batches-spec-list {
+  display: grid;
+  grid-template-columns: 180px minmax(0, 1fr);
+  row-gap: 13px;
+  column-gap: 18px;
+  align-items: baseline;
+  font-size: 13px;
+  margin: 0;
+}
+
+.batches-spec-list dt {
+  color: var(--batch-muted, #74796f);
+  font-size: 12.5px;
+  font-weight: 500;
+}
+
+.batches-spec-list dd {
+  color: var(--batch-ink, #24352b);
+  margin: 0;
+  word-break: break-word;
+  line-height: 1.45;
+}
+
+.batches-spec-list dd.batches-mono {
+  font-family: AdminMono, monospace;
+  font-size: 11.5px;
+  background: var(--batch-panel, #fbfaf6);
+  padding: 2px 7px;
+  border-radius: 4px;
+  border: 1px solid var(--batch-line-subtle, #eae8dd);
+  display: inline-block;
+  max-width: 100%;
+  overflow-x: auto;
+  vertical-align: middle;
+}
+
+.batches-notes {
+  white-space: pre-wrap;
+  line-height: 1.5;
+  color: var(--batch-muted, #74796f);
+  font-style: italic;
+}
+
+/* Sticker Samples Grid */
+.batches-stickers-sample {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 10px;
+}
+
+.batches-sticker-sample-item {
+  background: var(--batch-panel, #fbfaf6);
+  border: 1px solid var(--batch-line-subtle, #eae8dd);
+  border-radius: 6px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: all 0.15s ease;
+}
+
+.batches-sticker-sample-item:hover {
+  border-color: var(--batch-accent, #5d7554);
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  transform: translateY(-1px);
+}
+
+.batches-sticker-visible {
+  font-family: AdminMono, monospace;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--batch-ink, #24352b);
+  letter-spacing: 0.02em;
+}
+
+.batches-sticker-status {
+  font-size: 10px;
+  font-weight: 600;
+  color: #276738;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.batches-sticker-secret {
+  font-size: 9.5px;
+  color: #2e6a4f;
+  font-weight: 500;
+}
+
+/* Audit Trail Timeline */
+.batches-audit-timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: relative;
+}
+
+.batches-audit-timeline::before {
+  content: "";
+  position: absolute;
+  left: 7px;
+  top: 8px;
+  bottom: 8px;
+  width: 1px;
+  background: var(--batch-line, #dedcd0);
+}
+
+.batches-audit-item {
+  position: relative;
+  padding-left: 24px;
+}
+
+.batches-audit-item::before {
+  content: "";
+  position: absolute;
+  left: 3px;
+  top: 5px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--batch-panel, #fbfaf6);
+  border: 2px solid var(--batch-accent, #5d7554);
+}
+
+.batches-audit-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 4px;
+  flex-wrap: wrap;
+}
+
+.batches-audit-head strong {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--batch-ink, #24352b);
+  text-transform: capitalize;
+}
+
+.batches-audit-head time {
+  font-size: 11px;
+  color: var(--batch-muted, #74796f);
+}
+
+.batches-audit-item p {
+  font-size: 12px;
+  color: var(--batch-muted, #74796f);
+  margin: 0 0 4px;
+  line-height: 1.45;
+  word-break: break-word;
+}
+
+.batches-audit-time {
+  font-size: 10.5px;
+  color: #9ea298;
+}
+
+.batches-muted-text {
+  font-size: 12.5px;
+  color: var(--batch-muted, #74796f);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Generic Admin Button Styling in Batches */
+.batches-workspace .admin-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 12.5px;
+  font-weight: 500;
+  border: 1px solid var(--batch-line, #dedcd0);
+  background: var(--batch-paper, #fffefb);
+  color: var(--batch-ink, #24352b);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  line-height: 1.3;
+}
+
+.batches-workspace .admin-button:hover:not(:disabled) {
+  background: var(--batch-panel-alt, #f6f4ed);
+  border-color: #cbcaa6;
+}
+
+.batches-workspace .admin-button.primary {
+  background: var(--batch-accent, #5d7554);
+  border-color: var(--batch-accent, #5d7554);
+  color: #fff;
+}
+
+.batches-workspace .admin-button.primary:hover:not(:disabled) {
+  background: var(--batch-accent-hover, #4a6042);
+  border-color: var(--batch-accent-hover, #4a6042);
+}
+
+.batches-workspace .admin-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ==========================================================
+   RESPONSIVE MEDIA QUERIES
+   ========================================================== */
+
+@media (max-width: 1024px) {
+  .batches-full-detail {
+    padding: 20px 20px 48px;
+  }
+  .batches-full-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .batches-stage-strip {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  .batches-full-detail {
+    padding: 16px 16px 40px;
+  }
+  .batches-full-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .batches-full-header-actions {
+    width: 100%;
+  }
+  .batches-full-header-actions .admin-button {
+    flex: 1;
+  }
+  .batches-spec-list {
+    grid-template-columns: 1fr;
+    row-gap: 4px;
+  }
+  .batches-spec-list dt {
+    margin-top: 10px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .batches-spec-list dt:first-child {
+    margin-top: 0;
+  }
+  .batches-full-card {
+    padding: 18px 18px;
+  }
+}
+
+@media (max-width: 520px) {
+  .batches-stage-strip {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .batches-stickers-sample {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+  .batches-full-title {
+    font-size: 24px;
+  }
+  .batches-full-title-row {
+    gap: 8px;
+  }
+}
