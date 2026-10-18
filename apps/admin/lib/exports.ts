@@ -41,7 +41,13 @@ export function csvCell(value: unknown) {
 }
 export function exportRows(key: string, rows: Record<string, unknown>[]) {
   const fields =
-    key === "transfers"
+    key === "fraud"
+      ? RISK_EXPORT_FIELDS
+      : key === "replacements"
+      ? REPLACEMENT_EXPORT_FIELDS
+      : key === "reconciliation"
+      ? RECONCILIATION_EXPORT_FIELDS
+      : key === "transfers"
       ? TRANSFER_EXPORT_FIELDS
       : key === "inventory"
         ? INVENTORY_EXPORT_FIELDS
@@ -55,6 +61,7 @@ export function exportRows(key: string, rows: Record<string, unknown>[]) {
     return fields.map((field) => csvCell(masked[field])).join(",");
   });
 }
+export const RISK_EXPORT_FIELDS = ['reference_code','title','category','severity','review_status','visible_code','qr_status','vehicle_label','registration_masked','event_count','evidence_summary','case_reference','case_status','assigned_name','observed_at'];
 export const TRANSFER_EXPORT_FIELDS = [
   "reference_code",
   "source_name",
@@ -69,6 +76,8 @@ export const TRANSFER_EXPORT_FIELDS = [
   "expected_arrival",
   "created_at",
 ];
+export const REPLACEMENT_EXPORT_FIELDS = ['reference_code','customer_name','registration_masked','reason','status','stage','risk_level','old_visible_code','old_qr_status','new_visible_code','new_qr_status','order_number','payment_state','fulfilment_status','shipment_status','requested_at','activated_at','closed_at'];
+export const RECONCILIATION_EXPORT_FIELDS = ["reference_code","custodian_name","custodian_kind","city","district_name","state_name","expected_quantity","counted_quantity","variance","status","phase","outcome","missing_quantity","extra_quantity","damaged_quantity","transfer_reference","count_completed_at","created_at"];
 export const INVENTORY_EXPORT_FIELDS = [
   "visible_code",
   "public_id",

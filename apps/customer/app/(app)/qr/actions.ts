@@ -66,16 +66,18 @@ export async function submitQrReplacementAction(
     return { success: false, error: "Unauthorized session. Please sign in again." };
   }
 
+  if (!auth.phoneVerified) return { success: false, error: "Verify your mobile number before requesting a replacement." };
+
   if (!params.stickerId) {
     return { success: false, error: "Please select a sticker to replace." };
   }
 
-  if (!params.reason) {
+  if (!params.reason || params.reason.length > 100 || (params.notes?.length || 0) > 1800) {
     return { success: false, error: "Please provide a reason for the replacement." };
   }
 
   try {
-    const result = await executeQrReplacement(auth.user.id, params);
+    const result = await executeQrReplacement(auth.user.id, params, auth.session.id);
     if (result.success) {
       revalidatePath("/qr");
       revalidatePath("/qr/replace");

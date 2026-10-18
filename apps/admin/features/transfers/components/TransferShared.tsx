@@ -84,12 +84,31 @@ export const transferDate = (value: string | null) =>
       }).format(new Date(value))
     : "Not recorded";
 export function TransferBadge({ row }: { row: TransferRow }) {
+  const isSuccess = ["RECEIVED", "RECONCILED", "CLOSED"].includes(row.status);
+  const isAttention = !!row.attention;
+  const isTransit =
+    row.status === "IN_TRANSIT" || row.status === "PARTIALLY_RECEIVED";
   return (
     <span
-      className={`tr-badge ${row.attention ? "attention" : ["RECEIVED", "RECONCILED", "CLOSED"].includes(row.status) ? "success" : ""}`}
+      className={`tr-badge ${isAttention ? "attention" : isSuccess ? "success" : isTransit ? "transit" : ""}`}
     >
-      {transferLabel(row.status)}
-      {row.overdue ? " · Overdue" : ""}
+      <VaahanIcon
+        name={
+          isSuccess
+            ? "check"
+            : isAttention
+              ? "alert"
+              : isTransit
+                ? "route"
+                : "circle"
+        }
+        size={11}
+        className="shrink-0"
+      />
+      <span>
+        {transferLabel(row.status)}
+        {row.overdue ? " · Overdue" : ""}
+      </span>
     </span>
   );
 }
@@ -127,7 +146,13 @@ export function TransferRail({ row }: { row: TransferRow }) {
           className={i <= current ? "done" : ""}
           aria-current={i === current ? "step" : undefined}
         >
-          <span>{i + 1}</span>
+          <span>
+            {i < current ? (
+              <VaahanIcon name="check" size={11} className="shrink-0" />
+            ) : (
+              i + 1
+            )}
+          </span>
           <small>{s}</small>
         </li>
       ))}

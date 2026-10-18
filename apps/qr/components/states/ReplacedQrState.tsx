@@ -1,14 +1,13 @@
 import React from "react";
 import { VaahanIcon } from "@vaahansafe/icons";
 import { Badge } from "@vaahansafe/ui/components/badge";
-import { getQrUrl } from "@vaahansafe/config";
 
 export interface ReplacedQrStateProps {
   publicId: string;
   replacedByPublicId?: string;
 }
 
-export function ReplacedQrState({ publicId, replacedByPublicId }: ReplacedQrStateProps) {
+export function ReplacedQrState({ publicId }: ReplacedQrStateProps) {
   return (
     <div className="w-full p-6 rounded-2xl border border-border/80 bg-card text-center space-y-5 shadow-xs animate-in fade-in duration-300">
       <div className="mx-auto size-12 rounded-2xl bg-amber-500/10 text-amber-600 border border-amber-500/20 flex items-center justify-center">
@@ -31,17 +30,6 @@ export function ReplacedQrState({ publicId, replacedByPublicId }: ReplacedQrStat
         </p>
       </div>
 
-      {replacedByPublicId && (
-        <div className="pt-2">
-          <a
-            href={getQrUrl(replacedByPublicId)}
-            className="min-h-[44px] px-5 rounded-xl bg-muted hover:bg-muted/80 text-foreground font-medium text-xs flex items-center justify-center gap-2 transition-colors border border-border"
-          >
-            <span>Go to Replacement Identity</span>
-            <VaahanIcon name="external-link" size={14} />
-          </a>
-        </div>
-      )}
 
       <div className="border-t border-border/60 pt-3 text-[11px] font-mono text-muted-foreground">
         Retired Code: <span className="text-foreground">{publicId}</span>

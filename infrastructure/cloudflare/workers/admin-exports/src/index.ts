@@ -10,6 +10,9 @@ import {
   DISTRIBUTOR_EXPORT_FIELDS,
   RETAILER_EXPORT_FIELDS,
   TRANSFER_EXPORT_FIELDS,
+  RECONCILIATION_EXPORT_FIELDS,
+  REPLACEMENT_EXPORT_FIELDS,
+  RISK_EXPORT_FIELDS,
 } from "../../../../../apps/admin/lib/exports";
 interface Env {
   SUPABASE_URL: string;
@@ -110,7 +113,13 @@ export async function processExportJobs(env: Env) {
         throw new Error("Export access expired");
       const exportModule = getAdminModule(job.module_key)!;
       const lines = [
-        (job.module_key === "transfers"
+        (job.module_key === 'fraud'
+          ? RISK_EXPORT_FIELDS
+          : job.module_key === "replacements"
+          ? REPLACEMENT_EXPORT_FIELDS
+          : job.module_key === "reconciliation"
+          ? RECONCILIATION_EXPORT_FIELDS
+          : job.module_key === "transfers"
           ? TRANSFER_EXPORT_FIELDS
           : job.module_key === "inventory"
             ? INVENTORY_EXPORT_FIELDS
@@ -140,6 +149,33 @@ export async function processExportJobs(env: Env) {
           if (rows.length < 500) break;
           const last = rows.at(-1)!;
           cursor = { created_at: last.created_at, id: last.id };
+        }
+      } else if (job.module_key === 'fraud') {
+        let cursor:Record<string,unknown>|null=null;
+        for(let page=0;page<=20;page++) {
+          const rows=await api<Record<string,unknown>[]>(env,'rpc/admin_risk_export_page','POST',{p_job:job.id,p_cursor:cursor});
+          if(count+rows.length>10000)throw new Error('Export exceeds 10000-row limit');
+          lines.push(...exportRows('fraud',rows));count+=rows.length;
+          if(rows.length<500)break;
+          const last=rows.at(-1)!;cursor={id:last.id,at:last.observed_at};
+        }
+      } else if (job.module_key === "replacements") {
+        let cursor:Record<string,unknown>|null=null;
+        for(let page=0;page<=20;page++){
+          const rows=await api<Record<string,unknown>[]>(env,"rpc/admin_replacement_export_page","POST",{p_job:job.id,p_cursor:cursor});
+          if(count+rows.length>10000)throw new Error("Export exceeds 10000-row limit");
+          lines.push(...exportRows("replacements",rows));count+=rows.length;
+          if(rows.length<500)break;
+          const last=rows.at(-1)!;cursor={id:last.id,value:last.sort_value};
+        }
+      } else if (job.module_key === "reconciliation") {
+        let cursor:Record<string,unknown>|null=null;
+        for(let page=0;page<=20;page++){
+          const rows=await api<Record<string,unknown>[]>(env,"rpc/admin_reconciliation_export_page","POST",{p_job:job.id,p_cursor:cursor});
+          if(count+rows.length>10000)throw new Error("Export exceeds 10000-row limit");
+          lines.push(...exportRows("reconciliation",rows));count+=rows.length;
+          if(rows.length<500)break;
+          const last=rows.at(-1)!;cursor={id:last.id,value:last.sort_value};
         }
       } else if (
         job.module_key === "distributors" ||
@@ -182,7 +218,6 @@ export async function processExportJobs(env: Env) {
               "kind",
               `eq.${job.module_key === "distributors" ? "DISTRIBUTOR" : "RETAILER"}`,
             );
-          if (job.module_key === "fraud") query.set("outcome", "neq.SUCCESS");
           const rows = await api<Record<string, unknown>[]>(
             env,
             `${exportModule.table}?${query}`,

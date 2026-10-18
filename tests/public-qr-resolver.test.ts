@@ -146,7 +146,7 @@ describe("Authoritative Public QR Resolver (@vaahansafe/qr-core & apps/qr)", () 
 
       expect(result.state).toBe("REPLACED");
       expect(result.publicId).toBe("2B9C1100");
-      expect(result.replacedByPublicId).toBe("7F3K9021");
+      expect(result.replacedByPublicId).toBeUndefined();
       expect(result.profile).toBeUndefined();
     });
 

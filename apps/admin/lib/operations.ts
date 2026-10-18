@@ -42,7 +42,7 @@ export async function listAdminRecords(
       "kind",
       key === "distributors" ? "DISTRIBUTOR" : "RETAILER",
     );
-  if (key === "fraud") query = query.neq("outcome", "SUCCESS");
+  if (key === "fraud") throw new AdminError(400, "RISK_WORKSPACE_REQUIRED", "Open Risk Intelligence to inspect correlated signals.");
   if (key === "reports") query = query.eq("actor_id", identity.id);
   if (input.status && m.statusField)
     query = query.eq(m.statusField, input.status.slice(0, 50));

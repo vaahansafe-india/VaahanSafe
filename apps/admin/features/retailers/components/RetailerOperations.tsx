@@ -158,18 +158,7 @@ export function RetailerHistoryActions({
         <Link href={`/transfers/${row.id}`}>Manage transfer →</Link>
       )}
       {section === "reconciliations" && row.status !== "CLOSED" && (
-        <RetailerConfirm
-          id={id}
-          label={row.status === "OPEN" ? "Review discrepancy" : "Close review"}
-          description="Preserve the counted quantity and record the review decision. No QR custody adjustment is performed."
-          body={{
-            action: "review-reconciliation",
-            record: row.id,
-            updatedAt: row.updated_at,
-            to: row.status === "OPEN" ? "REVIEWED" : "CLOSED",
-          }}
-          onChanged={onChanged}
-        />
+        <Link href={`/reconciliation/${row.id}`}>Review reconciliation →</Link>
       )}
     </div>
   );

@@ -5,8 +5,11 @@ workers_dev = false
 preview_urls = false
 
 [vars]
+RISK_EXPORTS_ENABLED = "true"
 RETAILER_EXPORTS_ENABLED = "true"
 TRANSFER_EXPORTS_ENABLED = "true"
+RECONCILIATION_EXPORTS_ENABLED = "true"
+REPLACEMENT_EXPORTS_ENABLED = "true"
 
 [triggers]
 crons = ["* * * * *"]

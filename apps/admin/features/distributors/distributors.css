@@ -1593,7 +1593,13 @@
     font-size: 20px;
   }
   .dist-sheet {
-    padding: 20px !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    padding: max(20px, env(safe-area-inset-top)) 16px max(24px, env(safe-area-inset-bottom)) 16px !important;
+    box-sizing: border-box;
+    border-left: 0;
   }
   .dist-result-bar {
     flex-wrap: wrap;

@@ -3,10 +3,15 @@ import { getAdminIdentity } from "../../lib/session";
 import { EmailVerification } from "../../components/EmailVerification";
 import { VaahanSafeLogo } from "@vaahansafe/ui/brand";
 
-export default async function VerifyEmail() {
+export default async function VerifyEmail({
+  searchParams,
+}: {
+  searchParams: Promise<{ stepUp?: string }>;
+}) {
+  const stepUp = (await searchParams).stepUp === "1";
   const identity = await getAdminIdentity();
   if (!identity) redirect("/login");
-  if (identity.emailVerified) redirect("/");
+  if (identity.emailVerified && !stepUp) redirect("/");
   return (
     <main className="admin-login admin-verify" id="main-content">
       <aside
@@ -39,13 +44,16 @@ export default async function VerifyEmail() {
         </header>
         <div className="admin-login-content">
           <div className="admin-login-card admin-verify-card">
-            <div className="admin-eyebrow">Complete secure sign-in</div>
+            <div className="admin-eyebrow">
+              {stepUp ? "Verify privileged access" : "Complete secure sign-in"}
+            </div>
             <h1>Check your inbox.</h1>
             <p className="admin-login-description">
-              Your password is confirmed. Verify your email code to open the
-              operations workspace.
+              {stepUp
+                ? "Verify a fresh email code before confirming sensitive operations. Your existing session and role remain authoritative."
+                : "Your password is confirmed. Verify your email code to open the operations workspace."}
             </p>
-            <EmailVerification />
+            <EmailVerification stepUp={stepUp} />
             <p className="admin-login-private">
               Your role determines what you can manage.
             </p>

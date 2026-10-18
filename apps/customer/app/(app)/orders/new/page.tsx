@@ -42,7 +42,7 @@ export default async function NewOrderPage({
   }>(
     `SELECT id, code, name, description, price_minor, currency
      FROM products
-     WHERE (code = ? OR id = ?) AND product_type = 'PHYSICAL_QR_STICKER' AND status = 'ACTIVE'
+     WHERE (code = ? OR id = ?) AND product_type IN ('PHYSICAL_QR_STICKER', 'REPLACEMENT_STICKER') AND status = 'ACTIVE'
      LIMIT 1`,
     [targetCode, targetCode],
   );

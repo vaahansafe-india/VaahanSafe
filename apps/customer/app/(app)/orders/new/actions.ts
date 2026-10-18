@@ -81,10 +81,11 @@ export async function createOrderAndPaymentSession(
       price_minor: number;
       currency: string;
       status: string;
+      product_type: string;
     }>(
-      `SELECT id, code, name, price_minor, currency, status
+      `SELECT id, code, name, price_minor, currency, status, product_type
        FROM products
-       WHERE (code = ? OR id = ?) AND product_type = 'PHYSICAL_QR_STICKER' AND status = 'ACTIVE'
+       WHERE (code = ? OR id = ?) AND product_type IN ('PHYSICAL_QR_STICKER', 'REPLACEMENT_STICKER') AND status = 'ACTIVE'
        LIMIT 1`,
       [productCode, productCode],
     );
@@ -118,6 +119,12 @@ export async function createOrderAndPaymentSession(
         };
       }
       verifiedVehicleId = v.id;
+    }
+
+    if (product.product_type === 'REPLACEMENT_STICKER') {
+      if (!verifiedVehicleId) return {success:false,error:'Choose the vehicle from your replacement request.'};
+      const request = await db.queryFirst<{id:string}>(`SELECT r.id FROM replacement_requests r WHERE r.user_id=? AND r.vehicle_id=? AND r.status IN ('REQUESTED','UNDER_REVIEW','APPROVED') AND public.replacement_owner_eligible(r.id) LIMIT 1`,[auth.user.id,verifiedVehicleId]);
+      if (!request) return {success:false,error:'Submit an eligible replacement request before purchasing its kit.'};
     }
 
     // 3. Resolve Shipping Address
@@ -198,6 +205,9 @@ export async function createOrderAndPaymentSession(
       shippingAddressId = newAddressId;
     }
 
+    const shipping = await db.queryFirst<{recipient_name:string;phone:string;line1:string;line2:string|null;city:string;state:string;postal_code:string}>(`SELECT recipient_name,phone,line1,line2,city,state,postal_code FROM addresses WHERE id=? AND user_id=? LIMIT 1`,[shippingAddressId,auth.user.id]);
+    if (!shipping) return {success:false,error:'Choose a valid shipping address.'};
+
     // 4. Generate Internal Order Identifiers
     const orderId = `ord_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`;
     const randomSuffix = Math.floor(1000 + Math.random() * 9000);
@@ -208,11 +218,11 @@ export async function createOrderAndPaymentSession(
       `INSERT INTO orders (
          id, user_id, order_number, status, currency,
          subtotal_minor, discount_minor, shipping_minor, tax_minor, total_minor,
-         shipping_address_id, vehicle_id, created_at, updated_at
+         shipping_address_id, vehicle_id, shipping_name,shipping_phone,shipping_address_line1,shipping_address_line2,shipping_city,shipping_state,shipping_postal_code, created_at, updated_at
        ) VALUES (
          ?, ?, ?, 'PENDING_PAYMENT', ?,
          ?, 0, 0, 0, ?,
-         ?, ?, datetime('now'), datetime('now')
+         ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now')
        )`,
       [
         orderId,
@@ -223,6 +233,7 @@ export async function createOrderAndPaymentSession(
         product.price_minor,
         shippingAddressId,
         verifiedVehicleId,
+        shipping.recipient_name,shipping.phone,shipping.line1,shipping.line2,shipping.city,shipping.state,shipping.postal_code,
       ],
     );
 

@@ -52,6 +52,8 @@ brand-icon-preview.png
 WHATSAPP_TEMPLATES_GUIDE.md
 *.docx
 ~$*
+*.pdf
+tooling/scripts/combine-*.ts
 
 
 # System & IDE

@@ -9,7 +9,6 @@
 
 import {
   getAuthoritativeDatabaseClient,
-  D1ReplacementRepository,
   createInAppNotification,
 } from "@vaahansafe/database";
 import { maskVehicleRegistration } from "@vaahansafe/vehicles";
@@ -638,8 +637,8 @@ export async function getReplaceQrData(
      FROM qr_stickers s
      JOIN qr_assignments a ON s.id = a.qr_id AND a.ended_at IS NULL
      JOIN vehicles v ON a.vehicle_id = v.id
-     WHERE a.user_id = ? AND s.status IN ('ACTIVATED', 'PRINTED', 'SOLD')
-     ORDER BY s.updated_at DESC`,
+     WHERE a.user_id = ? AND v.user_id = a.user_id AND v.status = 'ACTIVE' AND s.status = 'ACTIVATED' AND EXISTS (SELECT 1 FROM service_entitlements e WHERE e.qr_sticker_id=s.id AND e.vehicle_id=v.id AND e.user_id=a.user_id AND e.capability='REPLACEMENT_ELIGIBLE' AND e.status='ENABLED' AND (e.expires_at IS NULL OR e.expires_at>datetime('now')))
+     ORDER BY s.updated_at DESC,s.id DESC LIMIT 100`,
     [userId],
   );
 
@@ -652,7 +651,7 @@ export async function getReplaceQrData(
      JOIN qr_stickers s ON r.old_qr_sticker_id = s.id
      JOIN vehicles v ON r.vehicle_id = v.id
      WHERE r.user_id = ? AND r.status NOT IN ('REJECTED', 'COMPLETED', 'CANCELLED')
-     ORDER BY r.requested_at DESC`,
+     ORDER BY r.requested_at DESC,r.id DESC LIMIT 100`,
     [userId],
   );
 
@@ -949,122 +948,14 @@ export function mapToCanonicalReplacementReason(rawReason: string): {
   }
 }
 
-/**
- * Creates an authoritative replacement request for a damaged or lost QR sticker on D1.
- * Strictly adheres to Cloudflare D1 check constraints and centralized entitlement rules.
- */
+/** Requests a replacement through the real session-scoped transactional service. */
 export async function executeQrReplacement(
-  userId: string,
+  _userId: string,
   params: { stickerId: string; reason: string; notes?: string },
+  sessionId: string,
 ): Promise<{ success: boolean; error?: string; requestId?: string }> {
-  const db = getAuthoritativeDatabaseClient();
-
-  // 1. Verify sticker belongs to user and is currently assigned to their active fleet
-  const stickers = await db.query<
-    DbQrRow & { vehicle_id: string; vehicle_status?: string }
-  >(
-    `SELECT s.id, s.public_id, s.visible_code, s.status, a.vehicle_id, v.status as vehicle_status
-     FROM qr_stickers s
-     JOIN qr_assignments a ON s.id = a.qr_id AND a.ended_at IS NULL
-     JOIN vehicles v ON a.vehicle_id = v.id
-     WHERE s.id = ? AND a.user_id = ?
-     LIMIT 1`,
-    [params.stickerId, userId],
-  );
-  const sticker = stickers[0];
-  if (!sticker) {
-    return {
-      success: false,
-      error: "Selected sticker was not found in your active fleet.",
-    };
-  }
-
-  // 2. Prevent concurrent open replacement requests (idx_replacement_active_old_qr constraint)
-  const replacementRepo = new D1ReplacementRepository(db);
-  const existingActive = await replacementRepo.findActiveByOldQrId(sticker.id);
-  if (existingActive) {
-    return {
-      success: false,
-      error: `A replacement request (${existingActive.id.slice(0, 10)}) is already in progress (${existingActive.status}) for this QR sticker.`,
-    };
-  }
-
-  // 3. Centralized entitlement gate (Rule 26 & 35)
-  let isEntitled = await canRequestReplacement({
-    userId,
-    vehicleId: sticker.vehicle_id,
-    qrId: sticker.id,
-    db,
-  });
-
-  if (
-    !isEntitled &&
-    (sticker.status === "ACTIVATED" || sticker.status === "PRINTED")
-  ) {
-    await grantAuthoritativeEntitlements({
-      userId,
-      vehicleId: sticker.vehicle_id,
-      qrStickerId: sticker.id,
-      acquisitionSource: "ONLINE_PURCHASE",
-      db,
-    });
-    isEntitled = true;
-  }
-
-  if (!isEntitled) {
-    return {
-      success: false,
-      error:
-        "This QR sticker or vehicle is not currently entitled for hardware replacement.",
-    };
-  }
-
-  // 4. Map client reason to canonical D1 constraint: CHECK(reason IN ('LOST', 'DAMAGED', 'PRINT_DEFECT', 'DELIVERY_DAMAGE', 'OTHER'))
-  const reasonMeta = mapToCanonicalReplacementReason(params.reason);
-  const userNotes = params.notes?.trim()
-    ? `[${reasonMeta.label}] ${params.notes.trim()}`
-    : reasonMeta.label;
-
-  const requestId = `rpr_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-  const now = new Date().toISOString();
-
-  // 5. Persist replacement request with all schema columns populated
-  await replacementRepo.save({
-    id: requestId,
-    userId,
-    vehicleId: sticker.vehicle_id,
-    oldQrStickerId: sticker.id,
-    reason: reasonMeta.canonicalReason,
-    userNotes,
-    status: "REQUESTED",
-    riskLevel: "LOW",
-    requiresStepUp: false,
-    requestedAt: now,
-    createdAt: now,
-    updatedAt: now,
-  });
-
-  // Dispatch in-app notification for QR replacement request
-  try {
-    await createInAppNotification(db, {
-      userId,
-      eventType: "QR_REPLACEMENT_REQUESTED",
-      title: "QR Replacement Requested",
-      body: `Replacement requested for QR sticker (${reasonMeta.label}). Request ID: ${requestId}.`,
-      category: "SAFETY",
-      priority: "HIGH",
-      actionType: "VIEW_QR",
-      actionTarget: `/qr/replace`,
-    });
-  } catch (notifErr) {
-    console.error(
-      "[executeQrReplacement] Failed to create in-app notification:",
-      notifErr,
-    );
-  }
-
-  return {
-    success: true,
-    requestId,
-  };
+  const reason = mapToCanonicalReplacementReason(params.reason);
+  const { requestCustomerReplacement } = await import('./replacement-service');
+  const requestId = await requestCustomerReplacement(sessionId, params.stickerId, reason.canonicalReason, params.notes?.trim() ? `[${reason.label}] ${params.notes.trim()}` : reason.label);
+  return { success: true, requestId };
 }

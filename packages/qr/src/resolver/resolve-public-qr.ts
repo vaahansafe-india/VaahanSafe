@@ -195,7 +195,6 @@ export async function resolvePublicQr(
       publicId: row.public_id,
       visibleCode: row.visible_code,
       state: "REPLACED",
-      replacedByPublicId: row.replaced_by_public_id || undefined,
       meta: getPublicResolverMeta("REPLACED", { publicId: row.public_id }),
     };
   }

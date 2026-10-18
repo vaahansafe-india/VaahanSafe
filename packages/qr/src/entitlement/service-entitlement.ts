@@ -57,6 +57,8 @@ export async function hasServiceEntitlement(
     JOIN qr_stickers q ON e.qr_sticker_id = q.id
     JOIN qr_assignments a ON q.id = a.qr_id AND a.ended_at IS NULL
     WHERE e.user_id = ? AND e.capability = ? AND e.status = 'ENABLED'
+      AND a.user_id = e.user_id AND a.vehicle_id = e.vehicle_id
+      AND (e.expires_at IS NULL OR e.expires_at > datetime('now'))
   `;
   const sqlParams: unknown[] = [userId, capability];
 

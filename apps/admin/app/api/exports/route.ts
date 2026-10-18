@@ -5,7 +5,13 @@ import {
   AdminError,
 } from "../../../lib/session";
 import { adminResponse, adminFailure } from "../../../lib/api";
+import { parseRiskFilters } from '../../../features/risk/risk.filters';
+import { riskRpc } from '../../../features/risk/server/risk';
 import { canExport } from "../../../lib/exports";
+import { parseReconciliationFilters } from "../../../features/reconciliation/reconciliation.filters";
+import { reconciliationRpc } from "../../../features/reconciliation/server/reconciliation";
+import { parseReplacementFilters } from "../../../features/replacements/replacement.filters";
+import { replacementRpc } from "../../../features/replacements/server/replacements";
 import { parseInventoryFilters } from "../../../features/inventory/inventory.filters";
 import { parseDistributorFilters } from "../../../features/distributors/distributor.filters";
 import { parseRetailerFilters } from "../../../features/retailers/retailer.filters";
@@ -37,6 +43,20 @@ export async function POST(request: Request) {
         "EXPORT_UNAVAILABLE",
         "Report generation is temporarily unavailable. Please try again later.",
       );
+    if (body.moduleKey === 'fraud') {
+      await assertDistributorExportAvailable('fraud');
+      return adminResponse({id:await riskRpc(identity,'admin_risk_request_export',{p_filters:parseRiskFilters(new URLSearchParams(typeof body.filters==='string'?body.filters:'')),p_request:crypto.randomUUID()}),status:'QUEUED'},202);
+    }
+    if (body.moduleKey === "replacements") {
+      await assertDistributorExportAvailable("replacements");
+      if(body.ids!=null&&(!Array.isArray(body.ids)||body.ids.length<1||body.ids.length>100||body.ids.some((id:unknown)=>typeof id!=="string"||!/^[A-Za-z0-9_-]{1,100}$/.test(id))))throw new AdminError(400,"INVALID_SELECTION","Select between 1 and 100 replacements.");
+      return adminResponse({id:await replacementRpc(identity,"admin_request_replacement_export",{p_filters:parseReplacementFilters(new URLSearchParams(typeof body.filters==="string"?body.filters:"")),p_ids:body.ids?[...new Set(body.ids)]:null,p_request:crypto.randomUUID()}),status:"QUEUED"},202);
+    }
+    if (body.moduleKey === "reconciliation") {
+      await assertDistributorExportAvailable("reconciliation");
+      if(body.ids!=null&&(!Array.isArray(body.ids)||body.ids.length<1||body.ids.length>100||body.ids.some((id:unknown)=>typeof id!=="string"||!/^[A-Za-z0-9_-]{1,100}$/.test(id))))throw new AdminError(400,"INVALID_SELECTION","Select between 1 and 100 reconciliations.");
+      return adminResponse({id:await reconciliationRpc(identity,"admin_request_reconciliation_export",{p_filters:parseReconciliationFilters(new URLSearchParams(typeof body.filters==="string"?body.filters:"")),p_ids:body.ids?[...new Set(body.ids)]:null,p_request:crypto.randomUUID()}),status:"QUEUED"},202);
+    }
     if (body.moduleKey === "transfers") {
       await assertDistributorExportAvailable("transfers");
       if (

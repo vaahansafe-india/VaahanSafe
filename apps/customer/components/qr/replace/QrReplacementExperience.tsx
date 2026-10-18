@@ -127,35 +127,35 @@ export function QrReplacementExperience({
           </div>
 
           <div className="font-mono text-xs uppercase tracking-widest text-emerald-600 dark:text-emerald-400">
-            REPLACEMENT ORDER RECORDED
+            REPLACEMENT REQUEST RECEIVED
           </div>
 
           <h2 className="font-serif text-2xl sm:text-3xl font-medium text-foreground">
-            Hardware En Route to Your Doorstep
+            Your replacement request is received
           </h2>
 
           <p className="text-sm text-muted-foreground max-w-md mx-auto">
-            Replacement request <span className="font-mono font-bold text-foreground">#{successResult.requestId.slice(0, 10)}</span> for vehicle <span className="font-mono font-bold text-foreground">{successResult.vehiclePlate}</span> has been scheduled with courier dispatch.
+            Replacement request <span className="font-mono font-bold text-foreground">#{successResult.requestId.slice(0, 10)}</span> for vehicle <span className="font-mono font-bold text-foreground">{successResult.vehiclePlate}</span> is awaiting review. A verified paid replacement-kit order is required before new hardware is allocated.
           </p>
 
           <div className="rounded-xl border border-border bg-background p-4 text-xs text-muted-foreground text-left max-w-md mx-auto space-y-1.5">
             <div className="font-mono text-[10px] uppercase tracking-wider text-[#cc785c] font-semibold">
-              Zero Interruption Guarantee:
+              What happens next:
             </div>
             <div>
-              &bull; Your digital QR pass and anonymous phone masking remain 100% operational.
+              &bull; Your vehicle profile, emergency contacts and history are preserved. The original QR stops serving safety information when it is retired.
             </div>
             <div>
-              &bull; When the replacement arrives, simple 10-second pairing activates it automatically.
+              &bull; After confirmed delivery, verify the replacement’s private activation code to enable it.
             </div>
           </div>
 
           <div className="flex flex-col sm:flex-row justify-center gap-3 pt-4">
             <Link
-              href="/orders"
+              href={`/qr/replace/${successResult.requestId}`}
               className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#cc785c] px-6 font-mono text-xs font-semibold uppercase tracking-wider text-white hover:bg-[#b5654b] transition-colors shadow-xs"
             >
-              <span>Track Replacement Shipment</span>
+              <span>View replacement request</span>
               <ArrowRight className="size-4" />
             </Link>
             <Link
@@ -331,6 +331,7 @@ export function QrReplacementExperience({
                 <textarea
                   id="notes"
                   value={notes}
+                  maxLength={1800}
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="Provide any specific context or courier delivery instructions..."
                   rows={3}
@@ -374,16 +375,16 @@ export function QrReplacementExperience({
                 <span>HOW REPLACEMENT WORKS</span>
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                When you submit a replacement request, your existing digital safety pass and anonymous emergency telephone relays remain fully active.
+                We review your request and verify payment for the replacement kit before allocating hardware. Your vehicle profile and history stay attached to the same vehicle.
               </p>
               <div className="space-y-2 border-t border-border pt-3 text-xs text-foreground">
                 <div className="flex items-start gap-2">
                   <span className="size-1.5 rounded-full bg-[#5db8a6] mt-1.5 shrink-0" />
-                  <span>New physical sticker dispatched via express courier</span>
+                  <span>Approved replacement kit prepared after verified payment</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="size-1.5 rounded-full bg-[#5db8a6] mt-1.5 shrink-0" />
-                  <span>Instant 1-tap activation migrates identity seamlessly</span>
+                  <span>Owner verifies the private code after carrier-confirmed delivery</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="size-1.5 rounded-full bg-[#5db8a6] mt-1.5 shrink-0" />
@@ -409,9 +410,9 @@ export function QrReplacementExperience({
                           {req.reason.replace(/_/g, " ").toLowerCase()}
                         </div>
                       </div>
-                      <span className="font-mono text-[10px] font-semibold text-[#cc785c] rounded-md bg-[#cc785c]/10 px-2 py-0.5">
-                        {req.status}
-                      </span>
+                      <Link href={`/qr/replace/${req.id}`} className="font-mono text-[10px] font-semibold text-[#cc785c] rounded-md bg-[#cc785c]/10 px-2 py-1.5">
+                        {req.status} · View →
+                      </Link>
                     </div>
                   ))}
                 </div>

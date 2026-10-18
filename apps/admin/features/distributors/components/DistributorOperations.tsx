@@ -168,33 +168,14 @@ export function ReconciliationForm({
   );
 }
 export function ReconciliationAction({
-  id,
   record,
-  onChanged,
 }: {
   id: string;
   record: DistributorDetail["reconciliations"][number];
   onChanged: () => void;
 }) {
   return (
-    <OperationConfirm
-      id={id}
-      label={
-        record.status === "OPEN" ? "Mark reviewed" : "Close reconciliation"
-      }
-      description={
-        record.status === "OPEN"
-          ? "Record your review of the discrepancy. Custody quantities will remain unchanged."
-          : "Document the resolution and close this reconciliation. Custody quantities are not changed by this action."
-      }
-      body={{
-        action: "review-reconciliation",
-        record: record.id,
-        updatedAt: record.updated_at,
-        to: record.status === "OPEN" ? "REVIEWED" : "CLOSED",
-      }}
-      onChanged={onChanged}
-    />
+    <Link href={`/reconciliation/${record.id}`}>Review reconciliation →</Link>
   );
 }
 export function RetailerManager({

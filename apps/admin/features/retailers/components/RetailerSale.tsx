@@ -8,6 +8,7 @@ import { getAdminData } from "../../../lib/client-api";
 import type { RetailerRow } from "../retailer.types";
 import type { SaleOption, RetailSale } from "../retail-sale.schema";
 import { timeLabel } from "./RetailerWorkspace";
+import { VaahanIcon } from "@vaahansafe/icons";
 import "../retail-sale.css";
 
 export function RetailerSaleDialog({
@@ -321,23 +322,35 @@ export function RetailerSales({ id }: { id: string }) {
     ).values(),
   ];
   return (
-    <section className="dist-detail-panel">
-      <h2>Recorded retail sales</h2>
-      <p>
-        Sale records preserve retailer custody and the receipt reference.
-        Customer activation is recorded separately.
-      </p>
+    <section className="dist-detail-panel retail-sales-panel">
+      <div className="retail-sales-header">
+        <div className="retail-sales-title-wrap">
+          <VaahanIcon name="cart" size={18} className="retail-sales-icon shrink-0" />
+          <h2>Recorded retail sales</h2>
+        </div>
+        <p>
+          Sale records preserve retailer custody and the receipt reference.
+          Customer activation is recorded separately.
+        </p>
+      </div>
       {query.isPending ? (
-        <p role="status">Loading sales…</p>
+        <div className="retail-sale-loading">
+          <VaahanIcon name="refresh" size={14} className="animate-spin" />
+          <span>Loading sales…</span>
+        </div>
       ) : query.isError ? (
-        <div role="alert" className="dist-error">
-            We couldn’t load retail sales.{" "}
+        <div role="alert" className="dist-error retail-sale-error">
+          <VaahanIcon name="alert" size={14} className="shrink-0" />
+          <span>We couldn’t load retail sales.</span>
           <button type="button" onClick={() => void query.refetch()}>
             Retry
           </button>
         </div>
       ) : !rows.length ? (
         <div className="dist-empty-state">
+          <div className="dist-empty-icon">
+            <VaahanIcon name="cart" size={22} />
+          </div>
           <h3>No retail sales recorded</h3>
           <p>
             Record a completed sale after the retailer receives eligible printed
@@ -345,41 +358,76 @@ export function RetailerSales({ id }: { id: string }) {
           </p>
         </div>
       ) : (
-        rows.map((row) => (
-          <article
-            className="dist-history-row retail-sale-history"
-            key={row.id}
-          >
-            <div>
-              <strong>{row.reference_code}</strong>
-              <p>
-                {row.quantity} {row.quantity === 1 ? "sticker" : "stickers"} ·
-                Receipt {row.receipt_reference}
-              </p>
-              <small>
-                {timeLabel(row.created_at)} · {row.actor_name}
-              </small>
-              <p>{row.reason}</p>
-              <details>
-                <summary>View sold VaahanSafe IDs</summary>
-                <ul>
-                  {row.visible_codes.map((code) => (
-                    <li key={code}>{code}</li>
-                  ))}
-                </ul>
-              </details>
-            </div>
-          </article>
-        ))
+        <div className="retail-sales-list">
+          {rows.map((row) => (
+            <article
+              className="dist-history-row retail-sale-history"
+              key={row.id}
+            >
+              <div className="retail-sale-card-inner">
+                <div className="retail-sale-top">
+                  <span className="retail-sale-ref">
+                    <VaahanIcon name="receipt" size={13} className="shrink-0 opacity-70" />
+                    <strong>{row.reference_code}</strong>
+                  </span>
+                  <span className="retail-sale-qty-badge">
+                    <VaahanIcon name="tag" size={11} className="shrink-0" />
+                    <span>
+                      {row.quantity} {row.quantity === 1 ? "sticker" : "stickers"}
+                    </span>
+                  </span>
+                </div>
+                <div className="retail-sale-meta">
+                  <span className="retail-sale-receipt-pill">
+                    Receipt <strong>{row.receipt_reference}</strong>
+                  </span>
+                  <span className="retail-sale-dot">·</span>
+                  <span className="retail-sale-time">
+                    <VaahanIcon name="clock" size={12} className="shrink-0 opacity-70" />
+                    <span>{timeLabel(row.created_at)}</span>
+                  </span>
+                  <span className="retail-sale-dot">·</span>
+                  <span className="retail-sale-actor">{row.actor_name}</span>
+                </div>
+                {row.reason && <p className="retail-sale-reason">{row.reason}</p>}
+                <details className="retail-sale-details">
+                  <summary className="retail-sale-summary">
+                    <VaahanIcon name="qr" size={13} className="shrink-0" />
+                    <span>View sold VaahanSafe IDs ({row.visible_codes.length})</span>
+                    <VaahanIcon
+                      name="chevron-down"
+                      size={12}
+                      className="retail-sale-caret shrink-0"
+                    />
+                  </summary>
+                  <ul className="retail-sale-codes-list">
+                    {row.visible_codes.map((code) => (
+                      <li key={code} className="retail-sale-code-item">
+                        <code>{code}</code>
+                      </li>
+                    ))}
+                  </ul>
+                </details>
+              </div>
+            </article>
+          ))}
+        </div>
       )}
       {query.hasNextPage && (
         <button
           type="button"
-          className="dist-btn"
+          className="dist-btn retail-sale-load-more"
           disabled={query.isFetching}
           onClick={() => void query.fetchNextPage()}
         >
-          {query.isFetchingNextPage ? "Loading…" : "Load more sales"}
+          {query.isFetchingNextPage ? (
+            <>
+              <VaahanIcon name="refresh" size={13} className="animate-spin" />
+              <span>Loading…</span>
+            </>
+          ) : (
+            <span>Load more sales</span>
+          )}
         </button>
       )}
     </section>

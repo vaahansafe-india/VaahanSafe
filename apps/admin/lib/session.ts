@@ -95,10 +95,12 @@ export async function requireAdmin(
       "FORBIDDEN",
       "Your role does not have access to this workspace.",
     );
+  const stepUpWindowMs =
+    process.env.NODE_ENV === "development" ? 60 * 60 * 1000 : 10 * 60 * 1000;
   if (
     options?.stepUp &&
     (!identity.stepUpAt ||
-      Date.now() - Date.parse(identity.stepUpAt) > 10 * 60 * 1000)
+      Date.now() - Date.parse(identity.stepUpAt) > stepUpWindowMs)
   )
     throw new AdminError(
       403,

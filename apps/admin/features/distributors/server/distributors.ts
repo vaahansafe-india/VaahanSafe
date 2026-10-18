@@ -42,7 +42,11 @@ export async function assertDistributorExportAvailable(
           };
         };
         const bindings = result.result?.bindings || [];
+          if (moduleKey === 'fraud' && !bindings.some(b=>b.name==='RISK_EXPORTS_ENABLED'&&b.type==='plain_text'&&b.text==='true'))
+            throw new Error('Risk report worker is not available');
         if (
+          (moduleKey !== "replacements" || bindings.some(b=>b.name==='REPLACEMENT_EXPORTS_ENABLED'&&b.type==='plain_text'&&b.text==='true')) &&
+          (moduleKey !== "reconciliation" || bindings.some(b=>b.name==='RECONCILIATION_EXPORTS_ENABLED'&&b.type==='plain_text'&&b.text==='true')) &&
           (moduleKey !== "transfers" || bindings.some(b=>b.name==='TRANSFER_EXPORTS_ENABLED'&&b.type==='plain_text'&&b.text==='true')) &&
           (moduleKey !== "retailers" ||
             bindings.some(
