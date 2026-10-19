@@ -53,7 +53,7 @@ export async function GET(req: NextRequest) {
               u.full_name AS owner_name, u.primary_phone AS owner_phone,
               q.public_code AS qr_public_code, q.status AS qr_status
        FROM vehicles v
-       JOIN users u ON u.id = v.user_id
+       JOIN users u ON ${db.dialect === "postgres" ? "u.id::text = v.user_id" : "u.id = v.user_id"}
        LEFT JOIN qr_stickers q ON q.vehicle_id = v.id AND q.status = 'ACTIVATED'
        ${whereClause}
        ORDER BY v.created_at DESC

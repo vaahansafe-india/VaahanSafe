@@ -96,7 +96,16 @@ export class SupabaseDatabaseAdapter implements DatabaseClient {
     });
 
     if (!response.ok) {
-      throw new Error(`Database service unavailable (${response.status})`);
+      let detail = "";
+      try {
+        const errorJson = (await response.json()) as Record<string, unknown> | null;
+        if (errorJson && typeof errorJson === "object") {
+          detail = typeof errorJson.message === "string" ? errorJson.message : (typeof errorJson.error === "string" ? errorJson.error : "");
+        }
+      } catch {
+        // ignore JSON parse failure
+      }
+      throw new Error(`Database service unavailable (${response.status}${detail ? `: ${detail}` : ""})`);
     }
 
     const result: unknown = await response.json();

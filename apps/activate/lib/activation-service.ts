@@ -522,15 +522,15 @@ export async function activateRetailQr(params: {
     // in the Supabase migration remain the final double-claim boundary.
     {
       sql: `INSERT INTO qr_assignments (id, qr_id, vehicle_id, user_id, assignment_type, assigned_at, created_at)
-            SELECT ?, s.id, v.id, u.id, 'INITIAL', ?, ?
+            SELECT ?, s.id, v.id, ${db.dialect === "postgres" ? "u.id::text" : "u.id"}, 'INITIAL', ?, ?
             FROM qr_stickers s
             JOIN qr_activation_secrets sec ON sec.qr_id = s.id
             JOIN qr_activation_challenges ch ON ch.qr_id = s.id
             JOIN vehicles v ON v.id = ? AND v.user_id = ? AND v.status != 'DELETED'
-            JOIN users u ON u.id = v.user_id
+            JOIN users u ON ${db.dialect === "postgres" ? "u.id::text = v.user_id" : "u.id = v.user_id"}
             WHERE s.id = ? AND s.status = 'SOLD' AND sec.consumed_at IS NULL
               AND ch.id = ? AND ch.consumed_at IS NULL AND ${db.dialect === "postgres" ? "ch.expires_at > CURRENT_TIMESTAMP" : "datetime(ch.expires_at) > datetime('now')"}
-              AND (ch.user_id IS NULL OR ch.user_id = u.id)
+              AND (ch.user_id IS NULL OR ${db.dialect === "postgres" ? "ch.user_id = u.id::text" : "ch.user_id = u.id"})
               AND u.status = 'ACTIVE' AND u.onboarding_status IN ('PROFILE_REQUIRED', 'COMPLETED')
               AND EXISTS (SELECT 1 FROM auth_identities ai WHERE ai.user_id = u.id
                 AND ai.provider = 'PHONE' AND ai.${db.dialect === "postgres" ? "provider_user_id" : "provider_subject"} = u.primary_phone
