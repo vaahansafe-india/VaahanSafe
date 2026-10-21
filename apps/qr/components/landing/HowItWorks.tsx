@@ -8,8 +8,8 @@ const steps = [
     body: "Use your phone camera, our scanner, or the visible VaahanSafe ID. The link opens in your browser.",
   },
   {
-    title: "Find a way to help",
-    body: "Read the information the owner has chosen to share and use an available emergency contact when needed.",
+    title: "Choose the right alert",
+    body: "Send a parking report to the owner, or an accident report to the owner and enabled emergency contacts. Add helpful photos or a location before sending.",
   },
 ];
 export function HowItWorks() {

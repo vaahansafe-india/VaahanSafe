@@ -44,15 +44,15 @@ external attempts are quarantined rather than sent twice.
 
 - Applied and recorded migration `20261021070842_qr_scan_report_emergency_contacts.sql`
   on the configured Supabase project. No historical contact alerts were backfilled.
-- Submitted `vhn_emergency_contact_report_v1` to MSG91: English, four body variables,
-  utility category. Provider status was `PENDING` at the last verification.
-- The existing two owner-report templates were approved. Contact dispatch stays
-  gated by the new template's actual approval status.
-- The QR and customer application source changes require deployment through their
-  existing hosting pipeline. The customer runtime must deploy too: it uses
-  `claim_notification_batch_v2` and refreshes all three template approval states.
-  Older deployed runtimes cannot claim contact intents, preventing wrong-template
-  messages while the release is being rolled out.
+- Verified MSG91 approval for `vhn_emergency_contact_report_v1` and all three
+  report-viewer v2 templates. Approval remains checked during dispatch.
+- Applied the versioned report-viewer migration. New consented reports can issue
+  per-recipient, revocable links with a maximum 24-hour lifetime.
+- QR, customer and viewer production deployments were verified ready on
+  `60b4c69`; `view.vaahansafe.com` has valid domain configuration. The viewer
+  serves from Cloudflare through the Vercel domain-routing project.
+- The customer runtime uses `claim_notification_batch_v2` and refreshes all six
+  report-template approval states. Older runtimes cannot claim contact intents.
 - Cloudflare's existing Turnstile and private R2 integrations are reused. No new
   database, bucket or queue is required for this feature.
 

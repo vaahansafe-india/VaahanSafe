@@ -5,6 +5,7 @@ import Script from "next/script";
 import type { SharedScanLocation, ScanReportReason } from "@vaahansafe/qr-core";
 import { VaahanIcon } from "@vaahansafe/icons";
 import { Checkbox } from "@vaahansafe/ui/components/checkbox";
+import { ReportSharingSummary } from "./ReportSharingSummary";
 import {
   Dialog,
   DialogTrigger,
@@ -153,13 +154,13 @@ export function ScanReportForm({
         "error-callback": () => {
           setToken("");
           setSecurityError(
-            "The security check could not finish. Please retry, or use an approved contact above.",
+            "The security check could not finish. Please retry, or use an approved contact on this page.",
           );
         },
       });
     } catch {
       setSecurityError(
-        "The security check could not load. Please refresh this page or use an approved contact above.",
+        "The security check could not load. Please refresh this page or use an approved contact on this page.",
       );
       return;
     }
@@ -203,7 +204,7 @@ export function ScanReportForm({
     const timer = setTimeout(
       () =>
         setSecurityError(
-          "The security check is taking longer than expected. Please refresh this page or use an approved contact above.",
+          "The security check is taking longer than expected. Please refresh this page or use an approved contact on this page.",
         ),
       15000,
     );
@@ -335,7 +336,7 @@ export function ScanReportForm({
           ? body.emergencyContactsQueued
             ? "Your report was received. Alerts for the owner and eligible emergency contacts are queued; delivery may take a moment."
             : reason === "EMERGENCY"
-              ? "Your report was received. The owner notification is queued. No emergency-contact alerts were queued for this vehicle. For an immediate response, use an approved contact above."
+              ? "Your report was received. The owner notification is queued. No emergency-contact alerts were queued for this vehicle. For an immediate response, use an approved contact on this page."
               : "Your report was received. The owner notification is queued; delivery may take a moment."
           : "Your report was received.",
       );
@@ -447,9 +448,15 @@ export function ScanReportForm({
             </p>
           )}
           <p className="text-sm leading-relaxed text-muted-foreground">
-            For an immediate response, use an approved contact above. In an
-            emergency, call 112.
+            For an immediate response, use an approved contact on this page. In
+            an emergency, call 112.
           </p>
+          <a
+            href="#emergency-contacts"
+            className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-primary underline underline-offset-4"
+          >
+            View emergency contacts <VaahanIcon name="arrow-right" size={16} />
+          </a>
           <a href="#verified-vehicle-title" className={control}>
             Done <VaahanIcon name="check" size={18} />
           </a>
@@ -524,6 +531,7 @@ export function ScanReportForm({
                 your details remain on this page.
               </p>
             )}
+            {step > 1 && <ReportSharingSummary reason={reason} />}
             {step === 1 && (
               <fieldset className="space-y-4" disabled={busy}>
                 <legend className="sr-only">Report situation</legend>
@@ -585,6 +593,27 @@ export function ScanReportForm({
                     {selectedReason.hint}
                   </p>
                 </div>
+                {reason === "EMERGENCY" && (
+                  <p className="text-sm text-muted-foreground">
+                    If someone is in immediate danger,{" "}
+                    <a
+                      href="tel:112"
+                      className="font-semibold text-primary underline"
+                    >
+                      call 112 first
+                    </a>
+                    .
+                  </p>
+                )}
+              </fieldset>
+            )}
+            {step === 2 && (
+              <fieldset className="space-y-6" disabled={busy || preparing}>
+                <legend className="sr-only">Optional report details</legend>
+                <p className="text-base leading-relaxed text-muted-foreground">
+                  These details are optional. They can help the owner understand
+                  the situation.
+                </p>
                 <div className="space-y-2">
                   <label
                     htmlFor={`${formId}-note`}
@@ -612,27 +641,6 @@ export function ScanReportForm({
                     {note.length} / 300
                   </p>
                 </div>
-                {reason === "EMERGENCY" && (
-                  <p className="text-sm text-muted-foreground">
-                    If someone is in immediate danger,{" "}
-                    <a
-                      href="tel:112"
-                      className="font-semibold text-primary underline"
-                    >
-                      call 112 first
-                    </a>
-                    .
-                  </p>
-                )}
-              </fieldset>
-            )}
-            {step === 2 && (
-              <fieldset className="space-y-6" disabled={busy || preparing}>
-                <legend className="sr-only">Optional report details</legend>
-                <p className="text-base leading-relaxed text-muted-foreground">
-                  These details are optional. They can help the owner understand
-                  the situation.
-                </p>
                 <div className="space-y-3">
                   <h3 className="flex items-center gap-2 text-base font-semibold">
                     <VaahanIcon name="map-pin" size={19} />
@@ -783,6 +791,16 @@ export function ScanReportForm({
                     <dt className="text-sm text-muted-foreground">Situation</dt>
                     <dd className="font-medium">{selectedReason.label}</dd>
                   </div>
+                  <div>
+                    <dt className="text-sm text-muted-foreground">
+                      Alert recipients
+                    </dt>
+                    <dd className="font-medium">
+                      {reason === "EMERGENCY"
+                        ? "Owner and enabled emergency contacts"
+                        : "Vehicle owner only"}
+                    </dd>
+                  </div>
                   {note.trim() && (
                     <div>
                       <dt className="text-sm text-muted-foreground">Note</dt>
@@ -835,7 +853,7 @@ export function ScanReportForm({
                       }}
                       onError={() =>
                         setSecurityError(
-                          "The security check could not load. Please refresh this page or use an approved contact above.",
+                          "The security check could not load. Please refresh this page or use an approved contact on this page.",
                         )
                       }
                     />
@@ -884,8 +902,8 @@ export function ScanReportForm({
                     className="rounded-lg border border-primary/30 bg-primary/5 p-3 text-sm leading-relaxed"
                   >
                     Online reporting is unavailable right now. Please call or
-                    message an approved contact above. For immediate danger,
-                    call 112.
+                    message an approved contact on this page. For immediate
+                    danger, call 112.
                   </p>
                 )}
               </div>
@@ -975,19 +993,21 @@ export function ScanReportForm({
                     ? "Sending…"
                     : retryPending
                       ? "Retry send"
-                      : "Send report"}
+                      : reason === "EMERGENCY"
+                        ? "Send emergency alert"
+                        : "Send owner alert"}
                 </button>
               )}
             </div>
             {step === 3 && (
               <p className="text-sm leading-relaxed text-muted-foreground">
                 {!siteKey
-                  ? "Use an approved contact above for help."
+                  ? "Use an approved contact on this page for help."
                   : !consent
                     ? "Confirm sharing to enable sending."
                     : !token
                       ? "Complete the security check before sending."
-                      : "The owner will be notified after your report is saved."}
+                      : "Alerts are queued after your report is saved. Delivery depends on the recipient’s settings and WhatsApp availability."}
               </p>
             )}
           </div>

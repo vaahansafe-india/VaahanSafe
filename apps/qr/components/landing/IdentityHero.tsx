@@ -30,16 +30,29 @@ export function IdentityHero() {
   }
   return (
     <>
-      <section className="qr-container qr-hero" aria-labelledby="qr-hero-title">
+      <section
+        id="scan-vehicle"
+        className="qr-container qr-hero"
+        aria-labelledby="qr-hero-title"
+      >
         <div className="qr-hero-content w-full flex flex-col items-center text-center lg:items-start lg:text-left">
-          <p className="qr-label text-center lg:text-left text-[11px] sm:text-xs">Small sticker. A meaningful connection.</p>
-          <h1 id="qr-hero-title" className="qr-title mt-4 sm:mt-5 text-center lg:text-left text-balance">
+          <p className="qr-label text-center lg:text-left text-[11px] sm:text-xs">
+            Small sticker. A meaningful connection.
+          </p>
+          <h1
+            id="qr-hero-title"
+            className="qr-title mt-4 sm:mt-5 text-center lg:text-left text-balance"
+          >
             Your vehicle.
-            <br />A <em className="text-primary font-normal italic">safety identity.</em>
+            <br />A{" "}
+            <em className="text-primary font-normal italic">
+              safety identity.
+            </em>
           </h1>
           <p className="qr-muted mt-4 sm:mt-6 max-w-lg text-sm sm:text-base leading-relaxed mx-auto lg:mx-0 text-center lg:text-left text-balance">
-            A scan can help someone reach the people who matter. Open the
-            vehicle’s owner-approved safety information with a VaahanSafe QR.
+            A blocked driveway or an accident? Scan the vehicle’s VaahanSafe QR
+            to send the right WhatsApp alert, with photos and a shared location
+            when useful.
           </p>
           <div className="qr-hero-actions mt-6 sm:mt-7 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 w-full sm:w-auto">
             <button
@@ -48,12 +61,21 @@ export function IdentityHero() {
             >
               Scan a VaahanSafe QR <span aria-hidden="true">↗</span>
             </button>
-            <a className="qr-text-link justify-center text-center py-1 sm:py-0" href="#how-it-works">
+            <a
+              className="qr-text-link justify-center text-center py-1 sm:py-0"
+              href="#how-it-works"
+            >
               How it works <span aria-hidden="true">↓</span>
             </a>
           </div>
-          <form className="qr-lookup w-full max-w-sm sm:max-w-md mx-auto lg:mx-0 text-left mt-6 sm:mt-8 pt-5 sm:pt-6 border-t border-[var(--qr-line)]" onSubmit={submit}>
-            <label htmlFor="hero-lookup-input" className="text-xs sm:text-sm font-medium block text-center lg:text-left">
+          <form
+            className="qr-lookup w-full max-w-sm sm:max-w-md mx-auto lg:mx-0 text-left mt-6 sm:mt-8 pt-5 sm:pt-6 border-t border-[var(--qr-line)]"
+            onSubmit={submit}
+          >
+            <label
+              htmlFor="hero-lookup-input"
+              className="text-xs sm:text-sm font-medium block text-center lg:text-left"
+            >
               Or enter the ID on your sticker
             </label>
             <div className="qr-lookup-row flex gap-2 mt-2">
@@ -87,7 +109,10 @@ export function IdentityHero() {
                 {inputError}
               </p>
             ) : (
-              <p id="lookup-help" className="qr-muted mt-2 text-[11px] sm:text-xs text-center lg:text-left">
+              <p
+                id="lookup-help"
+                className="qr-muted mt-2 text-[11px] sm:text-xs text-center lg:text-left"
+              >
                 No app or account needed to view an enabled QR.
               </p>
             )}

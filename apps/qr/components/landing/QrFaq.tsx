@@ -15,6 +15,16 @@ const questions = [
       "Only the safety details the owner has approved for sharing, such as vehicle information, enabled emergency contacts and optional safety notes. Private account and billing details are excluded.",
   },
   {
+    question: "Who receives a parking or accident report?",
+    answer:
+      "Parking and other vehicle concerns go to the owner. Accident or emergency reports can also alert contacts enabled for emergency messages. WhatsApp alerts are queued after you review and submit the report; scanning alone does not send one.",
+  },
+  {
+    question: "How long can someone view the report photos and location?",
+    answer:
+      "With your consent, the alert includes a private report link at view.vaahansafe.com. It expires after 24 hours, and the owner can revoke it earlier. Anyone holding the link can view that report until access ends. Location sharing and photos are optional.",
+  },
+  {
     question: "Does a scan activate my sticker?",
     answer:
       "No. Activation requires a verified owner, valid activation proof and a connection to an eligible vehicle. A public QR link is separate from the private activation proof.",

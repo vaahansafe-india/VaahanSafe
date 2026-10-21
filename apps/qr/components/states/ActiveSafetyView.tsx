@@ -30,6 +30,16 @@ export function ActiveSafetyView({ resolution }: ActiveSafetyViewProps) {
         visibleCode={visibleCode}
       />
 
+      <ReportEntry
+        publicId={publicId}
+        vehicleDisplay={profile.vehicleDisplay}
+        siteKey={
+          process.env.TURNSTILE_SITE_KEY ||
+          process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ||
+          ""
+        }
+      />
+
       {/* 4. Controlled Public Safety Projection (Rule 10, 11, 37) */}
       <ProjectionBoundary>
         <SafetyField
@@ -47,7 +57,7 @@ export function ActiveSafetyView({ resolution }: ActiveSafetyViewProps) {
       </ProjectionBoundary>
 
       {/* 5. Emergency Contacts Section (Rule 21, 22, 23) */}
-      <div className="space-y-3 pt-1">
+      <div id="emergency-contacts" className="scroll-mt-24 space-y-3 pt-1">
         <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 px-0.5">
           <h2 className="font-serif text-2xl text-foreground">
             Emergency contacts
@@ -82,15 +92,6 @@ export function ActiveSafetyView({ resolution }: ActiveSafetyViewProps) {
           </div>
         )}
       </div>
-      <ReportEntry
-        publicId={publicId}
-        vehicleDisplay={profile.vehicleDisplay}
-        siteKey={
-          process.env.TURNSTILE_SITE_KEY ||
-          process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ||
-          ""
-        }
-      />
     </div>
   );
 }

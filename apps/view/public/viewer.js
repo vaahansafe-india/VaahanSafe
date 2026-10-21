@@ -38,6 +38,7 @@
     report = null;
     $("report").hidden = true;
     $("state").hidden = false;
+    $("state").classList.add("state-unavailable");
     $("state").classList.remove("loading");
     $("state-title").textContent = title;
     $("state-copy").textContent = copy;
@@ -47,7 +48,7 @@
   function expired() {
     state(
       "This link is no longer available.",
-      "This report link has expired or is no longer available. The owner can still review their saved report in their VaahanSafe account.",
+      "For privacy, report links expire after 24 hours and can be revoked earlier. Reopen the original link from your WhatsApp alert, or sign in to your account to review your saved reports.",
     );
   }
   function tick() {

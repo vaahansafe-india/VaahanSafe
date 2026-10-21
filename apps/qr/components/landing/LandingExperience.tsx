@@ -3,6 +3,7 @@ import { QrLandingHeader } from "./QrLandingHeader";
 import { IdentityHero } from "./IdentityHero";
 import { IdentityPath } from "./IdentityPath";
 import { HowItWorks } from "./HowItWorks";
+import { WhatsAppAlerts } from "./WhatsAppAlerts";
 import { StickerAnatomy } from "./StickerAnatomy";
 import { PublicViewDemo } from "./PublicViewDemo";
 import { PrivacyChapter } from "./PrivacyChapter";
@@ -22,6 +23,7 @@ export function LandingExperience() {
         <IdentityHero />
         <IdentityPath activeNode="CAMERA" />
         <HowItWorks />
+        <WhatsAppAlerts />
         <StickerAnatomy />
         <PublicViewDemo />
         <PrivacyChapter />

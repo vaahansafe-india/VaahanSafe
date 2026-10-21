@@ -5,7 +5,7 @@ import { VaahanSafeLogo } from "@vaahansafe/ui/brand";
 import { QrThemeToggle } from "./QrThemeToggle";
 const links = [
   { label: "How it works", href: "#how-it-works" },
-  { label: "Sticker anatomy", href: "#anatomy" },
+  { label: "WhatsApp alerts", href: "#whatsapp-alerts" },
   { label: "Your privacy", href: "#privacy" },
   { label: "Roadside utility", href: "#situations" },
   { label: "Principles", href: "#principles" },
@@ -66,10 +66,7 @@ export function QrLandingHeader({
             Activate your QR <span aria-hidden="true">↗</span>
           </a>
           <details ref={menu} className="qr-menu">
-            <summary
-              className="qr-icon-button"
-              aria-label="Navigation menu"
-            >
+            <summary className="qr-icon-button" aria-label="Navigation menu">
               <span aria-hidden="true">☰</span>
             </summary>
             <nav

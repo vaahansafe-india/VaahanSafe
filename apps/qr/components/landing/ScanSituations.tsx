@@ -14,25 +14,25 @@ export function ScanSituations() {
       icon: "car",
       title: "Parked Vehicle Coordination",
       tag: "Daily Roadside Context",
-      desc: "When a parked vehicle blocks a driveway, gate, or another vehicle, neighbors and security personnel can relay an urgent call without revealing the owner's personal phone number.",
+      desc: "When a vehicle blocks a driveway, gate or another vehicle, send a parking report. The owner can receive a WhatsApp alert with your note, photos and any shared location. Emergency contacts are not alerted.",
     },
     {
       icon: "alert",
       title: "Vehicle Hazard Notice",
       tag: "Preventive Care",
-      desc: "Passersby who spot a flat tire, active fluid leak, open window during monsoon rain, or headlights left on overnight can alert the owner in seconds.",
+      desc: "Spot a flat tyre, a fluid leak, an open window or lights left on? Share what you noticed in an owner report, with a photo if it helps explain the concern.",
     },
     {
       icon: "shield",
       title: "Emergency & First Aid Context",
       tag: "Medical Safety Relay",
-      desc: "In roadside accidents or acute medical incidents, emergency responders immediately discover owner-approved blood group, critical allergy notes, and priority family contacts.",
+      desc: "For an accident, choose Accident or emergency to queue WhatsApp alerts for the owner and enabled emergency contacts. Owner-approved safety information is also available. In immediate danger, call 112 first.",
     },
     {
       icon: "help",
       title: "Lost Property & Misplaced Items",
       tag: "Community Recovery",
-      desc: "Good Samaritans who discover dropped car keys, helmets, or forgotten bags near the vehicle have an authentic, safe channel to reach the verified owner.",
+      desc: "Found keys, a helmet or a bag near the vehicle? Choose another safety concern to send the owner a helpful note. Avoid including private information or unrelated people in photos.",
     },
   ];
 
@@ -47,8 +47,9 @@ export function ScanSituations() {
             is <span className="italic text-primary font-medium">scanned.</span>
           </h2>
           <p className="qr-muted mt-5 text-sm sm:text-base leading-relaxed">
-            Real life on Indian roads requires communication. VaahanSafe bridges vehicle owners
-            and the public with dignity, safety, and respect for privacy.
+            Real life on Indian roads requires communication. VaahanSafe bridges
+            vehicle owners and the public with dignity, safety, and respect for
+            privacy.
           </p>
         </div>
 

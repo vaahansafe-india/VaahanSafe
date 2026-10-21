@@ -25,52 +25,77 @@ export function ReportEntry(props: {
 }) {
   const [reason, setReason] = useState<ScanReportReason | null>(null);
   if (reason)
-    return <ReportFlow {...props} initialStep={1} initialReason={reason} />;
+    return <ReportFlow {...props} initialStep={2} initialReason={reason} />;
   return (
     <section
       aria-labelledby="report-entry-title"
-      className="space-y-3 rounded-xl border border-border bg-card p-5 sm:p-6"
+      className="qr-report-entry space-y-5 rounded-xl border border-border bg-card p-5 sm:p-6"
     >
-      <p className="text-sm font-medium text-primary">Need to help?</p>
-      <h2 id="report-entry-title" className="font-serif text-2xl font-semibold">
-        Report a vehicle issue
-      </h2>
-      <p className="text-base leading-relaxed text-muted-foreground">
-        Send a parking alert to the owner, or report an accident to alert the
-        owner and their enabled emergency contacts. No sign-in needed.
-      </p>
+      <div className="space-y-2">
+        <p className="qr-label">Care, connected.</p>
+        <h2 id="report-entry-title" className="font-serif text-3xl font-medium">
+          How can you help?
+        </h2>
+        <p className="text-sm leading-relaxed text-muted-foreground">
+          Choose what happened. Share a note, photos or your location, then
+          review and send a WhatsApp alert. No sign-in needed.
+        </p>
+      </div>
       <div className="grid gap-3 sm:grid-cols-2">
         <button
           type="button"
           onClick={() => setReason("PARKING")}
-          className="flex min-h-16 items-center gap-3 rounded-lg bg-primary p-4 text-left text-primary-foreground hover:bg-primary/90"
+          className="qr-report-choice group"
         >
-          <VaahanIcon name="car" size={22} className="shrink-0" />
-          <span>
-            <span className="block font-semibold">
+          <span className="qr-report-choice-top">
+            <VaahanIcon name="car" size={22} />
+            <span>Everyday help</span>
+            <VaahanIcon name="arrow-right" size={18} />
+          </span>
+          <span className="space-y-2">
+            <span className="block font-serif text-2xl font-medium">
               Parking or blocked access
             </span>
-            <span className="block text-sm">Send an alert to the owner</span>
+            <span className="block text-sm leading-relaxed">
+              Send a WhatsApp alert to the vehicle owner.
+            </span>
           </span>
+          <span className="qr-report-recipient">Owner only</span>
         </button>
         <button
           type="button"
           onClick={() => setReason("EMERGENCY")}
-          className="flex min-h-16 items-center gap-3 rounded-lg border border-primary/40 bg-primary/5 p-4 text-left text-foreground hover:bg-primary/10"
+          className="qr-report-choice qr-report-choice-emergency group"
         >
-          <VaahanIcon
-            name="alert"
-            size={22}
-            className="shrink-0 text-primary"
-          />
-          <span>
-            <span className="block font-semibold">Accident or emergency</span>
-            <span className="block text-sm">
-              Alert the owner and emergency contacts
+          <span className="qr-report-choice-top">
+            <VaahanIcon name="alert" size={22} />
+            <span>Urgent help</span>
+            <VaahanIcon name="arrow-right" size={18} />
+          </span>
+          <span className="space-y-2">
+            <span className="block font-serif text-2xl font-medium">
+              Accident or emergency
             </span>
+            <span className="block text-sm leading-relaxed">
+              Send WhatsApp alerts to the owner and enabled emergency contacts.
+            </span>
+          </span>
+          <span className="qr-report-recipient">
+            Owner + emergency contacts
           </span>
         </button>
       </div>
+      <p className="flex items-start gap-2 text-sm leading-relaxed text-muted-foreground">
+        <VaahanIcon
+          name="shield-check"
+          size={18}
+          className="mt-0.5 shrink-0 text-primary"
+        />
+        <span>
+          Photos and any shared location open in a private report link that
+          expires after 24 hours. The owner can revoke it earlier.
+        </span>
+      </p>
       <button
         type="button"
         onClick={() => setReason("OTHER")}
@@ -79,16 +104,24 @@ export function ReportEntry(props: {
         Report another safety concern{" "}
         <VaahanIcon name="arrow-right" size={16} />
       </button>
-      <p className="text-sm text-muted-foreground">
-        Immediate danger?{" "}
+      <div className="flex flex-wrap items-center justify-between gap-x-4 border-t border-border pt-2 text-sm text-muted-foreground">
         <a
-          href="tel:112"
-          className="inline-flex min-h-11 items-center font-semibold text-primary underline underline-offset-4"
+          href="#emergency-contacts"
+          className="inline-flex min-h-11 items-center gap-2 font-medium text-foreground underline underline-offset-4"
         >
-          Call 112
+          Emergency contacts <VaahanIcon name="arrow-right" size={15} />
         </a>
-        .
-      </p>
+        <p>
+          Immediate danger?{" "}
+          <a
+            href="tel:112"
+            className="inline-flex min-h-11 items-center font-semibold text-primary underline underline-offset-4"
+          >
+            Call 112
+          </a>
+          .
+        </p>
+      </div>
     </section>
   );
 }

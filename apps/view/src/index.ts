@@ -139,7 +139,7 @@ export async function handleRequest(
         },
       });
     if (
-      /^\/(viewer\.(css|js)|favicon\.svg|fonts\/[a-zA-Z0-9._-]+)$/.test(
+      /^\/(viewer\.(css|js)|favicon\.svg|fonts\/[a-zA-Z0-9._-]+|art\/(care-illustration|paper-texture)\.webp)$/.test(
         url.pathname,
       )
     )

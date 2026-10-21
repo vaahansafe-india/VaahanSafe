@@ -5,7 +5,7 @@ import { LandingExperience } from "../components/landing/LandingExperience";
 export const metadata: Metadata = {
   title: "VaahanSafe QR — Vehicle Safety Identity",
   description:
-    "Scan a VaahanSafe vehicle QR with your camera or resolve safety passes securely without exposing private account data.",
+    "Scan a VaahanSafe vehicle QR to send a parking WhatsApp alert to the owner or an accident alert to enabled emergency contacts, with private photos and optional location.",
   keywords: [
     "VaahanSafe QR",
     "vehicle safety QR",
@@ -83,6 +83,22 @@ export default function QrLandingPage() {
         acceptedAnswer: {
           "@type": "Answer",
           text: "Only the safety details the owner has approved for sharing, such as vehicle information, enabled emergency contacts and optional safety notes. Private account and billing details are excluded.",
+        },
+      },
+      {
+        "@type": "Question",
+        name: "Who receives a parking or accident report?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "Parking and other vehicle concerns go to the owner. Accident or emergency reports can also alert contacts enabled for emergency messages. WhatsApp alerts are queued after you review and submit the report; scanning alone does not send one.",
+        },
+      },
+      {
+        "@type": "Question",
+        name: "How long can someone view the report photos and location?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "With your consent, the alert includes a private report link at view.vaahansafe.com. It expires after 24 hours, and the owner can revoke it earlier. Anyone holding the link can view that report until access ends. Location sharing and photos are optional.",
         },
       },
       {
