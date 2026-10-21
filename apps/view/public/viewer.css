@@ -64,7 +64,8 @@ a {
   touch-action: manipulation;
 }
 button:focus-visible,
-a:focus-visible {
+a:focus-visible,
+summary:focus-visible {
   outline: 3px solid var(--accent);
   outline-offset: 5px;
 }
@@ -500,27 +501,12 @@ h2 {
 }
 .report-close {
   display: flex;
-  gap: 28px;
+  gap: 10px;
   align-items: center;
   justify-content: center;
   font-size: 12px;
   color: var(--muted);
   margin: 12px 0 48px;
-  padding-top: 28px;
-  border-top: 1px solid var(--line);
-}
-.report-close img {
-  width: 150px;
-  height: auto;
-  mix-blend-mode: multiply;
-}
-.report-close h2 {
-  font-size: 30px;
-  color: var(--ink);
-}
-.report-close .eyebrow {
-  margin-bottom: 8px;
-  font-size: 8px;
 }
 footer {
   padding: 26px 0 35px;
@@ -703,6 +689,217 @@ footer a {
 }
 .state-unavailable .viewer-guide {
   display: none;
+}
+.state-unavailable :is(.state-art, .landing-section, .landing-finale) {
+  display: none;
+}
+.report-page .state,
+.state-unavailable {
+  max-width: 680px;
+  margin: 70px auto;
+}
+.report-page .state-layout,
+.state-unavailable .state-layout {
+  display: block;
+}
+.report-page .state h1 {
+  font-size: clamp(42px, 6vw, 60px);
+}
+.report-page .state-content > #state-copy {
+  max-width: 530px;
+}
+.landing-nav {
+  display: flex;
+  align-items: center;
+  gap: 27px;
+  font-size: 11px;
+}
+.landing-nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+.landing-nav a:hover {
+  color: var(--accent);
+}
+.landing-nav .nav-account {
+  border: 1px solid var(--line);
+  gap: 22px;
+  padding: 0 17px;
+  border-radius: 3px;
+}
+.landing-section {
+  padding: 74px 0;
+  border-bottom: 1px solid var(--line);
+  scroll-margin-top: 30px;
+}
+.landing-section h2 {
+  font-size: clamp(36px, 4vw, 50px);
+  line-height: 1.08;
+  letter-spacing: -1px;
+}
+.landing-section-intro {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  align-items: end;
+  gap: 45px;
+}
+.landing-section-intro > p {
+  max-width: 350px;
+  font-size: 13px;
+  line-height: 1.9;
+  margin: 0;
+}
+.process-steps {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 32px;
+  padding: 0;
+  margin: 40px 0 30px;
+}
+.process-steps li {
+  border-top: 1px solid var(--line);
+  padding-top: 22px;
+}
+.step-index {
+  font-family: Editorial, Georgia, serif;
+  font-size: 38px;
+  font-style: italic;
+  color: var(--accent);
+}
+.process-steps h3,
+.privacy-facts h3 {
+  font-size: 13px;
+  line-height: 1.5;
+  font-weight: 600;
+  margin: 17px 0 9px;
+}
+.process-steps p,
+.privacy-facts p {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.9;
+  margin: 0;
+}
+.process-note {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 10px;
+  color: var(--muted);
+  margin-bottom: 0;
+}
+.privacy-chapter {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  background: #e9e9df;
+  border: 1px solid var(--line);
+  margin-top: 38px;
+  padding: 45px;
+}
+.privacy-heading > p.muted {
+  font-size: 12px;
+  line-height: 1.9;
+  margin: 22px 0 14px;
+  max-width: 340px;
+}
+.privacy-facts article {
+  display: grid;
+  grid-template-columns: 62px 1fr;
+  gap: 18px;
+  padding: 20px 0;
+  border-top: 1px solid #ced0c1;
+}
+.privacy-facts article:first-child {
+  padding-top: 0;
+  border: 0;
+}
+.privacy-facts h3 {
+  margin-top: 0;
+}
+.privacy-fact-number {
+  font-family: Editorial, Georgia, serif;
+  font-size: 44px;
+  line-height: 1;
+  letter-spacing: -1px;
+  color: var(--green);
+}
+.privacy-fact-number em {
+  font-size: 24px;
+}
+.privacy-fact-symbol {
+  font-size: 34px;
+  line-height: 1.1;
+  color: var(--green);
+}
+.landing-faq {
+  display: grid;
+  grid-template-columns: 0.8fr 1.2fr;
+  gap: 60px;
+}
+.landing-faq > div > p.muted {
+  font-size: 12px;
+  margin-top: 20px;
+}
+.faq-items details {
+  border-bottom: 1px solid var(--line);
+}
+.faq-items details:first-child {
+  border-top: 1px solid var(--line);
+}
+.faq-items summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px 0;
+  font-size: 12px;
+  line-height: 1.6;
+  font-weight: 500;
+  cursor: pointer;
+  list-style: none;
+  min-height: 44px;
+}
+.faq-items summary::-webkit-details-marker {
+  display: none;
+}
+.faq-items summary::after {
+  content: "+";
+  color: var(--accent);
+  font-size: 20px;
+  font-weight: 400;
+}
+.faq-items details[open] summary::after {
+  content: "−";
+}
+.faq-items details p {
+  margin: 0 0 22px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.9;
+  max-width: 480px;
+}
+.landing-finale {
+  text-align: center;
+  padding: 65px 0 50px;
+}
+.landing-finale h2 {
+  font-size: clamp(38px, 4.5vw, 58px);
+  line-height: 1.08;
+  letter-spacing: -1px;
+}
+.landing-finale > p:not(.eyebrow) {
+  font-size: 12px;
+  line-height: 1.9;
+  color: var(--muted);
+  margin: 23px 0;
+}
+.landing-finale .button {
+  width: auto;
+  margin: 0;
+  gap: 32px;
 }
 .state-unavailable .state-assurance {
   display: none;
@@ -1007,14 +1204,63 @@ dialog img {
     display: none;
   }
   .report-close {
-    gap: 16px;
-    text-align: left;
+    gap: 10px;
+    text-align: center;
   }
-  .report-close img {
-    width: 95px;
+  .landing-nav {
+    gap: 0;
   }
-  .report-close h2 {
-    font-size: 24px;
+  .landing-nav > a:not(.nav-account) {
+    display: none;
+  }
+  .landing-nav .nav-account {
+    font-size: 9px;
+    padding-inline: 10px;
+    gap: 12px;
+  }
+  .landing-section {
+    padding: 42px 0;
+  }
+  .landing-section-intro,
+  .process-steps,
+  .privacy-chapter,
+  .landing-faq {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 22px;
+  }
+  .landing-section .eyebrow {
+    font-size: 8px;
+  }
+  .landing-section h2 {
+    font-size: 39px;
+  }
+  .process-steps {
+    gap: 24px;
+    margin-top: 28px;
+  }
+  .process-steps li {
+    padding-top: 16px;
+  }
+  .process-steps h3 {
+    margin-top: 10px;
+  }
+  .privacy-chapter {
+    padding: 25px 21px;
+    margin-top: 10px;
+    gap: 28px;
+  }
+  .privacy-chapter h2 {
+    font-size: 35px;
+  }
+  .privacy-facts article {
+    grid-template-columns: 48px minmax(0, 1fr);
+    gap: 13px;
+  }
+  .landing-finale {
+    padding: 42px 0 35px;
+  }
+  .report-page .state {
+    margin-top: 42px;
   }
   .photos {
     gap: 10px;

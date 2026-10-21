@@ -132,12 +132,15 @@ export async function handleRequest(
     });
   if (request.method === "GET" || request.method === "HEAD") {
     if (url.pathname === "/" || url.pathname === "/r")
-      return new Response(request.method === "HEAD" ? null : renderShell(), {
-        headers: {
-          ...PRIVATE_HEADERS,
-          "Content-Type": "text/html; charset=utf-8",
+      return new Response(
+        request.method === "HEAD" ? null : renderShell(url.pathname === "/"),
+        {
+          headers: {
+            ...PRIVATE_HEADERS,
+            "Content-Type": "text/html; charset=utf-8",
+          },
         },
-      });
+      );
     if (
       /^\/(viewer\.(css|js)|favicon\.svg|fonts\/[a-zA-Z0-9._-]+|art\/(care-illustration|paper-texture)\.webp)$/.test(
         url.pathname,
