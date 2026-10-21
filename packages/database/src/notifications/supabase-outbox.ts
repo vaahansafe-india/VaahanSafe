@@ -27,6 +27,13 @@ export class SupabaseNotificationOutbox implements NotificationOutboxStore {
     });
   }
   async reportLink(intent: ClaimedNotification) {
+    const viewerOrigin = (
+      process.env.REPORT_VIEWER_ORIGIN || "https://view.vaahansafe.com"
+    ).replace(/\/$/, "");
+    // Keep bearer links restricted to the approved public viewer destination.
+    if (viewerOrigin !== "https://view.vaahansafe.com") {
+      throw new Error("Report viewer configuration unavailable");
+    }
     const proof = await reportViewToken(
       intent.id,
       process.env.NOTIFICATION_DISPATCH_SECRET || "",
@@ -41,7 +48,7 @@ export class SupabaseNotificationOutbox implements NotificationOutboxStore {
     );
     return grant
       ? {
-          viewerUrl: `https://view.vaahansafe.com/r#${proof.token}`,
+          viewerUrl: `${viewerOrigin}/r#${proof.token}`,
           viewerExpiresAt: grant.expiresAt,
         }
       : undefined;

@@ -44,6 +44,16 @@ The Cloudflare Worker is `vaahansafe-view.vaahansafe.workers.dev`. It has the
 private `REPORT_PHOTOS` binding and a platform rate limiter. Deploying this Worker
 does not make the R2 bucket public.
 
+Production environment settings:
+
+- Customer Vercel project: `REPORT_VIEWER_ORIGIN=https://view.vaahansafe.com`.
+- Viewer Vercel project: `REPORT_VIEWER_WORKER_ORIGIN=https://vaahansafe-view.vaahansafe.workers.dev`.
+- Viewer Cloudflare Worker: `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` as encrypted secrets.
+
+The existing customer `NOTIFICATION_DISPATCH_SECRET` signs the recipient links.
+Keep its value stable; changing it invalidates deterministic links in pending retries.
+Never copy Supabase credentials into the Vercel routing project or public variables.
+
 ```powershell
 node tooling/scripts/verify-qr-alert-routing.mjs --viewer
 npx vitest run tests/report-viewer.test.ts tests/notification-outbox.test.ts

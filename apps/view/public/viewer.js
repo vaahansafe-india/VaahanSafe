@@ -46,7 +46,7 @@
   }
   function expired() {
     state(
-      "This chapter is now private.",
+      "This link is no longer available.",
       "This report link has expired or is no longer available. The owner can still review their saved report in their VaahanSafe account.",
     );
   }

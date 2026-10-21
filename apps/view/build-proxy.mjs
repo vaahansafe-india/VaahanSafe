@@ -1,4 +1,13 @@
 import { mkdirSync, writeFileSync } from "node:fs";
+const workerOrigin = (
+  process.env.REPORT_VIEWER_WORKER_ORIGIN ||
+  "https://vaahansafe-view.vaahansafe.workers.dev"
+).replace(/\/$/, "");
+if (workerOrigin !== "https://vaahansafe-view.vaahansafe.workers.dev") {
+  throw new Error(
+    "Report viewer Worker origin must match the approved deployment",
+  );
+}
 // No credentials or report data live on the domain-routing project.
 mkdirSync(".vercel/output/static", { recursive: true });
 writeFileSync(
@@ -8,7 +17,7 @@ writeFileSync(
     routes: [
       {
         src: "/(.*)",
-        dest: "https://vaahansafe-view.vaahansafe.workers.dev/$1",
+        dest: `${workerOrigin}/$1`,
         headers: {
           "Cache-Control": "private, no-store",
           "X-Robots-Tag": "noindex, nofollow, noarchive",
