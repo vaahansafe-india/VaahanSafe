@@ -1,4 +1,5 @@
 import { renderShell } from "./shell";
+import { lookupPlace, validLocation } from "./location";
 
 export interface ViewerReport {
   reason: "PARKING" | "EMERGENCY" | "LIGHTS_ON" | "DAMAGE" | "OTHER";
@@ -20,6 +21,7 @@ export interface ViewerReport {
 export interface ViewerEnv {
   SUPABASE_URL: string;
   SUPABASE_SERVICE_ROLE_KEY: string;
+  PHOTON_GEOCODER_ORIGIN?: string;
   ASSETS: { fetch(request: Request): Promise<Response> };
   REPORT_PHOTOS: {
     get(key: string): Promise<{ body: ReadableStream; size: number } | null>;
@@ -36,7 +38,7 @@ export const PRIVATE_HEADERS = {
   "X-Robots-Tag": "noindex, nofollow, noarchive, nosnippet",
   "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
   "Content-Security-Policy":
-    "default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' blob:; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'; object-src 'none'",
+    "default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' blob:; connect-src 'self'; frame-src https://www.openstreetmap.org; base-uri 'none'; frame-ancestors 'none'; form-action 'none'; object-src 'none'",
 };
 export async function tokenHash(token: string) {
   const digest = await crypto.subtle.digest(
@@ -115,6 +117,38 @@ async function readToken(request: Request): Promise<string | null> {
     return null;
   }
 }
+async function unavailableCode(env: ViewerEnv, token: string) {
+  try {
+    const url = new URL(`${env.SUPABASE_URL}/rest/v1/qr_report_view_links`);
+    url.search = new URLSearchParams({
+      token_hash: `eq.${await tokenHash(token)}`,
+      select: "expires_at,revoked_at,report:qr_scan_reports(viewer_revoked_at)",
+      limit: "1",
+    }).toString();
+    const response = await fetch(url, {
+      headers: {
+        apikey: env.SUPABASE_SERVICE_ROLE_KEY,
+        Authorization: `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`,
+      },
+      signal: AbortSignal.timeout(4000),
+      cache: "no-store",
+    });
+    if (!response.ok) return "LINK_UNAVAILABLE";
+    const rows = (await response.json()) as {
+      expires_at?: string;
+      revoked_at?: string;
+      report?: { viewer_revoked_at?: string };
+    }[];
+    const row = Array.isArray(rows) ? rows[0] : null;
+    if (row?.revoked_at || row?.report?.viewer_revoked_at)
+      return "LINK_REVOKED";
+    if (row?.expires_at && Date.parse(row.expires_at) <= Date.now())
+      return "LINK_EXPIRED";
+  } catch {
+    /* An unavailable link never exposes service details. */
+  }
+  return "LINK_UNAVAILABLE";
+}
 export async function handleRequest(
   request: Request,
   env: ViewerEnv,
@@ -150,7 +184,10 @@ export async function handleRequest(
     return json({ error: "This page is unavailable." }, 404);
   }
   const photo = /^\/api\/photos\/([0-2])$/.exec(url.pathname);
-  if (request.method !== "POST" || (url.pathname !== "/api/report" && !photo))
+  if (
+    request.method !== "POST" ||
+    (!["/api/report", "/api/location"].includes(url.pathname) && !photo)
+  )
     return json({ error: "This request is unavailable." }, 405);
   const origin = request.headers.get("origin");
   if (
@@ -175,15 +212,34 @@ export async function handleRequest(
     const token = await readToken(request);
     if (!token)
       return json(
-        { error: "This link has expired or is no longer available." },
+        {
+          code: "LINK_UNAVAILABLE",
+          error: "This link has expired or is no longer available.",
+        },
         410,
       );
     const report = await resolveReport(env, token);
     if (!report)
       return json(
-        { error: "This link has expired or is no longer available." },
+        {
+          code: await unavailableCode(env, token),
+          error: "This link has expired or is no longer available.",
+        },
         410,
       );
+    if (url.pathname === "/api/location") {
+      if (!validLocation(report.location))
+        return json({ place: null, status: "NOT_SHARED" });
+      try {
+        const place = await lookupPlace(
+          report.location,
+          env.PHOTON_GEOCODER_ORIGIN,
+        );
+        return json({ place, status: place ? "AVAILABLE" : "UNAVAILABLE" });
+      } catch {
+        return json({ place: null, status: "UNAVAILABLE" });
+      }
+    }
     if (photo) {
       const item = report.photos[Number(photo[1])];
       if (

@@ -44,6 +44,29 @@ The Cloudflare Worker is `vaahansafe-view.vaahansafe.workers.dev`. It has the
 private `REPORT_PHOTOS` binding and a platform rate limiter. Deploying this Worker
 does not make the R2 bucket public.
 
+## Report interface and maps
+
+The report screen uses the existing Hugeicons vectors, full-image photo previews,
+a keyboard-accessible zoom dialog and a clock corrected against server response
+time. Access is checked again every minute and when the tab becomes visible.
+Expiry or revocation clears the displayed photos, location map and report text.
+
+`POST /api/location` accepts the same report bearer proof and rechecks access
+before looking up a place. Only coordinates rounded to three decimal places are
+sent to the configured Photon service; report references, tokens and recipient
+identities are excluded. Public place labels are cached in Cloudflare's Cache
+API for 24 hours. Geocoder failure gives a recoverable unavailable state; it does
+not invent a place or prevent access to the report. `PHOTON_GEOCODER_ORIGIN` can
+select a compatible HTTPS Photon service; the default is `https://photon.komoot.io`.
+The public service allows reasonable project usage and may throttle; use a
+dedicated compatible endpoint as volume grows. See [Photon's service policy](https://github.com/komoot/photon#demo-server).
+
+The map uses OpenStreetMap's embedded map with its attribution and a precise
+finder-shared pin. The iframe receives the shared coordinates, without the
+report proof or referrer. The map is removed when report access ends. Place names
+are approximate context rather than a verified incident address. Maps, place
+lookup and external directions work only for an actually shared location.
+
 Production environment settings:
 
 - Customer Vercel project: `REPORT_VIEWER_ORIGIN=https://view.vaahansafe.com`.

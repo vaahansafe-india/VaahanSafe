@@ -8,5 +8,8 @@
     "build": "wrangler deploy --dry-run --outdir .build",
     "deploy": "wrangler deploy",
     "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@hugeicons/core-free-icons": "^4.3.3"
   }
 }

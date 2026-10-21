@@ -33,12 +33,10 @@ function env(): ViewerEnv {
     SUPABASE_SERVICE_ROLE_KEY: "server-fixture",
     ASSETS: { fetch: vi.fn() },
     REPORT_PHOTOS: {
-      get: vi
-        .fn()
-        .mockResolvedValue({
-          body: new Blob([new Uint8Array([255, 216, 255, 0])]).stream(),
-          size: 4,
-        }),
+      get: vi.fn().mockResolvedValue({
+        body: new Blob([new Uint8Array([255, 216, 255, 0])]).stream(),
+        size: 4,
+      }),
     },
     VIEW_RATE_LIMITER: { limit: vi.fn().mockResolvedValue({ success: true }) },
   };
@@ -72,7 +70,7 @@ describe("Expiring report viewer", () => {
       new Request("https://view.vaahansafe.com/r"),
       env(),
     );
-    expect(await response.text()).toContain("Care starts with");
+    expect(await response.text()).toContain("Opening your report.");
     expect(response.headers.get("x-robots-tag")).toContain("noindex");
     expect(response.headers.get("cache-control")).toContain("no-store");
   });
@@ -167,4 +165,111 @@ describe("Expiring report viewer", () => {
     expect(response.status).toBe(503);
     expect(await response.text()).not.toContain("provider error");
   });
+  it("resolves a place only after authorization and sends no report identity to the provider", async () => {
+    const r = report();
+    r.location = {
+      latitude: 17.385044,
+      longitude: 78.486671,
+      accuracy: 20,
+      capturedAt: new Date().toISOString(),
+    };
+    const fetch = vi
+      .fn()
+      .mockResolvedValueOnce(Response.json(r))
+      .mockResolvedValueOnce(
+        Response.json({
+          features: [
+            {
+              properties: {
+                name: "Abids",
+                city: "Hyderabad",
+                state: "Telangana",
+                country: "India",
+              },
+            },
+          ],
+        }),
+      );
+    vi.stubGlobal("fetch", fetch);
+    const response = await handleRequest(request("/api/location"), env());
+    expect(await response.json()).toEqual({
+      place: { name: "Abids, Hyderabad", region: "Telangana, India" },
+      status: "AVAILABLE",
+    });
+    const url = String(fetch.mock.calls[1][0]);
+    expect(url).toContain("lat=17.385");
+    expect(url).toContain("lon=78.487");
+    expect(url).not.toContain(proof);
+    expect(url).not.toContain(r.reportId);
+    expect(JSON.stringify(fetch.mock.calls[1][1])).not.toContain(
+      "server-fixture",
+    );
+    expect(response.headers.get("cache-control")).toContain("no-store");
+  });
+  it("does not call a geocoder when a location was not shared", async () => {
+    const fetch = vi.fn().mockResolvedValue(Response.json(report()));
+    vi.stubGlobal("fetch", fetch);
+    const response = await handleRequest(request("/api/location"), env());
+    expect(await response.json()).toEqual({
+      place: null,
+      status: "NOT_SHARED",
+    });
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
+  it("keeps the report available without inventing a place when geocoding fails", async () => {
+    const r = report();
+    r.location = {
+      latitude: 17.385,
+      longitude: 78.487,
+      accuracy: 20,
+      capturedAt: new Date().toISOString(),
+    };
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValueOnce(Response.json(r))
+        .mockRejectedValueOnce(new Error("provider unavailable")),
+    );
+    const response = await handleRequest(request("/api/location"), env());
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      place: null,
+      status: "UNAVAILABLE",
+    });
+  });
+  it.each([
+    [
+      {
+        revoked_at: new Date().toISOString(),
+        expires_at: new Date(Date.now() + 10000).toISOString(),
+      },
+      "LINK_REVOKED",
+    ],
+    [
+      {
+        report: { viewer_revoked_at: new Date().toISOString() },
+        expires_at: new Date(Date.now() + 10000).toISOString(),
+      },
+      "LINK_REVOKED",
+    ],
+    [
+      { expires_at: new Date(Date.now() - 10000).toISOString() },
+      "LINK_EXPIRED",
+    ],
+  ])(
+    "returns a safe access state before any location-provider request",
+    async (row, code) => {
+      const fetch = vi
+        .fn()
+        .mockResolvedValueOnce(Response.json(null))
+        .mockResolvedValueOnce(Response.json([row]));
+      vi.stubGlobal("fetch", fetch);
+      const response = await handleRequest(request("/api/location"), env());
+      expect(response.status).toBe(410);
+      expect((await response.json()).code).toBe(code);
+      expect(fetch).toHaveBeenCalledTimes(2);
+      expect(String(fetch.mock.calls[1][0])).toContain("example.supabase.co");
+    },
+  );
 });
