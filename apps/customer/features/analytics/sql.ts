@@ -66,7 +66,14 @@ export function buildAnalyticsSql(
   ), scan_source AS (
     SELECT e.id,e.qr_id,q.vehicle_id,e.created_at,e.result,coalesce(nullif(e.state,''),nullif(e.region,''),'Not recorded') AS region,
     nullif(e.city,'') AS city,e.user_agent_family AS device,e.referrer_class AS referrer,
-    CASE WHEN coalesce(nullif(upper(e.country),''),'IN') NOT IN ('IN','INDIA') THEN 'UNKNOWN' ELSE CASE regexp_replace(lower(coalesce(nullif(e.state,''),e.region,'')),'[^a-z]','','g')
+    CASE WHEN coalesce(nullif(upper(e.country),''),'IN') NOT IN ('IN','INDIA') THEN 'UNKNOWN' ELSE CASE regexp_replace(regexp_replace(lower(coalesce(nullif(e.state,''),e.region,'')),'^in[-_ ]',''),'[^a-z]','','g')
+      WHEN 'an' THEN 'IN-AN' WHEN 'ar' THEN 'IN-AR' WHEN 'as' THEN 'IN-AS' WHEN 'br' THEN 'IN-BR'
+      WHEN 'ch' THEN 'IN-CH' WHEN 'cg' THEN 'IN-CG' WHEN 'ct' THEN 'IN-CG' WHEN 'dh' THEN 'IN-DH' WHEN 'dn' THEN 'IN-DH' WHEN 'dd' THEN 'IN-DH'
+      WHEN 'dl' THEN 'IN-DL' WHEN 'ga' THEN 'IN-GA' WHEN 'gj' THEN 'IN-GJ' WHEN 'hr' THEN 'IN-HR' WHEN 'hp' THEN 'IN-HP'
+      WHEN 'jk' THEN 'IN-JK' WHEN 'jh' THEN 'IN-JH' WHEN 'la' THEN 'IN-LA' WHEN 'ld' THEN 'IN-LD' WHEN 'mp' THEN 'IN-MP'
+      WHEN 'mn' THEN 'IN-MN' WHEN 'ml' THEN 'IN-ML' WHEN 'mz' THEN 'IN-MZ' WHEN 'nl' THEN 'IN-NL' WHEN 'od' THEN 'IN-OD' WHEN 'or' THEN 'IN-OD'
+      WHEN 'py' THEN 'IN-PY' WHEN 'pb' THEN 'IN-PB' WHEN 'rj' THEN 'IN-RJ' WHEN 'sk' THEN 'IN-SK' WHEN 'tr' THEN 'IN-TR'
+      WHEN 'up' THEN 'IN-UP' WHEN 'uk' THEN 'IN-UK' WHEN 'ut' THEN 'IN-UK' WHEN 'wb' THEN 'IN-WB'
       WHEN 'andhrapradesh' THEN 'IN-AP' WHEN 'ap' THEN 'IN-AP' WHEN 'telangana' THEN 'IN-TG' WHEN 'telengana' THEN 'IN-TG' WHEN 'tg' THEN 'IN-TG' WHEN 'ts' THEN 'IN-TG'
       WHEN 'tamilnadu' THEN 'IN-TN' WHEN 'tn' THEN 'IN-TN' WHEN 'karnataka' THEN 'IN-KA' WHEN 'ka' THEN 'IN-KA'
       WHEN 'maharashtra' THEN 'IN-MH' WHEN 'mh' THEN 'IN-MH' WHEN 'kerala' THEN 'IN-KL' WHEN 'kl' THEN 'IN-KL'

@@ -62,7 +62,7 @@ export function ResolverHeader({ verified = false }: { verified?: boolean }) {
                   or reporting a concern.
                 </p>
                 <p>
-                  Reports, photos and any location you add are shared privately
+                  Reports, photos and your shared location are shared privately
                   with the owner. No sign-in is needed to send a report.
                 </p>
                 <p>

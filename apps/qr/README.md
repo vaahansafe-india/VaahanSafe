@@ -47,6 +47,12 @@ Generated artwork (built-in image tool):
 
 ## Verification
 
+Active vehicle QR visits require browser location permission before continuing. A fresh device fix is reused in the report form; the report API independently rejects absent or stale location. Denied permission, unavailable GPS and connection failures have explicit recovery instructions. Calling 112 remains available on the location screen.
+
+The existing scan event is enriched with approximate city/state/country labels using an encrypted, authenticated 15-minute ticket bound to that event and QR. The endpoint rechecks the active safety entitlement, requires same-origin consent, limits request bytes, and conditionally marks the event as `DIRECT_SCAN_LOCATION_SHARED` so retries do not repeat enrichment or add scans. Exact GPS is retained only in consented reports, under the existing report access/expiry rules. Historical missing locations are never invented.
+
+Only coordinates rounded to three decimals reach the existing Photon-compatible geocoder. Configure optional server-only `PHOTON_GEOCODER_ORIGIN` for a dedicated HTTPS provider at higher traffic; the public Photon service has no availability guarantee. Place lookup has a four-second timeout. Initial edge geography also reads Vercel platform headers, and analytics understands Indian state abbreviations. No schema migration or new credentials are needed; existing `SESSION_SECRET` and service-only Supabase access are reused.
+
 ```powershell
 npm run typecheck --workspace=@vaahansafe/qr
 npx vitest run tests/public-qr-resolver.test.ts tests/qr-landing-page.test.ts tests/qr-scanner-architecture.test.ts tests/qr-scanner-payload-validation.test.ts tests/qr-resolver-projection.test.ts tests/secure-qr-entitlement-machine.test.ts

@@ -110,6 +110,21 @@ export interface AddContactInput {
   vehicleIds: string[];
   isPrimary?: boolean;
   isPubliclyAvailable?: boolean;
+  allowCall?: boolean;
+  allowMessage?: boolean;
+}
+
+export interface ReusableSafetyContact {
+  id: string;
+  name: string;
+  phone: string;
+  maskedPhone: string;
+  relationshipLabel: string;
+  sourceVehicleLabel: string;
+  linkedVehicleIds: string[];
+  isEnabled: boolean;
+  allowCall: boolean;
+  allowMessage: boolean;
 }
 
 export interface UpdateContactInput {

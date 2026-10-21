@@ -624,7 +624,7 @@ export function IndiaScanMap({
           CC BY 2.5 India
         </a>{" "}
         · Simplified historical boundaries. Current JK/Ladakh counts use the
-        ranking. Locations are coarse scan estimates, not car GPS.
+        ranking. Locations describe the scanner’s shared location or approximate network region, not vehicle movement.
       </p>
     </div>
   );

@@ -9,7 +9,7 @@ const steps = [
   },
   {
     title: "Choose the right alert",
-    body: "Send a parking report to the owner, or an accident report to the owner and enabled emergency contacts. Add helpful photos or a location before sending.",
+    body: "Allow location when you open the vehicle QR, then send a parking report to the owner or an accident report to enabled emergency contacts. You can also add helpful photos.",
   },
 ];
 export function HowItWorks() {

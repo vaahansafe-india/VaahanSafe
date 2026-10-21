@@ -6,6 +6,7 @@ import type { SharedScanLocation, ScanReportReason } from "@vaahansafe/qr-core";
 import { VaahanIcon } from "@vaahansafe/icons";
 import { Checkbox } from "@vaahansafe/ui/components/checkbox";
 import { ReportSharingSummary } from "./ReportSharingSummary";
+import { useScanLocation } from "../location/ScanLocationGate";
 import {
   Dialog,
   DialogTrigger,
@@ -107,7 +108,10 @@ export function ScanReportForm({
   const heading = useRef<HTMLHeadingElement>(null);
   const [reason, setReason] = useState<ScanReportReason>(initialReason),
     [note, setNote] = useState("");
-  const [location, setLocation] = useState<SharedScanLocation>(),
+  const scanLocation = useScanLocation();
+  const [location, setLocation] = useState<SharedScanLocation | undefined>(
+      scanLocation,
+    ),
     [photos, setPhotos] = useState<File[]>([]);
   const [consent, setConsent] = useState(false),
     [token, setToken] = useState(""),
@@ -191,6 +195,15 @@ export function ScanReportForm({
     }
   }, [step, success]);
   function goToStep(next: number) {
+    if (
+      next === 3 &&
+      (!location || Date.now() - Date.parse(location.capturedAt) > 300000)
+    ) {
+      setError(
+        "A recent location is required. Share or update your location before continuing.",
+      );
+      return;
+    }
     setError("");
     setStep(next);
   }
@@ -214,7 +227,7 @@ export function ScanReportForm({
     setError("");
     if (!navigator.geolocation) {
       setError(
-        "Location is unavailable in this browser. You can still send a report.",
+        "Location is required. Open this QR in a browser with location services enabled.",
       );
       return;
     }
@@ -232,10 +245,10 @@ export function ScanReportForm({
       (failure) => {
         setError(
           failure.code === 1
-            ? "Location access is blocked. Allow location for this site in your browser settings, then try again. You can also send without it."
+            ? "Location access is blocked. Allow location for this site in your browser settings, then try again."
             : failure.code === 3
-              ? "Finding your location took too long. Move to an open area and try again, or send without it."
-              : "Your device couldn’t find your location. Check that location services are on, then try again. You can also send without it.",
+              ? "Finding your location took too long. Move to an open area and try again."
+              : "Your device couldn’t find your location. Check that location services are on, then try again.",
         );
         setLocating(false);
       },
@@ -273,6 +286,10 @@ export function ScanReportForm({
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (sending.current || step !== 3) return;
+    if (!location) {
+      setError("Share your current location before sending this report.");
+      return;
+    }
     if (!navigator.onLine) {
       setError(
         "You're offline. Your report hasn't been sent. Reconnect and try again; your details are still here.",
@@ -291,7 +308,7 @@ export function ScanReportForm({
       !retryPending
     ) {
       setError(
-        "Your shared location is no longer recent. Go back to update it or remove it before sending.",
+        "Your shared location is no longer recent. Go back to update it before sending.",
       );
       return;
     }
@@ -372,7 +389,14 @@ export function ScanReportForm({
     }
   }
   const locked =
-    busy || preparing || locating || offline || !consent || !token || !siteKey;
+    busy ||
+    preparing ||
+    locating ||
+    offline ||
+    !consent ||
+    !token ||
+    !siteKey ||
+    !location;
   const selectedReason = reasons.find((item) => item.value === reason)!;
   const control =
     "inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-border bg-background px-4 text-base font-medium transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50";
@@ -644,11 +668,11 @@ export function ScanReportForm({
                 <div className="space-y-3">
                   <h3 className="flex items-center gap-2 text-base font-semibold">
                     <VaahanIcon name="map-pin" size={19} />
-                    Location
+                    Location · required
                   </h3>
                   <p className="text-sm leading-relaxed text-muted-foreground">
-                    Share your current location to help the owner find the
-                    vehicle. Used only for this report.
+                    Your current location is required to help the recipients
+                    find the vehicle.
                   </p>
                   {location ? (
                     <div className="flex flex-wrap items-center justify-between gap-2">
@@ -666,14 +690,6 @@ export function ScanReportForm({
                         disabled={locating}
                       >
                         {locating ? "Updating location…" : "Update location"}
-                      </button>
-                      <button
-                        type="button"
-                        className={control}
-                        onClick={() => setLocation(undefined)}
-                        disabled={locating}
-                      >
-                        Remove
                       </button>
                     </div>
                   ) : (
@@ -839,8 +855,8 @@ export function ScanReportForm({
                     className="min-h-11 cursor-pointer text-sm leading-relaxed"
                   >
                     {reason === "EMERGENCY"
-                      ? "I agree to share this report, photos and any shared location with the owner and their enabled emergency contacts through private links that expire after 24 hours. Anyone holding a link can view this report until it expires."
-                      : "I agree to share this report, photos and any shared location with the vehicle owner through a private link that expires after 24 hours. Anyone holding the link can view this report until it expires."}
+                      ? "I agree to share this report, photos and your shared location with the owner and their enabled emergency contacts through private links that expire after 24 hours. Anyone holding a link can view this report until it expires."
+                      : "I agree to share this report, photos and your shared location with the vehicle owner through a private link that expires after 24 hours. Anyone holding the link can view this report until it expires."}
                   </label>
                 </div>
                 {siteKey ? (

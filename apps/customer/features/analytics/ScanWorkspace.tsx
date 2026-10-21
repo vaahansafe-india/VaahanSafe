@@ -661,7 +661,7 @@ export function ScanWorkspace() {
           <div className="scan-panel-map">
             <ChartFrame
               title="Scan Locations"
-              description="Coarse state estimates with rankings beside the map."
+              description="Shared scanner location or approximate network geography. Older scans may have no location."
               {...frame("scan-geography", geography)}
               empty={
                 geography.data?.data.total === 0

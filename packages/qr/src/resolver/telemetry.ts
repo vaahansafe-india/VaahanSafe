@@ -5,7 +5,8 @@
  * - Legitimate public QR resolution produces a scan/resolution event.
  * - Does not count prefetch, crawler, health check, or asset requests.
  * - Non-blocking: Telemetry failure MUST NOT fail or stall public QR resolution.
- * - Privacy-safe: No GPS tracking, device fingerprinting, or long-term IP logging.
+ * - Initial geography is approximate edge data. Consented browser geography may
+ *   enrich this event later; analytics never stores exact GPS coordinates.
  */
 
 import type { DatabaseClient } from "@vaahansafe/database";
@@ -15,6 +16,7 @@ export interface RecordScanEventParams {
   db: DatabaseClient;
   qrId: string;
   state: QrPublicResolverState;
+  eventId?: string;
   headers?: Headers | Record<string, string | string[] | undefined> | null;
 }
 
@@ -96,13 +98,23 @@ export async function recordPublicScanEventSafely(
         break;
     }
 
-    const city = getHeader(headers, "cf-ipcity") || null;
+    const city =
+      getHeader(headers, "cf-ipcity") ||
+      getHeader(headers, "x-vercel-ip-city") ||
+      null;
     const region =
       getHeader(headers, "cf-region") ||
       getHeader(headers, "cf-ipregion") ||
+      getHeader(headers, "x-vercel-ip-country-region") ||
       null;
     const uaFamily = parseUserAgentFamily(userAgent);
-    const eventId = `qse_${crypto.randomUUID().replace(/-/g, "").slice(0, 16)}`;
+    const country =
+      getHeader(headers, "cf-ipcountry") ||
+      getHeader(headers, "x-vercel-ip-country") ||
+      null;
+    const eventId =
+      params.eventId ||
+      `qse_${crypto.randomUUID().replace(/-/g, "").slice(0, 16)}`;
 
     // Resolve internal primary key if a publicId was supplied
     let resolvedQrId = qrId;
@@ -120,11 +132,21 @@ export async function recordPublicScanEventSafely(
 
     const nowIso = new Date().toISOString();
 
+    const postgres = db.dialect === "postgres";
     await db.execute(
       `INSERT INTO qr_scan_events (
-         id, qr_id, scan_type, result, city, state, user_agent_family, referrer_class, created_at
-       ) VALUES (?, ?, 'PUBLIC_RESOLVE', ?, ?, ?, ?, 'DIRECT_SCAN', ?)`,
-      [eventId, resolvedQrId, scanResult, city, region, uaFamily, nowIso],
+         id, qr_id, scan_type, result, city, state, user_agent_family, referrer_class, created_at${postgres ? ", country" : ""}
+       ) VALUES (?, ?, 'PUBLIC_RESOLVE', ?, ?, ?, ?, 'DIRECT_SCAN', ?${postgres ? ", ?" : ""})`,
+      [
+        eventId,
+        resolvedQrId,
+        scanResult,
+        city,
+        region,
+        uaFamily,
+        nowIso,
+        ...(postgres ? [country] : []),
+      ],
     );
 
     // Notify vehicle owner on active QR scans

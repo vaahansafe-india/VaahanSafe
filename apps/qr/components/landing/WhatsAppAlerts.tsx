@@ -62,7 +62,7 @@ export function WhatsAppAlerts() {
             <p className="qr-label">A private view. A clear time limit.</p>
             <h3>Useful context, shared with care.</h3>
             <p className="qr-muted">
-              Add up to three photos, a note and an optional location. The
+              Add up to three photos, a note and your required scan location. The
               WhatsApp alert includes a report link at{" "}
               <span className="font-medium text-foreground">
                 view.vaahansafe.com

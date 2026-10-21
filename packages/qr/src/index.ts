@@ -102,3 +102,4 @@ export interface IQrResolver {
   resolve(publicId: string): Promise<QrResolverPayload>;
 }
 export * from './reports/scan-report';
+export * from './reports/location';

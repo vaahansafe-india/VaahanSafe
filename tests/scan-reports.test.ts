@@ -23,6 +23,12 @@ function input(): ScanReportInput {
     reason: "PARKING",
     note: "",
     consent: true,
+    location: {
+      latitude: 17.385,
+      longitude: 78.487,
+      accuracy: 25,
+      capturedAt: new Date().toISOString(),
+    },
     photos: [
       { data: new Uint8Array([255, 216, 255, 0]), mimeType: "image/jpeg" },
     ],

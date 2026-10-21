@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { createHmac } from "node:crypto";
 import { verifyScanReportTurnstile } from "../../../lib/verify-scan-report-turnstile";
 import { getAuthoritativeDatabaseClient } from "@vaahansafe/database";
@@ -8,6 +8,7 @@ import {
   submitScanReport,
   ScanReportError,
   type ScanReportInput,
+  scanLocationLabels,
 } from "@vaahansafe/qr-core";
 
 export const dynamic = "force-dynamic";
@@ -113,6 +114,20 @@ export async function POST(request: Request) {
       store: getScanReportObjectStore(),
       ipHash,
     });
+    // Enrich the report's own event too; it is distinct from the initial page scan.
+    // A place-name outage must not lose a saved emergency report or repeat its alerts.
+    if (input.location)
+      after(async () => {
+        try {
+          const place = await scanLocationLabels(input.location!);
+          await getAuthoritativeDatabaseClient().execute(
+            "UPDATE qr_scan_events SET city = ?, state = ?, region = ?, country = ? WHERE id = (SELECT scan_event_id FROM qr_scan_reports WHERE id = ? AND status = 'READY')",
+            [place.city, place.state, place.state, place.country, result.id],
+          );
+        } catch {
+          console.warn("[ScanReport] Location label enrichment unavailable");
+        }
+      });
     return NextResponse.json(
       {
         ...result,
@@ -125,7 +140,7 @@ export async function POST(request: Request) {
   } catch (error) {
     if (error instanceof ScanReportError) {
       const status =
-        error.code === "INVALID_REPORT"
+        error.code === "INVALID_REPORT" || error.code === "LOCATION_REQUIRED"
           ? 400
           : error.code === "REPORT_COOLDOWN"
             ? 429
@@ -135,13 +150,15 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           error:
-            error.code === "REPORT_COOLDOWN"
-              ? "A report was already submitted recently. Please wait five minutes before sending another."
-              : error.code === "REPORT_RETRY"
-                ? "Your report was not saved. Please wait five minutes, then try again."
-                : error.code === "INVALID_REPORT"
-                  ? "Please check your photos and location, then try again."
-                  : "We couldn’t send this report right now. Please try again.",
+            error.code === "LOCATION_REQUIRED"
+              ? "Share your current location before sending this report."
+              : error.code === "REPORT_COOLDOWN"
+                ? "A report was already submitted recently. Please wait five minutes before sending another."
+                : error.code === "REPORT_RETRY"
+                  ? "Your report was not saved. Please wait five minutes, then try again."
+                  : error.code === "INVALID_REPORT"
+                    ? "Please check your photos and location, then try again."
+                    : "We couldn’t send this report right now. Please try again.",
           code: error.code,
         },
         { status },

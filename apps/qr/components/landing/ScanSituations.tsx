@@ -14,7 +14,7 @@ export function ScanSituations() {
       icon: "car",
       title: "Parked Vehicle Coordination",
       tag: "Daily Roadside Context",
-      desc: "When a vehicle blocks a driveway, gate or another vehicle, send a parking report. The owner can receive a WhatsApp alert with your note, photos and any shared location. Emergency contacts are not alerted.",
+      desc: "When a vehicle blocks a driveway, gate or another vehicle, send a parking report. The owner can receive a WhatsApp alert with your note, photos and your shared location. Emergency contacts are not alerted.",
     },
     {
       icon: "alert",

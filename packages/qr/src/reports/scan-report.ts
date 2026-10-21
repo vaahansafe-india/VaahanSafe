@@ -1,6 +1,7 @@
 import type { DatabaseClient } from "@vaahansafe/database";
 import type { ObjectStore } from "@vaahansafe/storage";
 import { verifyMagicBytes } from "@vaahansafe/storage";
+import { isFreshScanLocation } from "./location";
 
 export const SCAN_REPORT_MAX_PHOTOS = 3;
 export const SCAN_REPORT_MAX_BYTES = 3 * 1024 * 1024;
@@ -36,6 +37,7 @@ export class ScanReportError extends Error {
   constructor(
     public code:
       | "INVALID_REPORT"
+      | "LOCATION_REQUIRED"
       | "REPORT_UNAVAILABLE"
       | "REPORT_COOLDOWN"
       | "REPORT_FAILED"
@@ -56,20 +58,9 @@ export function validateScanReport(input: ScanReportInput, now = Date.now()) {
     input.photos.length > SCAN_REPORT_MAX_PHOTOS
   )
     throw new ScanReportError("INVALID_REPORT");
-  if (input.location) {
-    const l = input.location,
-      time = Date.parse(l.capturedAt);
-    if (
-      ![l.latitude, l.longitude, l.accuracy, time].every(Number.isFinite) ||
-      Math.abs(l.latitude) > 90 ||
-      Math.abs(l.longitude) > 180 ||
-      l.accuracy < 0 ||
-      l.accuracy > 100000 ||
-      time > now + 30000 ||
-      time < now - 5 * 60000
-    )
-      throw new ScanReportError("INVALID_REPORT");
-  }
+  if (!input.location) throw new ScanReportError("LOCATION_REQUIRED");
+  if (!isFreshScanLocation(input.location, now))
+    throw new ScanReportError("INVALID_REPORT");
   let total = 0;
   for (const photo of input.photos) {
     total += photo.data.byteLength;

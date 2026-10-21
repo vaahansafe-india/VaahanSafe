@@ -754,7 +754,7 @@ export function AnalyticsWorkspace({
                 <ChartFrame
                   title="Scan regions"
                   description="Coarse geography where recorded"
-                  source="Region labels come from the scan request's approximate edge geography. They are not GPS positions or confirmed vehicle locations. Missing regions stay marked as not recorded."
+                  source="Region labels use the scanner’s shared device location when available, or approximate network geography. Only city and state are used in this map; these are scan locations, not confirmed vehicle positions. Older scans without location remain marked as not recorded."
                   loading={scans.isFetching}
                   error={scans.isError}
                   retry={() => void scans.refetch()}

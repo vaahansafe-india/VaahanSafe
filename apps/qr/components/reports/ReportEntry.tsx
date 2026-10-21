@@ -37,7 +37,7 @@ export function ReportEntry(props: {
           How can you help?
         </h2>
         <p className="text-sm leading-relaxed text-muted-foreground">
-          Choose what happened. Share a note, photos or your location, then
+          Choose what happened. Add an optional note or photos to your shared location, then
           review and send a WhatsApp alert. No sign-in needed.
         </p>
       </div>
@@ -92,7 +92,7 @@ export function ReportEntry(props: {
           className="mt-0.5 shrink-0 text-primary"
         />
         <span>
-          Photos and any shared location open in a private report link that
+          Photos and your shared location open in a private report link that
           expires after 24 hours. The owner can revoke it earlier.
         </span>
       </p>

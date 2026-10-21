@@ -5,7 +5,7 @@ import { LandingExperience } from "../components/landing/LandingExperience";
 export const metadata: Metadata = {
   title: "VaahanSafe QR — Vehicle Safety Identity",
   description:
-    "Scan a VaahanSafe vehicle QR to send a parking WhatsApp alert to the owner or an accident alert to enabled emergency contacts, with private photos and optional location.",
+    "Scan a VaahanSafe vehicle QR to send a parking WhatsApp alert to the owner or an accident alert to enabled emergency contacts, with private photos and a required scan location.",
   keywords: [
     "VaahanSafe QR",
     "vehicle safety QR",

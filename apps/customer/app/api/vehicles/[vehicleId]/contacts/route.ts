@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedCustomer } from "@/lib/session";
-import { getAuthoritativeDatabaseClient, createInAppNotification } from "@vaahansafe/database";
+import {
+  getAuthoritativeDatabaseClient,
+  createInAppNotification,
+} from "@vaahansafe/database";
+import { normalizePhone } from "@/lib/contacts-service";
 
 interface RouteParams {
   params: Promise<{
@@ -10,7 +14,7 @@ interface RouteParams {
 
 export async function POST(req: NextRequest, { params }: RouteParams) {
   const auth = await getAuthenticatedCustomer();
-  if (!auth) {
+  if (!auth?.phoneVerified) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -23,56 +27,104 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     const db = getAuthoritativeDatabaseClient();
 
     // Authorize vehicle ownership
-    const vehicle = await db.queryFirst<{ id: string; registration_number: string }>(
+    const vehicle = await db.queryFirst<{
+      id: string;
+      registration_number: string;
+    }>(
       `SELECT id, registration_number FROM vehicles WHERE id = ? AND user_id = ? AND status != 'DELETED'`,
-      [vehicleId, auth.user.id]
+      [vehicleId, auth.user.id],
     );
 
     if (!vehicle) {
-      return NextResponse.json({ error: "Vehicle not found or unauthorized" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Vehicle not found or unauthorized" },
+        { status: 404 },
+      );
     }
 
     const body = await req.json();
-    const { contactId, name, relationship, phone, priority, allowCall, allowMessage } = body;
+    const {
+      contactId,
+      name,
+      relationship,
+      phone,
+      priority,
+      allowCall,
+      allowMessage,
+      isEnabled,
+    } = body;
 
     if (!name || typeof name !== "string" || !name.trim()) {
-      return NextResponse.json({ error: "Contact name is required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Contact name is required" },
+        { status: 400 },
+      );
     }
 
     if (!phone || typeof phone !== "string" || !phone.trim()) {
-      return NextResponse.json({ error: "Contact phone number is required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Contact phone number is required" },
+        { status: 400 },
+      );
     }
 
-    const cleanedPhone = phone.replace(/[^\d+]/g, "");
-    if (cleanedPhone.length < 10) {
+    const cleanedPhone = normalizePhone(phone);
+    if (!/^[6-9]\d{9}$/.test(cleanedPhone)) {
       return NextResponse.json(
         { error: "Please enter a valid 10-digit mobile number" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     // Resolve or initialize emergency profile
     let profile = await db.queryFirst<{ id: string }>(
       `SELECT id FROM emergency_profiles WHERE vehicle_id = ? AND status = 'ACTIVE'`,
-      [vehicleId]
+      [vehicleId],
     );
 
     const now = new Date().toISOString();
 
     if (!profile) {
-      if(contactId)return NextResponse.json({error:'This contact is no longer available. Please refresh and try again.'},{status:404});
+      if (contactId)
+        return NextResponse.json(
+          {
+            error:
+              "This contact is no longer available. Please refresh and try again.",
+          },
+          { status: 404 },
+        );
       const newProfileId = `ep_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
       await db.execute(
         `INSERT INTO emergency_profiles (
            id, vehicle_id, display_name, show_owner_name, show_blood_group,
            show_medical_notes, show_vehicle_details, status, created_at, updated_at
          ) VALUES (?, ?, ?, 1, 1, 0, 1, 'ACTIVE', ?, ?)`,
-        [newProfileId, vehicleId, auth.user.name || null, now, now]
+        [newProfileId, vehicleId, auth.user.name || null, now, now],
       );
       profile = { id: newProfileId };
     }
 
-    const validPriority = priority && Number(priority) >= 1 && Number(priority) <= 5 ? Number(priority) : 1;
+    const validPriority =
+      priority && Number(priority) >= 1 && Number(priority) <= 5
+        ? Number(priority)
+        : 1;
+
+    const duplicate = await db.queryFirst<{ id: string }>(
+      "SELECT id FROM emergency_contacts WHERE emergency_profile_id = ? AND right(regexp_replace(phone, '[^0-9]', '', 'g'), 10) = ? AND id <> ?",
+      [
+        profile.id,
+        cleanedPhone,
+        typeof contactId === "string" ? contactId : "",
+      ],
+    );
+    if (duplicate)
+      return NextResponse.json(
+        {
+          error:
+            "This contact is already linked to this vehicle. Edit the existing contact to change its settings.",
+        },
+        { status: 409 },
+      );
 
     if (contactId && typeof contactId === "string") {
       // Update existing contact
@@ -84,6 +136,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
            priority = ?,
            allow_call = ?,
            allow_message = ?,
+           is_enabled = ?,
            updated_at = ?
          WHERE id = ? AND emergency_profile_id = ?`,
         [
@@ -93,20 +146,40 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
           validPriority,
           allowCall !== false ? 1 : 0,
           allowMessage !== false ? 1 : 0,
+          isEnabled !== false ? 1 : 0,
           now,
           contactId,
           profile.id,
-        ]
+        ],
       );
-      if(updated.rowsAffected!==1)return NextResponse.json({error:'This contact is no longer available. Please refresh and try again.'},{status:404});
+      if (updated.rowsAffected !== 1)
+        return NextResponse.json(
+          {
+            error:
+              "This contact is no longer available. Please refresh and try again.",
+          },
+          { status: 404 },
+        );
     } else {
       // Insert new contact
-      const newContactId = `cnt_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+      const count = await db.queryFirst<{ total: number }>(
+        "SELECT count(*) AS total FROM emergency_contacts WHERE emergency_profile_id = ?",
+        [profile.id],
+      );
+      if (Number(count?.total) >= 5)
+        return NextResponse.json(
+          {
+            error:
+              "This vehicle already has five contacts. Remove one before adding another.",
+          },
+          { status: 409 },
+        );
+      const newContactId = `cnt_${crypto.randomUUID()}`;
       await db.execute(
         `INSERT INTO emergency_contacts (
            id, emergency_profile_id, name, relationship_label, phone,
            priority, is_enabled, allow_call, allow_message, created_at, updated_at
-         ) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?)`,
+         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           newContactId,
           profile.id,
@@ -114,11 +187,12 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
           relationship ? String(relationship).trim() : "Emergency Contact",
           cleanedPhone,
           validPriority,
+          isEnabled !== false ? 1 : 0,
           allowCall !== false ? 1 : 0,
           allowMessage !== false ? 1 : 0,
           now,
           now,
-        ]
+        ],
       );
     }
 
@@ -138,7 +212,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     console.error("[Contacts API] Error saving contact:", err);
     return NextResponse.json(
       { error: "Failed to save emergency contact" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -159,7 +233,10 @@ export async function DELETE(req: NextRequest, { params }: RouteParams) {
     const contactId = searchParams.get("contactId");
 
     if (!contactId) {
-      return NextResponse.json({ error: "Contact ID required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Contact ID required" },
+        { status: 400 },
+      );
     }
 
     const db = getAuthoritativeDatabaseClient();
@@ -170,16 +247,19 @@ export async function DELETE(req: NextRequest, { params }: RouteParams) {
        FROM emergency_profiles p
        INNER JOIN vehicles v ON p.vehicle_id = v.id
        WHERE v.id = ? AND v.user_id = ? AND v.status != 'DELETED'`,
-      [vehicleId, auth.user.id]
+      [vehicleId, auth.user.id],
     );
 
     if (!profile) {
-      return NextResponse.json({ error: "Vehicle profile not found or unauthorized" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Vehicle profile not found or unauthorized" },
+        { status: 404 },
+      );
     }
 
     await db.execute(
       `DELETE FROM emergency_contacts WHERE id = ? AND emergency_profile_id = ?`,
-      [contactId, profile.id]
+      [contactId, profile.id],
     );
 
     return NextResponse.json({ success: true });
@@ -187,7 +267,7 @@ export async function DELETE(req: NextRequest, { params }: RouteParams) {
     console.error("[Contacts API] Error deleting contact:", err);
     return NextResponse.json(
       { error: "Failed to delete emergency contact" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

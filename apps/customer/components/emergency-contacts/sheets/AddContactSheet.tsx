@@ -16,11 +16,14 @@ import type {
   ContactRoleType,
   VehicleOption,
   AddContactInput,
+  ReusableSafetyContact,
 } from "@/lib/contacts-types";
 import { ContactRoleSelector } from "../roles/ContactRoleSelector";
 import { ContactRoleMark } from "../roles/ContactRoleMark";
 import { ROLE_DEFINITIONS } from "../roles/ContactRoleIcon";
 import { addSafetyContactAction } from "@/lib/contacts-actions";
+import { ExistingContactPicker } from "../ExistingContactPicker";
+import { normalizeRelationshipToRole } from "@/lib/contacts-roles";
 
 interface AddContactSheetProps {
   open: boolean;
@@ -44,10 +47,13 @@ export function AddContactSheet({
   const [relationshipLabel, setRelationshipLabel] = useState("");
   const [phone, setPhone] = useState("");
   const [selectedVehicleIds, setSelectedVehicleIds] = useState<string[]>(
-    vehicles.map((v) => v.id)
+    vehicles.map((v) => v.id),
   );
   const [isPrimary, setIsPrimary] = useState(false);
   const [isPubliclyAvailable, setIsPubliclyAvailable] = useState(true);
+  const [allowCall, setAllowCall] = useState(true);
+  const [allowMessage, setAllowMessage] = useState(true);
+  const [linkedVehicleIds, setLinkedVehicleIds] = useState<string[]>([]);
 
   // Reset when opened
   React.useEffect(() => {
@@ -60,22 +66,46 @@ export function AddContactSheet({
       setSelectedVehicleIds(vehicles.map((v) => v.id));
       setIsPrimary(false);
       setIsPubliclyAvailable(true);
+      setAllowCall(true);
+      setAllowMessage(true);
+      setLinkedVehicleIds([]);
     }
   }, [open, vehicles]);
 
-  const activeRoleDef = ROLE_DEFINITIONS.find((r) => r.type === role) ?? ROLE_DEFINITIONS[0]!;
+  const activeRoleDef =
+    ROLE_DEFINITIONS.find((r) => r.type === role) ?? ROLE_DEFINITIONS[0]!;
   const displayLabel = relationshipLabel.trim() || activeRoleDef.label;
 
   const handleToggleVehicle = (vehicleId: string) => {
+    if (linkedVehicleIds.includes(vehicleId)) return;
     if (selectedVehicleIds.includes(vehicleId)) {
       if (selectedVehicleIds.length === 1) {
         toast.error("At least one vehicle must remain selected.");
         return;
       }
-      setSelectedVehicleIds(selectedVehicleIds.filter((id) => id !== vehicleId));
+      setSelectedVehicleIds(
+        selectedVehicleIds.filter((id) => id !== vehicleId),
+      );
     } else {
       setSelectedVehicleIds([...selectedVehicleIds, vehicleId]);
     }
+  };
+
+  const chooseExisting = (contact: ReusableSafetyContact) => {
+    setName(contact.name);
+    setPhone(contact.phone);
+    setRelationshipLabel(contact.relationshipLabel);
+    setRole(normalizeRelationshipToRole(contact.relationshipLabel));
+    setAllowCall(contact.allowCall);
+    setAllowMessage(contact.allowMessage);
+    setIsPubliclyAvailable(contact.isEnabled);
+    setIsPrimary(false);
+    setLinkedVehicleIds(contact.linkedVehicleIds);
+    setSelectedVehicleIds(
+      vehicles
+        .filter((vehicle) => !contact.linkedVehicleIds.includes(vehicle.id))
+        .map((vehicle) => vehicle.id),
+    );
   };
 
   const handleProceedToReview = (e: React.FormEvent) => {
@@ -107,6 +137,8 @@ export function AddContactSheet({
         vehicleIds: selectedVehicleIds,
         isPrimary,
         isPubliclyAvailable,
+        allowCall,
+        allowMessage,
       };
 
       const res = await addSafetyContactAction(input);
@@ -115,7 +147,9 @@ export function AddContactSheet({
         onOpenChange(false);
         onSuccess();
       } else {
-        toast.error(res.error || "We couldn't add this contact. Please try again.");
+        toast.error(
+          res.error || "We couldn't add this contact. Please try again.",
+        );
       }
     } catch {
       toast.error("An unexpected error occurred. Please try again.");
@@ -133,7 +167,8 @@ export function AddContactSheet({
         {/* Sticky Header */}
         <div className="p-6 pr-16 border-b border-border/70 bg-card/60">
           <div className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-[#cc785c]">
-            {step === "form" ? "Step 01 of 02" : "Step 02 of 02"} &bull; Safety Identity
+            {step === "form" ? "Step 01 of 02" : "Step 02 of 02"} &bull; Safety
+            Identity
           </div>
           <SheetHeader className="mt-1 text-left">
             <SheetTitle className="font-serif text-2xl font-medium text-foreground">
@@ -150,14 +185,28 @@ export function AddContactSheet({
         {/* Scrollable Form Content */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {step === "form" ? (
-            <form id="add-contact-form" onSubmit={handleProceedToReview} className="space-y-6">
+            <form
+              id="add-contact-form"
+              onSubmit={handleProceedToReview}
+              className="space-y-6"
+            >
+              <ExistingContactPicker
+                active={open}
+                targetVehicleIds={vehicles.map((vehicle) => vehicle.id)}
+                onSelect={chooseExisting}
+              />
               {/* 01 PERSON */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <label htmlFor="contact-name" className="font-mono text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  <label
+                    htmlFor="contact-name"
+                    className="font-mono text-[11px] font-semibold uppercase tracking-wider text-muted-foreground"
+                  >
                     01 &bull; Full Name
                   </label>
-                  <span className="text-[11px] text-muted-foreground">Required</span>
+                  <span className="text-[11px] text-muted-foreground">
+                    Required
+                  </span>
                 </div>
                 <input
                   id="contact-name"
@@ -176,7 +225,9 @@ export function AddContactSheet({
                   <label className="font-mono text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                     02 &bull; Relationship Role
                   </label>
-                  <span className="text-[11px] text-muted-foreground">Role Identity</span>
+                  <span className="text-[11px] text-muted-foreground">
+                    Role Identity
+                  </span>
                 </div>
 
                 <ContactRoleSelector
@@ -185,7 +236,10 @@ export function AddContactSheet({
                 />
 
                 <div className="pt-1">
-                  <label htmlFor="custom-label" className="text-[11px] text-muted-foreground">
+                  <label
+                    htmlFor="custom-label"
+                    className="text-[11px] text-muted-foreground"
+                  >
                     Specific Relationship Label (Optional)
                   </label>
                   <input
@@ -197,7 +251,8 @@ export function AddContactSheet({
                     className="mt-1 h-9 w-full rounded-xl border border-input bg-background px-3 text-xs text-foreground placeholder:text-muted-foreground focus:border-[#cc785c] focus:outline-none"
                   />
                   <p className="mt-1 text-[10px] text-muted-foreground">
-                    Custom label displayed alongside the role icon (e.g. &ldquo;Mother&rdquo;, &ldquo;Family Physician&rdquo;).
+                    Custom label displayed alongside the role icon (e.g.
+                    &ldquo;Mother&rdquo;, &ldquo;Family Physician&rdquo;).
                   </p>
                 </div>
               </div>
@@ -205,10 +260,15 @@ export function AddContactSheet({
               {/* 03 CONTACT */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <label htmlFor="contact-phone" className="font-mono text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  <label
+                    htmlFor="contact-phone"
+                    className="font-mono text-[11px] font-semibold uppercase tracking-wider text-muted-foreground"
+                  >
                     03 &bull; Mobile Phone Number
                   </label>
-                  <span className="text-[11px] text-muted-foreground">For SMS / WhatsApp Alerts</span>
+                  <span className="text-[11px] text-muted-foreground">
+                    For SMS / WhatsApp Alerts
+                  </span>
                 </div>
                 <div className="relative flex items-center">
                   <span className="absolute left-3 font-mono text-xs font-semibold text-muted-foreground">
@@ -227,7 +287,8 @@ export function AddContactSheet({
                   />
                 </div>
                 <p className="text-[10px] text-muted-foreground">
-                  Phone numbers are stored securely in your account. Raw numbers are never published directly on public scans.
+                  Phone numbers are stored securely in your account. Raw numbers
+                  are never published directly on public scans.
                 </p>
               </div>
 
@@ -237,7 +298,9 @@ export function AddContactSheet({
                   <label className="font-mono text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                     04 &bull; Vehicle Association
                   </label>
-                  <span className="text-[11px] text-muted-foreground">Select vehicles</span>
+                  <span className="text-[11px] text-muted-foreground">
+                    Select vehicles
+                  </span>
                 </div>
 
                 <div className="space-y-2 rounded-2xl border border-border/80 bg-muted/20 p-3">
@@ -255,6 +318,7 @@ export function AddContactSheet({
                         <div className="flex items-center gap-3">
                           <Checkbox
                             checked={isChecked}
+                            disabled={linkedVehicleIds.includes(v.id)}
                             onCheckedChange={() => handleToggleVehicle(v.id)}
                           />
                           <div>
@@ -263,10 +327,19 @@ export function AddContactSheet({
                             </div>
                             <div className="text-[11px] text-muted-foreground">
                               {v.makeModel}
+                              {linkedVehicleIds.includes(v.id) && (
+                                <span className="block text-primary">
+                                  Already linked · unchanged
+                                </span>
+                              )}
                             </div>
                           </div>
                         </div>
-                        <VaahanIcon name="vehicle" size={14} className="text-muted-foreground" />
+                        <VaahanIcon
+                          name="vehicle"
+                          size={14}
+                          className="text-muted-foreground"
+                        />
                       </label>
                     );
                   })}
@@ -275,6 +348,31 @@ export function AddContactSheet({
 
               {/* 05 PUBLIC SAFETY VIEW & PRIORITY CONTROLS */}
               <div className="space-y-3 pt-2">
+                <fieldset className="space-y-2 rounded-xl border border-border p-3 text-sm">
+                  <legend className="px-1 text-xs font-semibold">
+                    Contact permissions for selected vehicles
+                  </legend>
+                  <label className="flex min-h-10 items-center gap-2">
+                    <Checkbox
+                      checked={allowCall}
+                      onCheckedChange={(value) => setAllowCall(value === true)}
+                    />
+                    Allow calls
+                  </label>
+                  <label className="flex min-h-10 items-center gap-2">
+                    <Checkbox
+                      checked={allowMessage}
+                      onCheckedChange={(value) =>
+                        setAllowMessage(value === true)
+                      }
+                    />
+                    Allow WhatsApp messages
+                  </label>
+                  <p className="text-xs text-muted-foreground">
+                    Confirm this person agrees to these contact options.
+                    Existing vehicle settings stay unchanged.
+                  </p>
+                </fieldset>
                 <div className="font-mono text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                   05 &bull; Public Safety View &amp; Priority
                 </div>
@@ -286,7 +384,8 @@ export function AddContactSheet({
                       Set as Primary Safety Contact
                     </div>
                     <div className="text-[11px] text-muted-foreground">
-                      Primary contact receives highest priority notifications when passerby alerts occur.
+                      Primary contact receives highest priority notifications
+                      when passerby alerts occur.
                     </div>
                   </div>
                   <Switch checked={isPrimary} onCheckedChange={setIsPrimary} />
@@ -299,7 +398,8 @@ export function AddContactSheet({
                       Available Through Public Safety View
                     </div>
                     <div className="text-[11px] text-muted-foreground">
-                      When enabled, this contact is available via mediated relay when someone scans your vehicle QR sticker.
+                      When enabled, this contact is available via mediated relay
+                      when someone scans your vehicle QR sticker.
                     </div>
                   </div>
                   <Switch
@@ -317,7 +417,9 @@ export function AddContactSheet({
                     <div className="flex items-center gap-2.5">
                       <ContactRoleMark role={role} size="sm" />
                       <div>
-                        <div className="font-medium text-foreground">{name || "Contact Name"}</div>
+                        <div className="font-medium text-foreground">
+                          {name || "Contact Name"}
+                        </div>
                         <div className="font-mono text-[10px] text-muted-foreground">
                           {displayLabel} &bull; Relay Call Option
                         </div>
@@ -335,7 +437,11 @@ export function AddContactSheet({
             <div className="space-y-5">
               <div className="rounded-2xl border border-border bg-card p-4 space-y-4">
                 <div className="flex items-center gap-3 pb-3 border-b border-border/60">
-                  <ContactRoleMark role={role} size="lg" isPrimary={isPrimary} />
+                  <ContactRoleMark
+                    role={role}
+                    size="lg"
+                    isPrimary={isPrimary}
+                  />
                   <div>
                     <h3 className="font-serif text-lg font-medium text-foreground">
                       {name}
@@ -354,7 +460,9 @@ export function AddContactSheet({
                       Priority Level
                     </span>
                     <div className="font-medium text-foreground mt-0.5">
-                      {isPrimary ? "Primary (Priority 01)" : "Secondary (Priority 02)"}
+                      {isPrimary
+                        ? "Primary (Priority 01)"
+                        : "Secondary (Priority 02)"}
                     </div>
                   </div>
                   <div>
@@ -362,11 +470,17 @@ export function AddContactSheet({
                       Public Visibility
                     </span>
                     <div className="font-medium mt-0.5 text-[#5db8a6]">
-                      {isPubliclyAvailable ? "Enabled (Mediated Relay)" : "Private (Hidden)"}
+                      {isPubliclyAvailable
+                        ? "Enabled (Mediated Relay)"
+                        : "Private (Hidden)"}
                     </div>
                   </div>
                 </div>
 
+                <p className="text-xs text-muted-foreground">
+                  {allowCall ? "Calls allowed" : "Calls disabled"} ·{" "}
+                  {allowMessage ? "WhatsApp allowed" : "WhatsApp disabled"}
+                </p>
                 <div>
                   <span className="font-mono text-[10px] uppercase text-muted-foreground">
                     Associated Vehicles ({selectedVehicleIds.length})
@@ -379,8 +493,12 @@ export function AddContactSheet({
                           key={v.id}
                           className="flex items-center justify-between rounded-lg bg-muted/30 px-2.5 py-1.5 font-mono text-xs"
                         >
-                          <span className="font-semibold text-foreground">{v.maskedPlate}</span>
-                          <span className="text-muted-foreground">{v.makeModel}</span>
+                          <span className="font-semibold text-foreground">
+                            {v.maskedPlate}
+                          </span>
+                          <span className="text-muted-foreground">
+                            {v.makeModel}
+                          </span>
                         </div>
                       ))}
                   </div>
@@ -388,7 +506,9 @@ export function AddContactSheet({
               </div>
 
               <div className="rounded-xl border border-border/60 bg-muted/20 p-3 text-xs leading-relaxed text-muted-foreground">
-                By adding this contact, you authorize VaahanSafe to send critical incident notifications and passerby scan alerts regarding your associated vehicles.
+                By adding this contact, you authorize VaahanSafe to send
+                critical incident notifications and passerby scan alerts
+                regarding your associated vehicles.
               </div>
             </div>
           )}
@@ -432,7 +552,11 @@ export function AddContactSheet({
               >
                 {isSubmitting ? (
                   <>
-                    <VaahanIcon name="loading" size={14} className="animate-spin" />
+                    <VaahanIcon
+                      name="loading"
+                      size={14}
+                      className="animate-spin"
+                    />
                     <span>Adding to Network...</span>
                   </>
                 ) : (

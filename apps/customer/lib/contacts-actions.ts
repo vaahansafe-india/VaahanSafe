@@ -20,12 +20,15 @@ interface ActionResult<T = unknown> {
  * Server Action: Add a new Safety Contact to one or more user-owned vehicles.
  */
 export async function addSafetyContactAction(
-  input: AddContactInput
+  input: AddContactInput,
 ): Promise<ActionResult> {
   try {
     const auth = await getAuthenticatedCustomer();
-    if (!auth) {
-      return { success: false, error: "Please sign in to manage safety contacts." };
+    if (!auth?.phoneVerified) {
+      return {
+        success: false,
+        error: "Please sign in to manage safety contacts.",
+      };
     }
 
     if (!input.name || !input.name.trim()) {
@@ -33,12 +36,19 @@ export async function addSafetyContactAction(
     }
 
     const normPhone = normalizePhone(input.phone);
-    if (!normPhone || normPhone.length < 10) {
-      return { success: false, error: "Please provide a valid 10-digit mobile number." };
+    if (!/^[6-9]\d{9}$/.test(normPhone)) {
+      return {
+        success: false,
+        error: "Please provide a valid 10-digit mobile number.",
+      };
     }
 
     if (!input.vehicleIds || input.vehicleIds.length === 0) {
-      return { success: false, error: "Please select at least one vehicle to associate this contact with." };
+      return {
+        success: false,
+        error:
+          "Please select at least one vehicle to associate this contact with.",
+      };
     }
 
     const db = getAuthoritativeDatabaseClient();
@@ -47,11 +57,14 @@ export async function addSafetyContactAction(
     const placeholders = input.vehicleIds.map(() => "?").join(",");
     const authorizedVehicles = await db.query<{ id: string }>(
       `SELECT id FROM vehicles WHERE id IN (${placeholders}) AND user_id = ? AND status != 'DELETED'`,
-      [...input.vehicleIds, auth.user.id]
+      [...input.vehicleIds, auth.user.id],
     );
 
-    if (authorizedVehicles.length === 0) {
-      return { success: false, error: "No authorized vehicles selected." };
+    if (authorizedVehicles.length !== new Set(input.vehicleIds).size) {
+      return {
+        success: false,
+        error: "Please select only vehicles in your account.",
+      };
     }
 
     const authorizedIds = new Set(authorizedVehicles.map((v) => v.id));
@@ -60,13 +73,13 @@ export async function addSafetyContactAction(
     const isPublic = input.isPubliclyAvailable !== false ? 1 : 0;
     const priority = input.isPrimary ? 1 : 2;
 
-    for (const vehicleId of input.vehicleIds) {
+    for (const vehicleId of new Set(input.vehicleIds)) {
       if (!authorizedIds.has(vehicleId)) continue;
 
       // 1. Resolve or create emergency profile
       let profile = await db.queryFirst<{ id: string }>(
         `SELECT id FROM emergency_profiles WHERE vehicle_id = ? AND status = 'ACTIVE'`,
-        [vehicleId]
+        [vehicleId],
       );
 
       if (!profile) {
@@ -76,26 +89,30 @@ export async function addSafetyContactAction(
              id, vehicle_id, display_name, show_owner_name, show_blood_group,
              show_medical_notes, show_vehicle_details, status, created_at, updated_at
            ) VALUES (?, ?, ?, 1, 1, 0, 1, 'ACTIVE', ?, ?)`,
-          [newProfileId, vehicleId, auth.user.name || null, now, now]
+          [newProfileId, vehicleId, auth.user.name || null, now, now],
         );
         profile = { id: newProfileId };
       }
 
-      // If adding as primary, demote existing primary contacts on this vehicle
+      // 2. Insert new contact record
+      const existing = await db.queryFirst<{ id: string }>(
+        "SELECT id FROM emergency_contacts WHERE emergency_profile_id = ? AND right(regexp_replace(phone, '[^0-9]', '', 'g'), 10) = ?",
+        [profile.id, normPhone],
+      );
+      if (existing) continue;
+      // Existing associations are left unchanged when a saved contact is reused.
       if (input.isPrimary) {
         await db.execute(
           `UPDATE emergency_contacts SET priority = 2, updated_at = ? WHERE emergency_profile_id = ? AND priority = 1`,
-          [now, profile.id]
+          [now, profile.id],
         );
       }
-
-      // 2. Insert new contact record
-      const newContactId = `cnt_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+      const newContactId = `cnt_${crypto.randomUUID()}`;
       await db.execute(
         `INSERT INTO emergency_contacts (
            id, emergency_profile_id, name, relationship_label, phone,
            priority, is_enabled, allow_call, allow_message, created_at, updated_at
-         ) VALUES (?, ?, ?, ?, ?, ?, ?, 1, 1, ?, ?)`,
+         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           newContactId,
           profile.id,
@@ -104,13 +121,17 @@ export async function addSafetyContactAction(
           normPhone,
           priority,
           isPublic,
+          input.allowCall !== false ? 1 : 0,
+          input.allowMessage !== false ? 1 : 0,
           now,
           now,
-        ]
+        ],
       );
     }
 
     revalidatePath("/emergency-contacts");
+    revalidatePath("/vehicles");
+    revalidatePath("/dashboard");
     return { success: true };
   } catch (err) {
     console.error("[addSafetyContactAction] Error:", err);
@@ -125,12 +146,15 @@ export async function addSafetyContactAction(
  * Server Action: Update an existing Safety Contact's details, relationship, or associations.
  */
 export async function updateSafetyContactAction(
-  input: UpdateContactInput
+  input: UpdateContactInput,
 ): Promise<ActionResult> {
   try {
     const auth = await getAuthenticatedCustomer();
     if (!auth) {
-      return { success: false, error: "Please sign in to update safety contacts." };
+      return {
+        success: false,
+        error: "Please sign in to update safety contacts.",
+      };
     }
 
     if (!input.name || !input.name.trim()) {
@@ -139,7 +163,10 @@ export async function updateSafetyContactAction(
 
     const normPhone = normalizePhone(input.phone);
     if (!normPhone || normPhone.length < 10) {
-      return { success: false, error: "Please provide a valid 10-digit mobile number." };
+      return {
+        success: false,
+        error: "Please provide a valid 10-digit mobile number.",
+      };
     }
 
     const db = getAuthoritativeDatabaseClient();
@@ -156,11 +183,14 @@ export async function updateSafetyContactAction(
        INNER JOIN emergency_profiles p ON c.emergency_profile_id = p.id
        INNER JOIN vehicles v ON p.vehicle_id = v.id
        WHERE c.id = ? AND v.user_id = ? AND v.status != 'DELETED'`,
-      [input.contactId, auth.user.id]
+      [input.contactId, auth.user.id],
     );
 
     if (!existingContact) {
-      return { success: false, error: "Safety contact not found or unauthorized." };
+      return {
+        success: false,
+        error: "Safety contact not found or unauthorized.",
+      };
     }
 
     const now = new Date().toISOString();
@@ -181,21 +211,29 @@ export async function updateSafetyContactAction(
          INNER JOIN vehicles v ON p.vehicle_id = v.id
          WHERE (c.id = ? OR c.phone = ?) AND v.user_id = ?
        )`,
-      [input.name.trim(), relLabel, normPhone, now, input.contactId, existingPhone, auth.user.id]
+      [
+        input.name.trim(),
+        relLabel,
+        normPhone,
+        now,
+        input.contactId,
+        existingPhone,
+        auth.user.id,
+      ],
     );
 
     // If isPrimary was set, update primary priority on vehicle
     if (input.isPrimary) {
       await db.execute(
         `UPDATE emergency_contacts SET priority = 1, updated_at = ? WHERE id = ?`,
-        [now, input.contactId]
+        [now, input.contactId],
       );
     }
 
     // Update public view setting
     await db.execute(
       `UPDATE emergency_contacts SET is_enabled = ?, updated_at = ? WHERE id = ?`,
-      [isPublic, now, input.contactId]
+      [isPublic, now, input.contactId],
     );
 
     revalidatePath("/emergency-contacts");
@@ -204,7 +242,8 @@ export async function updateSafetyContactAction(
     console.error("[updateSafetyContactAction] Error:", err);
     return {
       success: false,
-      error: "We couldn't update this safety contact right now. Please try again.",
+      error:
+        "We couldn't update this safety contact right now. Please try again.",
     };
   }
 }
@@ -214,7 +253,7 @@ export async function updateSafetyContactAction(
  */
 export async function toggleContactVisibilityAction(
   contactId: string,
-  isEnabled: boolean
+  isEnabled: boolean,
 ): Promise<ActionResult> {
   try {
     const auth = await getAuthenticatedCustomer();
@@ -231,7 +270,7 @@ export async function toggleContactVisibilityAction(
        INNER JOIN emergency_profiles p ON c.emergency_profile_id = p.id
        INNER JOIN vehicles v ON p.vehicle_id = v.id
        WHERE c.id = ? AND v.user_id = ? AND v.status != 'DELETED'`,
-      [contactId, auth.user.id]
+      [contactId, auth.user.id],
     );
 
     if (!contact) {
@@ -241,7 +280,7 @@ export async function toggleContactVisibilityAction(
     const now = new Date().toISOString();
     await db.execute(
       `UPDATE emergency_contacts SET is_enabled = ?, updated_at = ? WHERE id = ?`,
-      [isEnabled ? 1 : 0, now, contactId]
+      [isEnabled ? 1 : 0, now, contactId],
     );
 
     revalidatePath("/emergency-contacts");
@@ -259,12 +298,15 @@ export async function toggleContactVisibilityAction(
  * Server Action: Designate a contact as the primary safety contact.
  */
 export async function setPrimaryContactAction(
-  contactId: string
+  contactId: string,
 ): Promise<ActionResult> {
   try {
     const auth = await getAuthenticatedCustomer();
     if (!auth) {
-      return { success: false, error: "Please sign in to change primary contact." };
+      return {
+        success: false,
+        error: "Please sign in to change primary contact.",
+      };
     }
 
     const db = getAuthoritativeDatabaseClient();
@@ -278,7 +320,7 @@ export async function setPrimaryContactAction(
        INNER JOIN emergency_profiles p ON c.emergency_profile_id = p.id
        INNER JOIN vehicles v ON p.vehicle_id = v.id
        WHERE c.id = ? AND v.user_id = ? AND v.status != 'DELETED'`,
-      [contactId, auth.user.id]
+      [contactId, auth.user.id],
     );
 
     if (!contact) {
@@ -290,13 +332,13 @@ export async function setPrimaryContactAction(
     // Demote any current primary contacts in this profile
     await db.execute(
       `UPDATE emergency_contacts SET priority = 2, updated_at = ? WHERE emergency_profile_id = ? AND priority = 1`,
-      [now, contact.emergency_profile_id]
+      [now, contact.emergency_profile_id],
     );
 
     // Promote selected contact
     await db.execute(
       `UPDATE emergency_contacts SET priority = 1, updated_at = ? WHERE id = ?`,
-      [now, contactId]
+      [now, contactId],
     );
 
     revalidatePath("/emergency-contacts");
@@ -315,7 +357,7 @@ export async function setPrimaryContactAction(
  * Does NOT delete vehicles, accounts, or scan event history.
  */
 export async function removeSafetyContactAction(
-  contactId: string
+  contactId: string,
 ): Promise<ActionResult> {
   try {
     const auth = await getAuthenticatedCustomer();
@@ -336,7 +378,7 @@ export async function removeSafetyContactAction(
        INNER JOIN emergency_profiles p ON c.emergency_profile_id = p.id
        INNER JOIN vehicles v ON p.vehicle_id = v.id
        WHERE c.id = ? AND v.user_id = ? AND v.status != 'DELETED'`,
-      [contactId, auth.user.id]
+      [contactId, auth.user.id],
     );
 
     if (!contact) {
@@ -355,7 +397,7 @@ export async function removeSafetyContactAction(
          INNER JOIN vehicles v ON p.vehicle_id = v.id
          WHERE (c.id = ? OR (c.phone = ? AND c.name = ?)) AND v.user_id = ?
        )`,
-      [contactId, normPhone, contact.name, auth.user.id]
+      [contactId, normPhone, contact.name, auth.user.id],
     );
 
     revalidatePath("/emergency-contacts");
@@ -373,7 +415,7 @@ export async function removeSafetyContactAction(
  * Server Action: Fetch public safety projection preview for a vehicle.
  */
 export async function fetchPublicSafetyPreviewAction(
-  vehicleId: string
+  vehicleId: string,
 ): Promise<ActionResult<PublicSafetyPreviewData>> {
   try {
     const auth = await getAuthenticatedCustomer();

@@ -32,7 +32,7 @@ export function ReportSharingSummary({ reason }: { reason: ScanReportReason }) {
           className="mt-0.5 shrink-0 text-primary"
         />
         <p className="text-sm leading-relaxed text-muted-foreground">
-          Photos, your note and any shared location open at{" "}
+          Photos, your note and your shared location open at{" "}
           <span className="font-medium text-foreground">
             view.vaahansafe.com
           </span>
