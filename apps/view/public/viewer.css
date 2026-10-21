@@ -1740,6 +1740,7 @@ body:has(#photo-dialog[open]) {
   border: 1px solid var(--line);
   border-radius: 14px;
   width: min(94vw, 1080px);
+  max-width: calc(100vw - 20px);
   height: min(90dvh, 850px);
   max-height: calc(100dvh - 24px);
   overflow: hidden;
