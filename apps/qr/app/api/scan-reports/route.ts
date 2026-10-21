@@ -116,7 +116,9 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         ...result,
-        message: "Your report is saved. The owner notification is queued.",
+        message: result.emergencyContactsQueued
+          ? "Your report is saved. Alerts for the owner and eligible emergency contacts are queued."
+          : "Your report is saved. The owner notification is queued.",
       },
       { status: 200 },
     );

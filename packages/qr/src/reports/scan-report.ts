@@ -28,6 +28,7 @@ export interface ScanReportInput {
   reason: ScanReportReason;
   note: string;
   consent: boolean;
+  viewerConsent?: boolean;
   location?: SharedScanLocation;
   photos: ScanReportPhoto[];
 }
@@ -96,19 +97,29 @@ export async function submitScanReport(
   deps: { db: DatabaseClient; store: ObjectStore; ipHash: string },
 ) {
   validateScanReport(input);
+  async function receipt(id: string) {
+    const saved = await deps.db.queryFirst<{
+      result: { emergencyContactsQueued: boolean };
+    }>("SELECT public.qr_scan_report_receipt(?, ?::uuid) AS result", [
+      id,
+      input.requestId,
+    ]);
+    if (!saved?.result) throw new ScanReportError("REPORT_FAILED");
+    return { id, recorded: true, notificationQueued: true, ...saved.result };
+  }
   const reservation = await deps.db.queryFirst<{
     result: { id?: string; status?: string; error?: string };
-  }>("SELECT public.begin_qr_scan_report(?, ?::uuid, ?) AS result", [
+  }>("SELECT public.begin_qr_scan_report(?, ?::uuid, ?, ?) AS result", [
     input.publicId,
     input.requestId,
     deps.ipHash,
+    input.reason,
   ]);
   const result = reservation?.result;
   if (result?.error === "COOLDOWN")
     throw new ScanReportError("REPORT_COOLDOWN");
   if (!result?.id) throw new ScanReportError("REPORT_UNAVAILABLE");
-  if (result.status === "READY")
-    return { id: result.id, recorded: true, notificationQueued: true };
+  if (result.status === "READY") return receipt(result.id);
   if (result.status === "FAILED") throw new ScanReportError("REPORT_RETRY");
   if (result.status !== "NEW") throw new ScanReportError("REPORT_COOLDOWN");
   const id = result.id;
@@ -131,17 +142,18 @@ export async function submitScanReport(
       await deps.store.put(key, photo.data, { contentType: photo.mimeType });
     }
     const completed = await deps.db.queryFirst<{ result: boolean }>(
-      "SELECT public.complete_qr_scan_report(?, ?::jsonb, ?::jsonb, ?, ?) AS result",
+      "SELECT public.complete_qr_scan_report(?, ?::jsonb, ?::jsonb, ?, ?, ?) AS result",
       [
         id,
         JSON.stringify(input.location || null),
         JSON.stringify(photos),
         input.reason,
         input.note.trim(),
+        input.viewerConsent === true,
       ],
     );
     if (!completed?.result) throw new ScanReportError("REPORT_UNAVAILABLE");
-    return { id, recorded: true, notificationQueued: true };
+    return await receipt(id);
   } catch (error) {
     // A transport failure can hide a committed transaction. Never delete committed photos.
     const saved = await deps.db
@@ -150,8 +162,7 @@ export async function submitScanReport(
         [id],
       )
       .catch(() => null);
-    if (saved?.status === "READY")
-      return { id, recorded: true, notificationQueued: true };
+    if (saved?.status === "READY") return receipt(id);
     if (saved) {
       // Cancel under the report row lock before removing bytes. Completion may
       // still be running after its HTTP response timed out; its committed READY
@@ -174,8 +185,7 @@ export async function submitScanReport(
           [id],
         )
         .catch(() => null);
-      if (final?.status === "READY")
-        return { id, recorded: true, notificationQueued: true };
+      if (final?.status === "READY") return receipt(id);
       if (final?.status === "FAILED") throw new ScanReportError("REPORT_RETRY");
     }
     throw error instanceof ScanReportError

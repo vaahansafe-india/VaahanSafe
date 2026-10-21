@@ -30,7 +30,9 @@ function input(): ScanReportInput {
 }
 function deps(results: unknown[]) {
   const db = {
-    queryFirst: vi.fn(),
+    queryFirst: vi
+      .fn()
+      .mockResolvedValue({ result: { emergencyContactsQueued: false } }),
     execute: vi.fn().mockResolvedValue({ success: true, rowsAffected: 1 }),
   } as unknown as DatabaseClient;
   for (const value of results)
@@ -146,7 +148,7 @@ describe("finder report boundaries", () => {
       id,
     });
     expect(d.store.put).not.toHaveBeenCalled();
-    expect(d.db.queryFirst).toHaveBeenCalledTimes(1);
+    expect(d.db.queryFirst).toHaveBeenCalledTimes(2);
   });
   it("permits a fresh client request only after a confirmed failed reservation", async () => {
     const d = deps([{ result: { id, status: "FAILED" } }]);
@@ -163,6 +165,21 @@ describe("finder report boundaries", () => {
       `scan-reports/${id}/0.jpg`,
       expect.any(Uint8Array),
       { contentType: "image/jpeg" },
+    );
+  });
+  it("acknowledges emergency contact routing only from the saved server receipt", async () => {
+    const d = deps([
+      { result: { id, status: "NEW" } },
+      { result: true },
+      { result: { emergencyContactsQueued: true } },
+    ]);
+    expect(
+      await submitScanReport({ ...input(), reason: "EMERGENCY" }, d),
+    ).toMatchObject({ emergencyContactsQueued: true });
+    expect(d.db.queryFirst).toHaveBeenNthCalledWith(
+      1,
+      expect.any(String),
+      expect.arrayContaining(["EMERGENCY"]),
     );
   });
   it("cleans orphan objects after a confirmed incomplete report", async () => {
@@ -255,36 +272,34 @@ describe("MSG91 report approval contract", () => {
   function provider(overrides: Record<string, unknown> = {}) {
     vi.stubGlobal(
       "fetch",
-      vi
-        .fn()
-        .mockResolvedValue(
-          new Response(
-            JSON.stringify({
-              status: "success",
-              data: [
-                {
-                  name,
-                  namespace: "unit-namespace",
-                  languages: [
-                    {
-                      language: "en",
-                      status: "approved",
-                      is_disabled: 0,
-                      variables: [
-                        "body_1",
-                        "body_2",
-                        "body_3",
-                        "body_4",
-                        "body_5",
-                      ],
-                      ...overrides,
-                    },
-                  ],
-                },
-              ],
-            }),
-          ),
+      vi.fn().mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            status: "success",
+            data: [
+              {
+                name,
+                namespace: "unit-namespace",
+                languages: [
+                  {
+                    language: "en",
+                    status: "approved",
+                    is_disabled: 0,
+                    variables: [
+                      "body_1",
+                      "body_2",
+                      "body_3",
+                      "body_4",
+                      "body_5",
+                    ],
+                    ...overrides,
+                  },
+                ],
+              },
+            ],
+          }),
         ),
+      ),
     );
   }
   it("accepts the approved exact five-variable language contract", async () => {

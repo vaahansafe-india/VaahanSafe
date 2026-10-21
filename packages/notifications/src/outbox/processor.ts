@@ -22,6 +22,8 @@ export interface ClaimedNotification {
   payload_json: string;
   profile: AccountContactProfile;
   preferences: UserNotificationPreference[];
+  /** Server-only routing metadata, never derived from the event payload. */
+  recipient_kind?: "ACCOUNT" | "EMERGENCY_CONTACT";
 }
 export type DeliveryOutcome =
   | "PROCESSING"
@@ -30,6 +32,9 @@ export type DeliveryOutcome =
   | "FAILED_PERMANENT"
   | "DEAD_LETTERED";
 export interface NotificationOutboxStore {
+  reportLink?(
+    intent: ClaimedNotification,
+  ): Promise<{ viewerUrl: string; viewerExpiresAt: string } | undefined>;
   claimBatch(limit: number): Promise<ClaimedNotification[]>;
   prepare(
     intent: ClaimedNotification,
@@ -62,8 +67,19 @@ export async function drainNotificationOutbox(
     intents.map(async (intent) => {
       let rendered: ReturnType<typeof renderTemplate>;
       let payload: Record<string, unknown>;
+      // A failed grant call leaves the lease recoverable and sends no message.
+      const link = [
+        "VEHICLE_SCAN_REPORT_V1",
+        "EMERGENCY_CONTACT_REPORT_V1",
+      ].includes(intent.template_key)
+        ? await deps.store.reportLink?.(intent)
+        : undefined;
       try {
         payload = JSON.parse(intent.payload_json);
+        // Never accept a viewer URL from a persisted event or browser payload.
+        delete payload.viewerUrl;
+        delete payload.viewerExpiresAt;
+        if (link) Object.assign(payload, link);
         rendered = renderTemplate(
           getTemplateDefinition(intent.template_key),
           payload,
@@ -79,12 +95,29 @@ export async function drainNotificationOutbox(
         payload.snapshotDestination as
           { phone?: string; email?: string } | undefined,
       );
-      const channels = evaluateNotificationChannels({
-        eventType: intent.event_type,
-        category: intent.category,
-        userPreferences: intent.preferences,
-        capabilities: { hasPhone: !!dest.phone, hasEmail: !!dest.email },
-      });
+      const contact = intent.recipient_kind === "EMERGENCY_CONTACT";
+      if (contact !== (intent.template_key === "EMERGENCY_CONTACT_REPORT_V1")) {
+        await deps.store.finishIntent(intent, "RECIPIENT_TEMPLATE_MISMATCH");
+        failed++;
+        return;
+      }
+      if (contact && !dest.phone) {
+        await deps.store.finishIntent(intent, "EMERGENCY_CONTACT_UNAVAILABLE");
+        failed++;
+        return;
+      }
+      // The contact's current allow_message permission is enforced by the DB
+      // at claim and prepare. The owner's channel preferences do not apply to it.
+      const channels: NotificationChannel[] = contact
+        ? dest.phone
+          ? ["WHATSAPP"]
+          : []
+        : evaluateNotificationChannels({
+            eventType: intent.event_type,
+            category: intent.category,
+            userPreferences: intent.preferences,
+            capabilities: { hasPhone: !!dest.phone, hasEmail: !!dest.email },
+          });
       // The first-party channel is completed even when a provider is unavailable.
       for (const channel of channels) {
         const claim = await deps.store.prepare(intent, channel, rendered.inApp);

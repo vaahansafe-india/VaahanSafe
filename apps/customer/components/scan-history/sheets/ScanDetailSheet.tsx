@@ -12,6 +12,7 @@ import {
 import { VaahanIcon } from "@vaahansafe/icons";
 import { ScanJourney } from "../journey/ScanJourney";
 import { ReportPhoto } from "./ReportPhoto";
+import { ReportLinkControls } from "./ReportLinkControls";
 import type { ScanEventItem } from "@/lib/scan-history-types";
 
 interface ScanDetailSheetProps {
@@ -208,6 +209,10 @@ export function ScanDetailSheet({
                   <ReportPhoto key={url} url={url} number={index + 1} />
                 ))}
               </div>
+              <ReportLinkControls
+                key={event.report.id}
+                reportId={event.report.id}
+              />
               {!event.report.photoUrls.length && (
                 <p className="text-muted-foreground">No photos were shared.</p>
               )}

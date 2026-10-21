@@ -1,0 +1,27 @@
+name = "vaahansafe-view"
+account_id = "980cb7ee6eaacd3746d51f46bd62217a"
+main = "src/index.ts"
+compatibility_date = "2026-09-01"
+workers_dev = true
+preview_urls = false
+# Vercel owns the DNS zone. Its viewer project proxies to this Worker so the
+# existing domain does not need a nameserver migration.
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
+run_worker_first = true
+
+[[r2_buckets]]
+binding = "REPORT_PHOTOS"
+bucket_name = "vaahansafe-prod-private"
+
+[[ratelimits]]
+name = "VIEW_RATE_LIMITER"
+namespace_id = "21073209"
+simple = { limit = 60, period = 60 }
+
+# Server secrets: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY.
+# Bearer fragments and request bodies must never enter invocation logs.
+[observability]
+enabled = false

@@ -32,8 +32,8 @@ const reasons: { value: ScanReportReason; label: string; hint: string }[] = [
   },
   {
     value: "EMERGENCY",
-    label: "Possible emergency",
-    hint: "Alert the owner about an urgent situation. If someone is in immediate danger, call 112 first.",
+    label: "Accident or emergency",
+    hint: "Alert the owner and their enabled emergency contacts. If someone is in immediate danger, call 112 first.",
   },
   {
     value: "LIGHTS_ON",
@@ -88,11 +88,13 @@ export function ScanReportForm({
   siteKey,
   vehicleDisplay,
   initialStep = 0,
+  initialReason = "PARKING",
 }: {
   publicId: string;
   siteKey: string;
   vehicleDisplay: string;
   initialStep?: number;
+  initialReason?: ScanReportReason;
 }) {
   const [step, setStep] = useState(initialStep);
   const [offline, setOffline] = useState(false);
@@ -102,7 +104,7 @@ export function ScanReportForm({
   const sending = useRef(false);
   const photoProcessing = useRef(false);
   const heading = useRef<HTMLHeadingElement>(null);
-  const [reason, setReason] = useState<ScanReportReason>("PARKING"),
+  const [reason, setReason] = useState<ScanReportReason>(initialReason),
     [note, setNote] = useState("");
   const [location, setLocation] = useState<SharedScanLocation>(),
     [photos, setPhotos] = useState<File[]>([]);
@@ -306,6 +308,7 @@ export function ScanReportForm({
           reason,
           note,
           consent,
+          viewerConsent: consent,
           location,
         }),
       );
@@ -329,7 +332,11 @@ export function ScanReportForm({
         );
       setSuccess(
         body.notificationQueued
-          ? "Your report was received. The owner notification is queued; delivery may take a moment."
+          ? body.emergencyContactsQueued
+            ? "Your report was received. Alerts for the owner and eligible emergency contacts are queued; delivery may take a moment."
+            : reason === "EMERGENCY"
+              ? "Your report was received. The owner notification is queued. No emergency-contact alerts were queued for this vehicle. For an immediate response, use an approved contact above."
+              : "Your report was received. The owner notification is queued; delivery may take a moment."
           : "Your report was received.",
       );
       if (typeof body.id === "string")
@@ -813,8 +820,9 @@ export function ScanReportForm({
                     htmlFor={`${formId}-consent`}
                     className="min-h-11 cursor-pointer text-sm leading-relaxed"
                   >
-                    I understand this report and any attached photos or location
-                    will be shared privately with the vehicle owner.
+                    {reason === "EMERGENCY"
+                      ? "I agree to share this report, photos and any shared location with the owner and their enabled emergency contacts through private links that expire after 24 hours. Anyone holding a link can view this report until it expires."
+                      : "I agree to share this report, photos and any shared location with the vehicle owner through a private link that expires after 24 hours. Anyone holding the link can view this report until it expires."}
                   </label>
                 </div>
                 {siteKey ? (

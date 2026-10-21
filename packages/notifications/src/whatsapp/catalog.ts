@@ -1,10 +1,14 @@
-/** Approved contracts inspected in the VaahanSafe MSG91 dashboard on 8 October 2026. */
+/** Exact provider contracts. Report templates also require live approval before dispatch. */
 export const MSG91_TEMPLATE_CATALOG = {
   vhn_welcome_v1: { language: "en", bodyCount: 1 },
   vhn_qr_activated_v1: { language: "en_US", bodyCount: 2 },
   vhn_qr_scan_notice_v2: { language: "en_US", bodyCount: 2 },
-  vhn_vehicle_report_v1: { language: 'en', bodyCount: 5 },
-  vhn_vehicle_emergency_report_v1: { language: 'en', bodyCount: 5 },
+  vhn_vehicle_report_v1: { language: "en", bodyCount: 5 },
+  vhn_vehicle_emergency_report_v1: { language: "en", bodyCount: 5 },
+  vhn_emergency_contact_report_v1: { language: "en", bodyCount: 4 },
+  vhn_vehicle_report_v2: { language: "en", bodyCount: 5 },
+  vhn_vehicle_emergency_report_v2: { language: "en", bodyCount: 5 },
+  vhn_emergency_contact_report_v2: { language: "en", bodyCount: 5 },
   vhn_payment_success_v1: { language: "en", bodyCount: 2 },
   vhn_shipment_update_v1: { language: "en", bodyCount: 2 },
   vhn_sub_renewed_v1: { language: "en", bodyCount: 2 },
@@ -24,10 +28,16 @@ export function getMsg91Template(name: string) {
 }
 
 /** Only exact positional components reach the provider. */
-export function buildMsg91Components(name: string, parameters: Record<string, string>) {
+export function buildMsg91Components(
+  name: string,
+  parameters: Record<string, string>,
+) {
   const { bodyCount } = getMsg91Template(name);
   const keys = Object.keys(parameters);
-  if (keys.length !== bodyCount || keys.some((key) => !/^[1-9]\d*$/.test(key))) {
+  if (
+    keys.length !== bodyCount ||
+    keys.some((key) => !/^[1-9]\d*$/.test(key))
+  ) {
     throw new Error("MSG91_TEMPLATE_PARAMETERS_INVALID");
   }
   const components: Record<string, { type: "text"; value: string }> = {};

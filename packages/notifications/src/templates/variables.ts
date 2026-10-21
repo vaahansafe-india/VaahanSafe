@@ -11,7 +11,9 @@ export const AccountWelcomeVariablesSchema = z.object({
   displayName: z.string().min(1).max(100),
   accountCreatedDate: z.string().min(1),
 });
-export type AccountWelcomeVariables = z.infer<typeof AccountWelcomeVariablesSchema>;
+export type AccountWelcomeVariables = z.infer<
+  typeof AccountWelcomeVariablesSchema
+>;
 
 export const QrActivatedVariablesSchema = z.object({
   publicId: z.string().min(6).max(64),
@@ -26,21 +28,27 @@ export const PaymentSuccessVariablesSchema = z.object({
   amountDisplay: z.string().min(1),
   paymentId: z.string().min(1),
 });
-export type PaymentSuccessVariables = z.infer<typeof PaymentSuccessVariablesSchema>;
+export type PaymentSuccessVariables = z.infer<
+  typeof PaymentSuccessVariablesSchema
+>;
 
 export const SubscriptionRenewedVariablesSchema = z.object({
   subscriptionId: z.string().min(1),
   planName: z.string().min(1),
   nextBillingDate: z.string().min(1),
 });
-export type SubscriptionRenewedVariables = z.infer<typeof SubscriptionRenewedVariablesSchema>;
+export type SubscriptionRenewedVariables = z.infer<
+  typeof SubscriptionRenewedVariablesSchema
+>;
 
 export const SubscriptionRenewalFailedVariablesSchema = z.object({
   subscriptionId: z.string().min(1),
   planName: z.string().min(1),
   failureReason: z.string().max(200).optional(),
 });
-export type SubscriptionRenewalFailedVariables = z.infer<typeof SubscriptionRenewalFailedVariablesSchema>;
+export type SubscriptionRenewalFailedVariables = z.infer<
+  typeof SubscriptionRenewalFailedVariablesSchema
+>;
 
 export const ShipmentUpdateVariablesSchema = z.object({
   shipmentId: z.string().min(1),
@@ -48,42 +56,72 @@ export const ShipmentUpdateVariablesSchema = z.object({
   trackingNumber: z.string().max(100).optional(),
   carrierName: z.string().max(100).optional(),
 });
-export type ShipmentUpdateVariables = z.infer<typeof ShipmentUpdateVariablesSchema>;
+export type ShipmentUpdateVariables = z.infer<
+  typeof ShipmentUpdateVariablesSchema
+>;
 
 export const ReplacementApprovedVariablesSchema = z.object({
   replacementRequestId: z.string().min(1),
   originalPublicId: z.string().min(1),
   newPublicId: z.string().optional(),
 });
-export type ReplacementApprovedVariables = z.infer<typeof ReplacementApprovedVariablesSchema>;
+export type ReplacementApprovedVariables = z.infer<
+  typeof ReplacementApprovedVariablesSchema
+>;
 
 export const EmergencyScanAlertVariablesSchema = z.object({
   vehicleMaskedReg: z.string().min(1),
   scannedAtFormatted: z.string().min(1),
   approximateLocation: z.string().max(200).optional(),
 });
-export type EmergencyScanAlertVariables = z.infer<typeof EmergencyScanAlertVariablesSchema>;
+export type EmergencyScanAlertVariables = z.infer<
+  typeof EmergencyScanAlertVariablesSchema
+>;
 
+const ViewerLinkVariables = {
+  viewerUrl: z
+    .string()
+    .regex(/^https:\/\/view\.vaahansafe\.com\/r#[A-Za-z0-9_-]{43}$/)
+    .optional(),
+  viewerExpiresAt: z.string().datetime({ offset: true }).optional(),
+};
 export const VehicleScanReportVariablesSchema = z.object({
+  ...ViewerLinkVariables,
   vehicleMaskedReg: z.string().min(1).max(24),
   scannedAtFormatted: z.string().min(1).max(100),
   reportId: z.string().regex(/^report_[a-f0-9-]{36}$/),
-  reason: z.enum(['PARKING','EMERGENCY','LIGHTS_ON','DAMAGE','OTHER']),
+  reason: z.enum(["PARKING", "EMERGENCY", "LIGHTS_ON", "DAMAGE", "OTHER"]),
   locationText: z.string().min(1).max(400),
   photoCount: z.number().int().min(0).max(3),
 });
-export type VehicleScanReportVariables = z.infer<typeof VehicleScanReportVariablesSchema>;
+export type VehicleScanReportVariables = z.infer<
+  typeof VehicleScanReportVariablesSchema
+>;
+
+export const EmergencyContactReportVariablesSchema =
+  VehicleScanReportVariablesSchema.pick({
+    vehicleMaskedReg: true,
+    scannedAtFormatted: true,
+    locationText: true,
+  }).extend({ reason: z.literal("EMERGENCY"), ...ViewerLinkVariables });
+export type EmergencyContactReportVariables = z.infer<
+  typeof EmergencyContactReportVariablesSchema
+>;
 
 export const SecurityChangedVariablesSchema = z.object({
   changeType: z.string().min(1),
   occurredAt: z.string().min(1),
   actionSummary: z.string().min(1),
 });
-export type SecurityChangedVariables = z.infer<typeof SecurityChangedVariablesSchema>;
+export type SecurityChangedVariables = z.infer<
+  typeof SecurityChangedVariablesSchema
+>;
 
 export const SupportUpdateVariablesSchema = z.object({
   ticketId: z.string().min(1),
   ticketSubject: z.string().min(1),
   status: z.string().min(1),
 });
-export type SupportUpdateVariables = z.infer<typeof SupportUpdateVariablesSchema>;
+export type SupportUpdateVariables = z.infer<
+  typeof SupportUpdateVariablesSchema
+>;

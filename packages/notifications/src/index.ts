@@ -23,3 +23,4 @@ export * from "./email";
 export * from "./whatsapp";
 export * from "./outbox/processor";
 export type { InAppRenderResult } from "./templates/definition";
+export * from "./links/report-view-link";

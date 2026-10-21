@@ -1,4 +1,5 @@
 import { getSupabaseAdminClient } from "../repositories/supabase-auth.repository";
+import { reportViewToken } from "@vaahansafe/notifications";
 import type {
   ClaimedNotification,
   NotificationOutboxStore,
@@ -21,9 +22,29 @@ export class SupabaseNotificationOutbox implements NotificationOutboxStore {
     return data as T;
   }
   claimBatch(limit: number) {
-    return this.rpc<ClaimedNotification[]>("claim_notification_batch", {
+    return this.rpc<ClaimedNotification[]>("claim_notification_batch_v2", {
       p_limit: limit,
     });
+  }
+  async reportLink(intent: ClaimedNotification) {
+    const proof = await reportViewToken(
+      intent.id,
+      process.env.NOTIFICATION_DISPATCH_SECRET || "",
+    );
+    const grant = await this.rpc<{ expiresAt: string } | null>(
+      "issue_qr_report_view_link",
+      {
+        p_intent: intent.id,
+        p_lease: intent.lease_token,
+        p_token_hash: proof.hash,
+      },
+    );
+    return grant
+      ? {
+          viewerUrl: `https://view.vaahansafe.com/r#${proof.token}`,
+          viewerExpiresAt: grant.expiresAt,
+        }
+      : undefined;
   }
   prepare(
     intent: ClaimedNotification,

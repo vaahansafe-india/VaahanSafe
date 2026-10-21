@@ -8,7 +8,10 @@
 
 import { TemplateDefinition } from "./definition";
 import { escapeHtml } from "./renderer";
-import { VehicleScanReportVariablesSchema, type VehicleScanReportVariables } from './variables';
+import {
+  VehicleScanReportVariablesSchema,
+  type VehicleScanReportVariables,
+} from "./variables";
 import {
   AccountWelcomeVariablesSchema,
   AccountWelcomeVariables,
@@ -26,6 +29,8 @@ import {
   ReplacementApprovedVariables,
   EmergencyScanAlertVariablesSchema,
   EmergencyScanAlertVariables,
+  EmergencyContactReportVariablesSchema,
+  EmergencyContactReportVariables,
   SecurityChangedVariablesSchema,
   SecurityChangedVariables,
   SupportUpdateVariablesSchema,
@@ -137,73 +142,75 @@ export const PAYMENT_SUCCESS_V1: TemplateDefinition<PaymentSuccessVariables> = {
   },
 };
 
-export const SUBSCRIPTION_RENEWED_V1: TemplateDefinition<SubscriptionRenewedVariables> = {
-  key: "SUBSCRIPTION_RENEWED_V1",
-  version: 1,
-  category: "SUBSCRIPTION",
-  supportedChannels: ["IN_APP", "WHATSAPP", "EMAIL"],
-  schema: SubscriptionRenewedVariablesSchema,
-  renderInApp: (v) => ({
-    title: "Subscription Renewed",
-    body: `Your ${v.planName} subscription has been renewed until ${v.nextBillingDate}.`,
-    actionType: "VIEW_SUBSCRIPTION",
-    actionTarget: v.subscriptionId,
-  }),
-  renderWhatsApp: (v) => ({
-    templateName: "vhn_sub_renewed_v1",
-    languageCode: "en",
-    parameters: {
-      1: v.planName,
-      2: v.nextBillingDate,
-    },
-  }),
-  renderEmail: (v) => {
-    const safePlan = escapeHtml(v.planName);
-    const safeDate = escapeHtml(v.nextBillingDate);
-    return {
-      subject: `Subscription Renewed: ${v.planName}`,
-      html: `<div style="font-family: sans-serif; line-height: 1.5; color: #111;">
+export const SUBSCRIPTION_RENEWED_V1: TemplateDefinition<SubscriptionRenewedVariables> =
+  {
+    key: "SUBSCRIPTION_RENEWED_V1",
+    version: 1,
+    category: "SUBSCRIPTION",
+    supportedChannels: ["IN_APP", "WHATSAPP", "EMAIL"],
+    schema: SubscriptionRenewedVariablesSchema,
+    renderInApp: (v) => ({
+      title: "Subscription Renewed",
+      body: `Your ${v.planName} subscription has been renewed until ${v.nextBillingDate}.`,
+      actionType: "VIEW_SUBSCRIPTION",
+      actionTarget: v.subscriptionId,
+    }),
+    renderWhatsApp: (v) => ({
+      templateName: "vhn_sub_renewed_v1",
+      languageCode: "en",
+      parameters: {
+        1: v.planName,
+        2: v.nextBillingDate,
+      },
+    }),
+    renderEmail: (v) => {
+      const safePlan = escapeHtml(v.planName);
+      const safeDate = escapeHtml(v.nextBillingDate);
+      return {
+        subject: `Subscription Renewed: ${v.planName}`,
+        html: `<div style="font-family: sans-serif; line-height: 1.5; color: #111;">
         <h2>Subscription Renewed Successfully</h2>
         <p>Your subscription to <strong>${safePlan}</strong> has been renewed.</p>
         <p>Next billing cycle: <strong>${safeDate}</strong></p>
       </div>`,
-      text: `Subscription Renewed Successfully\n\nPlan: ${v.planName}\nNext billing cycle: ${v.nextBillingDate}`,
-    };
-  },
-};
-
-export const SUBSCRIPTION_RENEWAL_FAILED_V1: TemplateDefinition<SubscriptionRenewalFailedVariables> = {
-  key: "SUBSCRIPTION_RENEWAL_FAILED_V1",
-  version: 1,
-  category: "SUBSCRIPTION",
-  supportedChannels: ["IN_APP", "WHATSAPP", "EMAIL"],
-  schema: SubscriptionRenewalFailedVariablesSchema,
-  renderInApp: (v) => ({
-    title: "Renewal Payment Failed",
-    body: `Renewal for ${v.planName} failed. Please update your payment method to maintain premium features.`,
-    actionType: "VIEW_SUBSCRIPTION",
-    actionTarget: v.subscriptionId,
-  }),
-  renderWhatsApp: (v) => ({
-    templateName: "vhn_sub_failed_v1",
-    languageCode: "en",
-    parameters: {
-      1: v.planName,
+        text: `Subscription Renewed Successfully\n\nPlan: ${v.planName}\nNext billing cycle: ${v.nextBillingDate}`,
+      };
     },
-  }),
-  renderEmail: (v) => {
-    const safePlan = escapeHtml(v.planName);
-    return {
-      subject: `Action Required: Renewal Payment Failed for ${v.planName}`,
-      html: `<div style="font-family: sans-serif; line-height: 1.5; color: #111;">
+  };
+
+export const SUBSCRIPTION_RENEWAL_FAILED_V1: TemplateDefinition<SubscriptionRenewalFailedVariables> =
+  {
+    key: "SUBSCRIPTION_RENEWAL_FAILED_V1",
+    version: 1,
+    category: "SUBSCRIPTION",
+    supportedChannels: ["IN_APP", "WHATSAPP", "EMAIL"],
+    schema: SubscriptionRenewalFailedVariablesSchema,
+    renderInApp: (v) => ({
+      title: "Renewal Payment Failed",
+      body: `Renewal for ${v.planName} failed. Please update your payment method to maintain premium features.`,
+      actionType: "VIEW_SUBSCRIPTION",
+      actionTarget: v.subscriptionId,
+    }),
+    renderWhatsApp: (v) => ({
+      templateName: "vhn_sub_failed_v1",
+      languageCode: "en",
+      parameters: {
+        1: v.planName,
+      },
+    }),
+    renderEmail: (v) => {
+      const safePlan = escapeHtml(v.planName);
+      return {
+        subject: `Action Required: Renewal Payment Failed for ${v.planName}`,
+        html: `<div style="font-family: sans-serif; line-height: 1.5; color: #111;">
         <h2>Subscription Renewal Notice</h2>
         <p>We were unable to process the renewal payment for your <strong>${safePlan}</strong> plan.</p>
         <p>Please review and update your payment method in the customer portal. (Note: Your core QR emergency safety profile remains active).</p>
       </div>`,
-      text: `Subscription Renewal Notice\n\nWe could not process renewal for ${v.planName}. Please update your payment method in the customer portal. Core QR safety remains active.`,
-    };
-  },
-};
+        text: `Subscription Renewal Notice\n\nWe could not process renewal for ${v.planName}. Please update your payment method in the customer portal. Core QR safety remains active.`,
+      };
+    },
+  };
 
 export const SHIPMENT_UPDATE_V1: TemplateDefinition<ShipmentUpdateVariables> = {
   key: "SHIPMENT_UPDATE_V1",
@@ -240,126 +247,196 @@ export const SHIPMENT_UPDATE_V1: TemplateDefinition<ShipmentUpdateVariables> = {
   },
 };
 
-export const REPLACEMENT_APPROVED_V1: TemplateDefinition<ReplacementApprovedVariables> = {
-  key: "REPLACEMENT_APPROVED_V1",
-  version: 1,
-  category: "SAFETY",
-  supportedChannels: ["IN_APP", "WHATSAPP", "EMAIL"],
-  schema: ReplacementApprovedVariablesSchema,
-  renderInApp: (v) => ({
-    title: "QR Replacement Approved",
-    body: `Your replacement request for sticker ${v.originalPublicId} has been approved.`,
-    actionType: "VIEW_QR",
-    actionTarget: v.newPublicId || v.originalPublicId,
-  }),
-  renderWhatsApp: (v) => ({
-    templateName: "vhn_replace_approved_v1",
-    languageCode: "en",
-    parameters: {
-      1: v.originalPublicId,
-    },
-  }),
-  renderEmail: (v) => {
-    const safeOrig = escapeHtml(v.originalPublicId);
-    return {
-      subject: `QR Replacement Approved (${v.originalPublicId})`,
-      html: `<div style="font-family: sans-serif; line-height: 1.5; color: #111;">
+export const REPLACEMENT_APPROVED_V1: TemplateDefinition<ReplacementApprovedVariables> =
+  {
+    key: "REPLACEMENT_APPROVED_V1",
+    version: 1,
+    category: "SAFETY",
+    supportedChannels: ["IN_APP", "WHATSAPP", "EMAIL"],
+    schema: ReplacementApprovedVariablesSchema,
+    renderInApp: (v) => ({
+      title: "QR Replacement Approved",
+      body: `Your replacement request for sticker ${v.originalPublicId} has been approved.`,
+      actionType: "VIEW_QR",
+      actionTarget: v.newPublicId || v.originalPublicId,
+    }),
+    renderWhatsApp: (v) => ({
+      templateName: "vhn_replace_approved_v1",
+      languageCode: "en",
+      parameters: {
+        1: v.originalPublicId,
+      },
+    }),
+    renderEmail: (v) => {
+      const safeOrig = escapeHtml(v.originalPublicId);
+      return {
+        subject: `QR Replacement Approved (${v.originalPublicId})`,
+        html: `<div style="font-family: sans-serif; line-height: 1.5; color: #111;">
         <h2>QR Replacement Approved</h2>
         <p>Your request to replace QR sticker <strong>${safeOrig}</strong> has been approved by operations.</p>
         <p>A replacement physical sticker has been scheduled for dispatch.</p>
       </div>`,
-      text: `QR Replacement Approved\n\nReplacement for QR sticker ${v.originalPublicId} has been approved. A replacement sticker has been scheduled for dispatch.`,
-    };
-  },
-};
-
-export const EMERGENCY_SCAN_ALERT_V1: TemplateDefinition<EmergencyScanAlertVariables> = {
-  key: "EMERGENCY_SCAN_ALERT_V1",
-  version: 1,
-  category: "SAFETY",
-  supportedChannels: ["IN_APP", "WHATSAPP", "EMAIL"],
-  schema: EmergencyScanAlertVariablesSchema,
-  renderInApp: (v) => ({
-    title: "Vehicle QR Scanned",
-    body: `A VaahanSafe QR associated with your vehicle ${v.vehicleMaskedReg} was scanned at ${v.scannedAtFormatted}.`,
-    actionType: "VIEW_QR",
-  }),
-  renderWhatsApp: (v) => ({
-    // v1 falsely claims emergency contacts were notified by a scan.
-    // The safe v2 notice was approved in MSG91 on 8 October 2026.
-    templateName: "vhn_qr_scan_notice_v2",
-    languageCode: "en_US",
-    parameters: {
-      1: v.vehicleMaskedReg,
-      2: v.scannedAtFormatted,
+        text: `QR Replacement Approved\n\nReplacement for QR sticker ${v.originalPublicId} has been approved. A replacement sticker has been scheduled for dispatch.`,
+      };
     },
-  }),
-  renderEmail: (v) => {
-    const safeReg = escapeHtml(v.vehicleMaskedReg);
-    const safeTime = escapeHtml(v.scannedAtFormatted);
-    const safeLoc = v.approximateLocation ? `<p>Approximate Location: ${escapeHtml(v.approximateLocation)}</p>` : "";
-    return {
-      subject: `Safety Alert: QR Scanned for vehicle ${v.vehicleMaskedReg}`,
-      html: `<div style="font-family: sans-serif; line-height: 1.5; color: #111;">
+  };
+
+export const EMERGENCY_SCAN_ALERT_V1: TemplateDefinition<EmergencyScanAlertVariables> =
+  {
+    key: "EMERGENCY_SCAN_ALERT_V1",
+    version: 1,
+    category: "SAFETY",
+    supportedChannels: ["IN_APP", "WHATSAPP", "EMAIL"],
+    schema: EmergencyScanAlertVariablesSchema,
+    renderInApp: (v) => ({
+      title: "Vehicle QR Scanned",
+      body: `A VaahanSafe QR associated with your vehicle ${v.vehicleMaskedReg} was scanned at ${v.scannedAtFormatted}.`,
+      actionType: "VIEW_QR",
+    }),
+    renderWhatsApp: (v) => ({
+      // v1 falsely claims emergency contacts were notified by a scan.
+      // The safe v2 notice was approved in MSG91 on 8 October 2026.
+      templateName: "vhn_qr_scan_notice_v2",
+      languageCode: "en_US",
+      parameters: {
+        1: v.vehicleMaskedReg,
+        2: v.scannedAtFormatted,
+      },
+    }),
+    renderEmail: (v) => {
+      const safeReg = escapeHtml(v.vehicleMaskedReg);
+      const safeTime = escapeHtml(v.scannedAtFormatted);
+      const safeLoc = v.approximateLocation
+        ? `<p>Approximate Location: ${escapeHtml(v.approximateLocation)}</p>`
+        : "";
+      return {
+        subject: `Safety Alert: QR Scanned for vehicle ${v.vehicleMaskedReg}`,
+        html: `<div style="font-family: sans-serif; line-height: 1.5; color: #111;">
         <h2>Vehicle QR Scanned</h2>
         <p>A VaahanSafe emergency QR sticker associated with your vehicle <strong>${safeReg}</strong> was scanned on <strong>${safeTime}</strong>.</p>
         ${safeLoc}
         <p style="color: #666; font-size: 13px;">Note: A scan alone does not indicate an accident. The public finder view has safely displayed your designated emergency contacts.</p>
       </div>`,
-      text: `Safety Alert: Vehicle QR Scanned\n\nA VaahanSafe QR sticker for vehicle ${v.vehicleMaskedReg} was scanned on ${v.scannedAtFormatted}.\n${
-        v.approximateLocation ? `Approximate Location: ${v.approximateLocation}\n` : ""
-      }\nNote: A scan alone does not indicate an accident.`,
-    };
-  },
-};
-
-const reportReason = {PARKING:'Parking / access concern',EMERGENCY:'Possible emergency',LIGHTS_ON:'Lights left on',DAMAGE:'Vehicle damage',OTHER:'Safety concern'};
-const reportUrl = (id:string) => `https://app.vaahansafe.com/scan-history?period=90D&report=${encodeURIComponent(id)}`;
-export const VEHICLE_SCAN_REPORT_V1: TemplateDefinition<VehicleScanReportVariables> = {
-  key:'VEHICLE_SCAN_REPORT_V1',version:1,category:'SAFETY',supportedChannels:['IN_APP','WHATSAPP','EMAIL'],schema:VehicleScanReportVariablesSchema,
-  renderInApp:v=>({title:reportReason[v.reason],body:`A finder shared a report for ${v.vehicleMaskedReg} at ${v.scannedAtFormatted}. ${v.photoCount} photo(s) available.`,actionType:'VIEW_QR',actionTarget:`/scan-history?period=90D&report=${encodeURIComponent(v.reportId)}`}),
-  renderWhatsApp:v=>({templateName:v.reason==='EMERGENCY'?'vhn_vehicle_emergency_report_v1':'vhn_vehicle_report_v1',languageCode:'en',parameters:{
-    1:v.vehicleMaskedReg,2:reportReason[v.reason],3:v.scannedAtFormatted,4:v.locationText,5:reportUrl(v.reportId),
-  }}),
-  renderEmail:v=>({subject:`Vehicle report: ${reportReason[v.reason]}`,html:`<p>A finder reported ${escapeHtml(reportReason[v.reason])} for ${escapeHtml(v.vehicleMaskedReg)}.</p><p>${escapeHtml(v.locationText)}</p><p><a href="${reportUrl(v.reportId)}">View ${v.photoCount} photo(s) and report details in your VaahanSafe account</a></p>`,text:`${reportReason[v.reason]}: ${v.vehicleMaskedReg}\n${v.locationText}\nView ${v.photoCount} photo(s): ${reportUrl(v.reportId)}`}),
-};
-
-export const SECURITY_CHANGED_V1: TemplateDefinition<SecurityChangedVariables> = {
-  key: "SECURITY_CHANGED_V1",
-  version: 1,
-  category: "SECURITY",
-  supportedChannels: ["IN_APP", "WHATSAPP", "EMAIL"],
-  schema: SecurityChangedVariablesSchema,
-  renderInApp: (v) => ({
-    title: "Security Settings Modified",
-    body: `${v.changeType}: ${v.actionSummary} at ${v.occurredAt}.`,
-    actionType: "VIEW_SECURITY",
-  }),
-  renderWhatsApp: (v) => ({
-    templateName: "vhn_security_alert_v1",
-    languageCode: "en",
-    parameters: {
-      1: v.changeType,
-      2: v.occurredAt,
+        text: `Safety Alert: Vehicle QR Scanned\n\nA VaahanSafe QR sticker for vehicle ${v.vehicleMaskedReg} was scanned on ${v.scannedAtFormatted}.\n${
+          v.approximateLocation
+            ? `Approximate Location: ${v.approximateLocation}\n`
+            : ""
+        }\nNote: A scan alone does not indicate an accident.`,
+      };
     },
-  }),
-  renderEmail: (v) => {
-    const safeType = escapeHtml(v.changeType);
-    const safeSummary = escapeHtml(v.actionSummary);
-    const safeTime = escapeHtml(v.occurredAt);
-    return {
-      subject: `Security Alert: ${v.changeType}`,
-      html: `<div style="font-family: sans-serif; line-height: 1.5; color: #111;">
+  };
+
+const reportReason = {
+  PARKING: "Parking / access concern",
+  EMERGENCY: "Possible emergency",
+  LIGHTS_ON: "Lights left on",
+  DAMAGE: "Vehicle damage",
+  OTHER: "Safety concern",
+};
+const reportUrl = (id: string) =>
+  `https://app.vaahansafe.com/scan-history?period=90D&report=${encodeURIComponent(id)}`;
+export const VEHICLE_SCAN_REPORT_V1: TemplateDefinition<VehicleScanReportVariables> =
+  {
+    key: "VEHICLE_SCAN_REPORT_V1",
+    version: 1,
+    category: "SAFETY",
+    supportedChannels: ["IN_APP", "WHATSAPP", "EMAIL"],
+    schema: VehicleScanReportVariablesSchema,
+    renderInApp: (v) => ({
+      title: reportReason[v.reason],
+      body: `A finder shared a report for ${v.vehicleMaskedReg} at ${v.scannedAtFormatted}. ${v.photoCount} photo(s) available.`,
+      actionType: "VIEW_QR",
+      actionTarget: `/scan-history?period=90D&report=${encodeURIComponent(v.reportId)}`,
+    }),
+    renderWhatsApp: (v) => ({
+      templateName:
+        v.reason === "EMERGENCY"
+          ? v.viewerUrl
+            ? "vhn_vehicle_emergency_report_v2"
+            : "vhn_vehicle_emergency_report_v1"
+          : v.viewerUrl
+            ? "vhn_vehicle_report_v2"
+            : "vhn_vehicle_report_v1",
+      languageCode: "en",
+      parameters: {
+        1: v.vehicleMaskedReg,
+        2: reportReason[v.reason],
+        3: v.scannedAtFormatted,
+        4: v.locationText,
+        5: v.viewerUrl || reportUrl(v.reportId),
+      },
+    }),
+    renderEmail: (v) => ({
+      subject: `Vehicle report: ${reportReason[v.reason]}`,
+      html: `<p>A finder reported ${escapeHtml(reportReason[v.reason])} for ${escapeHtml(v.vehicleMaskedReg)}.</p><p>${escapeHtml(v.locationText)}</p><p><a href="${reportUrl(v.reportId)}">View ${v.photoCount} photo(s) and report details in your VaahanSafe account</a></p>`,
+      text: `${reportReason[v.reason]}: ${v.vehicleMaskedReg}\n${v.locationText}\nView ${v.photoCount} photo(s): ${reportUrl(v.reportId)}`,
+    }),
+  };
+
+export const EMERGENCY_CONTACT_REPORT_V1: TemplateDefinition<EmergencyContactReportVariables> =
+  {
+    key: "EMERGENCY_CONTACT_REPORT_V1",
+    version: 1,
+    category: "SAFETY",
+    supportedChannels: ["WHATSAPP"],
+    schema: EmergencyContactReportVariablesSchema,
+    renderInApp: (v) => ({
+      title: "Possible vehicle emergency",
+      body: `A finder reported a possible accident or emergency involving ${v.vehicleMaskedReg}.`,
+    }),
+    renderWhatsApp: (v) => ({
+      templateName: v.viewerUrl
+        ? "vhn_emergency_contact_report_v2"
+        : "vhn_emergency_contact_report_v1",
+      languageCode: "en",
+      parameters: {
+        1: v.vehicleMaskedReg,
+        2: "Possible accident or emergency",
+        3: v.scannedAtFormatted,
+        4: v.locationText,
+        ...(v.viewerUrl ? { 5: v.viewerUrl } : {}),
+      },
+    }),
+    renderEmail: () => ({ subject: "", html: "", text: "" }),
+  };
+
+export const SECURITY_CHANGED_V1: TemplateDefinition<SecurityChangedVariables> =
+  {
+    key: "SECURITY_CHANGED_V1",
+    version: 1,
+    category: "SECURITY",
+    supportedChannels: ["IN_APP", "WHATSAPP", "EMAIL"],
+    schema: SecurityChangedVariablesSchema,
+    renderInApp: (v) => ({
+      title: "Security Settings Modified",
+      body: `${v.changeType}: ${v.actionSummary} at ${v.occurredAt}.`,
+      actionType: "VIEW_SECURITY",
+    }),
+    renderWhatsApp: (v) => ({
+      templateName: "vhn_security_alert_v1",
+      languageCode: "en",
+      parameters: {
+        1: v.changeType,
+        2: v.occurredAt,
+      },
+    }),
+    renderEmail: (v) => {
+      const safeType = escapeHtml(v.changeType);
+      const safeSummary = escapeHtml(v.actionSummary);
+      const safeTime = escapeHtml(v.occurredAt);
+      return {
+        subject: `Security Alert: ${v.changeType}`,
+        html: `<div style="font-family: sans-serif; line-height: 1.5; color: #111;">
         <h2 style="color: #c00;">Security Change Notification</h2>
         <p>We detected the following security modification on your VaahanSafe account:</p>
         <p><strong>${safeType}</strong>: ${safeSummary}</p>
         <p>Timestamp: <strong>${safeTime}</strong></p>
         <p>If you did not perform this change, please log in immediately and revoke active sessions.</p>
       </div>`,
-      text: `Security Change Notification\n\nType: ${v.changeType}\nDetails: ${v.actionSummary}\nTime: ${v.occurredAt}\n\nIf you did not authorize this, log in immediately and revoke active sessions.`,
-    };
-  },
-};
+        text: `Security Change Notification\n\nType: ${v.changeType}\nDetails: ${v.actionSummary}\nTime: ${v.occurredAt}\n\nIf you did not authorize this, log in immediately and revoke active sessions.`,
+      };
+    },
+  };
 
 export const SUPPORT_UPDATE_V1: TemplateDefinition<SupportUpdateVariables> = {
   key: "SUPPORT_UPDATE_V1",
@@ -408,6 +485,7 @@ export const TEMPLATE_REGISTRY: Record<string, TemplateDefinition<any>> = {
   REPLACEMENT_APPROVED_V1,
   EMERGENCY_SCAN_ALERT_V1,
   VEHICLE_SCAN_REPORT_V1,
+  EMERGENCY_CONTACT_REPORT_V1,
   SECURITY_CHANGED_V1,
   SUPPORT_UPDATE_V1,
 };
