@@ -660,3 +660,119 @@
     transition: none !important;
   }
 }
+
+/* A compact app identity and quieter, editorial surfaces. */
+.brand-app-icon {
+  border-radius: 12px;
+  box-shadow: 0 3px 8px #23382b18;
+  flex-shrink: 0;
+}
+.park-header {
+  min-height: 108px;
+}
+.park-header nav a {
+  font-size: 12px;
+  color: #5b6858;
+  padding-block: 12px;
+}
+.park-header nav a:hover {
+  color: #aa6148;
+}
+.park-header .button {
+  border-radius: 8px;
+  min-height: 46px;
+}
+.hero-art {
+  border-radius: 6px;
+  box-shadow:
+    0 24px 60px #303e2614,
+    0 3px 8px #303e2608;
+}
+.hero-art::before {
+  content: "";
+  width: 76px;
+  height: 24px;
+  position: absolute;
+  top: -12px;
+  left: calc(50% - 38px);
+  background: #d9d4ba80;
+  transform: rotate(-5deg);
+  border-inline: 1px solid #c7c3ac66;
+}
+.hero-copy .button {
+  border-radius: 8px;
+  min-height: 52px;
+  box-shadow: 0 5px 12px #304c3b15;
+}
+.parking-stub {
+  border-radius: 5px;
+}
+.reassurance {
+  padding-block: 25px;
+  font-size: 11px;
+  color: #53664f;
+}
+.steps article {
+  border-radius: 6px;
+  background: #fffcf538;
+}
+.steps article > .icon {
+  width: 46px;
+  height: 46px;
+  padding: 10px;
+  border-radius: 13px;
+  background: #e5e9dc;
+  border: 1px solid #d5dccb;
+}
+.detail-paper {
+  border-radius: 6px;
+  box-shadow: 0 12px 30px #344b3210;
+}
+.detail-list article > .icon {
+  width: 42px;
+  height: 42px;
+  padding: 9px;
+  border: 1px solid #ccd4bf;
+  border-radius: 12px;
+}
+.faq-list details {
+  padding-inline: 8px;
+}
+.closing .button {
+  border-radius: 8px;
+}
+@media (max-width: 800px) {
+  .park-header nav {
+    display: none;
+  }
+}
+@media (max-width: 600px) {
+  .park-header {
+    min-height: 90px;
+    gap: 10px;
+    padding-block: 18px;
+  }
+  .brand-app-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+  }
+  .park-header .button {
+    font-size: 11px;
+    padding-inline: 13px;
+    gap: 9px;
+  }
+  .park-header .brand {
+    gap: 9px;
+  }
+  .park-header .brand-name {
+    font-size: 32px;
+  }
+  .park-header .brand-name > span {
+    font-size: 6px;
+    letter-spacing: 1.3px;
+  }
+  .reassurance {
+    font-size: 10px;
+  }
+}

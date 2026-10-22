@@ -233,24 +233,6 @@
   overflow: hidden;
   border-radius: 3px;
 }
-.park-map iframe {
-  width: 100%;
-  height: 100%;
-  border: 0;
-}
-.park-accuracy {
-  position: absolute;
-  bottom: 30px;
-  left: 12px;
-  display: flex;
-  gap: 5px;
-  align-items: center;
-  font-size: 9px;
-  background: #faf8efed;
-  padding: 7px 10px;
-  border: 1px solid #d1d4c2;
-  pointer-events: none;
-}
 .park-map-note {
   font-size: 8px;
   color: var(--park-muted);
@@ -824,5 +806,601 @@
   }
   .park-workspace * {
     transition: none !important;
+  }
+}
+
+/* Park's app shell keeps useful details readable at every screen size. */
+.park-top {
+  min-height: 100px;
+  padding-block: 24px;
+}
+.park-wordmark {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  letter-spacing: -1.5px;
+  text-decoration: none;
+}
+.park-wordmark > img {
+  border-radius: 11px;
+  box-shadow: 0 4px 12px #23382b16;
+}
+.park-wordmark .park-brand-text {
+  font:
+    46px/0.8 "Cormorant Garamond",
+    Georgia,
+    serif;
+  letter-spacing: -1.5px;
+}
+.park-brand-text small {
+  display: block;
+  font:
+    7px/2.6 Inter,
+    sans-serif;
+  letter-spacing: 1.7px;
+}
+.park-top-links a {
+  min-height: 42px;
+  font-size: 12px;
+  border-radius: 7px;
+  padding: 8px 10px;
+}
+.park-nav-current {
+  background: #e6ebde;
+  color: #36553e;
+}
+.park-main {
+  padding-top: 48px;
+}
+.park-eyebrow {
+  font-size: 10px !important;
+  color: #68745e;
+  letter-spacing: 0.16em;
+}
+.park-intro > div > p:last-child {
+  font-size: 14px;
+}
+.park-private {
+  border: 1px solid #d9ddcd;
+  background: #f9f8f0b0;
+  border-radius: 8px;
+  padding: 12px 15px;
+  font-size: 9px;
+}
+.park-private small {
+  font-size: 10px;
+}
+.park-stats {
+  padding-block: 19px;
+  font-size: 12px;
+}
+.park-stats > button {
+  min-height: 36px;
+  font-size: 11px;
+}
+.park-columns {
+  align-items: start;
+  grid-template-columns: minmax(0, 1.35fr) minmax(370px, 1fr);
+}
+.park-current,
+.park-save {
+  border-radius: 12px;
+  box-shadow: 0 8px 28px #34432707;
+  overflow: hidden;
+}
+.park-current {
+  background: #fffcf580;
+  padding: 28px;
+}
+.park-save {
+  background: #eeefe3b0;
+  padding: 28px;
+}
+.park-status {
+  font-size: 9px;
+  border-radius: 5px;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+.park-save > p:not(.park-eyebrow) {
+  font-size: 13px;
+  margin-bottom: 27px;
+}
+.park-save h2 {
+  font-size: 39px;
+  margin-top: 12px;
+}
+.park-field {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  margin-bottom: 21px;
+  color: #5f6c58;
+  font-weight: 500;
+}
+.park-field > span {
+  font-size: 8px;
+  color: #838978;
+  font-weight: 400;
+}
+.park-field input,
+.park-field textarea {
+  border-color: #cdd3bf;
+  border-radius: 7px;
+  background: #fffdf580;
+  font-size: 13px;
+  padding: 12px 13px;
+  min-height: 47px;
+}
+.park-field textarea {
+  min-height: 95px;
+}
+.park-field input::placeholder,
+.park-field textarea::placeholder {
+  color: #8a8f80;
+}
+.park-select-trigger {
+  margin-top: 8px;
+  min-height: 65px;
+  height: auto;
+  border: 1px solid #c6cfba;
+  border-radius: 8px;
+  background: #fffdf8b0;
+  box-shadow: 0 2px 3px #304c3b05;
+  padding: 11px 14px;
+  gap: 12px;
+  color: #36503c;
+  font:
+    13px/1.6 Inter,
+    sans-serif;
+}
+.park-select-trigger > span {
+  flex: 1;
+  margin: 0;
+  color: inherit;
+  font: inherit;
+  letter-spacing: 0;
+  text-align: left;
+}
+.park-select-trigger > svg:first-child {
+  flex-shrink: 0;
+}
+.park-select-trigger > svg:last-child {
+  flex-shrink: 0;
+  margin-left: auto;
+}
+.park-select-trigger[data-state="open"] {
+  border-color: #78906a;
+  box-shadow: 0 0 0 3px #657f4f16;
+}
+.park-select-trigger:focus-visible {
+  outline: 2px solid #8c9f7c;
+  outline-offset: 3px;
+}
+.park-duration-trigger {
+  min-height: 49px;
+}
+.park-vehicle-option {
+  display: flex !important;
+  flex-direction: column;
+  gap: 3px;
+  margin: 0 !important;
+  font: inherit !important;
+  letter-spacing: 0;
+  color: #304c3b !important;
+}
+.park-vehicle-option strong {
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+}
+.park-vehicle-option small {
+  font:
+    11px/1.5 Inter,
+    sans-serif;
+  letter-spacing: 0;
+  color: #79816d;
+}
+.park-select-menu {
+  background: #fcfaf1;
+  color: #344c39;
+  border: 1px solid #c9d1bc;
+  border-radius: 10px;
+  padding: 4px;
+  box-shadow: 0 16px 40px #23382b25;
+  max-width: min(440px, calc(100vw - 32px));
+  font-family: Inter, sans-serif;
+}
+.park-select-menu [data-radix-select-viewport] {
+  scrollbar-width: thin;
+  scrollbar-color: #aebc9b #f2f2e7;
+}
+.park-select-option {
+  border-radius: 6px;
+  padding: 11px 36px 11px 12px;
+  font-size: 13px;
+  min-height: 43px;
+  cursor: pointer;
+}
+.park-select-option[data-highlighted] {
+  background: #e7eddf;
+  color: #304c3b;
+}
+.park-select-option[data-state="checked"] {
+  background: #edf0e5;
+}
+.park-select-option > span:last-child {
+  min-width: 0;
+}
+.park-consent {
+  font-size: 11px;
+  line-height: 1.8;
+  gap: 12px;
+}
+.park-consent input {
+  width: 17px;
+  height: 17px;
+}
+.park-small-print,
+.park-map-note {
+  font-size: 10px;
+  line-height: 1.8;
+}
+.park-small-print a {
+  text-underline-offset: 3px;
+  text-decoration: underline;
+}
+.park-gps {
+  border-radius: 8px;
+  font-size: 13px;
+  min-height: 59px;
+}
+.park-gps small {
+  font-size: 10px;
+}
+.park-button {
+  border-radius: 7px;
+  min-height: 48px;
+  font-size: 12px;
+}
+.park-save-button {
+  min-height: 51px;
+}
+.park-empty-current {
+  padding: 28px 0 30px;
+}
+.park-empty-art {
+  position: relative;
+  margin: 3px 0 29px;
+  padding: 10px 10px 42px;
+  background: #fffdf6;
+  border: 1px solid #dedacb;
+  border-radius: 7px;
+  transform: rotate(-1deg);
+  box-shadow: 0 8px 20px #3443270c;
+}
+.park-empty-art img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 260px;
+  object-fit: cover;
+  border-radius: 3px;
+}
+.park-empty-art > span {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  position: absolute;
+  bottom: 15px;
+  left: 20px;
+  font-size: 8px;
+  letter-spacing: 0.14em;
+  color: #617359;
+}
+.park-empty-symbol {
+  display: none;
+}
+.park-empty-current h2 {
+  font-size: 48px;
+}
+.park-empty-current p {
+  font-size: 13px;
+}
+.park-empty-current > span {
+  font-size: 9px;
+  margin-top: 25px;
+}
+.park-ticket-clock {
+  border-left: 1px solid #d4dac8;
+  padding-left: 18px;
+}
+.park-ticket-clock > span,
+.park-location-details span {
+  font-size: 9px;
+}
+.park-ticket-clock small,
+.park-captured {
+  font-size: 10px;
+}
+.park-ticket-clock strong {
+  font-family: Inter, sans-serif;
+  font-weight: 400;
+  font-size: 25px;
+  letter-spacing: -0.03em;
+}
+.park-map-shell {
+  border: 1px solid #ced5c0;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #f4f5e9;
+}
+.park-map-caption,
+.park-map-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 14px;
+  font-size: 9px;
+  color: #627257;
+}
+.park-map-caption {
+  font-size: 8px;
+  letter-spacing: 0.1em;
+}
+.park-map-caption > span:first-child {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.park-map {
+  height: auto;
+  aspect-ratio: 4/3;
+  border: 0;
+  border-radius: 0;
+}
+.park-map > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.park-map-controls {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  border: 1px solid #cbd2be;
+  background: #fffcf5;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px #23382b15;
+  overflow: hidden;
+}
+.park-map-controls button {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  color: #304c3b;
+  border-bottom: 1px solid #e0e3d5;
+}
+.park-map-controls button:last-child {
+  border: 0;
+}
+.park-map-controls button:hover:not(:disabled) {
+  background: #e6eddd;
+}
+.park-map-state {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 35px 58px 35px 25px;
+  text-align: center;
+  gap: 12px;
+  background: #f0f2e7;
+}
+.park-map-state strong {
+  font-size: 14px;
+  font-weight: 500;
+}
+.park-map-state p {
+  font-size: 11px;
+  line-height: 1.8;
+  color: #75806a;
+}
+.park-map-state button {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 12px;
+  border-bottom: 1px solid #8fa17c;
+  padding: 7px;
+}
+.park-map-dialog {
+  width: min(960px, calc(100% - 32px));
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  padding: 22px;
+  border: 1px solid #c9d1bc;
+  border-radius: 14px;
+  background: #f8f5eb;
+  color: #304c3b;
+  box-shadow: 0 25px 100px #172b1940;
+}
+.park-map-dialog::backdrop {
+  background: #1e3025a6;
+  backdrop-filter: blur(6px);
+}
+.park-map-dialog header {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+.park-map-dialog h2 {
+  font-size: 30px;
+  line-height: 1.1;
+  margin-top: 6px;
+  max-width: 700px;
+}
+.park-map-dialog header button {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  background: #e6ebdd;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.park-map-expanded {
+  max-height: 65dvh;
+  aspect-ratio: 4/3;
+  background: #e6ebdd;
+  border-radius: 9px;
+}
+.park-map-dialog > p {
+  font-size: 10px;
+  margin-top: 14px;
+  line-height: 1.8;
+  color: #718065;
+}
+.park-map-dialog button:focus-visible {
+  outline: 2px solid #a35e45;
+  outline-offset: 3px;
+}
+.park-history > .park-section-title > span {
+  font-size: 9px;
+}
+.park-history-empty {
+  font-size: 13px;
+}
+.park-history-list strong {
+  font-size: 13px;
+}
+.park-history-list p {
+  font-size: 11px;
+}
+@media (max-width: 1000px) {
+  .park-columns {
+    grid-template-columns: minmax(0, 1fr) minmax(340px, 1fr);
+    gap: 20px;
+  }
+  .park-current,
+  .park-save {
+    padding: 22px;
+  }
+  .park-top-links {
+    gap: 8px;
+  }
+  .park-ticket-clock {
+    border-left: 0;
+    padding-left: 0;
+  }
+}
+@media (max-width: 800px) {
+  .park-columns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .park-empty-art {
+    max-width: 480px;
+    margin-inline: auto;
+  }
+  .park-private {
+    padding: 10px 13px;
+  }
+  .park-top-links .park-nav-current {
+    display: none;
+  }
+  .park-top {
+    min-height: 88px;
+  }
+  .park-empty-current {
+    padding-bottom: 22px;
+  }
+}
+@media (max-width: 600px) {
+  .park-top {
+    padding-inline: 20px;
+    gap: 12px;
+  }
+  .park-top-links {
+    gap: 2px;
+  }
+  .park-top-links a {
+    font-size: 10px;
+    padding-inline: 7px;
+    gap: 5px;
+  }
+  .park-top-links a:last-child {
+    width: 36px;
+  }
+  .park-wordmark {
+    gap: 9px;
+  }
+  .park-wordmark > img {
+    width: 38px;
+    height: 38px;
+  }
+  .park-wordmark .park-brand-text {
+    font-size: 39px;
+  }
+  .park-brand-text small {
+    font-size: 6px;
+    letter-spacing: 1.2px;
+  }
+  .park-intro h1 {
+    font-size: 45px;
+  }
+  .park-main {
+    padding-top: 30px;
+  }
+  .park-current,
+  .park-save {
+    padding: 20px;
+    border-radius: 10px;
+  }
+  .park-stats {
+    gap: 14px;
+    font-size: 11px;
+  }
+  .park-stats > button {
+    margin-left: 0;
+  }
+  .park-field input,
+  .park-field textarea {
+    font-size: 16px;
+  }
+  .park-empty-current h2 {
+    font-size: 42px;
+  }
+  .park-empty-current p {
+    font-size: 12px;
+  }
+  .park-empty-art img {
+    max-height: 220px;
+  }
+  .park-status {
+    font-size: 8px;
+  }
+  .park-eyebrow {
+    font-size: 9px !important;
+  }
+  .park-map-dialog {
+    padding: 16px;
+  }
+  .park-map-dialog h2 {
+    font-size: 26px;
+  }
+  .park-map-meta {
+    font-size: 8px;
+    padding-inline: 10px;
+  }
+  .park-history > .park-section-title > span {
+    max-width: 100px;
+    text-align: right;
+    line-height: 1.7;
   }
 }

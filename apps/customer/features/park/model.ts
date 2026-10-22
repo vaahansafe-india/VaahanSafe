@@ -144,9 +144,13 @@ export function parkClock(
       session.status === "PARKED" && remaining !== null && remaining <= 0,
   };
 }
-export function parkingMapUrl(latitude: number, longitude: number) {
-  const d = 0.003;
-  return `https://www.openstreetmap.org/export/embed.html?bbox=${encodeURIComponent(`${longitude - d},${latitude - d},${longitude + d},${latitude + d}`)}&layer=mapnik&marker=${encodeURIComponent(`${latitude},${longitude}`)}`;
+export function parkingMapZoom(value: string | null) {
+  if (value === null) return 16;
+  if (!/^(1[2-9])$/.test(value)) throw new ParkError("INVALID_INPUT");
+  return Number(value);
+}
+export function parkingMapUrl(id: string, zoom = 16) {
+  return `/api/park/${encodeURIComponent(id)}/map?zoom=${parkingMapZoom(String(zoom))}`;
 }
 export function parkingDirectionsUrl(latitude: number, longitude: number) {
   return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${latitude},${longitude}`)}&travelmode=walking`;

@@ -14,10 +14,6 @@ copyFileSync(
   path.join(root, "../view/public/art/paper-texture.webp"),
   path.join(root, "public/art/paper-texture.webp"),
 );
-copyFileSync(
-  path.join(root, "../customer/public/favicon.svg"),
-  path.join(root, "public/favicon.svg"),
-);
 if (!existsSync(path.join(root, "public/art/park-hero.webp")))
   throw new Error("Park hero artwork is required");
 execFileSync(

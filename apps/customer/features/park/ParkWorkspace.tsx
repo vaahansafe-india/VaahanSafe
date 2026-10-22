@@ -2,7 +2,15 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { VaahanIcon } from "@vaahansafe/icons";
 import type { ParkData, ParkLocation, ParkSession } from "./model";
-import { parkClock, parkingDirectionsUrl, parkingMapUrl } from "./model";
+import { parkClock, parkingDirectionsUrl } from "./model";
+import { ParkMap } from "./ParkMap";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const formatTime = (time: string) =>
   new Date(time).toLocaleString("en-IN", {
@@ -199,16 +207,23 @@ export function ParkWorkspace({ phoneVerified }: { phoneVerified: boolean }) {
           className="park-wordmark"
           aria-label="Park by VaahanSafe home"
         >
-          park<span>BY VAAHANSAFE</span>
+          <img src="/images/park/icon.svg" width={44} height={44} alt="" />
+          <span className="park-brand-text">
+            park<small>BY VAAHANSAFE</small>
+          </span>
         </a>
-        <div className="park-top-links">
+        <nav className="park-top-links" aria-label="Park navigation">
+          <a className="park-nav-current" href="/park" aria-current="page">
+            <VaahanIcon name="location" size={16} />
+            My notebook
+          </a>
           <a href="/dashboard">
             <VaahanIcon name="arrow-left" size={16} /> My VaahanSafe
           </a>
           <a href="/help" aria-label="Help">
             <VaahanIcon name="help" size={20} />
           </a>
-        </div>
+        </nav>
       </header>
       <main className="park-main">
         <div className="park-intro">
@@ -349,25 +364,15 @@ export function ParkWorkspace({ phoneVerified }: { phoneVerified: boolean }) {
                             </small>
                           </div>
                         </div>
-                        <div className="park-map">
-                          <iframe
-                            title="Map of your saved parking location"
-                            src={parkingMapUrl(
-                              chosen.latitude,
-                              chosen.longitude,
-                            )}
-                            loading="lazy"
-                            referrerPolicy="no-referrer"
-                          />
-                          <span className="park-accuracy">
-                            <VaahanIcon name="location" size={14} /> GPS
-                            accuracy ±{Math.ceil(chosen.accuracy_m)} m
-                          </span>
-                        </div>
+                        <ParkMap
+                          key={chosen.id}
+                          id={chosen.id}
+                          place={chosen.place_name}
+                          accuracy={chosen.accuracy_m}
+                        />
                         <p className="park-map-note">
-                          Map © OpenStreetMap contributors.
-                          {chosen.place_name && " Address: Ola Maps."} Your
-                          phone’s accuracy can vary, especially indoors.
+                          Map and address by Ola Maps. Your phone’s accuracy can
+                          vary, especially indoors.
                         </p>
                         <div className="park-location-details">
                           <div>
@@ -426,6 +431,18 @@ export function ParkWorkspace({ phoneVerified }: { phoneVerified: boolean }) {
                       </>
                     ) : (
                       <div className="park-empty-current">
+                        <div className="park-empty-art" aria-hidden="true">
+                          <img
+                            src="/images/park/park-hero.webp"
+                            width={1400}
+                            height={934}
+                            alt=""
+                          />
+                          <span>
+                            <VaahanIcon name="location" size={18} /> A PLACE FOR
+                            YOUR NEXT PAUSE
+                          </span>
+                        </div>
                         <div className="park-empty-symbol">
                           <VaahanIcon name="location" size={42} />
                         </div>
@@ -468,23 +485,46 @@ export function ParkWorkspace({ phoneVerified }: { phoneVerified: boolean }) {
                       </div>
                     ) : (
                       <form onSubmit={save}>
-                        <label className="park-field">
-                          VEHICLE
-                          <select
+                        <div className="park-field">
+                          <label htmlFor="park-vehicle">YOUR VEHICLE</label>
+                          <Select
                             required
                             value={vehicle}
-                            onChange={(e) => {
-                              setVehicle(e.target.value);
+                            onValueChange={(value) => {
+                              setVehicle(value);
                               requestId.current = null;
                             }}
                           >
-                            {available.map((v) => (
-                              <option value={v.id} key={v.id}>
-                                {v.registration_number} · {v.make} {v.model}
-                              </option>
-                            ))}
-                          </select>
-                        </label>
+                            <SelectTrigger
+                              id="park-vehicle"
+                              className="park-select-trigger"
+                            >
+                              <VaahanIcon name="vehicle" size={20} />
+                              <SelectValue placeholder="Choose a vehicle" />
+                            </SelectTrigger>
+                            <SelectContent
+                              className="park-select-menu"
+                              position="popper"
+                              sideOffset={6}
+                            >
+                              {available.map((v) => (
+                                <SelectItem
+                                  className="park-select-option"
+                                  value={v.id}
+                                  key={v.id}
+                                  textValue={`${v.registration_number} ${v.make} ${v.model}`}
+                                >
+                                  <span className="park-vehicle-option">
+                                    <strong>{v.registration_number}</strong>
+                                    <small>
+                                      {v.make} {v.model}
+                                    </small>
+                                  </span>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
                         <div className="park-field-row">
                           <label className="park-field">
                             FLOOR / LEVEL <span>OPTIONAL</span>
@@ -515,22 +555,49 @@ export function ParkWorkspace({ phoneVerified }: { phoneVerified: boolean }) {
                             onChange={(e) => setNotes(e.target.value)}
                           />
                         </label>
-                        <label className="park-field">
-                          RETURN-BY COUNTDOWN
-                          <select
-                            value={duration}
-                            onChange={(e) => setDuration(e.target.value)}
+                        <div className="park-field">
+                          <label htmlFor="park-duration">
+                            RETURN-BY COUNTDOWN
+                          </label>
+                          <Select
+                            value={duration || "none"}
+                            onValueChange={(v) =>
+                              setDuration(v === "none" ? "" : v)
+                            }
                           >
-                            <option value="">No countdown</option>
-                            <option value="30">30 minutes</option>
-                            <option value="60">1 hour</option>
-                            <option value="120">2 hours</option>
-                            <option value="180">3 hours</option>
-                            <option value="240">4 hours</option>
-                            <option value="480">8 hours</option>
-                            <option value="1440">24 hours</option>
-                          </select>
-                        </label>
+                            <SelectTrigger
+                              id="park-duration"
+                              className="park-select-trigger park-duration-trigger"
+                            >
+                              <VaahanIcon name="clock" size={20} />
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent
+                              className="park-select-menu"
+                              position="popper"
+                              sideOffset={6}
+                            >
+                              {[
+                                ["none", "No countdown"],
+                                ["30", "30 minutes"],
+                                ["60", "1 hour"],
+                                ["120", "2 hours"],
+                                ["180", "3 hours"],
+                                ["240", "4 hours"],
+                                ["480", "8 hours"],
+                                ["1440", "24 hours"],
+                              ].map(([value, label]) => (
+                                <SelectItem
+                                  key={value}
+                                  value={value!}
+                                  className="park-select-option"
+                                >
+                                  {label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
                         <label className="park-consent">
                           <input
                             type="checkbox"
@@ -542,12 +609,12 @@ export function ParkWorkspace({ phoneVerified }: { phoneVerified: boolean }) {
                           />
                           <span>
                             Save my current location privately in my account.
-                            Show it on OpenStreetMap and look up its address
-                            using Ola Maps when available.
+                            Use Ola Maps to display my saved spot and look up
+                            its address when available.
                           </span>
                         </label>
                         <p className="park-small-print">
-                          Address lookup:{" "}
+                          Maps & address lookup:{" "}
                           <a
                             href="https://maps.olakrutrim.com/legal-docs/terms-conditions-2026.pdf"
                             target="_blank"

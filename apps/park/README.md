@@ -30,8 +30,15 @@ not grant QR or subscription entitlements, or publish a location on a public QR.
 
 Configure `OLA_MAPS_API_KEY` in the **customer server environment**, not this public
 landing app, `NEXT_PUBLIC_*`, or tracked files. Address lookup failure leaves the actual
-saved GPS point intact without fabricating an address. Map rendering uses OpenStreetMap;
-Ola-derived labels are attributed separately. Consent explains both providers.
+saved GPS point intact without fabricating an address. Ola Maps supplies the map preview
+and address. The authenticated image endpoint checks current vehicle ownership before
+requesting a fixed-size map, permits zoom levels 12–19, and keeps the key server-only.
+Provider failures show a retry state; saved parking details remain available. The preview
+supports zoom and an expanded dialog, with no panning or live tracking.
+
+Dedicated SVG, Apple touch and maskable install icons are shared across the landing and
+workspace. Regenerate them with `node tooling/scripts/generate-park-icons.mjs` from the
+repository root. The manifest adds an app identity without claiming offline support.
 
 ## Commands
 

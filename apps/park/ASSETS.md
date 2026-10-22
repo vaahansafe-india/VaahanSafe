@@ -4,3 +4,5 @@
 - `public/art/paper-texture.webp`: existing VaahanSafe paper texture reused from the viewer.
 - `public/fonts/*`: existing Cormorant Garamond and Inter subsets; license files copied alongside the fonts.
 - Hugeicons free vectors: existing `@hugeicons/core-free-icons` package and serializer.
+- `public/favicon.svg`: original code-drawn Park monogram and location pin. Touch,
+  install and maskable PNG variants are rasterized by `generate-park-icons.mjs`.

@@ -4,6 +4,7 @@ import {
   parkClock,
   parkingDirectionsUrl,
   parkingMapUrl,
+  parkingMapZoom,
 } from "../apps/customer/features/park/model";
 const now = Date.parse("2026-10-22T12:00:00Z");
 const input = () => ({
@@ -120,9 +121,24 @@ describe("parking times and directions", () => {
       "travelmode",
     ]);
   });
-  it("renders the actual saved marker on the map", () => {
-    const u = new URL(parkingMapUrl(28.6, 77.2));
-    expect(u.origin).toBe("https://www.openstreetmap.org");
-    expect(u.searchParams.get("marker")).toBe("28.6,77.2");
+  it("addresses a private saved-record map without coordinates or credentials", () => {
+    expect(parkingMapUrl("private-id", 17)).toBe(
+      "/api/park/private-id/map?zoom=17",
+    );
+    expect(parkingMapUrl("x/y")).toBe("/api/park/x%2Fy/map?zoom=16");
+  });
+  it("bounds map zoom and rejects arbitrary provider parameters", () => {
+    expect(parkingMapZoom(null)).toBe(16);
+    for (const value of [
+      "0",
+      "11",
+      "20",
+      "16.5",
+      "16&api_key=bad",
+      "Infinity",
+      "",
+    ]) {
+      expect(() => parkingMapZoom(value)).toThrow("INVALID_INPUT");
+    }
   });
 });
