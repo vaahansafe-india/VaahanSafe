@@ -956,7 +956,7 @@
   border-radius: 8px;
   background: #fffdf8b0;
   box-shadow: 0 2px 3px #304c3b05;
-  padding: 8px 12px;
+  padding: 7px 12px;
   gap: 12px;
   color: #36503c;
   font:
@@ -999,7 +999,7 @@
 .park-vehicle-option {
   display: flex !important;
   flex-direction: column;
-  gap: 3px;
+  gap: 2px;
   margin: 0 !important;
   font: inherit !important;
   letter-spacing: 0;
@@ -1007,12 +1007,13 @@
 }
 .park-vehicle-option strong {
   font-size: 13px;
+  line-height: 1.2;
   letter-spacing: 0.06em;
   font-weight: 600;
 }
 .park-vehicle-option small {
   font:
-    11px/1.5 Inter,
+    11px/1.2 Inter,
     sans-serif;
   letter-spacing: 0;
   color: #79816d;
