@@ -10,7 +10,8 @@ mobile rule and vehicle ownership. No cross-domain bearer tokens or new sign-in 
 - Save fresh GPS once, with consent, for an active owned vehicle.
 - Store floor, bay, notes and an optional return-by countdown.
 - View a map, GPS accuracy, elapsed time and Google Maps walking directions.
-- End a parking session, view the latest 50 records, permanently delete a private record.
+- End a parking session, view the latest 50 records, and open a previous stop's map,
+  location, timestamps, floor, bay and notes. Permanently delete a private record.
 - Server-side Ola Maps reverse geocoding, with clear provider attribution and policy links.
 
 The countdown runs while the page is open. No background alarm, live tracking,

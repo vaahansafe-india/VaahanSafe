@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { VaahanIcon } from "@vaahansafe/icons";
 import { parkingMapUrl } from "./model";
 
@@ -7,11 +7,14 @@ export function ParkMap({
   id,
   place,
   accuracy,
+  expandable = true,
 }: {
   id: string;
   place: string | null;
   accuracy: number;
+  expandable?: boolean;
 }) {
+  const titleId = useId();
   const [zoom, setZoom] = useState(16),
     [retry, setRetry] = useState(0);
   const [image, setImage] = useState(""),
@@ -97,7 +100,7 @@ export function ParkMap({
         >
           <VaahanIcon name="zoom-out" size={18} />
         </button>
-        {!expanded && (
+        {!expanded && expandable && (
           <button
             type="button"
             aria-label="Expand parking map"
@@ -122,30 +125,32 @@ export function ParkMap({
         <span>GPS accuracy ±{Math.ceil(accuracy)} m</span>
         <span>Map preview · Zoom {zoom}</span>
       </div>
-      <dialog
-        ref={dialog}
-        className="park-map-dialog"
-        aria-labelledby="park-map-title"
-      >
-        <header>
-          <div>
-            <span className="park-eyebrow">YOUR WAY BACK</span>
-            <h2 id="park-map-title">{place || "Your saved parking spot"}</h2>
-          </div>
-          <button
-            type="button"
-            aria-label="Close map"
-            onClick={() => dialog.current?.close()}
-          >
-            <VaahanIcon name="close" size={22} />
-          </button>
-        </header>
-        {preview(true)}
-        <p>
-          © Ola Maps · GPS accuracy ±{Math.ceil(accuracy)} m · Your pin marks
-          the location saved by your phone.
-        </p>
-      </dialog>
+      {expandable && (
+        <dialog
+          ref={dialog}
+          className="park-map-dialog"
+          aria-labelledby={titleId}
+        >
+          <header>
+            <div>
+              <span className="park-eyebrow">YOUR WAY BACK</span>
+              <h2 id={titleId}>{place || "Your saved parking spot"}</h2>
+            </div>
+            <button
+              type="button"
+              aria-label="Close map"
+              onClick={() => dialog.current?.close()}
+            >
+              <VaahanIcon name="close" size={22} />
+            </button>
+          </header>
+          {preview(true)}
+          <p>
+            © Ola Maps · GPS accuracy ±{Math.ceil(accuracy)} m · Your pin marks
+            the location saved by your phone.
+          </p>
+        </dialog>
+      )}
     </div>
   );
 }

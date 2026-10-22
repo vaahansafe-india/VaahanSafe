@@ -811,8 +811,14 @@
 
 /* Park's app shell keeps useful details readable at every screen size. */
 .park-top {
-  min-height: 100px;
-  padding-block: 24px;
+  min-height: 76px;
+  padding-block: 14px;
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: #f8f6efed url("/images/auth/paper-texture.webp") center / 420px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 1px 0 #d8d4c766;
 }
 .park-wordmark {
   display: flex;
@@ -822,25 +828,28 @@
   text-decoration: none;
 }
 .park-wordmark > img {
+  width: 40px;
+  height: 40px;
   border-radius: 11px;
   box-shadow: 0 4px 12px #23382b16;
 }
 .park-wordmark .park-brand-text {
   font:
-    46px/0.8 "Cormorant Garamond",
+    36px/0.95 "Cormorant Garamond",
     Georgia,
     serif;
-  letter-spacing: -1.5px;
+  letter-spacing: -1px;
 }
 .park-brand-text small {
   display: block;
   font:
-    7px/2.6 Inter,
+    7px/1.3 Inter,
     sans-serif;
-  letter-spacing: 1.7px;
+  letter-spacing: 1.4px;
+  margin-top: 4px;
 }
 .park-top-links a {
-  min-height: 42px;
+  min-height: 36px;
   font-size: 12px;
   border-radius: 7px;
   padding: 8px 10px;
@@ -913,7 +922,7 @@
 .park-field {
   font-size: 10px;
   letter-spacing: 0.1em;
-  margin-bottom: 21px;
+  margin-bottom: 16px;
   color: #5f6c58;
   font-weight: 500;
 }
@@ -928,11 +937,12 @@
   border-radius: 7px;
   background: #fffdf580;
   font-size: 13px;
-  padding: 12px 13px;
-  min-height: 47px;
+  padding: 8px 11px;
+  min-height: 40px;
 }
 .park-field textarea {
-  min-height: 95px;
+  min-height: 76px;
+  height: 76px;
 }
 .park-field input::placeholder,
 .park-field textarea::placeholder {
@@ -940,13 +950,13 @@
 }
 .park-select-trigger {
   margin-top: 8px;
-  min-height: 65px;
+  min-height: 48px;
   height: auto;
   border: 1px solid #c6cfba;
   border-radius: 8px;
   background: #fffdf8b0;
   box-shadow: 0 2px 3px #304c3b05;
-  padding: 11px 14px;
+  padding: 8px 12px;
   gap: 12px;
   color: #36503c;
   font:
@@ -984,7 +994,7 @@
   outline-offset: 3px;
 }
 .park-duration-trigger {
-  min-height: 49px;
+  min-height: 40px;
 }
 .park-vehicle-option {
   display: flex !important;
@@ -1023,9 +1033,9 @@
 }
 .park-select-option {
   border-radius: 6px;
-  padding: 11px 36px 11px 12px;
+  padding: 8px 34px 8px 11px;
   font-size: 13px;
-  min-height: 43px;
+  min-height: 36px;
   cursor: pointer;
 }
 .park-select-option[data-highlighted] {
@@ -1059,18 +1069,20 @@
 .park-gps {
   border-radius: 8px;
   font-size: 13px;
-  min-height: 59px;
+  min-height: 44px;
+  padding: 10px 12px;
 }
 .park-gps small {
   font-size: 10px;
 }
 .park-button {
   border-radius: 7px;
-  min-height: 48px;
+  min-height: 40px;
   font-size: 12px;
+  padding: 9px 15px;
 }
 .park-save-button {
-  min-height: 51px;
+  min-height: 42px;
 }
 .park-empty-current {
   padding: 28px 0 30px;
@@ -1322,7 +1334,7 @@
     display: none;
   }
   .park-top {
-    min-height: 88px;
+    min-height: 76px;
   }
   .park-empty-current {
     padding-bottom: 22px;
@@ -1330,7 +1342,7 @@
 }
 @media (max-width: 600px) {
   .park-top {
-    padding-inline: 20px;
+    padding: 12px 18px;
     gap: 12px;
   }
   .park-top-links {
@@ -1352,11 +1364,12 @@
     height: 38px;
   }
   .park-wordmark .park-brand-text {
-    font-size: 39px;
+    font-size: 34px;
   }
   .park-brand-text small {
     font-size: 6px;
     letter-spacing: 1.2px;
+    margin-top: 4px;
   }
   .park-intro h1 {
     font-size: 45px;
@@ -1409,5 +1422,286 @@
     max-width: 100px;
     text-align: right;
     line-height: 1.7;
+  }
+}
+
+.park-history-actions {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  flex-shrink: 0;
+}
+.park-history-list .park-history-actions {
+  flex: 0 0 auto;
+}
+.park-view-stop {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 36px;
+  padding: 7px 11px;
+  border: 1px solid #c9d1bc;
+  border-radius: 6px;
+  background: #f6f7ee;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.park-view-stop:hover {
+  background: #e6ecdc;
+  border-color: #aab99b;
+}
+.park-stop-dialog {
+  width: min(740px, calc(100% - 32px));
+  max-height: calc(100dvh - 40px);
+  padding: 28px;
+  overflow-y: auto;
+  border: 1px solid #d0d5c2;
+  border-radius: 14px;
+  background: #f8f5eb url("/images/auth/paper-texture.webp") center/420px;
+  color: #304c3b;
+  box-shadow: 0 25px 100px #172b1955;
+  scrollbar-width: thin;
+  scrollbar-color: #aebc9b #f2f2e7;
+}
+.park-stop-dialog::backdrop {
+  background: #20302599;
+  backdrop-filter: blur(5px);
+}
+.park-stop-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 18px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #d5d8c7;
+}
+.park-stop-header h2 {
+  font:
+    500 40px/1.1 "Cormorant Garamond",
+    Georgia,
+    serif;
+  letter-spacing: -0.035em;
+  margin-top: 7px;
+}
+.park-stop-header > button {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #d0d7c2;
+  border-radius: 50%;
+  background: #edf0e3;
+  flex-shrink: 0;
+}
+.park-stop-place {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding-block: 21px;
+}
+.park-stop-place > span:first-child {
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+.park-stop-place > div {
+  flex: 1;
+  min-width: 0;
+}
+.park-stop-place h3 {
+  font:
+    500 16px/1.6 Inter,
+    sans-serif;
+  overflow-wrap: anywhere;
+}
+.park-stop-place p {
+  font-size: 11px;
+  color: #7c836e;
+  margin-top: 5px;
+  letter-spacing: 0.04em;
+}
+.park-stop-times {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid #d9ddcb;
+  border-radius: 8px;
+  background: #edf0e380;
+  margin-bottom: 20px;
+}
+.park-stop-dialog dt {
+  font:
+    500 9px/1.7 Inter,
+    sans-serif;
+  letter-spacing: 0.1em;
+  color: #748066;
+}
+.park-stop-dialog dd {
+  font-size: 12px;
+  line-height: 1.7;
+  margin-top: 5px;
+  overflow-wrap: anywhere;
+}
+.park-stop-times > div:last-child dd {
+  font-variant-numeric: tabular-nums;
+  font-size: 15px;
+}
+.park-stop-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  padding-block: 20px;
+  border-bottom: 1px solid #d5d8c7;
+}
+.park-stop-note {
+  display: flex;
+  gap: 12px;
+  padding-block: 20px;
+}
+.park-stop-note > span {
+  flex-shrink: 0;
+}
+.park-stop-note p {
+  font-size: 12px;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: #6d7861;
+  margin-top: 4px;
+}
+.park-stop-dialog footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 18px;
+  border-top: 1px solid #d5d8c7;
+}
+.park-stop-dialog footer > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 10px;
+  color: #7b846e;
+}
+.park-stop-dialog button:focus-visible {
+  outline: 2px solid #a35e45;
+  outline-offset: 3px;
+}
+.park-stop-dialog::-webkit-scrollbar {
+  width: 7px;
+}
+.park-stop-dialog::-webkit-scrollbar-track {
+  background: #eeecdf;
+}
+.park-stop-dialog::-webkit-scrollbar-thumb {
+  border: 2px solid #eeecdf;
+  background: #aebc9b;
+  border-radius: 8px;
+}
+@media (max-width: 600px) {
+  .park-field {
+    margin-bottom: 14px;
+  }
+  .park-field input {
+    min-height: 40px;
+    padding-block: 7px;
+  }
+  .park-select-trigger {
+    min-height: 48px;
+    padding: 7px 11px;
+    gap: 9px;
+  }
+  .park-duration-trigger {
+    min-height: 40px;
+  }
+  .park-select-trigger > span {
+    min-width: 0;
+  }
+  .park-vehicle-option strong {
+    font-size: 12px;
+  }
+  .park-vehicle-option small {
+    font-size: 10px;
+  }
+  .park-save > p:not(.park-eyebrow) {
+    margin-bottom: 20px;
+  }
+  .park-history-list article {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .park-history-list article > div:not(.park-history-actions) {
+    flex-basis: calc(100% - 32px);
+  }
+  .park-history-list .park-history-duration {
+    margin-right: auto;
+    text-align: left;
+    font-size: 15px;
+  }
+  .park-history-list .park-history-duration small {
+    text-align: left;
+    font-size: 7px;
+  }
+  .park-history-list .park-history-actions {
+    flex: 0 0 auto;
+    width: auto;
+  }
+  .park-history-actions .park-delete {
+    margin-left: 0;
+    min-width: 36px;
+    min-height: 36px;
+  }
+  .park-view-stop {
+    min-height: 36px;
+    font-size: 11px;
+  }
+  .park-stop-dialog {
+    width: calc(100% - 24px);
+    max-height: calc(100dvh - 24px);
+    padding: 18px;
+    border-radius: 11px;
+  }
+  .park-stop-header {
+    padding-bottom: 16px;
+  }
+  .park-stop-header h2 {
+    font-size: 34px;
+  }
+  .park-stop-place {
+    flex-wrap: wrap;
+    gap: 10px;
+    padding-block: 17px;
+  }
+  .park-stop-place > div {
+    flex-basis: calc(100% - 36px);
+  }
+  .park-stop-place > .park-status {
+    margin-left: 32px;
+  }
+  .park-stop-place h3 {
+    font-size: 14px;
+  }
+  .park-stop-times {
+    grid-template-columns: 1fr 1fr;
+    padding: 12px;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .park-stop-times > div:last-child {
+    grid-column: 1/-1;
+    border-top: 1px solid #d5dac6;
+    padding-top: 9px;
+  }
+  .park-stop-dialog dd {
+    font-size: 11px;
+  }
+  .park-stop-dialog footer {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .park-stop-dialog footer .park-button {
+    margin-left: auto;
   }
 }

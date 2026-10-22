@@ -4,6 +4,7 @@ import { VaahanIcon } from "@vaahansafe/icons";
 import type { ParkData, ParkLocation, ParkSession } from "./model";
 import { parkClock, parkingDirectionsUrl } from "./model";
 import { ParkMap } from "./ParkMap";
+import { ParkStopDialog } from "./ParkStopDialog";
 import {
   Select,
   SelectContent,
@@ -59,6 +60,7 @@ export function ParkWorkspace({ phoneVerified }: { phoneVerified: boolean }) {
     [notice, setNotice] = useState(""),
     [selected, setSelected] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [historyId, setHistoryId] = useState<string | null>(null);
   const requestId = useRef<string | null>(null),
     deleteDialog = useRef<HTMLDialogElement>(null);
   const load = useCallback(async () => {
@@ -218,7 +220,8 @@ export function ParkWorkspace({ phoneVerified }: { phoneVerified: boolean }) {
             My notebook
           </a>
           <a href="/dashboard">
-            <VaahanIcon name="arrow-left" size={16} /> My VaahanSafe
+            <VaahanIcon name="arrow-left" size={16} />{" "}
+            <span>My VaahanSafe</span>
           </a>
           <a href="/help" aria-label="Help">
             <VaahanIcon name="help" size={20} />
@@ -717,14 +720,25 @@ export function ParkWorkspace({ phoneVerified }: { phoneVerified: boolean }) {
                             {parkClock(s, now || Date.now()).elapsed}
                             <small>SESSION ENDED</small>
                           </span>
-                          <button
-                            className="park-delete"
-                            disabled={busy}
-                            onClick={() => setDeleteId(s.id)}
-                            aria-label={`Delete parking record from ${formatTime(s.started_at)}`}
-                          >
-                            <VaahanIcon name="trash" size={17} />
-                          </button>
+                          <div className="park-history-actions">
+                            <button
+                              type="button"
+                              className="park-view-stop"
+                              onClick={() => setHistoryId(s.id)}
+                              aria-label={`View stop from ${formatTime(s.started_at)}`}
+                            >
+                              <VaahanIcon name="external-link" size={15} /> View
+                              stop
+                            </button>
+                            <button
+                              className="park-delete"
+                              disabled={busy}
+                              onClick={() => setDeleteId(s.id)}
+                              aria-label={`Delete parking record from ${formatTime(s.started_at)}`}
+                            >
+                              <VaahanIcon name="trash" size={17} />
+                            </button>
+                          </div>
                         </article>
                       ))}
                     </div>
@@ -752,6 +766,13 @@ export function ParkWorkspace({ phoneVerified }: { phoneVerified: boolean }) {
           <a href="https://vaahansafe.com/privacy">Privacy</a>
         </footer>
       </main>
+      <ParkStopDialog
+        session={history.find((s) => s.id === historyId) || null}
+        vehicle={plate(
+          history.find((s) => s.id === historyId)?.vehicle_id || "",
+        )}
+        onClose={() => setHistoryId(null)}
+      />
       <dialog
         ref={deleteDialog}
         className="park-dialog"
