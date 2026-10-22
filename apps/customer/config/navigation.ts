@@ -105,6 +105,13 @@ export const CUSTOMER_NAVIGATION: readonly AppNavigationGroup[] = [
     label: "SERVICES",
     items: [
       {
+        id: "park",
+        label: "Park",
+        href: "/park",
+        icon: "location",
+        description: "Your private parking notebook",
+      },
+      {
         id: "subscription",
         label: "Subscription",
         href: "/subscription",
