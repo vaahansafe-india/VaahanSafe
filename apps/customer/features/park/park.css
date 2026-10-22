@@ -961,6 +961,13 @@
   letter-spacing: 0;
   text-align: left;
 }
+.park-select-trigger > span[aria-hidden="true"] {
+  flex: 0 0 auto;
+  display: inline-flex;
+  width: auto;
+  overflow: visible;
+  -webkit-line-clamp: unset;
+}
 .park-select-trigger > svg:first-child {
   flex-shrink: 0;
 }
