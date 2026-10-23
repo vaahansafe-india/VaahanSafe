@@ -22,6 +22,15 @@ await build({
 });
 const { landing } = await import(pathToFileURL(renderer).href);
 cpSync(path.join(root, "public"), target, { recursive: true });
+await build({
+  entryPoints: [path.join(root, "src/motion.ts")],
+  outfile: path.join(target, "park-motion.js"),
+  bundle: true,
+  minify: true,
+  format: "esm",
+  platform: "browser",
+  target: ["es2022"],
+});
 writeFileSync(path.join(target, "index.html"), landing());
 writeFileSync(
   path.join(target, "robots.txt"),
@@ -36,7 +45,7 @@ const headers = {
   "Referrer-Policy": "strict-origin-when-cross-origin",
   "Permissions-Policy": "geolocation=(), camera=(), microphone=()",
   "Content-Security-Policy":
-    "default-src 'none'; style-src 'self'; img-src 'self'; font-src 'self'; manifest-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'",
+    "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; manifest-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'",
 };
 writeFileSync(
   path.join(root, ".vercel/output/config.json"),

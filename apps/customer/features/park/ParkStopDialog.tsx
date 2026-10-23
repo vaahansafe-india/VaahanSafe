@@ -80,7 +80,6 @@ export function ParkStopDialog({
               session.latitude,
               session.longitude,
             )}
-            expandable={false}
           />
           <dl className="park-stop-details">
             <div>

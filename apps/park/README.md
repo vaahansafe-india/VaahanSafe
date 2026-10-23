@@ -44,8 +44,18 @@ types. It does not accept browser-supplied coordinates or arbitrary provider URL
 Responses are private/no-store. Google receives the saved coordinates only after
 the user chooses **Load Google Maps** for that record; consent lasts only in React
 state and resets on reload. The iframe explicitly sends the origin referrer for key
-restrictions. A responsive expanded explorer, walking directions and retry states
+restrictions. A dedicated `/park/map/[id]` page, walking directions and retry states
 keep saved details accessible. No live vehicle tracking or Google geocoding is enabled.
+
+The full-page map has a desktop details rail and an expandable mobile details panel.
+Both active and completed stops use the same authenticated record and current vehicle
+ownership checks. Opening the page does not start or end a session or load Google
+before consent. It supports direct links, loading, unavailable and not-found states.
+
+The landing page uses the existing pinned Framer Motion 12 DOM entry for reveal,
+parallax and reading-progress animations. It keeps static HTML content visible with
+JavaScript disabled and disables effects when reduced motion is requested. Assets,
+fonts and the animation bundle are served locally under a self-only script policy.
 
 Dedicated SVG, Apple touch and maskable install icons are shared across the landing and
 workspace. Regenerate them with `node tooling/scripts/generate-park-icons.mjs` from the

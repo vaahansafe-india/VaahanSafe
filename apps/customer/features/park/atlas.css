@@ -1,0 +1,445 @@
+.park-map-tools a {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid #d9dece;
+  border-radius: 7px;
+  color: #526b47;
+}
+.park-map-tools a:hover {
+  background: #edf1e5;
+}
+.park-atlas-page {
+  height: 100dvh;
+  min-height: 0;
+  width: 100%;
+  overflow: hidden;
+}
+.park-atlas {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.park-atlas-header {
+  height: calc(68px + env(safe-area-inset-top, 0px));
+  padding: env(safe-area-inset-top, 0px) 24px 0;
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  border-bottom: 1px solid #d4dac8;
+  flex-shrink: 0;
+  background: #f8f5eb url("/images/auth/paper-texture.webp") center/420px;
+}
+.park-atlas-back {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid #d2dac5;
+  color: #405d48;
+}
+.park-atlas-brand {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  color: #304c3b;
+}
+.park-atlas-brand > span {
+  font:
+    34px/0.85 "Cormorant Garamond",
+    Georgia,
+    serif;
+  letter-spacing: -1.2px;
+}
+.park-atlas-brand small {
+  display: block;
+  font:
+    6px/1.8 Inter,
+    sans-serif;
+  letter-spacing: 0.17em;
+  margin-top: 5px;
+}
+.park-atlas-private {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 10px;
+  color: #78816c;
+}
+.park-atlas-grid {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 330px;
+}
+.park-atlas-surface {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: #ecefe3;
+}
+.park-atlas-surface .park-map-toolbar {
+  padding: 10px 18px;
+  border-bottom: 1px solid #d9decc;
+  flex-shrink: 0;
+}
+.park-atlas-surface .park-google-canvas.is-expanded {
+  flex: 1;
+  width: 100%;
+  min-height: 200px;
+  max-height: none;
+  height: auto;
+  border: 0;
+  border-radius: 0;
+  aspect-ratio: auto;
+}
+.park-atlas-surface .park-map-invitation {
+  overflow-y: auto;
+  justify-content: safe center;
+  background: radial-gradient(ellipse at 50% 35%, #fffdf4 0, #eaeddf 85%);
+}
+.park-atlas-surface .park-map-invitation h3 {
+  font-size: 46px;
+}
+.park-atlas-surface .park-map-invitation p {
+  max-width: 330px;
+  font-size: 12px;
+}
+.park-atlas-surface .park-map-invitation .park-map-pin {
+  width: 72px;
+  height: 72px;
+  margin-bottom: 18px;
+}
+.park-atlas-surface .park-map-feedback {
+  flex-shrink: 0;
+}
+.park-atlas-details {
+  padding: 30px 25px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-left: 1px solid #d4dac8;
+  background: #f8f5eb url("/images/auth/paper-texture.webp") center/420px;
+  scrollbar-width: thin;
+  scrollbar-color: #aebc9b #f2f2e7;
+}
+.park-atlas-place h1 {
+  font:
+    34px/1.12 "Cormorant Garamond",
+    Georgia,
+    serif;
+  letter-spacing: -0.02em;
+  color: #304c3b;
+  margin: 15px 0 18px;
+  overflow-wrap: anywhere;
+}
+.park-atlas-place > p {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  color: #627257;
+  font:
+    11px/1.5 Inter,
+    sans-serif;
+}
+.park-atlas-place > p > span {
+  font-size: 7px;
+  letter-spacing: 0.08em;
+  padding: 5px 7px;
+  border: 1px solid #cbd5be;
+  border-radius: 4px;
+  margin-left: auto;
+  background: #e7ecdc;
+}
+.park-atlas-walk {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #304c3b;
+  color: #fffaf0;
+  padding: 13px 14px;
+  min-height: 56px;
+  border-radius: 8px;
+  margin-block: 23px;
+  font-size: 12px;
+}
+.park-atlas-walk small {
+  display: block;
+  font-size: 8px;
+  color: #c6d2bc;
+  margin-top: 3px;
+}
+.park-atlas-walk > svg:last-child {
+  margin-left: auto;
+}
+.park-atlas-facts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  padding: 21px 0;
+  border-block: 1px solid #d9decc;
+}
+.park-atlas-facts dt {
+  font-size: 8px;
+  color: #7c856f;
+  letter-spacing: 0.12em;
+}
+.park-atlas-facts dd {
+  font-size: 15px;
+  margin-top: 8px;
+  color: #40553b;
+  overflow-wrap: anywhere;
+}
+.park-atlas-time {
+  display: flex;
+  gap: 12px;
+  margin-block: 24px;
+  align-items: flex-start;
+  color: #617653;
+}
+.park-atlas-time span {
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  display: block;
+}
+.park-atlas-time strong {
+  display: block;
+  font:
+    31px/1.4 "Cormorant Garamond",
+    Georgia,
+    serif;
+  font-variant-numeric: tabular-nums;
+}
+.park-atlas-time .is-overdue {
+  color: #a35e45;
+}
+.park-atlas-time small {
+  display: block;
+  color: #7a836e;
+  font-size: 9px;
+  line-height: 1.7;
+}
+.park-atlas-note {
+  display: flex;
+  gap: 10px;
+  border-top: 1px solid #d9decc;
+  padding-top: 20px;
+  margin-bottom: 20px;
+  color: #617653;
+}
+.park-atlas-note svg {
+  flex-shrink: 0;
+}
+.park-atlas-note p {
+  font-size: 11px;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.park-atlas-accuracy {
+  display: flex;
+  gap: 10px;
+  padding: 15px;
+  border: 1px solid #d9decc;
+  border-radius: 8px;
+  color: #6e8061;
+  background: #edf0e480;
+}
+.park-atlas-accuracy svg {
+  flex-shrink: 0;
+}
+.park-atlas-accuracy strong {
+  font-size: 10px;
+  font-weight: 500;
+}
+.park-atlas-accuracy p {
+  font-size: 9px;
+  line-height: 1.8;
+  margin-top: 5px;
+}
+.park-atlas-attribution {
+  font-size: 8px;
+  line-height: 1.9;
+  color: #89917d;
+  margin-top: 20px;
+}
+.park-atlas-sheet-toggle {
+  display: none;
+}
+.park-map-tools .park-atlas-details-toggle {
+  display: inline-flex;
+  gap: 7px;
+  width: auto;
+  padding-inline: 10px;
+  font-size: 10px;
+}
+@media (min-width: 801px) {
+  .park-atlas-grid.is-map-only {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .park-atlas-grid.is-map-only .park-atlas-details {
+    display: none;
+  }
+}
+.park-map-page-error {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  padding: 30px;
+  text-align: center;
+}
+.park-map-page-error h1 {
+  font:
+    48px/1 "Cormorant Garamond",
+    Georgia,
+    serif;
+}
+.park-map-page-error p {
+  font-size: 13px;
+}
+@media (max-width: 800px) {
+  .park-map-tools .park-atlas-details-toggle {
+    display: none;
+  }
+  .park-atlas-header {
+    height: calc(60px + env(safe-area-inset-top, 0px));
+    padding-inline: 16px;
+    gap: 13px;
+  }
+  .park-atlas-brand > span {
+    font-size: 30px;
+  }
+  .park-atlas-private {
+    font-size: 9px;
+  }
+  .park-atlas-grid {
+    display: flex;
+    flex-direction: column;
+  }
+  .park-atlas-surface {
+    flex: 1;
+    min-height: 244px;
+  }
+  .park-atlas-surface .park-map-toolbar {
+    padding: 6px 12px;
+  }
+  .park-atlas-surface .park-map-invitation h3 {
+    font-size: 33px;
+  }
+  .park-atlas-surface .park-map-invitation p {
+    font-size: 11px;
+  }
+  .park-atlas-surface .park-map-invitation .park-map-pin {
+    width: 56px;
+    height: 56px;
+    margin-bottom: 4px;
+  }
+  .park-atlas-details {
+    flex-shrink: 0;
+    overflow-y: auto;
+    border-left: 0;
+    border-top: 1px solid #ccd5be;
+    padding: 0 18px max(12px, env(safe-area-inset-bottom, 0px));
+    max-height: min(45dvh, calc(100dvh - 304px));
+  }
+  .park-atlas-sheet-toggle {
+    width: 100%;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 0 9px;
+    font:
+      9px/1.5 Inter,
+      sans-serif;
+    color: #78866a;
+    position: relative;
+  }
+  .park-atlas-sheet-grip {
+    position: absolute;
+    top: 6px;
+    width: 28px;
+    height: 3px;
+    border-radius: 3px;
+    background: #bdc7ae;
+  }
+  .park-atlas-place {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 5px 12px;
+    align-items: center;
+  }
+  .park-atlas-place .park-eyebrow {
+    display: none;
+  }
+  .park-atlas-place h1 {
+    font:
+      15px/1.4 Inter,
+      sans-serif;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .park-atlas-place > p {
+    font-size: 9px;
+    gap: 4px;
+  }
+  .park-atlas-place > p > span {
+    display: none;
+  }
+  .park-atlas-walk {
+    min-height: 40px;
+    padding: 9px 12px;
+    font-size: 11px;
+    margin: 10px 0 0;
+    border-radius: 7px;
+  }
+  .park-atlas-walk small {
+    display: none;
+  }
+  .park-atlas-more {
+    display: none;
+  }
+  .park-atlas-details.is-open .park-atlas-more {
+    display: block;
+  }
+  .park-atlas-details.is-open .park-atlas-place h1 {
+    -webkit-line-clamp: unset;
+  }
+  .park-atlas-facts {
+    margin-top: 17px;
+    padding-block: 16px;
+  }
+  .park-atlas-time {
+    margin-block: 18px;
+  }
+}
+@media (max-height: 550px) and (max-width: 800px) {
+  .park-atlas-surface .park-map-invitation {
+    gap: 6px;
+    padding: 12px;
+  }
+  .park-atlas-surface .park-map-invitation .park-eyebrow,
+  .park-atlas-surface .park-map-invitation .park-map-pin,
+  .park-atlas-surface .park-map-invitation > small {
+    display: none;
+  }
+  .park-atlas-surface .park-map-invitation h3 {
+    font-size: 25px;
+  }
+  .park-atlas-place h1 {
+    -webkit-line-clamp: 1;
+    font-size: 12px;
+  }
+  .park-atlas-details {
+    padding-bottom: 8px;
+  }
+}

@@ -79,7 +79,7 @@ export async function startParking(value: unknown) {
   }
   return data as ParkSession;
 }
-export async function getParkingMapLocation(id: string) {
+export async function getParkingStop(id: string) {
   const account = await parkAccount();
   if (
     !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)
@@ -88,7 +88,7 @@ export async function getParkingMapLocation(id: string) {
   const db = getSupabaseAdminClient();
   const record = await db
     .from("park_sessions")
-    .select("vehicle_id,latitude,longitude")
+    .select(fields)
     .eq("id", id)
     .eq("user_id", account.user.id)
     .maybeSingle();
@@ -96,7 +96,7 @@ export async function getParkingMapLocation(id: string) {
   if (!record.data) throw new ParkError("NOT_FOUND", 404);
   const vehicle = await db
     .from("vehicles")
-    .select("id")
+    .select("id,registration_number,make,model")
     .eq("id", record.data.vehicle_id)
     .eq("user_id", account.user.id)
     .eq("status", "ACTIVE")
@@ -104,10 +104,11 @@ export async function getParkingMapLocation(id: string) {
     .maybeSingle();
   if (vehicle.error) throw new ParkError("SERVICE_UNAVAILABLE", 503);
   if (!vehicle.data) throw new ParkError("NOT_FOUND", 404);
-  return {
-    latitude: record.data.latitude as number,
-    longitude: record.data.longitude as number,
-  };
+  return { session: record.data as ParkSession, vehicle: vehicle.data };
+}
+export async function getParkingMapLocation(id: string) {
+  const { session } = await getParkingStop(id);
+  return { latitude: session.latitude, longitude: session.longitude };
 }
 export async function changeParking(id: string, action: "end" | "delete") {
   const a = await parkAccount();

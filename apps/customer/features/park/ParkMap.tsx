@@ -1,7 +1,13 @@
 "use client";
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import Link from "next/link";
 import { VaahanIcon } from "@vaahansafe/icons";
-import { parkingMapUrl, type ParkingMapType } from "./model";
+import {
+  parkClock,
+  parkingMapUrl,
+  type ParkingMapType,
+  type ParkSession,
+} from "./model";
 
 export function ParkMap({
   id,
@@ -11,6 +17,9 @@ export function ParkMap({
   floor,
   bay,
   expandable = true,
+  fullPage = false,
+  session,
+  vehicle,
 }: {
   id: string;
   place: string | null;
@@ -19,17 +28,27 @@ export function ParkMap({
   floor?: string | null;
   bay?: string | null;
   expandable?: boolean;
+  fullPage?: boolean;
+  session?: ParkSession;
+  vehicle?: string;
 }) {
-  const titleId = useId(),
-    dialog = useRef<HTMLDialogElement>(null);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [railHidden, setRailHidden] = useState(false);
+  const [now, setNow] = useState(0);
+  useEffect(() => {
+    if (!fullPage) return;
+    setNow(Date.now());
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, [fullPage]);
+  const clock = session && now ? parkClock(session, now) : null;
   const [allowedId, setAllowedId] = useState<string | null>(null);
   const [type, setType] = useState<ParkingMapType>("roadmap");
   const [retry, setRetry] = useState(0),
     [src, setSrc] = useState("");
   const [error, setError] = useState(false),
     [ready, setReady] = useState(false);
-  const [slow, setSlow] = useState(false),
-    [expanded, setExpanded] = useState(false);
+  const [slow, setSlow] = useState(false);
   const allowed = allowedId === id;
   useEffect(() => {
     setSrc("");
@@ -64,21 +83,12 @@ export function ParkMap({
     if (!allowed || ready || error) return;
     const timer = setTimeout(() => setSlow(true), 20000);
     return () => clearTimeout(timer);
-  }, [allowed, ready, error, src, expanded, retry]);
+  }, [allowed, ready, error, src, retry]);
   const reload = () => {
     setReady(false);
     setRetry((v) => v + 1);
   };
-  const open = () => {
-    setExpanded(true);
-    setReady(false);
-    dialog.current?.showModal();
-  };
-  const close = () => {
-    setExpanded(false);
-    setReady(false);
-  };
-  const toolbar = (large = false) => (
+  const toolbar = () => (
     <div className="park-map-toolbar">
       <div className="park-map-types" role="group" aria-label="Map appearance">
         {(["roadmap", "satellite"] as const).map((value) => (
@@ -97,6 +107,20 @@ export function ParkMap({
         ))}
       </div>
       <div className="park-map-tools">
+        {fullPage && (
+          <button
+            type="button"
+            className="park-atlas-details-toggle"
+            aria-label={
+              railHidden ? "Show parking details" : "Hide parking details"
+            }
+            aria-expanded={!railHidden}
+            onClick={() => setRailHidden((value) => !value)}
+          >
+            <VaahanIcon name="panel-left" size={17} />
+            <span>{railHidden ? "Show details" : "Hide details"}</span>
+          </button>
+        )}
         {allowed && (
           <button
             type="button"
@@ -106,10 +130,14 @@ export function ParkMap({
             <VaahanIcon name="refresh" size={17} />
           </button>
         )}
-        {!large && expandable && (
-          <button type="button" aria-label="Expand parking map" onClick={open}>
+        {!fullPage && expandable && (
+          <Link
+            href={`/park/map/${encodeURIComponent(id)}`}
+            prefetch={false}
+            aria-label="Open full-page parking map"
+          >
             <VaahanIcon name="fullscreen" size={17} />
-          </button>
+          </Link>
         )}
       </div>
     </div>
@@ -210,6 +238,150 @@ export function ParkMap({
         )}
       </div>
     );
+  if (fullPage)
+    return (
+      <div className="park-atlas">
+        <header className="park-atlas-header">
+          <Link
+            className="park-atlas-back"
+            href="/park"
+            aria-label="Back to parking notebook"
+          >
+            <VaahanIcon name="arrow-left" size={19} />
+          </Link>
+          <Link className="park-atlas-brand" href="/park">
+            <img src="/images/park/icon.svg" width={32} height={32} alt="" />
+            <span>
+              park<small>YOUR SAVED PLACES</small>
+            </span>
+          </Link>
+          <span className="park-atlas-private">
+            <VaahanIcon name="lock" size={14} /> Private map
+          </span>
+        </header>
+        <div className={`park-atlas-grid ${railHidden ? "is-map-only" : ""}`}>
+          <section
+            className="park-atlas-surface"
+            aria-label="Saved parking map"
+          >
+            {toolbar()}
+            {map(true)}
+            {feedback()}
+          </section>
+          <aside
+            className={`park-atlas-details ${detailsOpen ? "is-open" : ""}`}
+          >
+            <button
+              type="button"
+              className="park-atlas-sheet-toggle"
+              aria-expanded={detailsOpen}
+              aria-controls="parking-map-details"
+              onClick={() => setDetailsOpen((v) => !v)}
+            >
+              <span className="park-atlas-sheet-grip" />
+              <span>
+                {detailsOpen ? "Less detail, more map" : "Parking details"}
+              </span>
+              <VaahanIcon
+                name={detailsOpen ? "chevron-down" : "chevron-up"}
+                size={17}
+              />
+            </button>
+            <div className="park-atlas-place">
+              <span className="park-eyebrow">
+                {session?.status === "ENDED"
+                  ? "FROM YOUR NOTEBOOK"
+                  : "YOUR WAY BACK"}
+              </span>
+              <h1>{place || "Your saved parking spot"}</h1>
+              <p>
+                <VaahanIcon name="vehicle" size={16} />
+                {vehicle}
+                <span>
+                  {session?.status === "ENDED" ? "COMPLETED" : "PARKED"}
+                </span>
+              </p>
+            </div>
+            {directionsUrl && (
+              <a
+                className="park-atlas-walk"
+                href={directionsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <VaahanIcon name="route" size={19} />
+                <span>
+                  Walk to this spot<small>Open Google Maps directions</small>
+                </span>
+                <VaahanIcon name="external-link" size={16} />
+              </a>
+            )}
+            <div id="parking-map-details" className="park-atlas-more">
+              <dl className="park-atlas-facts">
+                <div>
+                  <dt>FLOOR / LEVEL</dt>
+                  <dd>{floor || "Not noted"}</dd>
+                </div>
+                <div>
+                  <dt>BAY / SLOT</dt>
+                  <dd>{bay || "Not noted"}</dd>
+                </div>
+              </dl>
+              {session && (
+                <div className="park-atlas-time">
+                  <VaahanIcon name="clock" size={21} />
+                  <div>
+                    <span>
+                      {session.status === "ENDED"
+                        ? "TIME PARKED"
+                        : session.return_at
+                          ? clock?.overdue
+                            ? "PAST YOUR RETURN TIME"
+                            : "TIME TO RETURN"
+                          : "PARKED FOR"}
+                    </span>
+                    <strong className={clock?.overdue ? "is-overdue" : ""}>
+                      {session.status === "PARKED" && session.return_at
+                        ? clock?.remaining || "—"
+                        : clock?.elapsed || "—"}
+                    </strong>
+                    <small>
+                      Saved{" "}
+                      {new Date(session.started_at).toLocaleString("en-IN", {
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                        timeZone: "Asia/Kolkata",
+                      })}
+                    </small>
+                  </div>
+                </div>
+              )}
+              {session?.notes && (
+                <div className="park-atlas-note">
+                  <VaahanIcon name="edit" size={17} />
+                  <p>{session.notes}</p>
+                </div>
+              )}
+              <div className="park-atlas-accuracy">
+                <VaahanIcon name="location" size={18} />
+                <div>
+                  <strong>GPS accuracy ±{Math.ceil(accuracy)} m</strong>
+                  <p>
+                    A saved pin, not live tracking. Your phone’s accuracy can
+                    vary, especially indoors.
+                  </p>
+                </div>
+              </div>
+              <p className="park-atlas-attribution">
+                Interactive maps by Google Maps.
+                <br />
+                Address lookup by Ola Maps.
+              </p>
+            </div>
+          </aside>
+        </div>
+      </div>
+    );
   return (
     <div className="park-map-shell park-google-shell">
       <div className="park-map-caption">
@@ -219,8 +391,8 @@ export function ParkMap({
         <span>GOOGLE MAPS</span>
       </div>
       {toolbar()}
-      {!expanded && map()}
-      {!expanded && feedback()}
+      {map()}
+      {feedback()}
       <div className="park-map-place">
         <VaahanIcon name="location" size={18} />
         <div>
@@ -241,75 +413,6 @@ export function ParkMap({
           <span>Walking directions</span>
           <VaahanIcon name="external-link" size={15} />
         </a>
-      )}
-      {expandable && (
-        <dialog
-          ref={dialog}
-          className="park-map-dialog park-google-dialog"
-          aria-labelledby={titleId}
-          onClose={close}
-        >
-          <header>
-            <div>
-              <span className="park-eyebrow">PARK / YOUR WAY BACK</span>
-              <h2 id={titleId}>Every return starts here.</h2>
-            </div>
-            <button
-              type="button"
-              aria-label="Close map"
-              onClick={() => dialog.current?.close()}
-            >
-              <VaahanIcon name="close" size={21} />
-            </button>
-          </header>
-          <div className="park-map-explorer">
-            <div className="park-map-explorer-main">
-              {toolbar(true)}
-              {expanded && map(true)}
-              {expanded && feedback()}
-            </div>
-            <aside className="park-map-explorer-details">
-              <span className="park-map-pin">
-                <VaahanIcon name="location" size={25} />
-              </span>
-              <span className="park-eyebrow">YOUR SAVED LOCATION</span>
-              <h3>{place || "Your saved parking spot"}</h3>
-              <dl>
-                <div>
-                  <dt>FLOOR / LEVEL</dt>
-                  <dd>{floor || "Not noted"}</dd>
-                </div>
-                <div>
-                  <dt>BAY / SLOT</dt>
-                  <dd>{bay || "Not noted"}</dd>
-                </div>
-              </dl>
-              <p>
-                GPS accuracy ±{Math.ceil(accuracy)} m. Your phone’s accuracy can
-                vary, especially indoors.
-              </p>
-              {directionsUrl && (
-                <a
-                  className="park-button"
-                  href={directionsUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <VaahanIcon name="route" size={17} /> Walk to this spot{" "}
-                  <VaahanIcon name="external-link" size={14} />
-                </a>
-              )}
-              <small>
-                <VaahanIcon name="lock" size={13} /> Visible only in your
-                account
-              </small>
-            </aside>
-          </div>
-          <footer>
-            <span>Interactive maps by Google Maps</span>
-            <span>A saved pin, not live vehicle tracking.</span>
-          </footer>
-        </dialog>
       )}
     </div>
   );

@@ -23,7 +23,10 @@ vi.mock("@vaahansafe/database", () => ({
     }),
   }),
 }));
-import { getParkingMapLocation } from "../apps/customer/features/park/server";
+import {
+  getParkingMapLocation,
+  getParkingStop,
+} from "../apps/customer/features/park/server";
 const id = "12345678-1234-4234-8234-123456789abc";
 beforeEach(() => {
   state.account = { phoneVerified: true, user: { id: "current-owner" } };
@@ -77,6 +80,32 @@ describe("private parking map authorization", () => {
       latitude: 28.6129,
       longitude: 77.2295,
     });
+  });
+  it("loads an owned completed stop for the full-page map without changing its state", async () => {
+    const session = {
+      id,
+      vehicle_id: "owned-vehicle",
+      status: "ENDED",
+      latitude: 28.6129,
+      longitude: 77.2295,
+      floor_label: "Ground",
+      bay_label: "B2",
+    };
+    const vehicle = {
+      id: "owned-vehicle",
+      registration_number: "owned-plate",
+      make: "make",
+      model: "model",
+    };
+    state.results = [
+      { data: session, error: null },
+      { data: vehicle, error: null },
+    ];
+    await expect(getParkingStop(id)).resolves.toEqual({ session, vehicle });
+    expect(state.chains[0].eq).toHaveBeenCalledWith("id", id);
+    expect(state.chains[0].eq).toHaveBeenCalledWith("user_id", "current-owner");
+    expect(state.chains[1].eq).toHaveBeenCalledWith("user_id", "current-owner");
+    expect(state.chains[1].is).toHaveBeenCalledWith("deleted_at", null);
   });
   it("rejects malformed identities and database outages", async () => {
     await expect(getParkingMapLocation("../other")).rejects.toThrow(

@@ -7,9 +7,17 @@ const root = path.join(
   path.dirname(fileURLToPath(import.meta.url)),
   ".vercel/output/static",
 );
+const outputConfig = JSON.parse(
+  await readFile(path.join(root, "../config.json"), "utf8"),
+);
+const securityHeaders =
+  outputConfig.routes.find(
+    (route) => route.headers?.["Content-Security-Policy"],
+  )?.headers || {};
 const types = {
   ".html": "text/html; charset=utf-8",
   ".css": "text/css",
+  ".js": "text/javascript; charset=utf-8",
   ".svg": "image/svg+xml",
   ".webp": "image/webp",
   ".png": "image/png",
@@ -34,6 +42,7 @@ createServer(async (req, res) => {
     if (!file.startsWith(root + path.sep) || !(await stat(file)).isFile())
       throw new Error("Not found");
     res.writeHead(200, {
+      ...securityHeaders,
       "Content-Type": types[path.extname(file)] || "application/octet-stream",
     });
     res.end(await readFile(file));

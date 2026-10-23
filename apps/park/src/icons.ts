@@ -13,6 +13,10 @@ import {
   FitToScreenIcon,
   AlertCircleIcon,
   RefreshIcon,
+  Menu01Icon,
+  ArrowDown01Icon,
+  Route01Icon,
+  Edit02Icon,
 } from "@hugeicons/core-free-icons";
 
 const icons = {
@@ -30,6 +34,10 @@ const icons = {
   fit: FitToScreenIcon,
   alert: AlertCircleIcon,
   retry: RefreshIcon,
+  menu: Menu01Icon,
+  down: ArrowDown01Icon,
+  route: Route01Icon,
+  note: Edit02Icon,
 };
 export type ViewerIcon = keyof typeof icons;
 const escape = (value: unknown) =>
