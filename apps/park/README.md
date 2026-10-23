@@ -31,11 +31,21 @@ not grant QR or subscription entitlements, or publish a location on a public QR.
 
 Configure `OLA_MAPS_API_KEY` in the **customer server environment**, not this public
 landing app, `NEXT_PUBLIC_*`, or tracked files. Address lookup failure leaves the actual
-saved GPS point intact without fabricating an address. Ola Maps supplies the map preview
-and address. The authenticated image endpoint checks current vehicle ownership before
-requesting a fixed-size map, permits zoom levels 12–19, and keeps the key server-only.
-Provider failures show a retry state; saved parking details remain available. The preview
-supports zoom and an expanded dialog, with no panning or live tracking.
+saved GPS point intact without fabricating an address. Ola Maps supplies address lookup.
+
+Interactive road and satellite maps use Google Maps Embed API. Set
+`GOOGLE_MAPS_EMBED_API_KEY` in the customer server environment (Vercel Production).
+Use a separate browser credential restricted to `https://app.vaahansafe.com/*` and
+**Maps Embed API only**. This restricted key necessarily appears in the iframe URL;
+do not substitute a private provider credential or commit its value.
+The authenticated map endpoint rechecks current vehicle ownership and returns only a
+Google Embed URL built from the saved record, with bounded zoom and allowlisted map
+types. It does not accept browser-supplied coordinates or arbitrary provider URLs.
+Responses are private/no-store. Google receives the saved coordinates only after
+the user chooses **Load Google Maps** for that record; consent lasts only in React
+state and resets on reload. The iframe explicitly sends the origin referrer for key
+restrictions. A responsive expanded explorer, walking directions and retry states
+keep saved details accessible. No live vehicle tracking or Google geocoding is enabled.
 
 Dedicated SVG, Apple touch and maskable install icons are shared across the landing and
 workspace. Regenerate them with `node tooling/scripts/generate-park-icons.mjs` from the

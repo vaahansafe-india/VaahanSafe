@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getParkingMapLocation } from "@/features/park/server";
-import { fetchParkingMap } from "@/features/park/map-provider";
-import { parkingMapZoom } from "@/features/park/model";
+import { parkingGoogleEmbedUrl } from "@/features/park/map-provider";
+import { parkingMapZoom, parkingMapType } from "@/features/park/model";
 import { PARK_HEADERS, parkFailure } from "@/features/park/http";
 export const dynamic = "force-dynamic";
 export async function GET(
@@ -12,14 +12,17 @@ export async function GET(
     const { id } = await context.params;
     const location = await getParkingMapLocation(id);
     const zoom = parkingMapZoom(request.nextUrl.searchParams.get("zoom"));
-    const image = await fetchParkingMap(location, zoom);
-    return new NextResponse(image, {
-      headers: {
-        ...PARK_HEADERS,
-        "Content-Type": "image/png",
-        "Cross-Origin-Resource-Policy": "same-origin",
+    const type = parkingMapType(request.nextUrl.searchParams.get("maptype"));
+    const embedUrl = parkingGoogleEmbedUrl(location, zoom, type);
+    return NextResponse.json(
+      { embedUrl },
+      {
+        headers: {
+          ...PARK_HEADERS,
+          "Cross-Origin-Resource-Policy": "same-origin",
+        },
       },
-    });
+    );
   } catch (error) {
     return parkFailure(error);
   }

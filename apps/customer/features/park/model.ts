@@ -149,8 +149,18 @@ export function parkingMapZoom(value: string | null) {
   if (!/^(1[2-9])$/.test(value)) throw new ParkError("INVALID_INPUT");
   return Number(value);
 }
-export function parkingMapUrl(id: string, zoom = 16) {
-  return `/api/park/${encodeURIComponent(id)}/map?zoom=${parkingMapZoom(String(zoom))}`;
+export type ParkingMapType = "roadmap" | "satellite";
+export function parkingMapType(value: string | null): ParkingMapType {
+  if (value === null || value === "roadmap") return "roadmap";
+  if (value === "satellite") return "satellite";
+  throw new ParkError("INVALID_INPUT");
+}
+export function parkingMapUrl(
+  id: string,
+  zoom = 16,
+  type: ParkingMapType = "roadmap",
+) {
+  return `/api/park/${encodeURIComponent(id)}/map?zoom=${parkingMapZoom(String(zoom))}&maptype=${parkingMapType(type)}`;
 }
 export function parkingDirectionsUrl(latitude: number, longitude: number) {
   return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${latitude},${longitude}`)}&travelmode=walking`;

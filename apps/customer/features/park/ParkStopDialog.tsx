@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useId, useRef } from "react";
 import { VaahanIcon } from "@vaahansafe/icons";
-import { parkClock, type ParkSession } from "./model";
+import { parkClock, parkingDirectionsUrl, type ParkSession } from "./model";
 import { ParkMap } from "./ParkMap";
 const date = (value: string) =>
   new Date(value).toLocaleString("en-IN", {
@@ -76,6 +76,10 @@ export function ParkStopDialog({
             id={session.id}
             place={session.place_name}
             accuracy={session.accuracy_m}
+            directionsUrl={parkingDirectionsUrl(
+              session.latitude,
+              session.longitude,
+            )}
             expandable={false}
           />
           <dl className="park-stop-details">

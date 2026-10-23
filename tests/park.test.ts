@@ -123,9 +123,14 @@ describe("parking times and directions", () => {
   });
   it("addresses a private saved-record map without coordinates or credentials", () => {
     expect(parkingMapUrl("private-id", 17)).toBe(
-      "/api/park/private-id/map?zoom=17",
+      "/api/park/private-id/map?zoom=17&maptype=roadmap",
     );
-    expect(parkingMapUrl("x/y")).toBe("/api/park/x%2Fy/map?zoom=16");
+    expect(parkingMapUrl("x/y")).toBe(
+      "/api/park/x%2Fy/map?zoom=16&maptype=roadmap",
+    );
+    expect(parkingMapUrl("id", 16, "satellite")).toBe(
+      "/api/park/id/map?zoom=16&maptype=satellite",
+    );
   });
   it("bounds map zoom and rejects arbitrary provider parameters", () => {
     expect(parkingMapZoom(null)).toBe(16);

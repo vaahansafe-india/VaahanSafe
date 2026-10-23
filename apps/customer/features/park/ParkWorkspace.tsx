@@ -372,10 +372,17 @@ export function ParkWorkspace({ phoneVerified }: { phoneVerified: boolean }) {
                           id={chosen.id}
                           place={chosen.place_name}
                           accuracy={chosen.accuracy_m}
+                          floor={chosen.floor_label}
+                          bay={chosen.bay_label}
+                          directionsUrl={parkingDirectionsUrl(
+                            chosen.latitude,
+                            chosen.longitude,
+                          )}
                         />
                         <p className="park-map-note">
-                          Map and address by Ola Maps. Your phone’s accuracy can
-                          vary, especially indoors.
+                          Interactive maps by Google Maps. Address lookup by Ola
+                          Maps. The pin marks your saved location, not live
+                          tracking.
                         </p>
                         <div className="park-location-details">
                           <div>
@@ -612,12 +619,12 @@ export function ParkWorkspace({ phoneVerified }: { phoneVerified: boolean }) {
                           />
                           <span>
                             Save my current location privately in my account.
-                            Use Ola Maps to display my saved spot and look up
-                            its address when available.
+                            Use Ola Maps to look up its address when available.
+                            Google Maps is optional and loads when I choose it.
                           </span>
                         </label>
                         <p className="park-small-print">
-                          Maps & address lookup:{" "}
+                          Address lookup:{" "}
                           <a
                             href="https://maps.olakrutrim.com/legal-docs/terms-conditions-2026.pdf"
                             target="_blank"
