@@ -1,5 +1,11 @@
 # Park assets
 
+- `public/art/park-cafe.webp` and `public/art/park-coast.webp`: original built-in
+  image-generation watercolours for the illustrated journal carousel, created on
+  23 October 2026. Full prompts are recorded in [ART-PROMPTS.md](ART-PROMPTS.md).
+  Responsive `-800.webp` variants are optimized for mobile. The neighbourhood
+  illustration also has an 800px variant. These are decorative imaginary scenes.
+
 - `public/art/park-neighbourhood.webp`: original AI-generated watercolour street illustration,
   created with the built-in image generation tool on 23 October 2026. Optimized as WebP
   for the landing hero and image essay. It is decorative artwork, not a customer's

@@ -17,6 +17,8 @@ import {
   ArrowDown01Icon,
   Route01Icon,
   Edit02Icon,
+  PauseIcon,
+  PlayIcon,
 } from "@hugeicons/core-free-icons";
 
 const icons = {
@@ -38,6 +40,8 @@ const icons = {
   down: ArrowDown01Icon,
   route: Route01Icon,
   note: Edit02Icon,
+  pause: PauseIcon,
+  play: PlayIcon,
 };
 export type ViewerIcon = keyof typeof icons;
 const escape = (value: unknown) =>
