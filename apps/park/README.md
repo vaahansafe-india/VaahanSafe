@@ -1,6 +1,6 @@
 # Park by VaahanSafe
 
-The public Park product landing page is hosted directly on Vercel.
+The public, paper-themed Park landing page is hosted directly on Vercel.
 The **Open Park** action enters `https://app.vaahansafe.com/park`, the private parking
 workspace in the existing customer app. It reuses the real HttpOnly session, verified
 mobile rule and vehicle ownership. No cross-domain bearer tokens or new sign-in system.
@@ -57,12 +57,11 @@ parallax and reading-progress animations. It keeps static HTML content visible w
 JavaScript disabled and disables effects when reduced motion is requested. Assets,
 fonts and the animation bundle are served locally under a self-only script policy.
 
-The product landing uses bold Inter typography, white and light-grey surfaces,
-blue calls to action, green feature accents, a compact navigation header and a
-horizontal feature finder. Three illustrated product cards lead into maps,
-numbered setup steps, privacy features, FAQs and the account action. Each artwork
-is used in a single section. Images are decorative, not fabricated parking records.
-Native scrolling, image parallax and Framer Motion reveals respect reduced motion.
+The product-led landing includes a native-scroll, three-chapter walkthrough. On
+desktop its illustrated panel stays alongside the explanation and changes with the
+nearest chapter; chapter links also work without JavaScript. Mobile presents each
+illustration inline, without a pinned scroll sequence. Scene transitions respect
+reduced motion. All scenes are decorative artwork, not fabricated parking records.
 
 The centered, full-width hero has three dedicated background illustrations, an
 eight-second automatic crossfade, pagination and a pause control. Rotation pauses
@@ -74,7 +73,7 @@ and controls stay accessible as ordinary HTML. Responsive WebP sources and local
 assets keep third-party image services out of the page.
 
 Each illustration belongs to one section: three new backgrounds in the hero,
-neighbourhood/café/coast in the product cards, the notebook artwork in Features and
+neighbourhood/café/coast in the walkthrough, the notebook artwork in Features and
 a new flower-market illustration in the story. The former repeated journal carousel
 has been replaced by the hero slideshow. Prompts and final asset filenames are in
 `HERO-ART-PROMPTS.md`.
