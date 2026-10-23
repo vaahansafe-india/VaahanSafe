@@ -1,12 +1,10 @@
 import { animate, inView, scroll } from "framer-motion/dom";
 import { initializeHero } from "./hero-motion";
-import { initializeWalkthrough } from "./walkthrough-motion";
 
 // Framer Motion's DOM entry keeps this static, accessible page free of React hydration.
 // Content is visible by default, including when JavaScript is unavailable.
 const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
 initializeHero(preference);
-initializeWalkthrough();
 let cleanup: Array<() => void> = [];
 function stopMotion() {
   cleanup.forEach((stop) => stop());

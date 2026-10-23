@@ -1,44 +1,33 @@
 import { icon } from "./icons";
-
-const chapters = [
+const features = [
   {
     id: "save",
-    number: "01",
-    name: "Save your spot",
-    title: "A place saved.<br>A day opened up.",
-    copy: "Choose your vehicle. Save your current location. Park keeps the pin and your phone’s reported GPS accuracy together, in your private notebook.",
-    detail: "A deliberate save. No continuous tracking.",
+    tag: "SAVE YOUR SPOT",
+    title: "Your parking location. Saved in seconds.",
+    copy: "Choose your vehicle and save your current GPS location, with your phone’s reported accuracy clearly visible.",
     image: "park-neighbourhood",
-    alt: "Watercolour of a car and scooter on a leafy Indian street",
-    label: "THE EVERYDAY STOP",
+    alt: "Illustration of a car parked along a leafy neighbourhood street",
     glyph: "location" as const,
   },
   {
     id: "remember",
-    number: "02",
-    name: "Keep the details",
-    title: "The floor. The bay.<br>The little things.",
-    copy: "Keep the landmark you’ll recognise, the floor you chose, and the bay you parked in. Set a return-by countdown for a little perspective on time.",
-    detail: "Your timer updates while Park is open.",
+    tag: "KEEP THE DETAILS",
+    title: "The floor. The bay. Everything in one place.",
+    copy: "Add the landmark you’ll recognise, the floor you chose and the bay you parked in. Give your future self a helpful note.",
     image: "park-cafe",
-    alt: "Watercolour of a car and scooter outside a neighbourhood café",
-    label: "A LITTLE LONGER AT LUNCH",
+    alt: "Illustration of a car parked outside a neighbourhood café",
     glyph: "note" as const,
   },
   {
     id: "return",
-    number: "03",
-    name: "Find your way back",
-    title: "Your way back.<br>Beautifully clear.",
-    copy: "Give your map the whole page. Bring your notes into view, switch between road and satellite, or open walking directions to your saved parking spot.",
-    detail: "Google Maps loads when you choose.",
+    tag: "FIND YOUR WAY BACK",
+    title: "A map that takes the whole picture in.",
+    copy: "Open a full-page map, switch to satellite, check saved details and follow walking directions to your parking spot.",
     image: "park-coast",
-    alt: "Watercolour of a parked car beside a palm-lined coastal promenade",
-    label: "THE SCENIC WAY BACK",
+    alt: "Illustration of a parked car beside a coastal promenade",
     glyph: "route" as const,
   },
 ];
-
 export function walkthrough() {
-  return `<section id="how-it-works" class="walkthrough section" aria-labelledby="walkthrough-title"><div class="wrap"><div class="walkthrough-heading" data-reveal><span class="eyebrow">SMALL EFFORT. EVERYDAY EASE.</span><h2 id="walkthrough-title">One stop.<br><em>Every detail, together.</em></h2><p>From the moment you park to the moment you return.</p></div><div class="walkthrough-grid"><div class="walkthrough-sticky"><div class="chapter-art" aria-label="Illustrated everyday parking scenes">${chapters.map((c, i) => `<figure class="chapter-scene" data-chapter-scene="${i}" aria-hidden="${i !== 0}"><img src="/art/${c.image}-800.webp" width="800" height="450" loading="lazy" alt="${c.alt}"><figcaption><span>${c.number} / ${c.label}</span>${icon(c.glyph, 20)}</figcaption></figure>`).join("")}</div><nav class="chapter-nav" aria-label="Parking walkthrough">${chapters.map((c, i) => `<a href="#${c.id}" data-chapter-link="${i}" ${i === 0 ? 'aria-current="step"' : ""}><span>${c.number}</span>${c.name}${icon("next", 14)}</a>`).join("")}</nav><span class="chapter-disclosure">ILLUSTRATED SCENES / YOUR SAVED PLACES STAY PRIVATE</span></div><div class="chapter-copy">${chapters.map((c, i) => `<article id="${c.id}" class="chapter" data-chapter="${i}"><div class="chapter-mobile-art"><img src="/art/${c.image}-800.webp" width="800" height="450" loading="lazy" alt="${c.alt}"></div><div class="chapter-text" data-reveal><span class="chapter-kicker">${icon(c.glyph, 22)}<span>${c.number} / ${c.name.toUpperCase()}</span></span><h3>${c.title}</h3><p>${c.copy}</p><span class="chapter-detail">${icon("shield", 15)}${c.detail}</span><a class="quiet-link" href="/workspace">Open your notebook ${icon("next", 16)}</a></div></article>`).join("")}</div></div></div></section>`;
+  return `<section class="products-section" id="how-it-works"><div class="wrap"><div class="section-heading" data-reveal><span class="eyebrow">YOUR EVERYDAY PARKING TOOLKIT</span><h2>Everything you need to park.<br><em>And find your way back.</em></h2><p>A simple set of tools. Built into your existing VaahanSafe account.</p></div><div class="product-cards">${features.map((f) => `<article id="${f.id}" class="product-card" data-reveal><div class="product-card-art"><img src="/art/${f.image}-800.webp" width="800" height="450" loading="lazy" alt="${f.alt}"></div><div class="product-card-body"><span class="product-label">${icon(f.glyph, 18)}${f.tag}</span><h3>${f.title}</h3><p>${f.copy}</p><a href="/workspace" class="quiet-link">Get started ${icon("next", 16)}</a></div></article>`).join("")}</div></div></section>`;
 }
