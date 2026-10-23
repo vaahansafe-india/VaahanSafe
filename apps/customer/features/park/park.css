@@ -1457,6 +1457,7 @@
   max-height: calc(100dvh - 40px);
   padding: 28px;
   overflow-y: auto;
+  overscroll-behavior: contain;
   border: 1px solid #d0d5c2;
   border-radius: 14px;
   background: #f8f5eb url("/images/auth/paper-texture.webp") center/420px;
@@ -1470,11 +1471,16 @@
   backdrop-filter: blur(5px);
 }
 .park-stop-header {
+  position: sticky;
+  top: -28px;
+  z-index: 1;
+  margin: -28px -28px 0;
+  padding: 28px 28px 20px;
+  background: #f8f5eb url("/images/auth/paper-texture.webp") center/420px;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   gap: 18px;
-  padding-bottom: 20px;
   border-bottom: 1px solid #d5d8c7;
 }
 .park-stop-header h2 {
@@ -1665,7 +1671,9 @@
     border-radius: 11px;
   }
   .park-stop-header {
-    padding-bottom: 16px;
+    top: -18px;
+    margin: -18px -18px 0;
+    padding: 18px 18px 16px;
   }
   .park-stop-header h2 {
     font-size: 34px;
