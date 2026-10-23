@@ -1465,18 +1465,26 @@
   position: relative;
   z-index: 1;
 }
+.hero-visual {
+  padding-bottom: 96px;
+}
+.editorial-stub {
+  z-index: 2;
+  left: 15px;
+  bottom: 0;
+}
 .hero-orbit {
   position: absolute;
-  inset: -25px -25px 0;
+  inset: 18px 12px 0;
   border: 1px solid #b9c4ae70;
   border-radius: 50%;
-  transform: rotate(-20deg);
+  transform: rotate(-10deg);
   pointer-events: none;
 }
 .hero-orbit:after {
   content: "";
   position: absolute;
-  inset: 22px -12px;
+  inset: 22px 0;
   border: 1px dashed #b9c4ae60;
   border-radius: 50%;
 }
@@ -1840,7 +1848,7 @@
     font-size: 7px;
   }
   .hero-orbit {
-    inset: -10px -7px 12px;
+    inset: 14px 12px 20px;
   }
   .reassurance {
     font-size: 9px;
