@@ -63,14 +63,20 @@ nearest chapter; chapter links also work without JavaScript. Mobile presents eac
 illustration inline, without a pinned scroll sequence. Scene transitions respect
 reduced motion. All scenes are decorative artwork, not fabricated parking records.
 
-The illustrated journal is a three-scene carousel with a seven-second automatic
-slide interval, manual arrows, pagination and touch swipe. It pauses on hover,
-keyboard focus, manual navigation, hidden tabs and when outside the viewport.
-Reduced-motion users get a static gallery with instantaneous manual navigation.
-The first scene remains visible without JavaScript. Illustrations use responsive
-WebP sources, descriptive alt text and an explicit decorative-art disclosure.
-Automatic playback checks current visibility, focus and pointer position on each
-tick, so anchor navigation and layout changes cannot leave stale pause flags.
+The centered, full-width hero has three dedicated background illustrations, an
+eight-second automatic crossfade, pagination and a pause control. Rotation pauses
+for keyboard focus, manual navigation, hidden tabs, hovering the slideshow controls
+and when the hero is outside the viewport. Reduced-motion users get a still hero
+with instantaneous manual scene changes. The first background and all copy remain
+available without JavaScript. Background illustrations are decorative; the heading
+and controls stay accessible as ordinary HTML. Responsive WebP sources and local
+assets keep third-party image services out of the page.
+
+Each illustration belongs to one section: three new backgrounds in the hero,
+neighbourhood/café/coast in the walkthrough, the notebook artwork in Features and
+a new flower-market illustration in the story. The former repeated journal carousel
+has been replaced by the hero slideshow. Prompts and final asset filenames are in
+`HERO-ART-PROMPTS.md`.
 
 Dedicated SVG, Apple touch and maskable install icons are shared across the landing and
 workspace. Regenerate them with `node tooling/scripts/generate-park-icons.mjs` from the

@@ -1,5 +1,11 @@
 # Park assets
 
+- `public/art/park-dawn-overlook.webp`, `park-evening-boulevard.webp`,
+  `park-garden-arrival.webp`: dedicated full-width hero backgrounds. The separate
+  `park-flower-market.webp` belongs only to the story section. Each has an 800px
+  variant. Created with the built-in image generation tool on 23 October 2026;
+  exact prompts are recorded in [HERO-ART-PROMPTS.md](HERO-ART-PROMPTS.md).
+
 - `public/art/park-cafe.webp` and `public/art/park-coast.webp`: original built-in
   image-generation watercolours for the illustrated journal carousel, created on
   23 October 2026. Full prompts are recorded in [ART-PROMPTS.md](ART-PROMPTS.md).
@@ -8,7 +14,7 @@
 
 - `public/art/park-neighbourhood.webp`: original AI-generated watercolour street illustration,
   created with the built-in image generation tool on 23 October 2026. Optimized as WebP
-  for the landing hero and image essay. It is decorative artwork, not a customer's
+  for the parking walkthrough. It is decorative artwork, not a customer's
   parking location or vehicle photo. Final prompt: “A premium editorial watercolour
   illustration for VaahanSafe Park, a private parking notebook website in India.
   Wide landscape composition, approximately 16:9. A calm leafy Indian neighbourhood

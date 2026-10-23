@@ -1926,6 +1926,323 @@
     border-radius: 12px;
   }
 }
+.immersive-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  min-height: 680px;
+  min-height: min(780px, max(680px, calc(100svh - 106px)));
+  padding-block: 96px 140px;
+  background: #30483b;
+  color: #fffdf5;
+}
+.hero-backgrounds,
+.hero-background,
+.hero-shade {
+  position: absolute;
+  inset: 0;
+}
+.hero-backgrounds {
+  z-index: -3;
+}
+.hero-background {
+  opacity: 1;
+  will-change: opacity;
+}
+.hero-background[hidden] {
+  display: none;
+}
+.hero-background img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+.hero-shade {
+  z-index: -1;
+  background: linear-gradient(
+    180deg,
+    #172a2855 0%,
+    #172a2878 42%,
+    #142a2780 70%,
+    #132a2ad9 100%
+  );
+}
+.immersive-copy {
+  text-align: center;
+  position: relative;
+  max-width: 950px;
+}
+.immersive-copy > .eyebrow {
+  color: #f0eedf;
+  font-size: 9px;
+  letter-spacing: 0.23em;
+}
+.immersive-copy h1 {
+  font:
+    550 clamp(58px, 6.6vw, 94px)/1.02 Inter,
+    sans-serif;
+  letter-spacing: -0.065em;
+  margin-block: 26px 24px;
+  color: #fffdf5;
+  text-shadow: 0 3px 26px #122d2630;
+}
+.immersive-copy h1 em {
+  font:
+    italic 400 1.12em/1.05 "Cormorant Garamond",
+    Georgia,
+    serif;
+  letter-spacing: -0.035em;
+  color: #f1e7ca;
+  display: inline-block;
+  margin-top: 4px;
+}
+.immersive-lead {
+  color: #eeeee1;
+  font-size: 15px;
+  line-height: 1.8;
+  margin-inline: auto;
+  max-width: 480px;
+}
+.immersive-hero .hero-actions {
+  justify-content: center;
+  gap: 24px;
+  margin-block: 29px 21px;
+}
+.immersive-hero .button-primary {
+  background: #f5f1e2;
+  color: #304c3b;
+  border-color: #f5f1e2;
+  font-size: 12px;
+  min-height: 44px;
+  box-shadow: 0 6px 24px #12282028;
+}
+.immersive-hero .button-primary:hover {
+  background: #e3ebd0;
+  border-color: #e3ebd0;
+}
+.hero-explore {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  color: #fffdf5;
+  border-bottom: 1px solid #e9e8d38c;
+  padding-block: 9px;
+}
+.hero-explore:hover,
+.hero-scroll:hover {
+  color: #f1e1ae;
+}
+.immersive-privacy {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  color: #e2e7d6;
+  font-size: 10px;
+}
+.hero-bottom {
+  position: absolute;
+  bottom: 42px;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+.hero-scroll {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 7px;
+  letter-spacing: 0.14em;
+  color: #ecebdd;
+}
+.hero-scroll > svg {
+  border: 1px solid #f0eedf55;
+  box-sizing: content-box;
+  padding: 11px;
+  border-radius: 50%;
+}
+.hero-scene-controls {
+  display: none;
+  align-items: center;
+  gap: 18px;
+  color: #f5f2e4;
+}
+[data-hero][data-enhanced="true"] .hero-scene-controls {
+  display: flex;
+}
+.hero-scene-caption {
+  font:
+    italic 22px/1.2 "Cormorant Garamond",
+    Georgia,
+    serif;
+  min-width: 140px;
+  text-align: right;
+}
+.hero-scene-dots {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+}
+.hero-scene-dots button {
+  width: 28px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+}
+.hero-scene-dots button > span {
+  width: 5px;
+  height: 5px;
+  border-radius: 20px;
+  background: #e5e9d779;
+  transition:
+    width 0.3s,
+    background 0.3s;
+}
+.hero-scene-dots button[aria-current="true"] > span {
+  width: 21px;
+  background: #f1e7ca;
+}
+.hero-pause {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  height: 36px;
+  min-width: 77px;
+  border: 1px solid #f0eedf66;
+  border-radius: 6px;
+  padding-inline: 10px;
+  font-size: 10px;
+  background: #1a332d33;
+}
+.hero-pause:hover {
+  background: #f0eedf20;
+}
+.hero-pause:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+.hero-pause [hidden] {
+  display: none;
+}
+.hero-art-credit {
+  position: absolute;
+  bottom: 14px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 5px;
+  letter-spacing: 0.18em;
+  color: #d8dfca9e;
+}
+.immersive-hero a:focus-visible,
+.immersive-hero button:focus-visible {
+  outline-color: #f3e5b5;
+}
+.everyday-story .story-image img {
+  object-position: center;
+}
+@media (min-width: 1600px) {
+  .immersive-hero {
+    min-height: 800px;
+  }
+}
+@media (max-width: 760px) {
+  .immersive-hero {
+    min-height: 720px;
+    padding-block: 90px 150px;
+  }
+  .immersive-copy h1 {
+    font-size: 68px;
+  }
+  .hero-scene-caption {
+    display: none;
+  }
+  .hero-bottom {
+    bottom: 40px;
+  }
+}
+@media (max-width: 600px) {
+  .immersive-hero {
+    min-height: max(650px, calc(100svh - 90px));
+    padding-block: 72px 155px;
+  }
+  .immersive-copy {
+    width: calc(100% - 40px);
+  }
+  .immersive-copy > .eyebrow {
+    font-size: 7px;
+    letter-spacing: 0.16em;
+  }
+  .immersive-copy h1 {
+    font-size: clamp(43px, 12.5vw, 68px);
+    line-height: 1.08;
+    margin-block: 24px 22px;
+  }
+  .immersive-copy h1 em {
+    font-size: 1.16em;
+    line-height: 1.02;
+    max-width: 6.4em;
+    margin-top: 5px;
+  }
+  .immersive-lead {
+    font-size: 12px;
+    line-height: 1.9;
+  }
+  .immersive-hero .hero-actions {
+    gap: 20px;
+    margin-block: 25px 20px;
+  }
+  .immersive-hero .button-primary {
+    min-height: 42px;
+    font-size: 10px;
+    padding-inline: 14px;
+    gap: 10px;
+  }
+  .hero-explore {
+    font-size: 10px;
+    gap: 8px;
+  }
+  .immersive-privacy {
+    font-size: 8px;
+    gap: 5px;
+  }
+  .hero-bottom {
+    flex-direction: column-reverse;
+    justify-content: center;
+    gap: 21px;
+    bottom: 38px;
+  }
+  .hero-scroll {
+    font-size: 6px;
+  }
+  .hero-scroll > svg {
+    padding: 6px;
+    width: 14px;
+    height: 14px;
+  }
+  .hero-scene-controls {
+    gap: 18px;
+  }
+  .hero-pause {
+    height: 34px;
+    min-width: 74px;
+    font-size: 9px;
+  }
+  .hero-background img {
+    object-position: center;
+  }
+  .everyday-story .story-image img {
+    object-position: 28% center;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
