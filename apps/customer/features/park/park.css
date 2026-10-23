@@ -1948,6 +1948,19 @@
   font-size: 38px;
   margin-top: 8px;
 }
+.park-google-dialog > header {
+  position: sticky;
+  top: -25px;
+  z-index: 1;
+  margin: -25px -25px 20px;
+  padding: 25px;
+  border-bottom: 1px solid #d9decc;
+  background: #f8f5eb url("/images/auth/paper-texture.webp") repeat;
+  background-size: 420px;
+}
+.park-google-dialog {
+  overscroll-behavior: contain;
+}
 .park-map-explorer {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 260px;
@@ -2065,9 +2078,15 @@
   }
   .park-google-dialog {
     width: calc(100% - 20px);
+    max-width: calc(100% - 20px);
     max-height: calc(100dvh - 20px);
     padding: 15px;
     border-radius: 12px;
+  }
+  .park-google-dialog > header {
+    top: -15px;
+    margin: -15px -15px 15px;
+    padding: 15px;
   }
   .park-google-dialog h2 {
     font-size: 31px;
