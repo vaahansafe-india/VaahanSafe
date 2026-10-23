@@ -57,12 +57,20 @@ parallax and reading-progress animations. It keeps static HTML content visible w
 JavaScript disabled and disables effects when reduced motion is requested. Assets,
 fonts and the animation bundle are served locally under a self-only script policy.
 
+The product-led landing includes a native-scroll, three-chapter walkthrough. On
+desktop its illustrated panel stays alongside the explanation and changes with the
+nearest chapter; chapter links also work without JavaScript. Mobile presents each
+illustration inline, without a pinned scroll sequence. Scene transitions respect
+reduced motion. All scenes are decorative artwork, not fabricated parking records.
+
 The illustrated journal is a three-scene carousel with a seven-second automatic
 slide interval, manual arrows, pagination and touch swipe. It pauses on hover,
 keyboard focus, manual navigation, hidden tabs and when outside the viewport.
 Reduced-motion users get a static gallery with instantaneous manual navigation.
 The first scene remains visible without JavaScript. Illustrations use responsive
 WebP sources, descriptive alt text and an explicit decorative-art disclosure.
+Automatic playback checks current visibility, focus and pointer position on each
+tick, so anchor navigation and layout changes cannot leave stale pause flags.
 
 Dedicated SVG, Apple touch and maskable install icons are shared across the landing and
 workspace. Regenerate them with `node tooling/scripts/generate-park-icons.mjs` from the

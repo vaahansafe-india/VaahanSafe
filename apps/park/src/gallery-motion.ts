@@ -16,10 +16,7 @@ export function initializeGallery(preference: MediaQueryList) {
   const counter = root.querySelector<HTMLElement>("[data-gallery-counter]")!;
   const status = root.querySelector<HTMLElement>("[data-gallery-status]")!;
   let index = 0,
-    userPaused = false,
-    hovered = false,
-    focused = false,
-    visible = false;
+    userPaused = false;
   let timer: ReturnType<typeof setTimeout> | undefined;
   let transition: ReturnType<typeof animate> | undefined;
   let touch: { x: number; y: number } | null = null;
@@ -45,17 +42,19 @@ export function initializeGallery(preference: MediaQueryList) {
       !userPaused || preference.matches;
     root.querySelector<HTMLElement>("[data-gallery-pause-icon]")!.hidden =
       userPaused && !preference.matches;
-    if (
-      userPaused ||
-      preference.matches ||
-      hovered ||
-      focused ||
-      !visible ||
-      document.hidden
-    )
-      return;
+    if (userPaused || preference.matches || document.hidden) return;
     timer = setTimeout(() => {
-      show(index + 1);
+      // Read current DOM conditions instead of caching pointer/focus events:
+      // layout shifts and native anchor navigation can move the gallery under a pointer.
+      const bounds = root.getBoundingClientRect();
+      const visibleHeight =
+        Math.min(bounds.bottom, window.innerHeight) - Math.max(bounds.top, 0);
+      const visible =
+        visibleHeight >= Math.min(bounds.height, window.innerHeight) * 0.3;
+      const hovered =
+        window.matchMedia("(hover: hover)").matches && root.matches(":hover");
+      const focused = root.contains(document.activeElement);
+      if (visible && !hovered && !focused && !document.hidden) show(index + 1);
       schedule();
     }, 7000);
   };
@@ -98,25 +97,6 @@ export function initializeGallery(preference: MediaQueryList) {
     userPaused = !userPaused;
     schedule();
   });
-  root.addEventListener("pointerenter", (event) => {
-    if (event.pointerType === "mouse") {
-      hovered = true;
-      schedule();
-    }
-  });
-  root.addEventListener("pointerleave", () => {
-    hovered = false;
-    schedule();
-  });
-  root.addEventListener("focusin", () => {
-    focused = true;
-    schedule();
-  });
-  root.addEventListener("focusout", (event) => {
-    focused =
-      event.relatedTarget instanceof Node && root.contains(event.relatedTarget);
-    schedule();
-  });
   root
     .querySelector(".gallery-window")
     ?.addEventListener("pointerdown", (event) => {
@@ -142,12 +122,6 @@ export function initializeGallery(preference: MediaQueryList) {
         .forEach((image) => {
           image.loading = "eager";
         });
-      visible = true;
-      schedule();
-      return () => {
-        visible = false;
-        schedule();
-      };
     },
     { amount: 0.3 },
   );
