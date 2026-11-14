@@ -48,6 +48,39 @@ export async function markNotificationAsUnreadAction(
   }
 }
 
+export async function deleteNotificationAction(
+  notificationId: string,
+): Promise<NotificationActionResult> {
+  return bulkDeleteNotificationsAction([notificationId]);
+}
+
+export async function bulkDeleteNotificationsAction(
+  notificationIds: string[],
+): Promise<NotificationActionResult> {
+  const auth = await getAuthenticatedCustomer();
+  if (!auth) return { success: false, error: "Authentication required" };
+  if (
+    !Array.isArray(notificationIds) ||
+    notificationIds.length === 0 ||
+    notificationIds.length > 200 ||
+    notificationIds.some((id) => typeof id !== "string" || !id || id.length > 128)
+  ) {
+    return { success: false, error: "Invalid notification selection" };
+  }
+
+  try {
+    const count = await getNotificationRepository().deleteInboxNotifications(
+      notificationIds,
+      auth.user.id,
+    );
+    if (count) revalidatePath("/notifications");
+    return { success: count > 0, count };
+  } catch (error) {
+    console.error("[VaahanSafe] Inbox deletion failed:", error);
+    return { success: false, error: "We couldn't delete this notification right now." };
+  }
+}
+
 export async function archiveNotificationAction(
   notificationId: string
 ): Promise<NotificationActionResult> {

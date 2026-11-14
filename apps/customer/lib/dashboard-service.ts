@@ -258,7 +258,7 @@ export async function getDashboardOverview(
     db.query<DbNotificationRow>(
       `SELECT id, category, priority, title, body_safe, read_at, created_at
        FROM notifications
-       WHERE user_id = ?
+       WHERE user_id = ?${db.dialect === "postgres" ? " AND deleted_at IS NULL" : ""}
        ORDER BY created_at DESC
        LIMIT 10`,
       [user.id]
@@ -267,7 +267,7 @@ export async function getDashboardOverview(
     db.queryFirst<{ count: number }>(
       `SELECT COUNT(*) as count
        FROM notifications
-       WHERE user_id = ? AND read_at IS NULL`,
+       WHERE user_id = ? AND read_at IS NULL${db.dialect === "postgres" ? " AND deleted_at IS NULL" : ""}`,
       [user.id]
     ),
   ]);

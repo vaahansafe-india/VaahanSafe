@@ -22,6 +22,7 @@ interface NotificationInboxProps {
   onOpenDetails: (notification: NotificationItem) => void;
   onToggleRead: (notification: NotificationItem) => void;
   onArchive: (notification: NotificationItem) => void;
+  onDelete: (notification: NotificationItem) => void;
   onResetFilters: () => void;
   onSelectInboxView: () => void;
   totalUnfilteredCount: number;
@@ -43,6 +44,7 @@ export function NotificationInbox({
   onOpenDetails,
   onToggleRead,
   onArchive,
+  onDelete,
   onResetFilters,
   onSelectInboxView,
   totalUnfilteredCount,
@@ -99,6 +101,7 @@ export function NotificationInbox({
                   onOpenDetails={onOpenDetails}
                   onToggleRead={onToggleRead}
                   onArchive={onArchive}
+                  onDelete={onDelete}
                   isLastInGroup={idx === groupItems.length - 1}
                 />
               ))}

@@ -4,6 +4,16 @@ import React from "react";
 import { useSearchParams } from "next/navigation";
 import { useCustomerRouter } from "@/lib/use-customer-router";
 import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@vaahansafe/ui";
 import { useCustomerMutation } from "@/lib/use-customer-mutation";
 import type {
   NotificationItem,
@@ -15,10 +25,12 @@ import {
   markNotificationAsReadAction,
   markNotificationAsUnreadAction,
   archiveNotificationAction,
+  deleteNotificationAction,
   unarchiveNotificationAction,
   bulkMarkAsReadAction,
   bulkMarkAsUnreadAction,
   bulkArchiveAction,
+  bulkDeleteNotificationsAction,
   markAllAsReadAction,
 } from "@/lib/notifications-actions";
 import { NotificationCenterHeader } from "./NotificationCenterHeader";
@@ -54,6 +66,7 @@ export function NotificationCenterController({
   const [filterSheetOpen, setFilterSheetOpen] = React.useState(false);
   const [settingsSheetOpen, setSettingsSheetOpen] = React.useState(false);
   const [markAllAlertOpen, setMarkAllAlertOpen] = React.useState(false);
+  const [deleteSelection, setDeleteSelection] = React.useState<string[]>([]);
   const mutation = useCustomerMutation(
     async (action: () => Promise<import("@/lib/notifications-actions").NotificationActionResult>) => action(),
     ["notifications", "shell", "dashboard"],
@@ -146,6 +159,29 @@ export function NotificationCenterController({
         toast.error("Couldn't update read status. Please try again.");
       }
     })();
+  };
+
+  const handleDelete = async (item: NotificationItem) => {
+    if (isPending) return;
+    const result = await runAction(() => deleteNotificationAction(item.id));
+    if (result.success) {
+      toast.success("Notification deleted.");
+    } else {
+      toast.error(result.error || "Couldn't delete notification. Please try again.");
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (isPending || !deleteSelection.length) return;
+    const ids = deleteSelection;
+    setDeleteSelection([]);
+    const result = await runAction(() => bulkDeleteNotificationsAction(ids));
+    if (result.success) {
+      setSelectedIds(new Set());
+      toast.success(`Deleted ${result.count} selected notifications.`);
+    } else {
+      toast.error(result.error || "Couldn't delete the selected notifications.");
+    }
   };
 
   const handleArchive = (item: NotificationItem) => {
@@ -315,6 +351,7 @@ export function NotificationCenterController({
               onMarkRead={handleBulkMarkRead}
               onMarkUnread={handleBulkMarkUnread}
               onArchive={handleBulkArchive}
+              onDelete={() => setDeleteSelection([...selectedIds])}
               onClearSelection={handleClearSelection}
               isPending={isPending}
             />
@@ -338,6 +375,7 @@ export function NotificationCenterController({
                 onOpenDetails={(notif) => setActiveDetailItem(notif)}
                 onToggleRead={handleToggleRead}
                 onArchive={handleArchive}
+                onDelete={handleDelete}
                 onResetFilters={handleResetFilters}
                 onSelectInboxView={() => handleSelectView("inbox")}
                 totalUnfilteredCount={data.counts.inbox + data.counts.archived}
@@ -371,6 +409,25 @@ export function NotificationCenterController({
         open={settingsSheetOpen}
         onOpenChange={setSettingsSheetOpen}
       />
+
+      <AlertDialog open={deleteSelection.length > 0} onOpenChange={(open) => {
+        if (!open) setDeleteSelection([]);
+      }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete selected notifications?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This removes {deleteSelection.length} selected notifications from your notification center.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleBulkDelete} disabled={isPending}>
+              Delete selected
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <MarkAllReadAlert
         open={markAllAlertOpen}

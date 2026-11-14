@@ -1,7 +1,7 @@
 DO $tests$
 DECLARE r public.qr_scan_reports; target public.notification_intents; expected_count integer;
-  actual_count integer; original_phone text; token uuid; answer jsonb;
-  public_id text; request_id uuid; reserved_id text;
+  actual_count integer; original_phone text; owner_phone text; token uuid; answer jsonb;
+  public_id text; request_id uuid; reserved_id text; page_event text;
 BEGIN
   IF has_function_privilege('anon','public.claim_notification_batch_v2(integer)','EXECUTE')
     OR has_function_privilege('authenticated','public.qr_report_contact_phone(text)','EXECUTE')
@@ -9,13 +9,17 @@ BEGIN
     RAISE EXCEPTION 'Private alert routing is exposed';
   END IF;
   SELECT report.* INTO r FROM public.qr_scan_reports report WHERE report.status='READY'
+    AND NOT EXISTS(SELECT 1 FROM public.notification_intents i
+      WHERE i.source_id=report.id AND i.recipient_kind='EMERGENCY_CONTACT')
     AND EXISTS(SELECT 1 FROM public.emergency_profiles p JOIN public.emergency_contacts c ON c.emergency_profile_id=p.id
       WHERE p.vehicle_id=report.vehicle_id AND p.status='ACTIVE' AND c.is_enabled=1 AND c.allow_message=1)
     ORDER BY report.created_at DESC LIMIT 1;
   IF r.id IS NULL THEN RAISE EXCEPTION 'No existing real report with contacts available for rollback verification'; END IF;
-  -- Discard only test-transaction intents for this real report; outer block rolls back.
-  IF EXISTS(SELECT 1 FROM public.notification_intents WHERE source_id=r.id AND recipient_kind='EMERGENCY_CONTACT') THEN
-    RAISE EXCEPTION 'Select a real report without dispatched contact alerts for this verification';
+  page_event:='qse_'||gen_random_uuid()::text;
+  INSERT INTO public.qr_scan_events(id,qr_id,vehicle_id,scan_type,result,user_agent_family,referrer_class)
+    VALUES(page_event,r.qr_id,r.vehicle_id,'PUBLIC_RESOLVE','RESOLVED_ACTIVE','Browser','DIRECT_SCAN');
+  IF EXISTS(SELECT 1 FROM public.notification_intents WHERE source_type='QR_SCAN' AND source_id=page_event) THEN
+    RAISE EXCEPTION 'A passive page visit enqueued a notification';
   END IF;
   UPDATE public.qr_scan_reports SET status='UPLOADING',reason='PARKING',created_at=clock_timestamp(),expires_at=clock_timestamp()+interval '1 day' WHERE id=r.id;
   UPDATE public.qr_scan_reports SET status='READY' WHERE id=r.id;
@@ -55,13 +59,23 @@ BEGIN
     RAISE EXCEPTION 'Private owner report was included in contact alert';
   END IF;
   IF public.qr_report_contact_phone(target.id) IS NULL THEN RAISE EXCEPTION 'Real eligible contact failed service gate'; END IF;
+  SELECT public.qr_alert_phone(coalesce(phone,primary_phone)) INTO owner_phone
+    FROM public.users WHERE id=r.owner_user_id;
+  SELECT phone INTO original_phone FROM public.emergency_contacts WHERE id=target.emergency_contact_id;
+  UPDATE public.emergency_contacts SET phone='+'||owner_phone WHERE id=target.emergency_contact_id;
+  UPDATE public.notification_intents SET recipient_phone=owner_phone WHERE id=target.id;
+  IF public.qr_report_contact_phone(target.id) IS NOT NULL THEN RAISE EXCEPTION 'Owner phone accepted as emergency contact'; END IF;
+  UPDATE public.notification_intents SET recipient_phone=target.recipient_phone WHERE id=target.id;
+  UPDATE public.emergency_contacts SET phone=original_phone WHERE id=target.emergency_contact_id;
   -- Isolate the new intent from unrelated production work inside this rollback.
   UPDATE public.notification_intents SET next_attempt_at=clock_timestamp()+interval '1 day'
     WHERE id<>target.id AND status IN ('PENDING','QUEUED');
-  UPDATE public.scan_report_template_approvals SET status='PENDING' WHERE template_name='vhn_emergency_contact_report_v1';
+  UPDATE public.scan_report_template_approvals SET status='PENDING'
+    WHERE template_name IN ('vhn_emergency_contact_report_v1','vhn_emergency_contact_report_v2');
   answer:=public.claim_notification_batch_v2(5);
   IF jsonb_array_length(answer)<>0 THEN RAISE EXCEPTION 'Unapproved contact template was claimed'; END IF;
-  UPDATE public.scan_report_template_approvals SET status='APPROVED' WHERE template_name='vhn_emergency_contact_report_v1';
+  UPDATE public.scan_report_template_approvals SET status='APPROVED'
+    WHERE template_name IN ('vhn_emergency_contact_report_v1','vhn_emergency_contact_report_v2');
   answer:=public.claim_notification_batch(5);
   IF jsonb_array_length(answer)<>0 THEN RAISE EXCEPTION 'Legacy deployment claimed a contact alert'; END IF;
   answer:=public.claim_notification_batch_v2(5);

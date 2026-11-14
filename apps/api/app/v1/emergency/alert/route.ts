@@ -96,6 +96,15 @@ export async function POST(req: NextRequest) {
     }
 
     const db = getApiDatabase();
+    if (db.dialect === "postgres") {
+      return NextResponse.json(
+        {
+          error: "Open the VaahanSafe QR page to submit a vehicle report.",
+          code: "ERR_USE_PROTECTED_REPORT",
+        },
+        { status: 410 },
+      );
+    }
     const now = new Date().toISOString();
 
     // 1. Look up active vehicle and owner
@@ -192,10 +201,6 @@ export async function POST(req: NextRequest) {
     // Persist a canonical intent first. Queue outages leave a recoverable PENDING intent.
     let notificationQueued = false;
     try {
-      if (db.dialect === 'postgres') {
-        // The scan insert creates the deduplicated canonical event in the same database transaction.
-        notificationQueued = true;
-      } else {
       const binding = (process.env as unknown as { NOTIFICATION_QUEUE?: NotificationQueueBinding }).NOTIFICATION_QUEUE;
       const producer = new NotificationProducerService(new D1NotificationIntentRepository(db), new CloudflareNotificationQueueProducer(binding));
       const result = await producer.recordAndPublishIntent({
@@ -208,7 +213,6 @@ export async function POST(req: NextRequest) {
         sourceType: "EMERGENCY", sourceId: eventId, dedupeKey: `emergency_scan_${eventId}`,
       });
       notificationQueued = result.published;
-      }
     } catch {
       console.warn("[ApiEmergencyAlert] Notification intent unavailable");
     }

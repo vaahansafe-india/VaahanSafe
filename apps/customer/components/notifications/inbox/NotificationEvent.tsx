@@ -17,6 +17,7 @@ interface NotificationEventProps {
   onOpenDetails: (notification: NotificationItem) => void;
   onToggleRead: (notification: NotificationItem) => void;
   onArchive: (notification: NotificationItem) => void;
+  onDelete: (notification: NotificationItem) => void;
   isLastInGroup?: boolean;
 }
 
@@ -49,6 +50,7 @@ export function NotificationEvent({
   onOpenDetails,
   onToggleRead,
   onArchive,
+  onDelete,
   isLastInGroup = false,
 }: NotificationEventProps) {
   const iconName = CATEGORY_ICON_MAP[notification.category] || "notification";
@@ -212,6 +214,9 @@ export function NotificationEvent({
             >
               <VaahanIcon name="document" size={14} />
               <span>{notification.isArchived ? "Move to Inbox" : "Archive"}</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onDelete(notification)} className="text-destructive">
+              Delete
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

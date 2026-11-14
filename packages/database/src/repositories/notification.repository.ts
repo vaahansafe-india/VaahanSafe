@@ -239,9 +239,13 @@ export class D1NotificationIntentRepository implements NotificationIntentReposit
 export class D1NotificationRepository implements NotificationRepository {
   constructor(private db: DatabaseClient) {}
 
+  private get visibleOnly(): string {
+    return this.db.dialect === "postgres" ? " AND deleted_at IS NULL" : "";
+  }
+
   async findById(id: string): Promise<Notification | null> {
     const row = await this.db.queryFirst<DbNotificationRow>(
-      `SELECT * FROM notifications WHERE id = ?`,
+      `SELECT * FROM notifications WHERE id = ?${this.visibleOnly}`,
       [id]
     );
     return row ? mapNotificationRow(row) : null;
@@ -249,7 +253,7 @@ export class D1NotificationRepository implements NotificationRepository {
 
   async findByUserId(userId: string, limit = 50, offset = 0): Promise<Notification[]> {
     const rows = await this.db.query<DbNotificationRow>(
-      `SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?`,
+      `SELECT * FROM notifications WHERE user_id = ?${this.visibleOnly} ORDER BY created_at DESC LIMIT ? OFFSET ?`,
       [userId, Math.max(1, Math.min(limit, 200)), Math.max(0, offset)]
     );
     return rows.map(mapNotificationRow);
@@ -257,7 +261,7 @@ export class D1NotificationRepository implements NotificationRepository {
 
   async countUnreadByUserId(userId: string): Promise<number> {
     const row = await this.db.queryFirst<{ count: number }>(
-      `SELECT COUNT(*) as count FROM notifications WHERE user_id = ? AND read_at IS NULL AND archived_at IS NULL`,
+      `SELECT COUNT(*) as count FROM notifications WHERE user_id = ? AND read_at IS NULL AND archived_at IS NULL${this.visibleOnly}`,
       [userId]
     );
     return row?.count ?? 0;
@@ -278,7 +282,7 @@ export class D1NotificationRepository implements NotificationRepository {
         COUNT(CASE WHEN archived_at IS NULL AND category='SUBSCRIPTION' THEN 1 END) AS subscription,
         COUNT(CASE WHEN archived_at IS NULL AND category='SECURITY' THEN 1 END) AS security,
         COUNT(CASE WHEN archived_at IS NULL AND category='ACCOUNT' THEN 1 END) AS account
-       FROM notifications WHERE user_id = ?`,
+       FROM notifications WHERE user_id = ?${this.visibleOnly}`,
       [new Date(new Date().setHours(0, 0, 0, 0)).toISOString(), userId],
     );
     return row || {};
@@ -310,6 +314,17 @@ export class D1NotificationRepository implements NotificationRepository {
       [now, userId]
     );
     return res.rowsAffected ?? 0;
+  }
+
+  async deleteInboxNotifications(ids: string[], userId: string): Promise<number> {
+    if (ids.length === 0) return 0;
+    const placeholders = ids.map(() => "?").join(", ");
+    const result = await this.db.execute(
+      `UPDATE notifications SET deleted_at = ? WHERE user_id = ?
+       AND id IN (${placeholders}) AND deleted_at IS NULL`,
+      [new Date().toISOString(), userId, ...ids],
+    );
+    return result.rowsAffected ?? 0;
   }
 
   async markAsArchived(id: string, userId: string, archivedAt?: string): Promise<boolean> {

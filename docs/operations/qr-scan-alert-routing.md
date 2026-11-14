@@ -4,9 +4,9 @@ For this feature the user explicitly approved retaining the existing Supabase
 relational service with Cloudflare. Reports keep the existing Turnstile
 verification, private R2 photo storage, entitlement checks and durable outbox.
 
-Scanning alone records the ordinary scan notice. The finder must choose a
+Opening or refreshing a QR page records telemetry. The finder must choose a
 situation, consent and submit the protected report to send a parking or emergency
-report. The entry page offers separate parking and accident actions.
+alert. The entry page offers separate parking and accident actions.
 
 | Report                                 | Owner                                                    | Emergency contacts                                                                |
 | -------------------------------------- | -------------------------------------------------------- | --------------------------------------------------------------------------------- |
@@ -25,6 +25,27 @@ expire after 15 minutes to avoid sending obsolete emergency information. Changin
 or deleting a contact prevents subsequent attempts without deleting audit history.
 Account notification preferences apply to the owner's alert; contact permission
 applies independently to each emergency contact's WhatsApp alert.
+
+## November scan-alert correction
+
+The `vs_notification_event` trigger on `qr_scan_events` treated
+`RESOLVED_ACTIVE` as an alert even when the row came from a passive page visit
+or owner test. Its per-QR 15-minute key allowed another message in every later
+bucket. Migration `20261103000100_isolate_qr_report_notifications.sql` removes
+that trigger and marks pending legacy scan notices failed, preserving audit
+history. The protected finder report retains its separate, report-ID-keyed
+intents and delivery claims. A production read-only audit on 3 November 2026
+found 49 legacy intents tied to page telemetry. Of these, 48 had WhatsApp
+provider references and processing status. The database recorded no confirmed
+delivery callbacks for those intents at the time of the audit.
+
+The contact enqueue trigger already excluded the normalized owner phone.
+The send-time recheck previously omitted that comparison, so an account phone
+change could make a queued contact destination equal the current owner's number.
+The migration adds the comparison at claim and delivery preparation. The
+processor also rejects mismatched contact roles and templates before rendering.
+These are repository findings. Incident-specific delivery attribution requires
+correlating production outbox and MSG91 delivery records.
 
 On reports without viewer consent, contacts receive the masked vehicle reference, finder-reported situation, time
 and optional finder-shared location. They receive no owner session, medical data,

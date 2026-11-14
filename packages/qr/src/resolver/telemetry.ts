@@ -58,14 +58,16 @@ export async function recordPublicScanEventSafely(
   const { db, qrId, state, headers } = params;
 
   try {
-    const purpose =
-      getHeader(headers, "purpose") || getHeader(headers, "sec-purpose") || "";
+    const purpose = [
+      getHeader(headers, "purpose"),
+      getHeader(headers, "sec-purpose"),
+    ].join(" ");
     const userAgent = getHeader(headers, "user-agent") || "";
 
     // 1. Filter out prefetch and automated crawlers / bots
-    const isPrefetch = purpose.toLowerCase() === "prefetch";
+    const isPrefetch = /\b(?:prefetch|prerender|preview)\b/i.test(purpose);
     const isBot =
-      /bot|crawler|spider|crawling|slurp|facebookexternalhit|bingpreview/i.test(
+      /bot|crawler|spider|crawling|slurp|facebookexternalhit|bingpreview|whatsapp/i.test(
         userAgent,
       );
 
@@ -148,81 +150,6 @@ export async function recordPublicScanEventSafely(
         ...(postgres ? [country] : []),
       ],
     );
-
-    // Notify vehicle owner on active QR scans
-    if (scanResult === "RESOLVED_ACTIVE" && db.dialect !== "postgres") {
-      try {
-        const assignment = await db.queryFirst<{
-          user_id: string;
-          vehicle_id: string;
-          registration_number: string;
-          make: string;
-          model: string;
-          public_id: string;
-        }>(
-          `SELECT a.user_id, a.vehicle_id, v.registration_number, v.make, v.model, s.public_id
-           FROM qr_assignments a
-           JOIN vehicles v ON a.vehicle_id = v.id
-           JOIN qr_stickers s ON a.qr_id = s.id
-           WHERE a.qr_id = ? AND a.ended_at IS NULL
-           LIMIT 1`,
-          [resolvedQrId],
-        );
-
-        if (assignment?.user_id) {
-          const dedupeKey = `scan_${resolvedQrId}_${nowIso.slice(0, 16)}`;
-          const notifIntentId = `intent_${crypto.randomUUID().replace(/-/g, "").slice(0, 16)}`;
-          const notifId = `notif_${crypto.randomUUID().replace(/-/g, "").slice(0, 16)}`;
-
-          await db.execute(
-            `INSERT INTO notification_intents (
-               id, event_type, recipient_user_id, category, priority,
-               template_key, template_version, payload_json, source_type,
-               source_id, dedupe_key, status, created_at, dispatched_at
-             ) VALUES (?, 'QR_SCANNED', ?, 'SAFETY', 'HIGH', 'QR_SCANNED_V1', 1, '{}', 'SYSTEM', ?, ?, 'PROCESSED', ?, ?)
-             ON CONFLICT(dedupe_key) DO NOTHING`,
-            [
-              notifIntentId,
-              assignment.user_id,
-              eventId,
-              dedupeKey,
-              nowIso,
-              nowIso,
-            ],
-          );
-
-          const locationText = [city, region].filter(Boolean).join(", ");
-          const scanLocationStr = locationText ? ` near ${locationText}` : "";
-          const vehicleName =
-            `${assignment.make || ""} ${assignment.model || ""}`.trim() ||
-            "vehicle";
-
-          await db.execute(
-            `INSERT INTO notifications (
-               id, user_id, intent_id, event_type, category, priority,
-               title, body_safe, action_type, action_target, read_at, archived_at, created_at
-             ) VALUES (?, ?, ?, 'QR_SCANNED', 'SAFETY', 'HIGH', ?, ?, 'NAVIGATE', ?, NULL, NULL, ?)
-             ON CONFLICT DO NOTHING`,
-            [
-              notifId,
-              assignment.user_id,
-              notifIntentId,
-              "Safety QR Scanned",
-              `Someone scanned the VaahanSafe QR on your ${vehicleName} (${assignment.registration_number})${scanLocationStr}.`,
-              `/vehicles/${assignment.vehicle_id}`,
-              nowIso,
-            ],
-          );
-        }
-      } catch (notifErr) {
-        if (process.env.NODE_ENV !== "production") {
-          console.warn(
-            "[VaahanSafe QR Telemetry] Scan notification skipped:",
-            notifErr,
-          );
-        }
-      }
-    }
   } catch (err) {
     // Invariant 41: Analytics failure MUST NOT block public QR resolution
     // Silent catch with low-noise server log

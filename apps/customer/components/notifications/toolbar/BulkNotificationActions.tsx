@@ -8,6 +8,7 @@ interface BulkNotificationActionsProps {
   onMarkRead: () => void;
   onMarkUnread: () => void;
   onArchive: () => void;
+  onDelete: () => void;
   onClearSelection: () => void;
   isPending?: boolean;
 }
@@ -17,6 +18,7 @@ export function BulkNotificationActions({
   onMarkRead,
   onMarkUnread,
   onArchive,
+  onDelete,
   onClearSelection,
   isPending = false,
 }: BulkNotificationActionsProps) {
@@ -65,6 +67,10 @@ export function BulkNotificationActions({
             <VaahanIcon name="document" size={12} />
             <span>Archive</span>
           </button>
+          <button type="button" onClick={onDelete} disabled={isPending}
+            className="px-2 py-1.5 font-mono text-xs font-semibold text-destructive disabled:opacity-50">
+            Delete selected
+          </button>
 
           <button
             type="button"
@@ -104,6 +110,10 @@ export function BulkNotificationActions({
             className="flex h-8 px-2.5 items-center justify-center rounded-xl border border-border bg-background font-mono text-[11px] font-semibold text-foreground transition-colors hover:border-[#cc785c] disabled:opacity-50"
           >
             Archive
+          </button>
+          <button type="button" onClick={onDelete} disabled={isPending}
+            className="h-8 px-2 font-mono text-[11px] font-semibold text-destructive disabled:opacity-50">
+            Delete
           </button>
 
           <button

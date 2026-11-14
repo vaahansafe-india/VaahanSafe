@@ -93,6 +93,12 @@ export class NotificationQueueConsumer {
       };
     }
 
+    // The generic queue has only an account destination. Contact reports
+    // require the role-aware Supabase outbox and its contact authorization.
+    if (intent.templateKey === "EMERGENCY_CONTACT_REPORT_V1") {
+      return { intentId: intent.id, success: false, channelResults: {} };
+    }
+
     // Step 4: Resolve recipient profile and trusted destinations
     const profile = await this.deps.loadRecipientProfile(intent.recipientUserId);
     const resolvedDest = resolveTrustedDestination(

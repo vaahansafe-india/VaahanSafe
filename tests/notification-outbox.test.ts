@@ -44,6 +44,17 @@ function setup(overrides: Partial<ClaimedNotification> = {}) {
   return { store, whatsapp, email, intent };
 }
 describe("Durable notification delivery", () => {
+  it("discards legacy telemetry notices before claiming any delivery", async () => {
+    const d = setup({
+      event_type: "EMERGENCY_SCAN_ALERT",
+      template_key: "EMERGENCY_SCAN_ALERT_V1",
+    });
+    await drainNotificationOutbox(d);
+    expect(d.store.finishIntent).toHaveBeenCalledWith(d.intent, "UNCONFIRMED_SCAN_NOTICE");
+    expect(d.store.prepare).not.toHaveBeenCalled();
+    expect(d.whatsapp.sendWhatsApp).not.toHaveBeenCalled();
+  });
+
   it("injects only a server-issued viewer URL into the new WhatsApp contract", async () => {
     const viewerUrl = `https://view.vaahansafe.com/r#${"A".repeat(43)}`;
     const d = setup({
@@ -90,6 +101,7 @@ describe("Durable notification delivery", () => {
       recipient_kind: "EMERGENCY_CONTACT",
       template_key: "EMERGENCY_CONTACT_REPORT_V1",
       event_type: "EMERGENCY_SCAN_ALERT",
+      profile: { userId: "owner", verifiedPhone: "+919123456789" },
       payload_json: contactPayload,
       preferences: [
         {
@@ -103,6 +115,7 @@ describe("Durable notification delivery", () => {
     await drainNotificationOutbox(d);
     expect(d.whatsapp.sendWhatsApp).toHaveBeenCalledWith(
       expect.objectContaining({
+        recipientPhone: "+919123456789",
         templateName: "vhn_emergency_contact_report_v1",
         parameters: {
           1: "MH••••1234",

@@ -65,6 +65,22 @@ export async function drainNotificationOutbox(
   let failed = 0;
   await Promise.all(
     intents.map(async (intent) => {
+      const contact = intent.recipient_kind === "EMERGENCY_CONTACT";
+      if (intent.template_key === "EMERGENCY_SCAN_ALERT_V1") {
+        await deps.store.finishIntent(intent, "UNCONFIRMED_SCAN_NOTICE");
+        failed++;
+        return;
+      }
+      if (
+        contact !== (intent.template_key === "EMERGENCY_CONTACT_REPORT_V1") ||
+        (contact &&
+          (intent.event_type !== "EMERGENCY_SCAN_ALERT" ||
+            intent.category !== "SAFETY"))
+      ) {
+        await deps.store.finishIntent(intent, "RECIPIENT_TEMPLATE_MISMATCH");
+        failed++;
+        return;
+      }
       let rendered: ReturnType<typeof renderTemplate>;
       let payload: Record<string, unknown>;
       // A failed grant call leaves the lease recoverable and sends no message.
@@ -89,18 +105,16 @@ export async function drainNotificationOutbox(
         failed++;
         return;
       }
-      const dest = resolveTrustedDestination(
-        intent.profile,
-        intent.category,
-        payload.snapshotDestination as
-          { phone?: string; email?: string } | undefined,
-      );
-      const contact = intent.recipient_kind === "EMERGENCY_CONTACT";
-      if (contact !== (intent.template_key === "EMERGENCY_CONTACT_REPORT_V1")) {
-        await deps.store.finishIntent(intent, "RECIPIENT_TEMPLATE_MISMATCH");
-        failed++;
-        return;
-      }
+      // Contact claims carry only the current server-authorized contact phone.
+      // Account snapshots are never a fallback for an emergency contact.
+      const dest = contact
+        ? { phone: intent.profile.verifiedPhone, email: undefined }
+        : resolveTrustedDestination(
+            intent.profile,
+            intent.category,
+            payload.snapshotDestination as
+              { phone?: string; email?: string } | undefined,
+          );
       if (contact && !dest.phone) {
         await deps.store.finishIntent(intent, "EMERGENCY_CONTACT_UNAVAILABLE");
         failed++;
@@ -109,9 +123,7 @@ export async function drainNotificationOutbox(
       // The contact's current allow_message permission is enforced by the DB
       // at claim and prepare. The owner's channel preferences do not apply to it.
       const channels: NotificationChannel[] = contact
-        ? dest.phone
-          ? ["WHATSAPP"]
-          : []
+        ? ["WHATSAPP"]
         : evaluateNotificationChannels({
             eventType: intent.event_type,
             category: intent.category,
