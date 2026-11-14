@@ -65,8 +65,8 @@ export async function resolveExactEntityGraph(
       .from("qr_assignments")
       .select("vehicle_id,user_id,assigned_at")
       .eq("qr_id", sticker.id)
-      .eq("is_current", 1)
-      .order("assigned_at", { ascending: false })
+      .is("ended_at", null)
+      .eq("slot", 1)
       .limit(1)
       .maybeSingle();
 

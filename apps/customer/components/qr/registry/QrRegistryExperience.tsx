@@ -2,6 +2,13 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { toast } from "sonner";
+import { setSecondaryQrVehicleAction } from "@/app/(app)/qr/actions";
+import { useCustomerMutation } from "@/lib/use-customer-mutation";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@vaahansafe/ui";
 import { VaahanIcon } from "@vaahansafe/icons";
 import { PhysicalQrObject } from "../primitives/PhysicalQrObject";
 import {
@@ -22,18 +29,32 @@ import { cn } from "@vaahansafe/ui/lib/utils";
 
 interface QrRegistryExperienceProps {
   initialItems: QrRegistryItemData[];
+  availableVehicles: Array<{ id: string; label: string }>;
 }
 
-export function QrRegistryExperience({ initialItems }: QrRegistryExperienceProps) {
+export function QrRegistryExperience({ initialItems, availableVehicles }: QrRegistryExperienceProps) {
   const [searchQuery, setSearchQuery] = React.useState("");
   const [selectedStatus, setSelectedStatus] = React.useState<"ALL" | "ACTIVATED" | "UNLINKED" | "REPLACED">("ALL");
   const [copiedId, setCopiedId] = React.useState<string | null>(null);
+  const [detach, setDetach] = React.useState<{ qrId: string; vehicleId: string } | null>(null);
+  const mutation = useCustomerMutation(setSecondaryQrVehicleAction, [
+    "qr-codes", "qr", "vehicles", "dashboard", "scan-history", "qr-buy", "qr-activate", "qr-replace",
+  ]);
+
+  async function updateVehicle(qrId: string, vehicleId: string, attach: boolean) {
+    try {
+      await mutation.mutateAsync({ qrId, vehicleId, attach });
+      toast.success(attach ? "Second vehicle attached." : "Second vehicle detached.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Couldn't update this VaahanSafe ID.");
+    }
+  }
 
   const filteredItems = React.useMemo(() => {
     return initialItems.filter((item) => {
       // Status filter
       if (selectedStatus === "ACTIVATED" && item.status !== "ACTIVATED") return false;
-      if (selectedStatus === "UNLINKED" && item.vehicle) return false;
+      if (selectedStatus === "UNLINKED" && item.vehicles.length) return false;
       if (selectedStatus === "REPLACED" && item.status !== "REPLACED") return false;
 
       // Search query
@@ -41,10 +62,9 @@ export function QrRegistryExperience({ initialItems }: QrRegistryExperienceProps
         const q = searchQuery.toLowerCase();
         const matchesPublicId = item.publicId.toLowerCase().includes(q);
         const matchesCode = item.visibleCode.toLowerCase().includes(q);
-        const matchesPlate = item.vehicle?.plate.toLowerCase().includes(q);
-        const matchesMake = item.vehicle?.make.toLowerCase().includes(q);
-        const matchesModel = item.vehicle?.model.toLowerCase().includes(q);
-        return matchesPublicId || matchesCode || Boolean(matchesPlate) || Boolean(matchesMake) || Boolean(matchesModel);
+        return matchesPublicId || matchesCode || item.vehicles.some((vehicle) =>
+          [vehicle.plate, vehicle.make, vehicle.model].some((value) => value.toLowerCase().includes(q)),
+        );
       }
 
       return true;
@@ -171,23 +191,27 @@ export function QrRegistryExperience({ initialItems }: QrRegistryExperienceProps
                   {/* Vehicle Identity Assignment */}
                   <div className="mt-4 rounded-xl border border-border/80 bg-background/50 p-3.5 min-w-0">
                     <div className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground">
-                      Assigned Vehicle
+                      Attached vehicles · {item.vehicles.length}/2
                     </div>
-                    {item.vehicle ? (
-                      <div className="mt-1 flex items-center justify-between gap-2">
+                    {item.vehicles.length ? item.vehicles.map((vehicle) => (
+                      <div key={vehicle.id} className="mt-2 flex flex-wrap items-center justify-between gap-2">
                         <div className="min-w-0">
                           <div className="font-mono text-sm font-bold text-foreground truncate">
-                            {item.vehicle.maskedPlate}
+                            <Link href={`/vehicles/${vehicle.id}`} className="hover:underline">{vehicle.maskedPlate}</Link>
                           </div>
                           <div className="text-xs text-muted-foreground truncate">
-                            {item.vehicle.make} {item.vehicle.model}
+                            {vehicle.make} {vehicle.model} · {vehicle.secondary ? "Second vehicle" : "Primary vehicle"}
                           </div>
                         </div>
-                        <span className="rounded-md bg-muted px-2 py-0.5 font-mono text-[10px] text-muted-foreground uppercase shrink-0">
-                          {item.vehicle.type}
-                        </span>
+                        {vehicle.secondary && (
+                          <button type="button" className="min-h-9 text-xs text-destructive underline"
+                            disabled={mutation.isPending}
+                            onClick={() => setDetach({ qrId: item.id, vehicleId: vehicle.id })}>
+                            Detach
+                          </button>
+                        )}
                       </div>
-                    ) : (
+                    )) : (
                       <div className="mt-1 flex items-center justify-between text-xs text-amber-600 dark:text-amber-400">
                         <span>Not bound to any vehicle</span>
                         <Link
@@ -197,6 +221,30 @@ export function QrRegistryExperience({ initialItems }: QrRegistryExperienceProps
                           Pair Now
                         </Link>
                       </div>
+                    )}
+                    {isActivated && item.vehicles.length === 1 && (
+                      availableVehicles.length ? (
+                        <form className="mt-3 flex flex-wrap gap-2" onSubmit={(event) => {
+                          event.preventDefault();
+                          const vehicleId = new FormData(event.currentTarget).get("vehicleId");
+                          if (typeof vehicleId === "string" && vehicleId) void updateVehicle(item.id, vehicleId, true);
+                        }}>
+                          <select required name="vehicleId" aria-label={`Second vehicle for ${item.visibleCode}`}
+                            defaultValue="" disabled={mutation.isPending}
+                            className="min-h-9 w-full rounded-lg border bg-background px-2 text-xs">
+                            <option value="" disabled>Select an available vehicle</option>
+                            {availableVehicles.map(({ id, label }) => <option key={id} value={id}>{label}</option>)}
+                          </select>
+                          <button type="submit" disabled={mutation.isPending}
+                            className="min-h-9 rounded-lg border bg-background px-3 text-xs font-medium">
+                            Attach second vehicle
+                          </button>
+                        </form>
+                      ) : (
+                        <p className="mt-2 text-xs text-muted-foreground">
+                          <Link href="/vehicles/new" className="underline">Add a vehicle</Link> to share this ID.
+                        </p>
+                      )
                     )}
                   </div>
 
@@ -250,13 +298,15 @@ export function QrRegistryExperience({ initialItems }: QrRegistryExperienceProps
                     <span>Pass</span>
                   </Link>
 
-                  <Link
+                  {item.vehicles.length === 2 ? (
+                    <span className="text-xs text-muted-foreground">Detach the second vehicle before replacement.</span>
+                  ) : <Link
                     href={`/qr/replace?id=${encodeURIComponent(item.publicId)}`}
                     className="inline-flex flex-1 h-8 items-center justify-center gap-1.5 rounded-lg border border-border bg-background font-mono text-[11px] font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition-colors text-center truncate"
                   >
                     <RotateCcw className="size-3.5 text-muted-foreground shrink-0" />
                     <span>Replace</span>
-                  </Link>
+                  </Link>}
                 </div>
               </div>
             );
@@ -307,6 +357,22 @@ export function QrRegistryExperience({ initialItems }: QrRegistryExperienceProps
           </div>
         </div>
       )}
+      <AlertDialog open={detach !== null} onOpenChange={(open) => { if (!open) setDetach(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Detach the second vehicle?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This vehicle will stop using this VaahanSafe ID. Its vehicle record, contacts and past reports are kept.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction disabled={mutation.isPending} onClick={() => {
+              if (detach) void updateVehicle(detach.qrId, detach.vehicleId, false);
+            }}>Detach vehicle</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

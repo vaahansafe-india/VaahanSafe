@@ -1,6 +1,7 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getSupabaseClient } from "@vaahansafe/database";
+import { publicQrVehicleLabel } from "@vaahansafe/qr-core";
 import type {
   HotPathQueryResultRow,
   ContactQueryResultRow,
@@ -40,6 +41,8 @@ type JoinedQr = Sticker & {
   assignments: {
     user_id: string;
     ended_at: string | null;
+    slot: number;
+    public_vehicle_choice: string;
     vehicle: Vehicle | null;
   }[];
 };
@@ -74,7 +77,7 @@ type QrDatabase = {
 
 const qrColumns = `id,public_id,visible_code,status,replaced_by_qr_id,
   entitlements:service_entitlements(id,capability,status,user_id,vehicle_id,expires_at),
-  assignments:qr_assignments(user_id,ended_at,
+  assignments:qr_assignments(user_id,ended_at,slot,public_vehicle_choice,
     vehicle:vehicles(id,user_id,status,make,model,color,vehicle_type,registration_number,
       profiles:emergency_profiles(id,display_name,blood_group,medical_notes,public_vehicle_details,show_owner_name,show_blood_group,show_medical_notes,show_vehicle_details,status,updated_at,
         contacts:emergency_contacts(id,name,relationship_label,phone,priority,allow_call,allow_message))))`;
@@ -101,12 +104,13 @@ export function createSupabaseQrRepository(): PublicQrReadRepository {
   let snapshot: JoinedQr | null = null;
   let approvedProfile: Profile | null = null;
   return {
-    async findQr(publicId) {
+    async findQr(publicId, vehicleChoice) {
       const { data, error } = await client
         .from("qr_stickers")
         .select(qrColumns)
         .eq("public_id", publicId)
         .eq("entitlements.capability", "SAFETY_VIEW_ACTIVE")
+        .is("assignments.ended_at", null)
         .eq("assignments.vehicle.profiles.contacts.is_enabled", 1)
         .order("priority", {
           referencedTable: "assignments.vehicle.profiles.contacts",
@@ -125,9 +129,28 @@ export function createSupabaseQrRepository(): PublicQrReadRepository {
           a.vehicle?.status === "ACTIVE" &&
           a.user_id === a.vehicle.user_id,
       );
-      // Ambiguous ownership is unavailable instead of selecting an arbitrary binding.
-      const vehicle =
-        validBindings.length === 1 ? validBindings[0]!.vehicle : null;
+      const activeBindings = data.assignments.filter((a) => a.ended_at === null);
+      const sameOwner = new Set(activeBindings.map((a) => a.user_id)).size === 1;
+      const eligible = sameOwner
+        ? validBindings.filter((a) =>
+            a.vehicle?.profiles?.status === "ACTIVE" &&
+            data.entitlements.some((e) => e.status === "ENABLED" &&
+              e.user_id === a.user_id && e.vehicle_id === a.vehicle?.id &&
+              (e.expires_at === null || Date.parse(e.expires_at) > Date.now())),
+          ).sort((a, b) => a.slot - b.slot)
+        : [];
+      const choiceRequired = sameOwner && validBindings.length > 1;
+      const binding = vehicleChoice
+        ? eligible.find((a) => a.public_vehicle_choice === vehicleChoice)
+        : !choiceRequired ? eligible[0] : undefined;
+      const vehicle = binding?.vehicle;
+      const choices = choiceRequired && !vehicleChoice ? eligible.map((a) => ({
+        choice: a.public_vehicle_choice,
+        label: publicQrVehicleLabel({
+          ...a.vehicle!,
+          show_vehicle_details: a.vehicle!.profiles!.show_vehicle_details,
+        }, a.slot - 1),
+      })) : undefined;
       const profile =
         vehicle?.profiles?.status === "ACTIVE" ? vehicle.profiles : null;
       approvedProfile = profile;
@@ -152,6 +175,8 @@ export function createSupabaseQrRepository(): PublicQrReadRepository {
         replaced_by_public_id: replacementId,
         vehicle_id: vehicle?.id || null,
         owner_user_id: vehicle?.user_id || null,
+        vehicle_choice: choiceRequired || vehicleChoice ? binding?.public_vehicle_choice : undefined,
+        vehicle_choices: choices,
         make: vehicle?.make || null,
         model: vehicle?.model || null,
         color: vehicle?.color || null,

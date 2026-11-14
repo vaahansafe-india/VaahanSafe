@@ -239,8 +239,8 @@ export async function getInventoryDetail(
       `SELECT j.id,j.reference_code AS reference,j.mode,j.status,j.quantity,j.created_at AS "createdAt",j.expires_at AS "expiresAt",j.reason FROM qr_print_items i JOIN qr_print_jobs j ON j.id=i.job_id WHERE i.qr_id=? ORDER BY j.created_at DESC LIMIT 10`,
       [id],
     ),
-    db.queryFirst<{ active: boolean; replacement: string | null }>(
-      `SELECT EXISTS(SELECT 1 FROM qr_assignments WHERE qr_id=? AND ended_at IS NULL) AS active,(SELECT r.visible_code FROM qr_stickers s JOIN qr_stickers r ON r.id=s.replaced_by_qr_id WHERE s.id=?) AS replacement`,
+    db.queryFirst<{ count: number; replacement: string | null }>(
+      `SELECT (SELECT count(*)::integer FROM qr_assignments WHERE qr_id=? AND ended_at IS NULL) AS count,(SELECT r.visible_code FROM qr_stickers s JOIN qr_stickers r ON r.id=s.replaced_by_qr_id WHERE s.id=?) AS replacement`,
       [id, id],
     ),
     getActiveTemplate(),
@@ -257,7 +257,8 @@ export async function getInventoryDetail(
     scans: scanRows[0]!,
     audit,
     prints,
-    activeAssignment: !!binding?.active,
+    activeAssignment: Boolean(binding?.count),
+    attachedVehicleCount: binding?.count ?? 0,
     replacement: binding?.replacement || null,
     template,
     eligibility: eligible[0].eligibility,

@@ -20,6 +20,7 @@ const ReportFlow = dynamic(
 /** Load report controls only after a scanner chooses to report a concern. */
 export function ReportEntry(props: {
   publicId: string;
+  vehicleChoice?: string;
   siteKey: string;
   vehicleDisplay: string;
 }) {

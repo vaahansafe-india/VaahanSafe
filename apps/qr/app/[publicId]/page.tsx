@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { after } from "next/server";
 import {
   resolvePublicQr,
+  isQrVehicleChoice,
   recordPublicScanEventSafely,
 } from "@vaahansafe/qr-core";
 import { getAuthoritativeDatabaseClient } from "@vaahansafe/database";
@@ -20,6 +21,7 @@ interface QrResolverPageProps {
   params: Promise<{
     publicId: string;
   }>;
+  searchParams?: Promise<{ vehicle?: string | string[] }>;
 }
 
 /**
@@ -46,14 +48,35 @@ export async function generateMetadata({
 
 export default async function DynamicQrResolverPage({
   params,
+  searchParams,
 }: QrResolverPageProps) {
   const { publicId } = await params;
+  const choice = (await searchParams)?.vehicle;
 
   try {
     // 1. Authoritative Domain Resolution (Rule 06, 07, 87)
     const resolution = await resolvePublicQr(publicId, {
       repository: createSupabaseQrRepository(),
+      vehicleChoice: isQrVehicleChoice(choice) ? choice : undefined,
     });
+    if (resolution.vehicleChoices?.length) {
+      return (
+        <ResolverShell verified>
+          <section className="space-y-4 rounded-xl border bg-card p-5">
+            <h1 className="font-serif text-2xl">Which vehicle did you scan?</h1>
+            <p className="text-sm text-muted-foreground">
+              This VaahanSafe ID is shared. Choose the vehicle to open its safety profile.
+            </p>
+            {resolution.vehicleChoices.map(({ choice, label }) => (
+              <a key={choice} href={`?vehicle=${choice}`}
+                className="flex min-h-11 items-center rounded-lg border px-4 text-sm font-medium hover:bg-muted">
+                {label}
+              </a>
+            ))}
+          </section>
+        </ResolverShell>
+      );
+    }
 
     // 2. Non-blocking Telemetry Logging (Rule 39, 40, 41)
     const reqHeaders = new Headers(await headers());
@@ -65,6 +88,8 @@ export default async function DynamicQrResolverPage({
           eventId,
           resolution.qrId,
           resolution.publicId,
+          undefined,
+          resolution.vehicleChoice,
         );
       } catch {
         console.warn("[QR location] Scan protection unavailable");
@@ -77,6 +102,7 @@ export default async function DynamicQrResolverPage({
             db: getAuthoritativeDatabaseClient(),
             qrId: resolution.qrId!,
             state: resolution.state,
+            vehicleId: resolution.resolvedVehicleId,
             headers: reqHeaders,
             eventId,
           });
@@ -88,6 +114,7 @@ export default async function DynamicQrResolverPage({
     // 3. Render State Router inside Dedicated Shell
     return (
       <ResolverShell verified={resolution.state === "ACTIVE"}>
+        {choice && <a href={`/${encodeURIComponent(publicId)}`} className="mb-4 inline-block text-sm underline">Back to QR vehicle selection</a>}
         {resolution.state === "ACTIVE" ? (
           <ScanLocationGate ticket={locationTicket}>
             <QrStateRouter resolution={resolution} />

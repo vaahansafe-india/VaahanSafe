@@ -243,7 +243,7 @@ export function InventoryFullRecord({
               </div>
               <p className="record-body-copy">
                 {detail.activeAssignment
-                  ? "An active vehicle binding is recorded."
+                  ? `${detail.attachedVehicleCount ?? 1} of 2 vehicles attached.`
                   : "No active vehicle binding recorded."}
               </p>
               {r.activatedAt && (

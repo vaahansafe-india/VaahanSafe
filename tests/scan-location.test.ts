@@ -54,7 +54,7 @@ beforeEach(() => {
   mocks.execute
     .mockReset()
     .mockResolvedValue({ success: true, rowsAffected: 1 });
-  mocks.resolve.mockResolvedValue({ state: "ACTIVE", qrId: "qr_existing" });
+  mocks.resolve.mockResolvedValue({ state: "ACTIVE", qrId: "qr_existing", profile: {} });
   mocks.queryFirst
     .mockResolvedValueOnce({
       id: "qse_existing",

@@ -6,7 +6,7 @@ import { CustomerPageLoading } from "@/components/query/CustomerPageState";
 export const metadata: Metadata = {
   title: "QR Codes Registry — VaahanSafe Automotive Safety",
   description:
-    "View and inspect all active QR codes linked to your vehicle safety identities.",
+    "Manage up to two vehicles on each activated VaahanSafe ID.",
 };
 
 export default function CustomerPage() {

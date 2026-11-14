@@ -57,8 +57,9 @@ export async function POST(request: Request) {
       );
     const resolution = await resolvePublicQr(ticket.publicId, {
       repository: createSupabaseQrRepository(),
+      vehicleChoice: ticket.vehicleChoice,
     });
-    if (resolution.state !== "ACTIVE" || resolution.qrId !== ticket.qrId)
+    if (resolution.state !== "ACTIVE" || !resolution.profile || resolution.qrId !== ticket.qrId)
       return reply({ error: "This QR is unavailable right now." }, 404);
     const db = getAuthoritativeDatabaseClient();
     // Check the signed event before contacting the geocoder; never accept a browser event ID.

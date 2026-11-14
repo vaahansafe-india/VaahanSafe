@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { resolvePublicEmergencyProfile } from "@vaahansafe/database";
-import { isValidPublicIdFormat } from "@vaahansafe/qr-core";
+import { isValidPublicIdFormat, isQrVehicleChoice, resolvePublicQr } from "@vaahansafe/qr-core";
 import { getApiDatabase } from "../../../_db";
 
 export const dynamic = "force-dynamic";
@@ -31,7 +31,13 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
     }
 
     const db = getApiDatabase();
-    const result = await resolvePublicEmergencyProfile(db, cleanPublicId);
+    const choice = req.nextUrl.searchParams.get("vehicle");
+    if (choice !== null && !isQrVehicleChoice(choice)) {
+      return NextResponse.json({ error: "Invalid vehicle selection" }, { status: 400 });
+    }
+    const result = db.dialect === "postgres"
+      ? await resolvePublicQr(cleanPublicId, { db, includeVehicleChoices: true, vehicleChoice: choice || undefined })
+      : await resolvePublicEmergencyProfile(db, cleanPublicId);
 
     if (result.state === "UNKNOWN") {
       return NextResponse.json(
@@ -43,12 +49,22 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
     return NextResponse.json(
       {
         success: true,
-        data: result,
+        data: {
+          state: result.state,
+          publicId: result.publicId,
+          visibleCode: result.visibleCode,
+          replacedByPublicId: result.replacedByPublicId,
+          vehicleChoices: "vehicleChoices" in result ? result.vehicleChoices : undefined,
+          profile: result.profile && {
+            ...result.profile,
+            approvedEmergencyContacts: result.profile.approvedEmergencyContacts.map(({ phone: _phone, ...contact }) => contact),
+          },
+        },
       },
       {
         status: 200,
         headers: {
-          "Cache-Control": "public, max-age=30, s-maxage=60, stale-while-revalidate=120",
+          "Cache-Control": "no-store",
           "X-Content-Type-Options": "nosniff",
         },
       }

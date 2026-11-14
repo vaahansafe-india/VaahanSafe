@@ -354,6 +354,7 @@ export async function getDashboardOverview(
                      SELECT 1 FROM qr_assignments a JOIN vehicles v ON v.id = a.vehicle_id
                      WHERE a.qr_id = qr_scan_events.qr_id AND a.vehicle_id = ? AND v.user_id = ?
                        AND a.ended_at IS NULL AND v.status != 'DELETED'
+                       AND (qr_scan_events.vehicle_id=a.vehicle_id OR (qr_scan_events.vehicle_id IS NULL AND a.slot=1))
                    )`;
 
     if (dateFilterCutoff) {

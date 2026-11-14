@@ -115,6 +115,20 @@ export async function DELETE(req: NextRequest, { params }: RouteParams) {
 
     const now = new Date().toISOString();
 
+    if (db.dialect === "postgres") {
+      const updated = await db.queryFirst<{ result: string }>(
+        "SELECT public.customer_remove_qr_vehicle(?, ?) AS result",
+        [auth.user.id, vehicleId],
+      );
+      if (updated?.result === "DETACH_SECOND_VEHICLE_FIRST") {
+        return NextResponse.json({ error: "Detach the second vehicle from this VaahanSafe ID before removing the primary vehicle." }, { status: 409 });
+      }
+      if (updated?.result !== "OK") {
+        return NextResponse.json({ error: "Vehicle is no longer available." }, { status: 404 });
+      }
+      return NextResponse.json({ success: true, message: `Vehicle ${vehicle.registration_number} successfully removed` });
+    }
+
     // 1. Unlink any active QR assignment gracefully (preserving history)
     await db.execute(
       `UPDATE qr_assignments SET ended_at = ?, end_reason = 'UNLINKED'

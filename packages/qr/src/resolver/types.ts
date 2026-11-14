@@ -52,6 +52,10 @@ export interface PublicQrResolution {
   state: QrPublicResolverState;
   replacedByPublicId?: string;
   profile?: PublicEmergencyProfile;
+  vehicleChoice?: string;
+  vehicleChoices?: Array<{ choice: string; label: string }>;
+  /** Internal telemetry context. Public API handlers omit this field. */
+  resolvedVehicleId?: string;
   meta: PublicResolverMeta;
   error?: string;
 }

@@ -138,6 +138,14 @@ describe("QR Service Read Models (Authoritative Cloudflare D1)", () => {
           vehicle_id: null,
           assigned_at: null,
         },
+        {
+          id: "qr_1",
+          public_id: "7F3K9021",
+          visible_code: "VS-7F3K-9021",
+          status: "ACTIVATED",
+          vehicle_id: "veh_2",
+          slot: 2,
+        },
       ])
       .mockResolvedValueOnce([
         {
@@ -151,14 +159,27 @@ describe("QR Service Read Models (Authoritative Cloudflare D1)", () => {
           created_at: "2026-09-01T10:00:00Z",
           updated_at: "2026-09-01T10:00:00Z",
         },
+        {
+          id: "veh_2",
+          user_id: "usr_active",
+          registration_number: "KA01MJ6293",
+          vehicle_type: "CAR",
+          make: "Tata",
+          model: "Nexon",
+          status: "ACTIVE",
+        },
       ])
+      .mockResolvedValueOnce([])
       .mockResolvedValueOnce([])
       .mockResolvedValueOnce([]);
 
-    const result = await getQrCodesRegistry("usr_active", { search: "honda" });
+    const result = await getQrCodesRegistry("usr_active", { search: "nexon" });
 
     expect(result.items).toHaveLength(1);
     expect(result.items[0]?.publicId).toBe("7F3K9021");
-    expect(result.items[0]?.vehicle?.make).toBe("Honda");
+    expect(result.items[0]?.vehicles.map(({ make, secondary }) => ({ make, secondary }))).toEqual([
+      { make: "Honda", secondary: false },
+      { make: "Tata", secondary: true },
+    ]);
   });
 });

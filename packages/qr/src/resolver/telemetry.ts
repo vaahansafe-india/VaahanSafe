@@ -17,6 +17,7 @@ export interface RecordScanEventParams {
   qrId: string;
   state: QrPublicResolverState;
   eventId?: string;
+  vehicleId?: string;
   headers?: Headers | Record<string, string | string[] | undefined> | null;
 }
 
@@ -137,8 +138,8 @@ export async function recordPublicScanEventSafely(
     const postgres = db.dialect === "postgres";
     await db.execute(
       `INSERT INTO qr_scan_events (
-         id, qr_id, scan_type, result, city, state, user_agent_family, referrer_class, created_at${postgres ? ", country" : ""}
-       ) VALUES (?, ?, 'PUBLIC_RESOLVE', ?, ?, ?, ?, 'DIRECT_SCAN', ?${postgres ? ", ?" : ""})`,
+         id, qr_id, scan_type, result, city, state, user_agent_family, referrer_class, created_at${postgres ? ", country, vehicle_id" : ""}
+       ) VALUES (?, ?, 'PUBLIC_RESOLVE', ?, ?, ?, ?, 'DIRECT_SCAN', ?${postgres ? ", ?, ?" : ""})`,
       [
         eventId,
         resolvedQrId,
@@ -147,7 +148,7 @@ export async function recordPublicScanEventSafely(
         region,
         uaFamily,
         nowIso,
-        ...(postgres ? [country] : []),
+        ...(postgres ? [country, params.vehicleId ?? null] : []),
       ],
     );
   } catch (err) {

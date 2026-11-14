@@ -92,6 +92,7 @@ export interface InventoryDetail {
   }[];
   prints: PrintJob[];
   activeAssignment: boolean;
+  attachedVehicleCount?: number;
   replacement: string | null;
   eligibility: { print: boolean; reprint: boolean; reason: string | null };
   safeSvg: string;

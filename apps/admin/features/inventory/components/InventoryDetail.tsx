@@ -189,7 +189,7 @@ export function DetailContent({
             </p>
             <p>
               {detail.activeAssignment
-                ? "An active vehicle binding is recorded."
+                ? `${detail.attachedVehicleCount ?? 1} of 2 vehicles attached.`
                 : "No active vehicle binding recorded."}
             </p>
             {detail.attempts.map((a) => (

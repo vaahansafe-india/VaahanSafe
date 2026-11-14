@@ -35,6 +35,8 @@ import { isValidPublicIdFormat } from "./validate-payload";
 export interface ResolvePublicQrOptions {
   db?: DatabaseClient;
   repository?: PublicQrReadRepository;
+  vehicleChoice?: string;
+  includeVehicleChoices?: boolean;
 }
 
 export interface HotPathQueryResultRow {
@@ -62,6 +64,9 @@ export interface HotPathQueryResultRow {
   show_vehicle_details: number | null;
   profile_status: string | null;
   profile_updated_at: string | null;
+  vehicle_choice?: string;
+  vehicle_choices?: PublicQrResolution["vehicleChoices"];
+  vehicle_slot?: number;
 }
 
 export interface ContactQueryResultRow {
@@ -84,12 +89,26 @@ export interface PublicQrEntitlementRow {
 }
 
 export interface PublicQrReadRepository {
-  findQr(publicId: string): Promise<HotPathQueryResultRow | null>;
+  findQr(publicId: string, vehicleChoice?: string): Promise<HotPathQueryResultRow | null>;
   findEntitlements(qrId: string): Promise<PublicQrEntitlementRow[]>;
   findContacts(profileId: string): Promise<ContactQueryResultRow[]>;
 }
 
 // Format validation is imported from ./validate-payload
+
+export function isQrVehicleChoice(value: unknown): value is string {
+  return typeof value === "string" &&
+    /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+}
+
+export function publicQrVehicleLabel(row: Pick<HotPathQueryResultRow,
+  "show_vehicle_details" | "make" | "model" | "color" | "registration_number">, index: number) {
+  if (row.show_vehicle_details !== 1) return `Vehicle ${index + 1}`;
+  const description = [row.make, row.model].filter(Boolean).join(" ");
+  const plateSuffix = row.registration_number?.slice(-4);
+  return [description, row.color, plateSuffix && `plate ending ${plateSuffix}`].filter(Boolean).join(" · ") ||
+    `Vehicle ${index + 1}`;
+}
 
 /**
  * Authoritative domain resolver for a public QR identifier.
@@ -116,10 +135,9 @@ export async function resolvePublicQr(
 
   // 2. Hot-Path Indexed Single Query
   // Note: Only selects minimal relational fields needed for emergency safety resolution
-  const row = repository
-    ? await repository.findQr(publicId)
-    : await db!.queryFirst<HotPathQueryResultRow>(
-        `SELECT
+  const shared = !repository && db?.dialect === "postgres" && options?.includeVehicleChoices;
+  const sql = `SELECT
+        ${shared ? "a.public_vehicle_choice AS vehicle_choice, a.slot AS vehicle_slot," : ""}
         s.id AS qr_id,
         s.public_id,
         s.visible_code,
@@ -127,7 +145,7 @@ export async function resolvePublicQr(
         s.replaced_by_qr_id,
         rep_s.public_id AS replaced_by_public_id,
         v.id AS vehicle_id,
-        v.user_id AS owner_user_id,
+        ${shared ? "a.user_id" : "v.user_id"} AS owner_user_id,
         v.make,
         v.model,
         v.color,
@@ -150,9 +168,40 @@ export async function resolvePublicQr(
      LEFT JOIN vehicles v ON a.vehicle_id = v.id AND a.user_id = v.user_id AND v.status = 'ACTIVE'
      LEFT JOIN emergency_profiles ep ON v.id = ep.vehicle_id AND ep.status = 'ACTIVE'
      WHERE s.public_id = ?
-     LIMIT 1`,
-        [publicId],
-      );
+     ${shared ? "ORDER BY a.slot LIMIT 3" : "LIMIT 1"}`;
+  let row: HotPathQueryResultRow | null;
+  if (repository) {
+    row = await repository.findQr(publicId, options?.vehicleChoice);
+  } else if (shared) {
+    const rows = await db!.query<HotPathQueryResultRow>(sql, [publicId]);
+    row = rows[0] ?? null;
+    if (row && mapInternalToPublicResolverState(row.qr_status) === "ACTIVE" && rows.length > 1) {
+      const bindings = rows.filter((binding) => binding.vehicle_id);
+      const sameOwner = new Set(rows.map((binding) => binding.owner_user_id)).size === 1;
+      const entitlements = sameOwner ? await db!.query<PublicQrEntitlementRow>(
+        `SELECT id, capability, status, user_id, vehicle_id, expires_at
+         FROM service_entitlements WHERE qr_sticker_id = ? AND capability='SAFETY_VIEW_ACTIVE'`,
+        [row.qr_id],
+      ) : [];
+      const eligible = bindings.filter((binding) => binding.profile_status === "ACTIVE" &&
+        entitlements.some((e) => e.status === "ENABLED" && e.user_id === binding.owner_user_id &&
+          e.vehicle_id === binding.vehicle_id && (e.expires_at === null || Date.parse(e.expires_at) > Date.now())));
+      const selected = options?.vehicleChoice && eligible.find((binding) => binding.vehicle_choice === options.vehicleChoice);
+      row = selected || {
+        ...row,
+        vehicle_id: null,
+        vehicle_choice: undefined,
+        vehicle_choices: options?.vehicleChoice ? undefined : eligible.map((binding) => ({
+          choice: binding.vehicle_choice!,
+          label: publicQrVehicleLabel(binding, (binding.vehicle_slot ?? 1) - 1),
+        })),
+      };
+    } else if (row && options?.vehicleChoice && row.vehicle_choice !== options.vehicleChoice) {
+      row = { ...row, vehicle_id: null, vehicle_choice: undefined };
+    }
+  } else {
+    row = await db!.queryFirst<HotPathQueryResultRow>(sql, [publicId]);
+  }
 
   // 3. Unknown Public Identifier
   if (!row) {
@@ -221,6 +270,16 @@ export async function resolvePublicQr(
 
   // 6. Active Lifecycle Gate: Check Service Entitlement & Active Binding
   if (publicState === "ACTIVE") {
+    if (row.vehicle_choices?.length) {
+      return {
+        qrId: row.qr_id,
+        publicId: row.public_id,
+        visibleCode: row.visible_code,
+        state: "ACTIVE",
+        vehicleChoices: row.vehicle_choices,
+        meta: getPublicResolverMeta("ACTIVE"),
+      };
+    }
     // A sticker is only eligible if bound to an active vehicle
     if (
       !row.vehicle_id ||
@@ -332,6 +391,8 @@ export async function resolvePublicQr(
       visibleCode: row.visible_code,
       state: "ACTIVE",
       profile,
+      vehicleChoice: row.vehicle_choice,
+      resolvedVehicleId: row.vehicle_id,
       meta: getPublicResolverMeta("ACTIVE", { publicId: row.public_id }),
     };
   }

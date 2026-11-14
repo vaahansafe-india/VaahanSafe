@@ -3,7 +3,7 @@
  * Authoritative Server-Side QR Identity Service
  *
  * Single source of truth for QR lifecycle, hardware assignments, and verifiable passes.
- * Strictly queries Cloudflare D1 with authorized session scoping.
+ * Queries the authoritative database with authorized session scoping.
  * Zero mock data, zero fallback dummies.
  */
 
@@ -13,6 +13,7 @@ import {
 } from "@vaahansafe/database";
 import { maskVehicleRegistration } from "@vaahansafe/vehicles";
 import {
+  ALL_ENTITLEMENT_CAPABILITIES,
   getQrUrl,
   verifyScratchSecret,
   canActivateSticker,
@@ -58,6 +59,7 @@ interface DbQrRow {
   updated_at: string;
   vehicle_id: string | null;
   assigned_at: string | null;
+  slot?: number;
 }
 
 interface DbProfileRow {
@@ -208,6 +210,7 @@ export async function getQrOverview(userId: string): Promise<QrOverviewData> {
       activatedAt: primaryStickerRow.activated_at || undefined,
       assignedAt: primaryStickerRow.assigned_at || undefined,
       resolverUrl: getQrUrl(primaryStickerRow.public_id),
+      attachedVehicleCount: stickers.filter((s) => s.id === primaryStickerRow.id).length,
       linkedVehicle: linkedVeh
         ? {
             id: linkedVeh.id,
@@ -276,7 +279,7 @@ export async function getQrOverview(userId: string): Promise<QrOverviewData> {
 
   // 8. Recommended action
   let recommendedAction: "BUY" | "ACTIVATE" | "MANAGE" | "DIGITAL" = "BUY";
-  const activeCount = stickers.filter((s) => s.status === "ACTIVATED").length;
+  const activeCount = new Set(stickers.filter((s) => s.status === "ACTIVATED").map((s) => s.id)).size;
 
   if (activeCount > 0) {
     recommendedAction = "DIGITAL";
@@ -291,7 +294,7 @@ export async function getQrOverview(userId: string): Promise<QrOverviewData> {
     primarySticker,
     railStates,
     vehicles: vehicleSummaries,
-    stickersCount: stickers.length,
+    stickersCount: new Set(stickers.map((s) => s.id)).size,
     activeStickersCount: activeCount,
     attentionItems,
     recommendedAction,
@@ -304,16 +307,16 @@ export async function getQrOverview(userId: string): Promise<QrOverviewData> {
 export async function getQrCodesRegistry(
   userId: string,
   filters?: QrFilterState,
-): Promise<{ items: QrRegistryItemData[]; totalCount: number }> {
+): Promise<{ items: QrRegistryItemData[]; totalCount: number; availableVehicles: Array<{ id: string; label: string }> }> {
   const db = getAuthoritativeDatabaseClient();
 
   const stickers = await db.query<DbQrRow>(
     `SELECT s.id, s.public_id, s.visible_code, s.batch_id, s.status, s.activated_at, s.created_at, s.updated_at,
-            a.vehicle_id, a.assigned_at
+            a.vehicle_id, a.assigned_at, a.slot
      FROM qr_stickers s
      JOIN qr_assignments a ON s.id = a.qr_id AND a.ended_at IS NULL
      WHERE a.user_id = ?
-     ORDER BY s.updated_at DESC`,
+     ORDER BY s.updated_at DESC, s.id, a.slot`,
     [userId],
   );
 
@@ -330,8 +333,8 @@ export async function getQrCodesRegistry(
     vehicles = await db.query<DbVehicleRow>(
       `SELECT id, user_id, registration_number, vehicle_type, make, model, status, created_at, updated_at
        FROM vehicles
-       WHERE id IN (${placeholders})`,
-      vehicleIds,
+       WHERE user_id = ? AND status = 'ACTIVE' AND id IN (${placeholders})`,
+      [userId, ...vehicleIds],
     );
 
     contacts = await db.query<DbContactRow>(
@@ -357,7 +360,8 @@ export async function getQrCodesRegistry(
   }
   const profileMap = new Map(profiles.map((p) => [p.vehicle_id, p]));
 
-  let items: QrRegistryItemData[] = stickers.map((s) => {
+  const bySticker = new Map<string, QrRegistryItemData>();
+  for (const s of stickers) {
     const v = s.vehicle_id ? vehicleMap.get(s.vehicle_id) : undefined;
     const cCount = s.vehicle_id ? contactCounts.get(s.vehicle_id) || 0 : 0;
     const p = s.vehicle_id ? profileMap.get(s.vehicle_id) : undefined;
@@ -365,7 +369,19 @@ export async function getQrCodesRegistry(
       (p?.display_name || p?.blood_group) && cCount > 0,
     );
 
-    return {
+    const vehicle = v && {
+      id: v.id, plate: v.registration_number,
+      maskedPlate: maskVehicleRegistration(v.registration_number),
+      make: v.make, model: v.model, type: v.vehicle_type, secondary: s.slot === 2,
+    };
+    const item = bySticker.get(s.id);
+    if (item) {
+      if (vehicle) item.vehicles.push(vehicle);
+      item.emergencyContactsCount += cCount;
+      item.safetyViewConfigured &&= isConfigured;
+      continue;
+    }
+    bySticker.set(s.id, {
       id: s.id,
       publicId: s.public_id,
       visibleCode: s.visible_code,
@@ -373,35 +389,27 @@ export async function getQrCodesRegistry(
       activatedAt: s.activated_at || undefined,
       assignedAt: s.assigned_at || undefined,
       resolverUrl: getQrUrl(s.public_id),
-      vehicle: v
-        ? {
-            id: v.id,
-            plate: v.registration_number,
-            maskedPlate: maskVehicleRegistration(v.registration_number),
-            make: v.make,
-            model: v.model,
-            type: v.vehicle_type,
-          }
-        : undefined,
+      vehicles: vehicle ? [vehicle] : [],
       emergencyContactsCount: cCount,
       safetyViewConfigured: isConfigured,
       replacementPending: s.status === "REPLACED",
-    };
-  });
+    });
+  }
+  let items = [...bySticker.values()];
 
   // Client-safe filter filtering
   if (filters?.status && filters.status !== "ALL") {
     if (filters.status === "ACTIVATED") {
       items = items.filter((i) => i.status === "ACTIVATED");
     } else if (filters.status === "UNLINKED") {
-      items = items.filter((i) => !i.vehicle);
+      items = items.filter((i) => !i.vehicles.length);
     } else if (filters.status === "REPLACED") {
       items = items.filter((i) => i.status === "REPLACED");
     }
   }
 
   if (filters?.vehicleType) {
-    items = items.filter((i) => i.vehicle?.type === filters.vehicleType);
+    items = items.filter((i) => i.vehicles.some((v) => v.type === filters.vehicleType));
   }
 
   if (filters?.search) {
@@ -410,15 +418,21 @@ export async function getQrCodesRegistry(
       (i) =>
         i.publicId.toLowerCase().includes(q) ||
         i.visibleCode.toLowerCase().includes(q) ||
-        i.vehicle?.make.toLowerCase().includes(q) ||
-        i.vehicle?.model.toLowerCase().includes(q) ||
-        i.vehicle?.plate.toLowerCase().includes(q),
+        i.vehicles.some((v) => [v.make, v.model, v.plate].some((value) => value.toLowerCase().includes(q))),
     );
   }
 
+  const availableVehicles = await db.query<{ id: string; label: string }>(
+    `SELECT v.id, v.registration_number || ' · ' || v.make || ' ' || v.model AS label
+     FROM vehicles v WHERE v.user_id=? AND v.status='ACTIVE' AND v.deleted_at IS NULL
+       AND NOT EXISTS (SELECT 1 FROM qr_assignments a WHERE a.vehicle_id=v.id AND a.ended_at IS NULL)
+     ORDER BY v.registration_number`,
+    [userId],
+  );
   return {
     items,
     totalCount: items.length,
+    availableVehicles,
   };
 }
 
@@ -538,12 +552,12 @@ export async function getDigitalQrData(
     ? `SELECT s.id, s.public_id, s.visible_code, s.status, a.vehicle_id
        FROM qr_stickers s
        JOIN qr_assignments a ON s.id = a.qr_id AND a.ended_at IS NULL
-       WHERE a.user_id = ? AND s.public_id = ? AND s.status = 'ACTIVATED'
+       WHERE a.user_id = ? AND s.public_id = ? AND s.status = 'ACTIVATED' AND a.slot = 1
        LIMIT 1`
     : `SELECT s.id, s.public_id, s.visible_code, s.status, a.vehicle_id
        FROM qr_stickers s
        JOIN qr_assignments a ON s.id = a.qr_id AND a.ended_at IS NULL
-       WHERE a.user_id = ? AND s.status = 'ACTIVATED'
+       WHERE a.user_id = ? AND s.status = 'ACTIVATED' AND a.slot = 1
        ORDER BY s.updated_at DESC
        LIMIT 1`;
 
@@ -623,6 +637,7 @@ export async function getReplaceQrData(
   userId: string,
 ): Promise<QrReplacementData> {
   const db = getAuthoritativeDatabaseClient();
+  const nowSql = db.dialect === "postgres" ? "CURRENT_TIMESTAMP" : "datetime('now')";
 
   const eligibleRows = await db.query<
     DbQrRow & {
@@ -637,7 +652,8 @@ export async function getReplaceQrData(
      FROM qr_stickers s
      JOIN qr_assignments a ON s.id = a.qr_id AND a.ended_at IS NULL
      JOIN vehicles v ON a.vehicle_id = v.id
-     WHERE a.user_id = ? AND v.user_id = a.user_id AND v.status = 'ACTIVE' AND s.status = 'ACTIVATED' AND EXISTS (SELECT 1 FROM service_entitlements e WHERE e.qr_sticker_id=s.id AND e.vehicle_id=v.id AND e.user_id=a.user_id AND e.capability='REPLACEMENT_ELIGIBLE' AND e.status='ENABLED' AND (e.expires_at IS NULL OR e.expires_at>datetime('now')))
+     WHERE a.user_id = ? AND v.user_id = a.user_id AND v.status = 'ACTIVE' AND s.status = 'ACTIVATED' AND EXISTS (SELECT 1 FROM service_entitlements e WHERE e.qr_sticker_id=s.id AND e.vehicle_id=v.id AND e.user_id=a.user_id AND e.capability='REPLACEMENT_ELIGIBLE' AND e.status='ENABLED' AND (e.expires_at IS NULL OR e.expires_at>${nowSql}))
+       AND a.slot=1 AND NOT EXISTS (SELECT 1 FROM qr_assignments shared WHERE shared.qr_id=s.id AND shared.slot=2 AND shared.ended_at IS NULL)
      ORDER BY s.updated_at DESC,s.id DESC LIMIT 100`,
     [userId],
   );
@@ -684,7 +700,7 @@ export async function getReplaceQrData(
 }
 
 /**
- * Executes retail scratch activation on Cloudflare D1.
+ * Verifies retail activation proof before claiming an unassigned vehicle.
  */
 export async function executeQrActivation(
   userId: string,
@@ -812,11 +828,80 @@ export async function executeQrActivation(
   const historyId = `qsh_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
   const attemptId = `qat_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 
-  // End any active assignments on this vehicle
-  await db.execute(
-    `UPDATE qr_assignments SET ended_at = ? WHERE vehicle_id = ? AND ended_at IS NULL`,
-    [now, vehicle.id],
+  const activeAssignment = await db.queryFirst<{ id: string }>(
+    "SELECT id FROM qr_assignments WHERE vehicle_id = ? AND ended_at IS NULL",
+    [vehicle.id],
   );
+  if (activeAssignment) {
+    return {
+      success: false,
+      error: "This vehicle already has a VaahanSafe ID. Detach it or use the replacement flow.",
+    };
+  }
+
+  if (db.dialect === "postgres") {
+    // A competing second-vehicle attachment must not consume this sticker's
+    // activation proof or leave an activated sticker without an assignment.
+    await db.batch([
+      {
+        sql: `PERFORM id FROM vehicles WHERE id=? AND user_id=? AND status='ACTIVE' FOR UPDATE`,
+        params: [vehicle.id, userId],
+      },
+      {
+        sql: `PERFORM id FROM qr_stickers WHERE id=? FOR UPDATE`,
+        params: [matched.qr_id],
+      },
+      {
+        sql: `INSERT INTO qr_assignments (id, qr_id, vehicle_id, user_id, assignment_type, assigned_at)
+          SELECT ?, q.id, v.id, v.user_id, 'INITIAL', ?
+          FROM qr_stickers q JOIN qr_activation_secrets sec ON sec.qr_id=q.id
+          JOIN vehicles v ON v.id=? AND v.user_id=? AND v.status='ACTIVE' AND v.deleted_at IS NULL
+          WHERE q.id=? AND q.status=?
+            AND sec.id=? AND sec.secret_hash=? AND sec.consumed_at IS NULL
+            AND (sec.locked_until IS NULL OR sec.locked_until<=now())
+            AND NOT EXISTS (SELECT 1 FROM qr_assignments a
+              WHERE a.ended_at IS NULL AND (a.qr_id=q.id OR a.vehicle_id=v.id))`,
+        params: [assignmentId, now, vehicle.id, userId, matched.qr_id, matched.qr_status, matched.secret_id, matched.secret_hash],
+      },
+      {
+        sql: `UPDATE qr_stickers SET status='ACTIVATED', activated_at=?, updated_at=?
+          WHERE id=? AND EXISTS (SELECT 1 FROM qr_assignments WHERE id=?)`,
+        params: [now, now, matched.qr_id, assignmentId],
+      },
+      {
+        sql: `UPDATE qr_activation_secrets SET consumed_at=?, updated_at=?
+          WHERE id=? AND EXISTS (SELECT 1 FROM qr_assignments WHERE id=?)`,
+        params: [now, now, matched.secret_id, assignmentId],
+      },
+      {
+        sql: `INSERT INTO qr_status_history (id, qr_id, from_status, to_status, reason_code, actor_type, actor_id, created_at)
+          SELECT ?, ?, ?, 'ACTIVATED', 'USER_ACTIVATION', 'USER', ?, ?
+          WHERE EXISTS (SELECT 1 FROM qr_assignments WHERE id=?)`,
+        params: [historyId, matched.qr_id, matched.qr_status, userId, now, assignmentId],
+      },
+      {
+        sql: `INSERT INTO qr_activation_attempts (id, qr_id, user_id, outcome, created_at)
+          SELECT ?, ?, ?, 'SUCCESS', ? WHERE EXISTS (SELECT 1 FROM qr_assignments WHERE id=?)`,
+        params: [attemptId, matched.qr_id, userId, now, assignmentId],
+      },
+      ...ALL_ENTITLEMENT_CAPABILITIES.map((capability) => ({
+        sql: `INSERT INTO service_entitlements
+          (id, user_id, vehicle_id, qr_sticker_id, capability, status, acquisition_source, verified_at)
+          SELECT ?, ?, ?, ?, ?, 'ENABLED', 'RETAIL_ACTIVATION', ?
+          WHERE EXISTS (SELECT 1 FROM qr_assignments WHERE id=?)
+          ON CONFLICT(vehicle_id,qr_sticker_id,capability)
+          DO UPDATE SET status='ENABLED', updated_at=now()`,
+        params: [`ent_${crypto.randomUUID()}`, userId, vehicle.id, matched.qr_id, capability, now, assignmentId],
+      })),
+    ]);
+    const committed = await db.queryFirst<{ id: string }>(
+      "SELECT id FROM qr_assignments WHERE id=? AND ended_at IS NULL",
+      [assignmentId],
+    );
+    return committed
+      ? { success: true, publicId: matched.public_id, maskedPlate: maskVehicleRegistration(vehicle.registration_number) }
+      : { success: false, error: "The vehicle or sticker was linked by another request. Refresh and try again." };
+  }
 
   // Atomic claim: update sticker status to ACTIVATED only if currently claimable (Rule 34)
   const updateResult = await db.execute(
@@ -869,8 +954,8 @@ export async function executeQrActivation(
     db,
   });
 
-  // Supabase's entitlement trigger owns the canonical multi-channel activation event.
-  if (db.dialect !== "postgres") try {
+  // Supabase returns above because its entitlement trigger owns this event.
+  try {
     const vehicleName =
       `${vehicle.make || ""} ${vehicle.model || ""}`.trim() || "your vehicle";
     await createInAppNotification(db, {

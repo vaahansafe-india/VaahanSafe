@@ -41,6 +41,7 @@ export interface QrStickerDetail {
   activatedAt?: string;
   assignedAt?: string;
   resolverUrl: string;
+  attachedVehicleCount?: number;
   linkedVehicle?: {
     id: string;
     plate: string;
@@ -88,14 +89,15 @@ export interface QrRegistryItemData {
   activatedAt?: string;
   assignedAt?: string;
   resolverUrl: string;
-  vehicle?: {
+  vehicles: Array<{
     id: string;
     plate: string;
     maskedPlate: string;
     make: string;
     model: string;
     type: string;
-  };
+    secondary: boolean;
+  }>;
   emergencyContactsCount: number;
   safetyViewConfigured: boolean;
   replacementPending: boolean;

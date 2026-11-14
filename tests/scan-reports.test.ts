@@ -50,6 +50,55 @@ function deps(results: unknown[]) {
   return { db, store, ipHash: "a".repeat(64) };
 }
 describe("finder report boundaries", () => {
+  it("binds a shared QR report to the selected vehicle before uploading", async () => {
+    const report = { ...input(), vehicleChoice: crypto.randomUUID() };
+    const dependencies = deps([{ result: { error: "UNAVAILABLE" } }]);
+    await expect(submitScanReport(report, dependencies)).rejects.toThrow("REPORT_UNAVAILABLE");
+    expect(dependencies.db.queryFirst).toHaveBeenCalledWith(
+      "SELECT public.begin_qr_scan_report(?, ?::uuid, ?, ?, ?::uuid) AS result",
+      [report.publicId, report.requestId, dependencies.ipHash, report.reason, report.vehicleChoice],
+    );
+    expect(dependencies.store.put).not.toHaveBeenCalled();
+  });
+
+  it("shows only eligible vehicle choices and opens the selected profile", async () => {
+    const publicId = "VS-ABCD1234567890";
+    const choices = [crypto.randomUUID(), crypto.randomUUID()];
+    const rows = choices.map((choice, index) => ({
+      qr_id: "qr_shared", public_id: publicId, qr_status: "ACTIVATED",
+      vehicle_choice: choice, vehicle_slot: index + 1, vehicle_id: `private_vehicle_${index}`,
+      owner_user_id: "private_owner", emergency_profile_id: `private_profile_${index}`,
+      profile_status: "ACTIVE", show_vehicle_details: index === 0 ? 1 : 0,
+      make: index === 0 ? "Honda" : "Private make", model: "City",
+      registration_number: index === 0 ? "KA01XX1234" : "KA01XX9999",
+    }));
+    const entitlements = rows.map((row) => ({
+      capability: "SAFETY_VIEW_ACTIVE", status: "ENABLED", user_id: row.owner_user_id,
+      vehicle_id: row.vehicle_id, expires_at: null,
+    }));
+    const db = { dialect: "postgres", query: vi.fn((sql: string, values: string[]) => {
+      if (sql.includes("FROM qr_stickers")) return rows;
+      if (sql.includes("FROM service_entitlements")) return entitlements;
+      if (sql.includes("FROM emergency_contacts")) {
+        expect(values).toEqual(["private_profile_1"]);
+        return [];
+      }
+      throw new Error("Unexpected query");
+    }) } as unknown as DatabaseClient;
+    const options = { db, includeVehicleChoices: true };
+    const selection = await resolvePublicQr(publicId, options);
+    expect(selection.vehicleChoices).toEqual([
+      { choice: choices[0], label: "Honda City · plate ending 1234" },
+      { choice: choices[1], label: "Vehicle 2" },
+    ]);
+    expect(selection.profile).toBeUndefined();
+    const selected = await resolvePublicQr(publicId, { ...options, vehicleChoice: choices[1] });
+    expect(selected.profile?.vehicleDisplay).toBe("Registered Vehicle");
+    expect(selected.vehicleChoice).toBe(choices[1]);
+    expect((await resolvePublicQr(publicId, { ...options, vehicleChoice: crypto.randomUUID() })).state)
+      .toBe("BLOCKED");
+  });
+
   it("retains WhatsApp-only contacts and removes contacts with neither permission", async () => {
     const publicId = "VS-ABCD1234567890";
     const result = await resolvePublicQr(publicId, {

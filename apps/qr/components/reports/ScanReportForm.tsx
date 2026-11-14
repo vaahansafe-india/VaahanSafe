@@ -87,12 +87,14 @@ async function preparePhoto(file: File): Promise<File> {
 
 export function ScanReportForm({
   publicId,
+  vehicleChoice,
   siteKey,
   vehicleDisplay,
   initialStep = 0,
   initialReason = "PARKING",
 }: {
   publicId: string;
+  vehicleChoice?: string;
   siteKey: string;
   vehicleDisplay: string;
   initialStep?: number;
@@ -322,6 +324,7 @@ export function ScanReportForm({
         "report",
         JSON.stringify({
           publicId,
+          vehicleChoice,
           requestId: requestId.current,
           reason,
           note,

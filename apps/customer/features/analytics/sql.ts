@@ -56,12 +56,12 @@ export function buildAnalyticsSql(
     SELECT v.id,left(v.registration_number,2)||'••••'||right(v.registration_number,4) AS label,v.make||' '||v.model AS name
     FROM vehicles v JOIN auth ON auth.owner=v.user_id WHERE v.deleted_at IS NULL AND v.status<>'DELETED'
   ), all_qrs AS (
-    SELECT DISTINCT ON (q.id) q.id,a.vehicle_id,coalesce(q.visible_code,'QR identity') AS label,q.activated_at
+    SELECT q.id,a.vehicle_id,a.slot,coalesce(q.visible_code,'QR identity') AS label,q.activated_at
     FROM qr_stickers q JOIN qr_assignments a ON a.qr_id=q.id AND a.ended_at IS NULL
     JOIN auth ON auth.owner=a.user_id JOIN owned_vehicles v ON v.id=a.vehicle_id
-    ORDER BY q.id,a.assigned_at DESC,a.id DESC
+    ORDER BY q.id,a.slot
   ), qrs AS (
-    SELECT q.id,q.vehicle_id,q.label,q.activated_at FROM all_qrs q CROSS JOIN p
+    SELECT q.id,q.vehicle_id,q.slot,q.label,q.activated_at FROM all_qrs q CROSS JOIN p
     WHERE (p.vehicle='' OR q.vehicle_id=p.vehicle) AND (p.qr='' OR q.id=p.qr)
   ), scan_source AS (
     SELECT e.id,e.qr_id,q.vehicle_id,e.created_at,e.result,coalesce(nullif(e.state,''),nullif(e.region,''),'Not recorded') AS region,
@@ -88,7 +88,8 @@ export function buildAnalyticsSql(
       WHEN 'puducherry' THEN 'IN-PY' WHEN 'pondicherry' THEN 'IN-PY' WHEN 'punjab' THEN 'IN-PB' WHEN 'rajasthan' THEN 'IN-RJ'
       WHEN 'sikkim' THEN 'IN-SK' WHEN 'tripura' THEN 'IN-TR' WHEN 'uttarpradesh' THEN 'IN-UP' WHEN 'uttarakhand' THEN 'IN-UK' WHEN 'uttaranchal' THEN 'IN-UK' WHEN 'westbengal' THEN 'IN-WB'
       ELSE 'UNKNOWN' END END AS state_code
-    FROM qr_scan_events e JOIN qrs q ON q.id=e.qr_id
+    FROM qr_scan_events e JOIN qrs q ON q.id=e.qr_id AND
+      (e.vehicle_id=q.vehicle_id OR (e.vehicle_id IS NULL AND q.slot=1))
   ), scans AS (
     SELECT e.id,e.qr_id,e.vehicle_id,e.created_at,e.result,e.region,e.city,e.device,e.referrer,e.state_code FROM scan_source e CROSS JOIN p
     WHERE e.created_at >= (CASE WHEN p.compare THEN p.previous ELSE p.first END::timestamp AT TIME ZONE 'Asia/Kolkata')
@@ -164,7 +165,7 @@ export function buildAnalyticsSql(
           CASE WHEN e.qr_id IN (SELECT qr_id FROM selected_scans GROUP BY qr_id ORDER BY count(*) DESC,qr_id LIMIT 12) THEN q.id ELSE '' END AS qr,
           CASE WHEN e.qr_id IN (SELECT qr_id FROM selected_scans GROUP BY qr_id ORDER BY count(*) DESC,qr_id LIMIT 12) THEN q.label ELSE 'Other QR identities' END AS qr_label,
           CASE WHEN e.result='RESOLVED_ACTIVE' THEN 'RESOLVED_ACTIVE' WHEN e.result='RESOLVED_INACTIVE' THEN 'RESOLVED_INACTIVE' ELSE 'OTHER' END AS outcome,count(*)::integer AS n
-          FROM selected_scans e JOIN qrs q ON q.id=e.qr_id JOIN owned_vehicles v ON v.id=e.vehicle_id GROUP BY 1,2,3,4,5,6) x`)})`;
+          FROM selected_scans e JOIN qrs q ON q.id=e.qr_id AND q.vehicle_id=e.vehicle_id JOIN owned_vehicles v ON v.id=e.vehicle_id GROUP BY 1,2,3,4,5,6) x`)})`;
       break;
     case "scan-geography":
       select = `jsonb_build_object('total',(SELECT count(*) FROM selected_scans),'located',(SELECT count(*) FROM selected_scans WHERE state_code<>'UNKNOWN'),
@@ -180,7 +181,7 @@ export function buildAnalyticsSql(
       select = `jsonb_build_object('hours',${arr(`SELECT jsonb_agg(jsonb_build_object('hour',h,'count',coalesce(n,0)) ORDER BY h) FROM generate_series(0,23) h LEFT JOIN (SELECT extract(hour FROM created_at AT TIME ZONE 'Asia/Kolkata')::integer AS hour,count(*)::integer AS n FROM selected_scans GROUP BY 1) x ON x.hour=h`)})`;
       break;
     case "scan-top":
-      select = `jsonb_build_object('total',(SELECT count(*) FROM selected_scans),'qrs',${arr(`SELECT jsonb_agg(jsonb_build_object('id',id,'label',label,'vehicle',vehicle_id,'vehicleLabel',vehicle_label,'count',n,'successful',successful) ORDER BY n DESC,id) FROM (SELECT q.id,q.label,q.vehicle_id,v.label AS vehicle_label,count(*)::integer AS n,count(*) FILTER(WHERE e.result='RESOLVED_ACTIVE')::integer AS successful FROM selected_scans e JOIN qrs q ON q.id=e.qr_id JOIN owned_vehicles v ON v.id=q.vehicle_id GROUP BY q.id,q.label,q.vehicle_id,v.label ORDER BY n DESC,q.id LIMIT 20) x`)})`;
+      select = `jsonb_build_object('total',(SELECT count(*) FROM selected_scans),'qrs',${arr(`SELECT jsonb_agg(jsonb_build_object('id',id,'label',label,'vehicle',vehicle_id,'vehicleLabel',vehicle_label,'count',n,'successful',successful) ORDER BY n DESC,id) FROM (SELECT q.id,q.label,q.vehicle_id,v.label AS vehicle_label,count(*)::integer AS n,count(*) FILTER(WHERE e.result='RESOLVED_ACTIVE')::integer AS successful FROM selected_scans e JOIN qrs q ON q.id=e.qr_id AND q.vehicle_id=e.vehicle_id JOIN owned_vehicles v ON v.id=q.vehicle_id GROUP BY q.id,q.label,q.vehicle_id,v.label ORDER BY n DESC,q.id LIMIT 20) x`)})`;
       break;
     case "scan-calendar":
       select = `jsonb_build_object('days',${arr(`SELECT jsonb_agg(jsonb_build_object('date',to_char(d,'YYYY-MM-DD'),'count',coalesce(n,0),'successful',coalesce(successful,0)) ORDER BY d) FROM p CROSS JOIN generate_series(p.first::timestamp,p.last::timestamp,interval '1 day') d LEFT JOIN (SELECT (created_at AT TIME ZONE 'Asia/Kolkata')::date AS date,count(*)::integer AS n,count(*) FILTER(WHERE result='RESOLVED_ACTIVE')::integer AS successful FROM selected_scans GROUP BY 1) x ON x.date=d::date`)})`;
@@ -192,7 +193,7 @@ export function buildAnalyticsSql(
         : "";
       if (cursor) params.push(cursor.timestamp, cursor.id);
       select = `jsonb_build_object('events',${arr(`SELECT jsonb_agg(jsonb_build_object('id',id,'timestamp',created_at,'qr',qr_id,'qrLabel',qr_label,'vehicle',vehicle_id,'vehicleLabel',vehicle_label,'vehicleName',vehicle_name,'result',result,'state',region,'city',city,'device',device,'referrer',referrer) ORDER BY created_at DESC,id DESC) FROM (
-        SELECT e.id,e.created_at,e.qr_id,q.label AS qr_label,e.vehicle_id,v.label AS vehicle_label,v.name AS vehicle_name,e.result,e.region,e.city,e.device,e.referrer FROM selected_scans e JOIN qrs q ON q.id=e.qr_id JOIN owned_vehicles v ON v.id=e.vehicle_id WHERE true ${predicate} ORDER BY e.created_at DESC,e.id DESC LIMIT ${section === "scan-export" ? 1001 : 26}) x`)})`;
+        SELECT e.id,e.created_at,e.qr_id,q.label AS qr_label,e.vehicle_id,v.label AS vehicle_label,v.name AS vehicle_name,e.result,e.region,e.city,e.device,e.referrer FROM selected_scans e JOIN qrs q ON q.id=e.qr_id AND q.vehicle_id=e.vehicle_id JOIN owned_vehicles v ON v.id=e.vehicle_id WHERE true ${predicate} ORDER BY e.created_at DESC,e.id DESC LIMIT ${section === "scan-export" ? 1001 : 26}) x`)})`;
       break;
     }
     case "context":
@@ -328,7 +329,7 @@ export function buildAnalyticsSql(
       UNION ALL SELECT 'document:'||e.id,'DOCUMENT',e.created_at,e.event_type,e.vehicle_id,e.title,'/documents/'||e.document_id FROM doc_events e
       UNION ALL SELECT 'session:'||s.id,'ACCOUNT',s.created_at,'Signed in',NULL,'Account session','/settings/security' FROM sessions s JOIN auth ON s.user_id::text=auth.owner CROSS JOIN p WHERE p.vehicle='' AND p.qr='' AND s.created_at >= (p.first::timestamp AT TIME ZONE 'Asia/Kolkata') AND s.created_at<((p.last+1)::timestamp AT TIME ZONE 'Asia/Kolkata')
       UNION ALL SELECT 'notification:'||n.id,'NOTIFICATION',n.created_at,'Notification recorded',NULL,'Notification','/notifications' FROM notifications n JOIN auth ON n.user_id=auth.owner CROSS JOIN p WHERE n.deleted_at IS NULL AND p.vehicle='' AND p.qr='' AND n.created_at >= (p.first::timestamp AT TIME ZONE 'Asia/Kolkata') AND n.created_at<((p.last+1)::timestamp AT TIME ZONE 'Asia/Kolkata')
-      UNION ALL SELECT 'activation:'||q.id,'ACTIVATION',q.activated_at,'QR activated',q.vehicle_id,q.label,'/qr' FROM qrs q CROSS JOIN p WHERE q.activated_at >= (p.first::timestamp AT TIME ZONE 'Asia/Kolkata') AND q.activated_at<((p.last+1)::timestamp AT TIME ZONE 'Asia/Kolkata')`;
+      UNION ALL SELECT 'activation:'||q.id||':'||q.slot,'ACTIVATION',q.activated_at,'QR activated',q.vehicle_id,q.label,'/qr' FROM qrs q CROSS JOIN p WHERE q.activated_at >= (p.first::timestamp AT TIME ZONE 'Asia/Kolkata') AND q.activated_at<((p.last+1)::timestamp AT TIME ZONE 'Asia/Kolkata')`;
       const predicate = cursor
         ? " AND (e.timestamp,e.id)<(?::timestamptz,?::text)"
         : "";

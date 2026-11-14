@@ -2,6 +2,7 @@ import type { DatabaseClient } from "@vaahansafe/database";
 import type { ObjectStore } from "@vaahansafe/storage";
 import { verifyMagicBytes } from "@vaahansafe/storage";
 import { isFreshScanLocation } from "./location";
+import { isQrVehicleChoice } from "../resolver/resolve-public-qr";
 
 export const SCAN_REPORT_MAX_PHOTOS = 3;
 export const SCAN_REPORT_MAX_BYTES = 3 * 1024 * 1024;
@@ -25,6 +26,7 @@ export interface ScanReportPhoto {
 }
 export interface ScanReportInput {
   publicId: string;
+  vehicleChoice?: string;
   requestId: string;
   reason: ScanReportReason;
   note: string;
@@ -49,6 +51,7 @@ export class ScanReportError extends Error {
 export function validateScanReport(input: ScanReportInput, now = Date.now()) {
   if (
     input.consent !== true ||
+    (input.vehicleChoice !== undefined && !isQrVehicleChoice(input.vehicleChoice)) ||
     !/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(
       input.requestId,
     ) ||
@@ -98,14 +101,15 @@ export async function submitScanReport(
     if (!saved?.result) throw new ScanReportError("REPORT_FAILED");
     return { id, recorded: true, notificationQueued: true, ...saved.result };
   }
+  const args = [input.publicId, input.requestId, deps.ipHash, input.reason];
   const reservation = await deps.db.queryFirst<{
     result: { id?: string; status?: string; error?: string };
-  }>("SELECT public.begin_qr_scan_report(?, ?::uuid, ?, ?) AS result", [
-    input.publicId,
-    input.requestId,
-    deps.ipHash,
-    input.reason,
-  ]);
+  }>(
+    input.vehicleChoice
+      ? "SELECT public.begin_qr_scan_report(?, ?::uuid, ?, ?, ?::uuid) AS result"
+      : "SELECT public.begin_qr_scan_report(?, ?::uuid, ?, ?) AS result",
+    input.vehicleChoice ? [...args, input.vehicleChoice] : args,
+  );
   const result = reservation?.result;
   if (result?.error === "COOLDOWN")
     throw new ScanReportError("REPORT_COOLDOWN");

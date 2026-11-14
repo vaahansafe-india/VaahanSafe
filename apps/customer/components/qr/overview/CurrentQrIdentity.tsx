@@ -95,10 +95,10 @@ export function CurrentQrIdentity({
 
             <div className="rounded-xl border border-border/60 bg-muted/30 p-3">
               <div className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground">
-                Linked Vehicle
+                Vehicles on this ID
               </div>
               <div className="mt-1 font-mono text-sm font-bold text-foreground truncate">
-                {sticker.linkedVehicle?.maskedPlate || "Unassigned"}
+                <Link href="/qr/codes" className="hover:underline">{sticker.attachedVehicleCount ?? 1} of 2 attached</Link>
               </div>
             </div>
           </div>
@@ -143,11 +143,11 @@ export function CurrentQrIdentity({
               <span>Digital Pass</span>
             </Link>
             <Link
-              href="/qr/replace"
+              href={sticker.attachedVehicleCount === 2 ? "/qr/codes" : "/qr/replace"}
               className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border bg-background px-3 font-mono text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
             >
               <VaahanIcon name="refresh" size={13} aria-hidden="true" />
-              <span>Replace</span>
+              <span>{sticker.attachedVehicleCount === 2 ? "Manage attached vehicles" : "Replace"}</span>
             </Link>
           </div>
         </div>

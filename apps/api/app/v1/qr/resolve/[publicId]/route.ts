@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { resolvePublicQr, isValidPublicIdFormat } from "@vaahansafe/qr-core";
+import { resolvePublicQr, isValidPublicIdFormat, isQrVehicleChoice } from "@vaahansafe/qr-core";
 import { getApiDatabase } from "../../../_db";
 
 export const dynamic = "force-dynamic";
@@ -33,7 +33,13 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
     }
 
     const db = getApiDatabase();
-    const resolution = await resolvePublicQr(cleanPublicId, { db });
+    const choice = req.nextUrl.searchParams.get("vehicle");
+    if (choice !== null && !isQrVehicleChoice(choice)) {
+      return NextResponse.json({ error: "Invalid vehicle selection" }, { status: 400 });
+    }
+    const { qrId: _qrId, resolvedVehicleId: _vehicleId, ...resolution } = await resolvePublicQr(cleanPublicId, {
+      db, includeVehicleChoices: true, vehicleChoice: choice || undefined,
+    });
 
     if (resolution.state === "UNKNOWN") {
       return NextResponse.json(
@@ -55,7 +61,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
       {
         status: 200,
         headers: {
-          "Cache-Control": "public, max-age=60, s-maxage=120, stale-while-revalidate=300",
+          "Cache-Control": "no-store",
           "X-Content-Type-Options": "nosniff",
         },
       }

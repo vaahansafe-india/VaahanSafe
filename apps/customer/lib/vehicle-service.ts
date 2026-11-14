@@ -47,6 +47,7 @@ interface DbQrRow {
   status: string;
   activated_at: string | null;
   assigned_at: string | null;
+  slot?: number;
 }
 
 interface DbProfileRow {
@@ -388,7 +389,7 @@ export async function getVehicleDossier(
       replacement_reason?: string | null;
     }
   >(
-    `SELECT s.id, s.public_id, s.visible_code, s.batch_id, s.status, s.activated_at, a.assigned_at,
+    `SELECT s.id, s.public_id, s.visible_code, s.batch_id, s.status, s.activated_at, a.assigned_at, a.slot,
             r.id as replacement_id, r.status as replacement_status, r.reason as replacement_reason
      FROM qr_stickers s
      INNER JOIN qr_assignments a ON s.id = a.qr_id
@@ -427,10 +428,10 @@ export async function getVehicleDossier(
     scanRows = await db.query<DbScanRow>(
       `SELECT id, scan_type, result, city, state, created_at
        FROM qr_scan_events
-       WHERE qr_id = ?
+       WHERE qr_id = ? AND (vehicle_id = ? OR (vehicle_id IS NULL AND ? = 1))
        ORDER BY created_at DESC
        LIMIT 5`,
-      [qrRow.id],
+      [qrRow.id, v.id, qrRow.slot ?? 1],
     );
   }
 

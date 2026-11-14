@@ -6,7 +6,7 @@ import { QrRegistryExperience } from "@/components/qr/registry/QrRegistryExperie
 export function CustomerPageView() {
   return (
     <CustomerDataPage resource="qr-codes">
-      {(data) => <QrRegistryExperience initialItems={data.items} />}
+      {(data) => <QrRegistryExperience initialItems={data.items} availableVehicles={data.availableVehicles} />}
     </CustomerDataPage>
   );
 }

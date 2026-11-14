@@ -9,6 +9,7 @@ type Ticket = {
   eventId: string;
   qrId: string;
   publicId: string;
+  vehicleChoice?: string;
   expires: number;
 };
 function key() {
@@ -24,11 +25,12 @@ export function createScanLocationTicket(
   qrId: string,
   publicId: string,
   now = Date.now(),
+  vehicleChoice?: string,
 ) {
   const iv = randomBytes(12);
   const cipher = createCipheriv("aes-256-gcm", key(), iv);
   const payload = Buffer.from(
-    JSON.stringify({ eventId, qrId, publicId, expires: now + 900000 }),
+    JSON.stringify({ eventId, qrId, publicId, vehicleChoice, expires: now + 900000 }),
   );
   const ciphertext = Buffer.concat([cipher.update(payload), cipher.final()]);
   return Buffer.concat([iv, cipher.getAuthTag(), ciphertext]).toString(

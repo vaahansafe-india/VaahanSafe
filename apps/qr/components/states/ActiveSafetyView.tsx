@@ -32,6 +32,7 @@ export function ActiveSafetyView({ resolution }: ActiveSafetyViewProps) {
 
       <ReportEntry
         publicId={publicId}
+        vehicleChoice={resolution.vehicleChoice}
         vehicleDisplay={profile.vehicleDisplay}
         siteKey={
           process.env.TURNSTILE_SITE_KEY ||

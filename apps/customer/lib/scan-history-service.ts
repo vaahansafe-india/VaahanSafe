@@ -45,6 +45,7 @@ interface DbQrRow {
 interface DbScanEventRow {
   id: string;
   qr_id: string;
+  vehicle_id?: string | null;
   scan_type: "PUBLIC_RESOLVE" | "EMERGENCY_TRIGGER" | "ADMIN_INSPECT";
   result:
     | "RESOLVED_ACTIVE"
@@ -199,7 +200,7 @@ export async function getScanHistoryOverview(
        FROM qr_stickers s
        JOIN qr_assignments a ON s.id = a.qr_id AND a.ended_at IS NULL
        WHERE a.user_id = ?
-       ORDER BY a.assigned_at DESC`,
+       ORDER BY a.slot DESC, a.assigned_at DESC`,
       [userId]
     ),
   ]);
@@ -223,7 +224,7 @@ export async function getScanHistoryOverview(
     };
   });
 
-  const authorizedQrs: AuthorizedQrScope[] = qrStickers.map((q) => {
+  const authorizedQrs: AuthorizedQrScope[] = [...qrMap.values()].map((q) => {
     const v = vehicleMap.get(q.vehicle_id);
     return {
       qrId: q.id,
@@ -276,7 +277,7 @@ export async function getScanHistoryOverview(
   if (activeFilters.qrPublicId !== "all") {
     const matchingSticker = qrByPublicId.get(activeFilters.qrPublicId);
     if (matchingSticker) {
-      targetQrIds = [matchingSticker.id];
+      targetQrIds = targetQrIds.filter((id) => id === matchingSticker.id);
     }
   }
 
@@ -288,7 +289,7 @@ export async function getScanHistoryOverview(
       signals: {
         totalScans: 0,
         lastScan: null,
-        activeQrCount: qrStickers.filter((q) => q.status === "ACTIVATED").length,
+        activeQrCount: [...qrMap.values()].filter((q) => q.status === "ACTIVATED").length,
         periodLabel: activeFilters.period === "ALL" ? "ALL TIME" : `${activeFilters.period} PERIOD`,
         periodScansCount: 0,
       },
@@ -308,10 +309,10 @@ export async function getScanHistoryOverview(
   }
 
   // 3. Query All Scan Events for user's authorized QR IDs
-  const allUserQrIds = qrStickers.map((q) => q.id);
+  const allUserQrIds = [...qrMap.keys()];
   const placeholders = allUserQrIds.map(() => "?").join(",");
   const rawScanEvents = await db.query<DbScanEventRow>(
-    `SELECT id, qr_id, scan_type, result, city, state, user_agent_family, referrer_class, created_at
+    `SELECT id, qr_id, vehicle_id, scan_type, result, city, state, user_agent_family, referrer_class, created_at
      FROM qr_scan_events
      WHERE qr_id IN (${placeholders})
      ORDER BY created_at DESC`,
@@ -319,10 +320,13 @@ export async function getScanHistoryOverview(
   );
 
   const totalLifetimeScans = rawScanEvents.length;
-  const activeQrCount = qrStickers.filter((q) => q.status === "ACTIVATED").length;
+  const activeQrCount = [...qrMap.values()].filter((q) => q.status === "ACTIVATED").length;
+  const scanVehicle = (scan: DbScanEventRow) =>
+    scan.vehicle_id ?? qrMap.get(scan.qr_id)?.vehicle_id;
 
   // Filter by scoped QR selection first
-  const scopedScans = rawScanEvents.filter((s) => targetQrIds.includes(s.qr_id));
+  const scopedScans = rawScanEvents.filter((s) => targetQrIds.includes(s.qr_id) &&
+    (activeFilters.vehicleId === "all" || scanVehicle(s) === activeFilters.vehicleId));
 
   // Date period filter
   const cutoffMs = getPeriodCutoff(activeFilters.period);
@@ -394,11 +398,11 @@ export async function getScanHistoryOverview(
     qrDistributionMap.set(s.qr_id, (qrDistributionMap.get(s.qr_id) || 0) + 1);
   }
 
-  const qrDistribution: QrDistributionItem[] = qrStickers
+  const qrDistribution: QrDistributionItem[] = [...qrMap.values()]
     .filter((q) => targetQrIds.includes(q.id))
     .map((q) => {
       const count = qrDistributionMap.get(q.id) || 0;
-      const v = vehicleMap.get(q.vehicle_id);
+      const v = vehicleMap.get(activeFilters.vehicleId === "all" ? q.vehicle_id : activeFilters.vehicleId);
       return {
         qrId: q.id,
         publicId: maskPublicId(q.public_id),
@@ -449,7 +453,7 @@ export async function getScanHistoryOverview(
     const q = activeFilters.search.toLowerCase();
     filteredRegistryScans = filteredRegistryScans.filter((s) => {
       const sticker = qrMap.get(s.qr_id);
-      const vehicle = sticker ? vehicleMap.get(sticker.vehicle_id) : null;
+      const vehicle = vehicleMap.get(scanVehicle(s) ?? "");
       const publicId = (sticker?.public_id || "").toLowerCase();
       const plate = (vehicle?.registration_number || "").toLowerCase();
       const makeModel = (vehicle ? `${vehicle.make} ${vehicle.model}` : "").toLowerCase();
@@ -473,7 +477,7 @@ export async function getScanHistoryOverview(
   const now = new Date();
   const events: ScanEventItem[] = filteredRegistryScans.map((s) => {
     const sticker = qrMap.get(s.qr_id);
-    const vehicle = sticker ? vehicleMap.get(sticker.vehicle_id) : null;
+    const vehicle = vehicleMap.get(scanVehicle(s) ?? "");
     const occurredDate = parseDbUtcDate(s.created_at);
     const report = reportMap.get(s.id);
 

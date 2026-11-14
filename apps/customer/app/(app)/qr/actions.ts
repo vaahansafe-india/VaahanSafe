@@ -1,8 +1,44 @@
 "use server";
 
 import { getAuthenticatedCustomer } from "@/lib/session";
+import { getSupabaseAdminClient } from "@vaahansafe/database";
 import { executeQrActivation, executeQrReplacement } from "@/lib/qr-service";
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
+
+const secondaryVehicleInput = z.object({
+  qrId: z.string().min(1).max(100),
+  vehicleId: z.string().min(1).max(100),
+  attach: z.boolean(),
+});
+
+export async function setSecondaryQrVehicleAction(input: z.infer<typeof secondaryVehicleInput>) {
+  const auth = await getAuthenticatedCustomer();
+  if (!auth?.phoneVerified) {
+    return { success: false, message: "Verify your mobile number to manage QR vehicles." };
+  }
+  const parsed = secondaryVehicleInput.safeParse(input);
+  if (!parsed.success) return { success: false, message: "Select a vehicle and VaahanSafe ID." };
+  const { qrId, vehicleId, attach } = parsed.data;
+  const { data, error } = await getSupabaseAdminClient().rpc("customer_set_secondary_qr_vehicle", {
+    p_session: auth.session.id, p_qr: qrId, p_vehicle: vehicleId, p_attach: attach,
+  });
+  if (error) {
+    console.error("[QR vehicle] Assignment update failed", { code: error.code });
+    return { success: false, message: "Couldn't update this VaahanSafe ID. Please try again." };
+  }
+  switch (data) {
+    case "LIMIT_REACHED": return { success: false, message: "This VaahanSafe ID already has two vehicles." };
+    case "ALREADY_LINKED": return { success: false, message: "That vehicle already has a VaahanSafe ID." };
+    case "REPLACEMENT_PENDING": return { success: false, message: "Complete the QR replacement before adding a vehicle." };
+    case "OK":
+      revalidatePath("/qr", "layout");
+      revalidatePath("/vehicles", "layout");
+      revalidatePath("/dashboard");
+      return { success: true };
+    default: return { success: false, message: "This VaahanSafe ID or vehicle is no longer available." };
+  }
+}
 
 export interface ActivationActionResult {
   success: boolean;
@@ -21,6 +57,9 @@ export async function submitQrActivationAction(
   const auth = await getAuthenticatedCustomer();
   if (!auth) {
     return { success: false, error: "Unauthorized session. Please sign in again." };
+  }
+  if (!auth.phoneVerified) {
+    return { success: false, error: "Verify your mobile number before activating a QR." };
   }
 
   if (!params.scratchCode || params.scratchCode.trim().length < 6) {
