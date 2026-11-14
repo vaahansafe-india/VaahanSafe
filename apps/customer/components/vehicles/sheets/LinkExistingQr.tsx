@@ -5,7 +5,14 @@ import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { VaahanIcon } from "@vaahansafe/icons";
-import { Button } from "@vaahansafe/ui";
+import {
+  Button,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@vaahansafe/ui";
 import { useCustomerScope } from "@/components/query/CustomerQueryProvider";
 import { customerQueryOptions } from "@/lib/customer-queries";
 import { useSecondaryQrVehicleMutation } from "@/lib/use-secondary-qr-vehicle-mutation";
@@ -18,6 +25,7 @@ export function LinkExistingQr({ vehicleId, onLinked }: {
   const [selected, setSelected] = useState("");
   const [error, setError] = useState("");
   const panelId = useId();
+  const selectId = `${panelId}-qr`;
   const scope = useCustomerScope();
   const router = useRouter();
   const candidates = useQuery({
@@ -79,21 +87,28 @@ export function LinkExistingQr({ vehicleId, onLinked }: {
           <p className="text-xs text-muted-foreground">You don&apos;t have an active QR with room for this vehicle. Each VaahanSafe ID supports up to two vehicles.</p>
         ) : (
           <form onSubmit={linkVehicle} className="space-y-2">
-            <label className="block space-y-1.5 text-xs font-medium text-foreground">
-              <span>Choose a VaahanSafe ID</span>
-              <select
+            <div className="space-y-1.5">
+              <label htmlFor={selectId} className="block text-xs font-medium text-foreground">
+                Choose a VaahanSafe ID
+              </label>
+              <Select
                 required
                 value={selectedId}
-                onChange={(event) => { setSelected(event.target.value); setError(""); }}
+                onValueChange={(id) => { setSelected(id); setError(""); }}
                 disabled={mutation.isPending}
-                className="min-h-9 w-full rounded-lg border border-border bg-background px-2 text-xs"
               >
-                <option value="" disabled>Select an existing QR</option>
-                {candidates.data.map(({ id, visible_code, registration_number }) => (
-                  <option value={id} key={id}>{visible_code} · {registration_number}</option>
-                ))}
-              </select>
-            </label>
+                <SelectTrigger id={selectId} className="rounded-lg border-border bg-background text-xs data-[placeholder]:text-muted-foreground">
+                  <SelectValue placeholder="Select an existing QR" />
+                </SelectTrigger>
+                <SelectContent className="z-[60] rounded-lg border-border">
+                  {candidates.data.map(({ id, visible_code, registration_number }) => (
+                    <SelectItem value={id} key={id} className="text-xs">
+                      {visible_code} · {registration_number}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <Button type="submit" size="sm" disabled={!selectedId || mutation.isPending || candidates.isFetching}>
               {mutation.isPending ? "Linking…" : "Link this vehicle"}
             </Button>
