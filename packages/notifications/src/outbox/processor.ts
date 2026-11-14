@@ -40,7 +40,7 @@ export interface NotificationOutboxStore {
     intent: ClaimedNotification,
     channel: NotificationChannel,
     content: InAppRenderResult,
-  ): Promise<{ claimed: boolean; id?: string; attempt?: number }>;
+  ): Promise<{ claimed: boolean; id?: string; attempt?: number; recipientPhone?: string | null }>;
   finishDelivery(
     intent: ClaimedNotification,
     id: string,
@@ -81,13 +81,11 @@ export async function drainNotificationOutbox(
         failed++;
         return;
       }
+      const finderReport = contact || intent.template_key === "VEHICLE_SCAN_REPORT_V1";
       let rendered: ReturnType<typeof renderTemplate>;
       let payload: Record<string, unknown>;
       // A failed grant call leaves the lease recoverable and sends no message.
-      const link = [
-        "VEHICLE_SCAN_REPORT_V1",
-        "EMERGENCY_CONTACT_REPORT_V1",
-      ].includes(intent.template_key)
+      const link = finderReport
         ? await deps.store.reportLink?.(intent)
         : undefined;
       try {
@@ -138,12 +136,17 @@ export async function drainNotificationOutbox(
           await deps.store.finishDelivery(intent, claim.id, "DELIVERED");
           continue;
         }
+        const recipientPhone = finderReport ? claim.recipientPhone : dest.phone;
+        if (channel === "WHATSAPP" && !recipientPhone) {
+          await deps.store.finishDelivery(intent, claim.id, "FAILED_PERMANENT", undefined, "REPORT_DESTINATION_UNAVAILABLE");
+          continue;
+        }
         let result;
         try {
           result =
             channel === "WHATSAPP"
               ? await deps.whatsapp.sendWhatsApp({
-                  recipientPhone: dest.phone!,
+                  recipientPhone: recipientPhone!,
                   ...rendered.whatsApp,
                   correlationId: claim.id,
                 })

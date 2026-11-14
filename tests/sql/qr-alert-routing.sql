@@ -1,6 +1,7 @@
 DO $tests$
 DECLARE r public.qr_scan_reports; target public.notification_intents; expected_count integer;
   actual_count integer; original_phone text; owner_phone text; token uuid; answer jsonb;
+  owner_intent text; legacy_intent text;
   public_id text; request_id uuid; reserved_id text; page_event text;
 BEGIN
   IF has_function_privilege('anon','public.claim_notification_batch_v2(integer)','EXECUTE')
@@ -44,7 +45,8 @@ BEGIN
     JOIN public.users u ON u.id=r.owner_user_id
     WHERE p.vehicle_id=r.vehicle_id AND p.status='ACTIVE' AND c.is_enabled=1 AND c.allow_message=1
       AND public.qr_alert_phone(c.phone) IS NOT NULL
-      AND public.qr_alert_phone(c.phone) IS DISTINCT FROM public.qr_alert_phone(coalesce(u.phone,u.primary_phone));
+      AND public.qr_alert_phone(c.phone) IS DISTINCT FROM public.qr_alert_phone(u.phone)
+      AND public.qr_alert_phone(c.phone) IS DISTINCT FROM public.qr_alert_phone(u.primary_phone);
   SELECT count(*) INTO actual_count FROM public.notification_intents WHERE source_id=r.id AND recipient_kind='EMERGENCY_CONTACT';
   IF expected_count=0 OR actual_count<>expected_count THEN RAISE EXCEPTION 'Emergency recipient count mismatch'; END IF;
   UPDATE public.qr_scan_reports SET status='UPLOADING' WHERE id=r.id;
@@ -89,7 +91,9 @@ BEGIN
   answer:=public.prepare_notification_delivery(target.id,token,'IN_APP','{}'::jsonb);
   IF (answer->>'claimed')::boolean THEN RAISE EXCEPTION 'Contact delivery reached owner inbox'; END IF;
   answer:=public.prepare_notification_delivery(target.id,token,'WHATSAPP','{}'::jsonb);
-  IF NOT (answer->>'claimed')::boolean THEN RAISE EXCEPTION 'Eligible contact could not acquire delivery claim'; END IF;
+  IF NOT (answer->>'claimed')::boolean OR answer->>'recipientPhone' IS DISTINCT FROM target.recipient_phone THEN
+    RAISE EXCEPTION 'Contact delivery did not receive the intended phone';
+  END IF;
   answer:=public.prepare_notification_delivery(target.id,token,'WHATSAPP','{}'::jsonb);
   IF (answer->>'claimed')::boolean THEN RAISE EXCEPTION 'Duplicate worker acquired delivery claim'; END IF;
   UPDATE public.emergency_contacts SET allow_message=0 WHERE id=target.emergency_contact_id;
@@ -103,6 +107,25 @@ BEGIN
   UPDATE public.emergency_contacts SET phone='' WHERE id=target.emergency_contact_id;
   IF public.qr_report_contact_phone(target.id) IS NOT NULL THEN RAISE EXCEPTION 'Contact phone snapshot ignored'; END IF;
   UPDATE public.emergency_contacts SET phone=original_phone WHERE id=target.emergency_contact_id;
+  SELECT i.id INTO STRICT owner_intent FROM public.notification_intents i
+    WHERE i.source_id=r.id AND i.source_type='QR_REPORT' AND i.template_key='VEHICLE_SCAN_REPORT_V1'
+      AND i.recipient_kind='ACCOUNT';
+  owner_phone:=public.qr_verified_owner_phone(r.owner_user_id::text);
+  IF owner_phone IS NULL OR owner_phone=target.recipient_phone THEN
+    RAISE EXCEPTION 'Owner and contact destinations are not separated';
+  END IF;
+  UPDATE public.notification_intents SET status='QUEUED',lease_token=token,lease_expires_at=clock_timestamp()+interval '2 minutes' WHERE id=owner_intent;
+  UPDATE public.notification_deliveries SET status='PENDING',next_attempt_at=NULL WHERE intent_id=owner_intent AND channel='WHATSAPP';
+  answer:=public.prepare_notification_delivery(owner_intent,token,'WHATSAPP','{}'::jsonb);
+  IF NOT (answer->>'claimed')::boolean OR answer->>'recipientPhone' IS DISTINCT FROM owner_phone THEN
+    RAISE EXCEPTION 'Owner delivery did not receive the verified registered phone';
+  END IF;
+  legacy_intent:='outbox_'||gen_random_uuid()::text;
+  INSERT INTO public.notification_intents(id,event_type,recipient_user_id,category,priority,template_key,template_version,payload_json,source_type,source_id,dedupe_key,status,lease_token,lease_expires_at)
+    VALUES(legacy_intent,'EMERGENCY_SCAN_ALERT',r.owner_user_id::text,'SAFETY','HIGH','EMERGENCY_SCAN_ALERT_V1',1,'{}','QR_SCAN',page_event,
+      legacy_intent,'QUEUED',token,clock_timestamp()+interval '2 minutes');
+  answer:=public.prepare_notification_delivery(legacy_intent,token,'WHATSAPP','{}'::jsonb);
+  IF (answer->>'claimed')::boolean THEN RAISE EXCEPTION 'Legacy scan notice reached delivery'; END IF;
   UPDATE public.qr_scan_reports SET created_at=clock_timestamp()-interval '16 minutes' WHERE id=r.id;
   IF public.qr_report_contact_phone(target.id) IS NOT NULL THEN RAISE EXCEPTION 'Stale emergency alert allowed'; END IF;
   UPDATE public.qr_scan_reports SET created_at=clock_timestamp() WHERE id=r.id;

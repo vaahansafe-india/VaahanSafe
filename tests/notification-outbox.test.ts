@@ -25,6 +25,7 @@ function setup(overrides: Partial<ClaimedNotification> = {}) {
       claimed: true,
       id: `delivery-${channel}`,
       attempt: 1,
+      recipientPhone: channel === "WHATSAPP" ? intent.profile.verifiedPhone : undefined,
     })),
     finishDelivery: vi.fn(),
     finishIntent: vi.fn(),
@@ -95,6 +96,42 @@ describe("Durable notification delivery", () => {
     reason: "EMERGENCY",
     scannedAtFormatted: "21 Oct 2026, 12:00 IST",
     locationText: "Location was not shared",
+  });
+  it("uses the owner phone authorized at delivery preparation instead of the earlier claim", async () => {
+    const d = setup({
+      recipient_kind: "ACCOUNT",
+      event_type: "EMERGENCY_SCAN_ALERT",
+      template_key: "VEHICLE_SCAN_REPORT_V1",
+      payload_json: JSON.stringify({
+        ...JSON.parse(contactPayload),
+        reportId: "report_4e70346f-266f-4d49-8a6a-fc91db9a785c",
+        photoCount: 0,
+      }),
+    });
+    vi.mocked(d.store.prepare).mockImplementation(async (_intent, channel) => ({
+      claimed: true, id: `delivery-${channel}`, recipientPhone: channel === "WHATSAPP" ? "919876000001" : null,
+    }));
+    await drainNotificationOutbox(d);
+    expect(d.whatsapp.sendWhatsApp).toHaveBeenCalledOnce();
+    expect(d.whatsapp.sendWhatsApp).toHaveBeenCalledWith(expect.objectContaining({
+      recipientPhone: "919876000001",
+      templateName: "vhn_vehicle_emergency_report_v1",
+    }));
+  });
+
+  it("never falls back to the claimed phone when report preparation lacks a destination", async () => {
+    const d = setup({
+      recipient_kind: "EMERGENCY_CONTACT",
+      event_type: "EMERGENCY_SCAN_ALERT",
+      template_key: "EMERGENCY_CONTACT_REPORT_V1",
+      payload_json: contactPayload,
+    });
+    vi.mocked(d.store.prepare).mockResolvedValue({ claimed: true, id: "delivery-WHATSAPP" });
+    await drainNotificationOutbox(d);
+    expect(d.whatsapp.sendWhatsApp).not.toHaveBeenCalled();
+    expect(d.store.finishDelivery).toHaveBeenCalledWith(
+      d.intent, "delivery-WHATSAPP", "FAILED_PERMANENT", undefined, "REPORT_DESTINATION_UNAVAILABLE",
+    );
   });
   it("sends a contact-only emergency alert without private owner links or owner preferences", async () => {
     const d = setup({

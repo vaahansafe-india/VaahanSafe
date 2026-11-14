@@ -93,9 +93,13 @@ export class NotificationQueueConsumer {
       };
     }
 
-    // The generic queue has only an account destination. Contact reports
-    // require the role-aware Supabase outbox and its contact authorization.
-    if (intent.templateKey === "EMERGENCY_CONTACT_REPORT_V1") {
+    // Finder reports use the Supabase outbox to authorize each recipient.
+    // Passive scan notices are retired.
+    if (
+      intent.templateKey === "EMERGENCY_SCAN_ALERT_V1" ||
+      intent.templateKey === "EMERGENCY_CONTACT_REPORT_V1" ||
+      intent.templateKey === "VEHICLE_SCAN_REPORT_V1"
+    ) {
       return { intentId: intent.id, success: false, channelResults: {} };
     }
 

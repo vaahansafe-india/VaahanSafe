@@ -58,7 +58,7 @@ export class SupabaseNotificationOutbox implements NotificationOutboxStore {
     channel: NotificationChannel,
     content: InAppRenderResult,
   ) {
-    return this.rpc<{ claimed: boolean; id?: string; attempt?: number }>(
+    return this.rpc<{ claimed: boolean; id?: string; attempt?: number; recipientPhone?: string | null }>(
       "prepare_notification_delivery",
       {
         p_intent: intent.id,

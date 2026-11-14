@@ -47,6 +47,13 @@ processor also rejects mismatched contact roles and templates before rendering.
 These are repository findings. Incident-specific delivery attribution requires
 correlating production outbox and MSG91 delivery records.
 
+Migration `20261114064505_harden_whatsapp_report_destinations.sql` also blocks
+legacy scan notices at claim and delivery preparation. Owner report WhatsApp
+delivery uses the registered phone that matches a verified sign-in identity.
+Contact delivery uses the saved contact's current permitted number, excluding
+both registered account phone fields. The worker gets the destination from the
+delivery preparation call so it cannot reuse an earlier phone for a report.
+
 On reports without viewer consent, contacts receive the masked vehicle reference, finder-reported situation, time
 and optional finder-shared location. They receive no owner session, medical data,
 private photo link or access to the owner's authenticated report. Photos and notes
