@@ -436,9 +436,36 @@ export async function getQrCodesRegistry(
   };
 }
 
-/**
- * Resolves Buy QR offerings and user vehicle eligibility.
- */
+/** Candidates for attaching an unassigned vehicle; the write RPC rechecks eligibility atomically. */
+export async function getLinkableQrs(userId: string, vehicleId: string) {
+  return getAuthoritativeDatabaseClient().query<{
+    id: string;
+    visible_code: string;
+    registration_number: string;
+  }>(
+    `SELECT s.id, s.visible_code, primary_vehicle.registration_number
+     FROM vehicles target
+     JOIN qr_assignments a ON a.user_id = target.user_id AND a.slot = 1 AND a.ended_at IS NULL
+     JOIN vehicles primary_vehicle ON primary_vehicle.id = a.vehicle_id AND primary_vehicle.user_id = a.user_id
+     JOIN qr_stickers s ON s.id = a.qr_id AND s.status = 'ACTIVATED'
+     WHERE target.id = ? AND target.user_id = ? AND target.status = 'ACTIVE' AND target.deleted_at IS NULL
+       AND primary_vehicle.status = 'ACTIVE' AND primary_vehicle.deleted_at IS NULL
+       AND NOT EXISTS (SELECT 1 FROM qr_assignments current_assignment
+         WHERE current_assignment.vehicle_id = target.id AND current_assignment.ended_at IS NULL)
+       AND NOT EXISTS (SELECT 1 FROM qr_assignments secondary
+         WHERE secondary.qr_id = s.id AND secondary.slot = 2 AND secondary.ended_at IS NULL)
+       AND NOT EXISTS (SELECT 1 FROM replacement_requests r
+         WHERE r.old_qr_sticker_id = s.id AND r.status NOT IN ('REJECTED', 'COMPLETED', 'CANCELLED'))
+       AND EXISTS (SELECT 1 FROM service_entitlements e
+         WHERE e.qr_sticker_id = s.id AND e.vehicle_id = a.vehicle_id AND e.user_id = a.user_id
+           AND e.capability = 'SAFETY_VIEW_ACTIVE' AND e.status = 'ENABLED' AND e.verified_at IS NOT NULL
+           AND (e.expires_at IS NULL OR e.expires_at > CURRENT_TIMESTAMP))
+     ORDER BY s.visible_code, s.id`,
+    [vehicleId, userId],
+  );
+}
+
+/** Resolves Buy QR offerings and user vehicle eligibility. */
 export async function getBuyQrData(userId: string): Promise<QrBuyOffering> {
   const db = getAuthoritativeDatabaseClient();
 

@@ -13,6 +13,7 @@ import {
 } from "@vaahansafe/ui";
 import { VaahanIcon } from "@vaahansafe/icons";
 import type { VehicleRegistryItem } from "@/lib/vehicle-types";
+import { LinkExistingQr } from "./LinkExistingQr";
 
 interface QrIdentitySheetProps {
   open: boolean;
@@ -108,6 +109,13 @@ export function QrIdentitySheet({
 
             {!hasQr ? (
               <>
+                {open && vehicle.status === "ACTIVE" && (
+                  <LinkExistingQr
+                    key={vehicle.id}
+                    vehicleId={vehicle.id}
+                    onLinked={() => onOpenChange(false)}
+                  />
+                )}
                 <Link
                   href={`/qr/activate?vehicleId=${vehicle.id}`}
                   onClick={() => onOpenChange(false)}

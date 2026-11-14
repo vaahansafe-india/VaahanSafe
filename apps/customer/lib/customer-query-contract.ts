@@ -10,6 +10,7 @@ import type { getSettingsData } from "./settings-service";
 import type {
   getQrOverview,
   getQrCodesRegistry,
+  getLinkableQrs,
   getBuyQrData,
   getActivateQrData,
   getReplaceQrData,
@@ -36,6 +37,7 @@ export interface CustomerQueryData {
   settings: Awaited<ReturnType<typeof getSettingsData>>;
   qr: Awaited<ReturnType<typeof getQrOverview>>;
   "qr-codes": Awaited<ReturnType<typeof getQrCodesRegistry>>;
+  "qr-linkable": Awaited<ReturnType<typeof getLinkableQrs>>;
   "qr-buy": Awaited<ReturnType<typeof getBuyQrData>>;
   "qr-activate": Awaited<ReturnType<typeof getActivateQrData>>;
   "qr-replace": Awaited<ReturnType<typeof getReplaceQrData>>;
@@ -59,6 +61,7 @@ export const CUSTOMER_QUERY_PARAMS: Record<
   settings: [],
   qr: [],
   "qr-codes": [],
+  "qr-linkable": ["vehicle"],
   "qr-buy": [],
   "qr-activate": [],
   "qr-replace": [],

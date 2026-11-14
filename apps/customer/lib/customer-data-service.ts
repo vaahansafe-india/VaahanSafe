@@ -134,6 +134,11 @@ export async function getCustomerData(
       return (await import("./qr-service")).getQrOverview(userId);
     case "qr-codes":
       return (await import("./qr-service")).getQrCodesRegistry(userId);
+    case "qr-linkable": {
+      const vehicleId = params.get("vehicle");
+      if (!auth.phoneVerified || !vehicleId) return [];
+      return (await import("./qr-service")).getLinkableQrs(userId, vehicleId);
+    }
     case "qr-buy":
       return (await import("./qr-service")).getBuyQrData(userId);
     case "qr-activate":

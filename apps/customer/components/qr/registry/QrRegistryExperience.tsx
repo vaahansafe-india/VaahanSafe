@@ -3,8 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { setSecondaryQrVehicleAction } from "@/app/(app)/qr/actions";
-import { useCustomerMutation } from "@/lib/use-customer-mutation";
+import { useSecondaryQrVehicleMutation } from "@/lib/use-secondary-qr-vehicle-mutation";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -37,9 +36,7 @@ export function QrRegistryExperience({ initialItems, availableVehicles }: QrRegi
   const [selectedStatus, setSelectedStatus] = React.useState<"ALL" | "ACTIVATED" | "UNLINKED" | "REPLACED">("ALL");
   const [copiedId, setCopiedId] = React.useState<string | null>(null);
   const [detach, setDetach] = React.useState<{ qrId: string; vehicleId: string } | null>(null);
-  const mutation = useCustomerMutation(setSecondaryQrVehicleAction, [
-    "qr-codes", "qr", "vehicles", "dashboard", "scan-history", "qr-buy", "qr-activate", "qr-replace",
-  ]);
+  const mutation = useSecondaryQrVehicleMutation();
 
   async function updateVehicle(qrId: string, vehicleId: string, attach: boolean) {
     try {
