@@ -6,10 +6,13 @@ import type {
 import {
   MSG91_TEMPLATE_CATALOG,
   getMsg91Template,
+  getMsg91TemplateVariableNames,
   buildMsg91Components,
   type Msg91TemplateName,
 } from "./catalog";
+import { reportButtonTemplates } from "./report-buttons";
 export * from "./catalog";
+export { reportButtonTemplates } from "./report-buttons";
 
 export interface SendWhatsAppMessageOptions {
   recipientPhone: string;
@@ -77,6 +80,8 @@ export class Msg91WhatsAppAdapter
           status: string;
           is_disabled: number;
           variables: string[];
+          variable_type?: Record<string, { type?: string; subtype?: string }>;
+          code?: unknown;
         }[];
       }[];
     };
@@ -90,19 +95,39 @@ export class Msg91WhatsAppAdapter
     const contract = data.data
       .find((t) => t.name === name && t.namespace === this.namespace)
       ?.languages?.find((t) => t.language === expected.language);
+    const expectedFields = getMsg91TemplateVariableNames(expected);
     if (
       !contract ||
       typeof contract.status !== "string" ||
       !Array.isArray(contract.variables) ||
-      contract.variables.join(",") !==
-        Array.from(
-          { length: expected.bodyCount },
-          (_, i) => `body_${i + 1}`,
-        ).join(",")
+      contract.variables.length !== expectedFields.length ||
+      !expectedFields.every((field) => contract.variables.includes(field))
     )
       return "PENDING";
     if (contract.is_disabled) return "DISABLED";
     const status = contract.status.toUpperCase();
+    const buttons = reportButtonTemplates.find((template) => template.name === name)?.buttons;
+    if (status === "APPROVED" && buttons) {
+      let code = contract.code;
+      if (typeof code === "string") {
+        try {
+          code = JSON.parse(code);
+        } catch {
+          return "PENDING";
+        }
+      }
+      const registered = Array.isArray(code)
+        ? code.find((component) => component?.type === "BUTTONS")?.buttons
+        : undefined;
+      if (!Array.isArray(registered) || registered.length !== buttons.length ||
+        !buttons.every(({ text, base }, index) => {
+          const variable = contract.variable_type?.[`button_${index + 1}`];
+          const button = registered[index];
+          return variable?.subtype === "url" && variable.type === "text" &&
+            button?.type === "URL" && button.text === text &&
+            button.url === base + "{{1}}";
+        })) return "PENDING";
+    }
     return ["APPROVED", "REJECTED", "PAUSED", "DISABLED"].includes(status)
       ? (status as "APPROVED" | "REJECTED" | "PAUSED" | "DISABLED")
       : "PENDING";

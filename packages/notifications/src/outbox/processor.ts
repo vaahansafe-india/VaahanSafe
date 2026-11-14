@@ -57,6 +57,7 @@ export async function drainNotificationOutbox(
     store: NotificationOutboxStore;
     whatsapp: WhatsAppProvider;
     email: EmailProvider;
+    approvedWhatsAppTemplates?: ReadonlySet<string>;
   },
   limit = 5,
 ) {
@@ -97,6 +98,7 @@ export async function drainNotificationOutbox(
         rendered = renderTemplate(
           getTemplateDefinition(intent.template_key),
           payload,
+          deps.approvedWhatsAppTemplates,
         );
       } catch {
         await deps.store.finishIntent(intent, "TEMPLATE_VALIDATION_FAILED");

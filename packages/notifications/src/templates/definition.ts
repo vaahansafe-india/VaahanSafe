@@ -36,6 +36,6 @@ export interface TemplateDefinition<TVariables = unknown> {
   supportedChannels: readonly NotificationChannel[];
   schema: z.ZodType<TVariables>;
   renderInApp: (variables: TVariables) => InAppRenderResult;
-  renderWhatsApp: (variables: TVariables) => WhatsAppRenderResult;
+  renderWhatsApp: (variables: TVariables, approvedTemplates?: ReadonlySet<string>) => WhatsAppRenderResult;
   renderEmail: (variables: TVariables) => EmailRenderResult;
 }

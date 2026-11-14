@@ -7,6 +7,8 @@ import {
   Msg91WhatsAppAdapter,
   SmtpEmailAdapter,
   drainNotificationOutbox,
+  reportButtonTemplates,
+  type Msg91TemplateName,
 } from "@vaahansafe/notifications";
 
 export function verifyNotificationSchedule(request: Request, now = Date.now()) {
@@ -29,6 +31,13 @@ export function verifyNotificationSchedule(request: Request, now = Date.now()) {
 export async function runNotificationDelivery() {
   const smtp = new SmtpEmailAdapter();
   const whatsapp = new Msg91WhatsAppAdapter();
+  const buttonApprovals = Promise.all(reportButtonTemplates.map(async ({ name }) => {
+    try {
+      return (await whatsapp.getTemplateApproval(name)) === "APPROVED" ? name : undefined;
+    } catch {
+      return undefined;
+    }
+  }));
   await Promise.all(
     (
       [
@@ -38,7 +47,7 @@ export async function runNotificationDelivery() {
         "vhn_vehicle_report_v2",
         "vhn_vehicle_emergency_report_v2",
         "vhn_emergency_contact_report_v2",
-      ] as const
+      ] satisfies Msg91TemplateName[]
     ).map(async (name) => {
       let status: string = "PENDING";
       try {
@@ -55,6 +64,9 @@ export async function runNotificationDelivery() {
   return drainNotificationOutbox({
     store: new SupabaseNotificationOutbox(),
     whatsapp,
+    approvedWhatsAppTemplates: new Set(
+      (await buttonApprovals).filter((name) => name !== undefined),
+    ),
     email: {
       sendEmail: async (options) => {
         const result = await smtp.sendEmail(options);

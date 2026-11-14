@@ -1,7 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { Msg91WhatsAppAdapter, MSG91_TEMPLATE_CATALOG } from "../packages/notifications/src/whatsapp";
+import { Msg91WhatsAppAdapter, MSG91_TEMPLATE_CATALOG, getMsg91TemplateVariableNames } from "../packages/notifications/src/whatsapp";
 import { Msg91OtpAdapter } from "../packages/notifications/src/otp";
 import { getTemplateDefinition } from "../packages/notifications/src/templates/registry";
+import { REPORT_BUTTON_TEMPLATES, reportButtonTemplates } from "../packages/notifications/src/whatsapp/report-buttons";
 
 afterEach(() => { vi.unstubAllGlobals(); vi.unstubAllEnvs(); });
 const adapter = () => new Msg91WhatsAppAdapter("credential-fixture", "918639785897", "namespace-fixture");
@@ -16,13 +17,62 @@ describe("MSG91 provider contracts", () => {
     const fetch = vi.fn().mockResolvedValue(new Response(JSON.stringify({ status: "success", request_id: "provider-reference" })));
     vi.stubGlobal("fetch", fetch);
     const parameters = Object.fromEntries(Array.from({ length: contract.bodyCount }, (_, i) => [String(i + 1), `value-${i + 1}`]));
+    const buttons = reportButtonTemplates.find((template) => template.name === name)?.buttons ?? [];
+    for (const [index, button] of buttons.entries()) {
+      parameters[`button_${index + 1}`] = button.sample;
+    }
     expect(await adapter().sendMessage({ ...message, templateName: name, templateParams: parameters })).toEqual({ success: true, messageId: "provider-reference" });
     const [url, request] = fetch.mock.calls[0];
     expect(url).toBe("https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/bulk/");
     const template = JSON.parse(request.body).payload.template;
     expect(template.namespace).toBe("namespace-fixture");
     expect(template.language.code).toBe(contract.language);
-    expect(Object.keys(template.to_and_components[0].components)).toEqual(Array.from({ length: contract.bodyCount }, (_, i) => `body_${i + 1}`));
+    const { components } = template.to_and_components[0];
+    expect(Object.keys(components)).toEqual(getMsg91TemplateVariableNames(contract));
+    for (const [index, { sample }] of buttons.entries()) {
+      expect(components[`button_${index + 1}`]).toEqual({ type: "text", subtype: "url", value: sample });
+    }
+  });
+  it("uses directions only for shared GPS and keeps the report proof out of message text", () => {
+    const template = getTemplateDefinition("VEHICLE_SCAN_REPORT_V1");
+    const names = REPORT_BUTTON_TEMPLATES.owner;
+    const approved = new Set([names.report, names.directions]);
+    const proof = "A".repeat(43);
+    const report = {
+      viewerUrl: `https://view.vaahansafe.com/r#${proof}`,
+      vehicleMaskedReg: "MH••••1234",
+      scannedAtFormatted: "21 Oct 2026, 14:00 IST",
+      reason: "PARKING",
+      locationText: "Finder-shared GPS (accuracy +/-20 m): https://www.google.com/maps/search/?api=1&query=19.076,72.8777",
+    };
+    expect(template.renderWhatsApp(report, approved)).toEqual({
+      templateName: names.directions, languageCode: "en",
+      parameters: { 1: report.vehicleMaskedReg, 2: "Parking / access concern", 3: report.scannedAtFormatted, button_1: proof, button_2: "19.076,72.8777" },
+    });
+    const noLocation = { ...report, locationText: "Location was not shared" };
+    expect(template.renderWhatsApp(noLocation, approved)).toMatchObject({ templateName: names.report, parameters: { button_1: proof } });
+    expect(template.renderWhatsApp(noLocation, approved).parameters).not.toHaveProperty("button_2");
+    expect(template.renderWhatsApp(report, new Set()).templateName).toBe("vhn_vehicle_report_v2");
+    expect(getTemplateDefinition("EMERGENCY_CONTACT_REPORT_V1")
+      .renderWhatsApp({ ...report, reason: "EMERGENCY" }, approved).templateName)
+      .toBe("vhn_emergency_contact_report_v2");
+  });
+  it("blocks an approved template if MSG91 rewrites its private report destination", async () => {
+    const name = REPORT_BUTTON_TEMPLATES.owner.directions;
+    const definition = reportButtonTemplates.find((template) => template.name === name)!;
+    const buttons = definition.buttons.map(({ text, base }) => ({ type: "URL", text, url: base + "{{1}}" }));
+    const language = {
+      language: "en", status: "approved", is_disabled: 0,
+      variables: ["body_1", "body_2", "body_3", "button_1", "button_2"],
+      variable_type: { button_1: { type: "text", subtype: "url" }, button_2: { type: "text", subtype: "url" } },
+      code: [{ type: "BUTTONS", buttons }],
+    };
+    vi.stubGlobal("fetch", vi.fn().mockImplementation(async () => Response.json({
+      status: "success", data: [{ name, namespace: "namespace-fixture", languages: [language] }],
+    })));
+    expect(await adapter().getTemplateApproval(name)).toBe("APPROVED");
+    buttons[0].url = "https://m.9m.io/{{1}}";
+    expect(await adapter().getTemplateApproval(name)).toBe("PENDING");
   });
   it("rejects aliases, extra variables, language mismatch and unapproved OTP templates before transmission", async () => {
     const fetch = vi.fn(); vi.stubGlobal("fetch", fetch);

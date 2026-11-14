@@ -8,6 +8,7 @@
 
 import { TemplateDefinition } from "./definition";
 import { escapeHtml } from "./renderer";
+import { renderReportButtons } from "../whatsapp/report-buttons";
 import {
   VehicleScanReportVariablesSchema,
   type VehicleScanReportVariables,
@@ -348,7 +349,12 @@ export const VEHICLE_SCAN_REPORT_V1: TemplateDefinition<VehicleScanReportVariabl
       actionType: "VIEW_QR",
       actionTarget: `/scan-history?period=90D&report=${encodeURIComponent(v.reportId)}`,
     }),
-    renderWhatsApp: (v) => ({
+    renderWhatsApp: (v, approved) => (approved && renderReportButtons(
+      v.reason === "EMERGENCY" ? "ownerEmergency" : "owner",
+      v,
+      reportReason[v.reason],
+      approved,
+    )) || ({
       templateName:
         v.reason === "EMERGENCY"
           ? v.viewerUrl
@@ -384,7 +390,12 @@ export const EMERGENCY_CONTACT_REPORT_V1: TemplateDefinition<EmergencyContactRep
       title: "Possible vehicle emergency",
       body: `A finder reported a possible accident or emergency involving ${v.vehicleMaskedReg}.`,
     }),
-    renderWhatsApp: (v) => ({
+    renderWhatsApp: (v, approved) => (approved && renderReportButtons(
+      "contact",
+      v,
+      "Possible accident or emergency",
+      approved,
+    )) || ({
       templateName: v.viewerUrl
         ? "vhn_emergency_contact_report_v2"
         : "vhn_emergency_contact_report_v1",

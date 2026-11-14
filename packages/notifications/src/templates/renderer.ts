@@ -36,7 +36,8 @@ export function escapeHtml(unsafe: string): string {
  */
 export function renderTemplate<TVariables>(
   template: TemplateDefinition<TVariables>,
-  rawVariables: unknown
+  rawVariables: unknown,
+  approvedWhatsAppTemplates?: ReadonlySet<string>,
 ): {
   inApp: InAppRenderResult;
   whatsApp: WhatsAppRenderResult;
@@ -51,7 +52,7 @@ export function renderTemplate<TVariables>(
 
   return {
     inApp: template.renderInApp(validated),
-    whatsApp: template.renderWhatsApp(validated),
+    whatsApp: template.renderWhatsApp(validated, approvedWhatsAppTemplates),
     email: template.renderEmail(validated),
   };
 }
