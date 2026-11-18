@@ -16,7 +16,8 @@ import {
   ALL_ENTITLEMENT_CAPABILITIES,
   getQrUrl,
   verifyScratchSecret,
-  canActivateSticker,
+  activationQrLookup,
+  normalizeActivationProofInput,
   canViewDigitalQr,
   canRequestReplacement,
   grantAuthoritativeEntitlements,
@@ -538,15 +539,14 @@ export async function getActivateQrData(
     db.query<DbVehicleRow>(
       `SELECT id, user_id, registration_number, vehicle_type, make, model, status, created_at, updated_at
      FROM vehicles
-     WHERE user_id = ? AND status = 'ACTIVE'
+     WHERE user_id = ? AND status = 'ACTIVE' AND deleted_at IS NULL
      ORDER BY updated_at DESC`,
       [userId],
     ),
     db.query<{ vehicle_id: string }>(
       `SELECT a.vehicle_id
-     FROM qr_stickers s
-     JOIN qr_assignments a ON s.id = a.qr_id AND a.ended_at IS NULL
-     WHERE a.user_id = ? AND s.status = 'ACTIVATED'`,
+     FROM qr_assignments a
+     WHERE a.user_id = ? AND a.ended_at IS NULL`,
       [userId],
     ),
   ]);
@@ -731,7 +731,7 @@ export async function getReplaceQrData(
  */
 export async function executeQrActivation(
   userId: string,
-  params: { scratchCode: string; vehicleId: string; publicId?: string },
+  params: { scratchCode: string; vehicleId: string; publicId: string },
 ): Promise<{
   success: boolean;
   error?: string;
@@ -739,13 +739,14 @@ export async function executeQrActivation(
   maskedPlate?: string;
 }> {
   const db = getAuthoritativeDatabaseClient();
-  const cleanCode = params.scratchCode.trim().toUpperCase();
+  const cleanCode = normalizeActivationProofInput(params.scratchCode);
+  const { publicId, visibleCode } = activationQrLookup(params.publicId);
 
   // 1. Verify target vehicle belongs to user
   const vehicles = await db.query<DbVehicleRow>(
     `SELECT id, registration_number, vehicle_type, status
      FROM vehicles
-     WHERE id = ? AND user_id = ? AND status = 'ACTIVE'
+     WHERE id = ? AND user_id = ? AND status = 'ACTIVE' AND deleted_at IS NULL
      LIMIT 1`,
     [params.vehicleId, userId],
   );
@@ -763,91 +764,44 @@ export async function executeQrActivation(
     qr_id: string;
     secret_hash: string;
     hash_version: string;
-    failed_attempts: number;
     locked_until: string | null;
-    consumed_at: string | null;
     public_id: string;
-    visible_code: string;
     qr_status: QrLifecycleState;
   }
 
-  const query = params.publicId
-    ? `SELECT s.id as secret_id, s.qr_id, s.secret_hash, s.hash_version, s.failed_attempts, s.locked_until, s.consumed_at,
-              q.public_id, q.visible_code, q.status as qr_status
-       FROM qr_activation_secrets s
-       JOIN qr_stickers q ON s.qr_id = q.id
-       WHERE q.public_id = ? AND s.consumed_at IS NULL
-       LIMIT 1`
-    : `SELECT s.id as secret_id, s.qr_id, s.secret_hash, s.hash_version, s.failed_attempts, s.locked_until, s.consumed_at,
-              q.public_id, q.visible_code, q.status as qr_status
-       FROM qr_activation_secrets s
-       JOIN qr_stickers q ON s.qr_id = q.id
-       WHERE s.consumed_at IS NULL`;
-
   const candidates = await db.query<CandidateSecretRow>(
-    query,
-    params.publicId ? [params.publicId] : [],
+    `SELECT s.id as secret_id, s.qr_id, s.secret_hash, s.hash_version, s.locked_until,
+            q.public_id, q.status as qr_status
+     FROM qr_activation_secrets s JOIN qr_stickers q ON s.qr_id = q.id
+     WHERE (q.public_id = ? OR q.visible_code = ?) AND q.status = 'SOLD' AND s.consumed_at IS NULL
+     LIMIT 2`,
+    [publicId, visibleCode],
   );
+  const invalidProof = {
+    success: false,
+    error: "We couldn't verify this sticker. Check the sticker ID and scratch code on the same pack, or try again later.",
+  };
+  const matched = candidates.length === 1 ? candidates[0] : undefined;
+  const nowMs = Date.now();
+  if (!matched || (matched.locked_until && new Date(matched.locked_until).getTime() > nowMs)) return invalidProof;
 
-  let matched: CandidateSecretRow | null = null;
-  for (const candidate of candidates) {
-    if (
-      candidate.locked_until &&
-      new Date(candidate.locked_until) > new Date()
-    ) {
-      continue;
-    }
-    const isMatch = await verifyScratchSecret(
-      cleanCode,
-      candidate.secret_hash,
-      candidate.hash_version,
-    );
-    if (isMatch) {
-      matched = candidate;
-      break;
-    }
-  }
-
-  if (!matched) {
-    // If candidate was identified, record failed attempt and apply throttling
-    if (candidates[0]) {
-      const target = candidates[0];
-      const attemptId = `qat_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-      await db.execute(
-        `UPDATE qr_activation_secrets
-         SET failed_attempts = failed_attempts + 1,
-             locked_until = CASE WHEN failed_attempts + 1 >= 5 THEN datetime('now', '+30 minutes') ELSE NULL END,
-             updated_at = datetime('now')
-         WHERE id = ?`,
-        [target.secret_id],
-      );
-      await db.execute(
-        `INSERT INTO qr_activation_attempts (id, qr_id, user_id, outcome, created_at)
-         VALUES (?, ?, ?, 'INVALID_SECRET', datetime('now'))`,
-        [attemptId, target.qr_id, userId],
-      );
-    }
-    return {
-      success: false,
-      error:
-        "Invalid activation proof code. Please re-check the silver scratch panel.",
-    };
-  }
-
-  if (matched.locked_until && new Date(matched.locked_until) > new Date()) {
-    return {
-      success: false,
-      error:
-        "Sticker activation is temporarily locked due to previous failed attempts.",
-    };
-  }
-
-  const checkAllowed = canActivateSticker(matched.qr_status);
-  if (!checkAllowed.allowed) {
-    return {
-      success: false,
-      error: checkAllowed.reason || "This QR sticker cannot be activated.",
-    };
+  if (!(await verifyScratchSecret(cleanCode, matched.secret_hash, matched.hash_version))) {
+    const attemptedAt = new Date(nowMs).toISOString();
+    await db.batch([
+      {
+        sql: `UPDATE qr_activation_secrets
+              SET failed_attempts = failed_attempts + 1,
+                  locked_until = CASE WHEN failed_attempts + 1 >= 5 THEN COALESCE(?, locked_until) ELSE NULL END, updated_at = ?
+              WHERE id = ? AND consumed_at IS NULL AND (locked_until IS NULL OR locked_until <= ?)`,
+        params: [new Date(nowMs + 30 * 60_000).toISOString(), attemptedAt, matched.secret_id, attemptedAt],
+      },
+      {
+        sql: `INSERT INTO qr_activation_attempts (id, qr_id, user_id, outcome, created_at)
+              VALUES (?, ?, ?, 'INVALID_SECRET', ?)`,
+        params: ["qat_" + crypto.randomUUID(), matched.qr_id, userId, attemptedAt],
+      },
+    ]);
+    return invalidProof;
   }
 
   const now = new Date().toISOString();
@@ -934,7 +888,7 @@ export async function executeQrActivation(
   const updateResult = await db.execute(
     `UPDATE qr_stickers
      SET status = 'ACTIVATED', activated_at = ?, updated_at = ?
-     WHERE id = ? AND status IN ('PRINTED', 'IN_TRANSIT_DISTRIBUTOR', 'WITH_DISTRIBUTOR', 'WITH_RETAILER', 'SOLD')`,
+     WHERE id = ? AND status = 'SOLD'`,
     [now, now, matched.qr_id],
   );
 

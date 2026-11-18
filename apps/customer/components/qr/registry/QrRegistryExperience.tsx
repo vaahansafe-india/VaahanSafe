@@ -7,6 +7,7 @@ import { useSecondaryQrVehicleMutation } from "@/lib/use-secondary-qr-vehicle-mu
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@vaahansafe/ui";
 import { VaahanIcon } from "@vaahansafe/icons";
 import { PhysicalQrObject } from "../primitives/PhysicalQrObject";
@@ -29,6 +30,53 @@ import { cn } from "@vaahansafe/ui/lib/utils";
 interface QrRegistryExperienceProps {
   initialItems: QrRegistryItemData[];
   availableVehicles: Array<{ id: string; label: string }>;
+}
+
+function SecondVehiclePicker({ vehicles, pending, onLink }: {
+  vehicles: QrRegistryExperienceProps["availableVehicles"];
+  pending: boolean;
+  onLink: (vehicleId: string) => void;
+}) {
+  const pickerId = React.useId();
+  const helpId = `${pickerId}-help`;
+  const [selection, setSelection] = React.useState("");
+  const selectedId = vehicles.some(({ id }) => id === selection) ? selection : "";
+
+  return (
+    <form
+      className="mt-4 grid min-w-0 gap-2 border-t border-border pt-4"
+      onSubmit={(event) => {
+        event.preventDefault();
+        if (selectedId && !pending) onLink(selectedId);
+      }}
+    >
+      <label htmlFor={pickerId} className="text-sm font-semibold text-foreground">Add a second vehicle</label>
+      <p id={helpId} className="text-sm text-muted-foreground">Use this same VaahanSafe ID for another vehicle in your garage.</p>
+      <Select value={selectedId} onValueChange={setSelection} disabled={pending}>
+        <SelectTrigger
+          id={pickerId}
+          aria-describedby={helpId}
+          className="h-12 min-w-0 gap-2 rounded-xl border-border bg-background text-base shadow-none data-[placeholder]:text-muted-foreground [&>span]:min-w-0 [&>svg]:shrink-0"
+        >
+          <SelectValue placeholder="Choose a vehicle" />
+        </SelectTrigger>
+        <SelectContent align="start" className="min-w-[var(--radix-select-trigger-width)] rounded-xl border-border shadow-lg">
+          {vehicles.map(({ id, label }) => (
+            <SelectItem key={id} value={id} className="min-h-11 rounded-lg px-3 pr-8">
+              {label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <button
+        type="submit"
+        disabled={!selectedId || pending}
+        className="min-h-12 rounded-xl bg-[#93462f] px-4 text-sm font-semibold text-white enabled:hover:bg-[#793823] disabled:opacity-60"
+      >
+        {pending ? "Updating..." : "Link second vehicle"}
+      </button>
+    </form>
+  );
 }
 
 export function QrRegistryExperience({ initialItems, availableVehicles }: QrRegistryExperienceProps) {
@@ -221,22 +269,11 @@ export function QrRegistryExperience({ initialItems, availableVehicles }: QrRegi
                     )}
                     {isActivated && item.vehicles.length === 1 && (
                       availableVehicles.length ? (
-                        <form className="mt-3 flex flex-wrap gap-2" onSubmit={(event) => {
-                          event.preventDefault();
-                          const vehicleId = new FormData(event.currentTarget).get("vehicleId");
-                          if (typeof vehicleId === "string" && vehicleId) void updateVehicle(item.id, vehicleId, true);
-                        }}>
-                          <select required name="vehicleId" aria-label={`Second vehicle for ${item.visibleCode}`}
-                            defaultValue="" disabled={mutation.isPending}
-                            className="min-h-9 w-full rounded-lg border bg-background px-2 text-xs">
-                            <option value="" disabled>Select an available vehicle</option>
-                            {availableVehicles.map(({ id, label }) => <option key={id} value={id}>{label}</option>)}
-                          </select>
-                          <button type="submit" disabled={mutation.isPending}
-                            className="min-h-9 rounded-lg border bg-background px-3 text-xs font-medium">
-                            Attach second vehicle
-                          </button>
-                        </form>
+                        <SecondVehiclePicker
+                          vehicles={availableVehicles}
+                          pending={mutation.isPending}
+                          onLink={(vehicleId) => void updateVehicle(item.id, vehicleId, true)}
+                        />
                       ) : (
                         <p className="mt-2 text-xs text-muted-foreground">
                           <Link href="/vehicles/new" className="underline">Add a vehicle</Link> to share this ID.

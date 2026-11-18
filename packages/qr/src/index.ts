@@ -103,3 +103,7 @@ export interface IQrResolver {
 }
 export * from './reports/scan-report';
 export * from './reports/location';
+
+export { isActivationProofInput, normalizeActivationProofInput, MAX_ACTIVATION_PROOF_INPUT_LENGTH } from "./secrets/activation-proof-input";
+
+export { activationQrLookup, normalizePublicId } from "./identity/activation-qr-id";

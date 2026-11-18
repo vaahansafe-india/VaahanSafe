@@ -4,6 +4,7 @@ import { getAuthenticatedCustomer } from "@/lib/session";
 import { getSupabaseAdminClient } from "@vaahansafe/database";
 import { executeQrActivation, executeQrReplacement } from "@/lib/qr-service";
 import { revalidatePath } from "next/cache";
+import { isActivationProofInput } from "@vaahansafe/qr-core/client";
 import { z } from "zod";
 
 const secondaryVehicleInput = z.object({
@@ -51,7 +52,7 @@ export async function submitQrActivationAction(
   params: {
     scratchCode: string;
     vehicleId: string;
-    publicId?: string;
+    publicId: string;
   }
 ): Promise<ActivationActionResult> {
   const auth = await getAuthenticatedCustomer();
@@ -62,11 +63,15 @@ export async function submitQrActivationAction(
     return { success: false, error: "Verify your mobile number before activating a QR." };
   }
 
-  if (!params.scratchCode || params.scratchCode.trim().length < 6) {
+  if (!isActivationProofInput(params?.scratchCode)) {
     return { success: false, error: "Please provide a valid activation secret code." };
   }
 
-  if (!params.vehicleId) {
+  if (typeof params.publicId !== "string" || !params.publicId.trim() || params.publicId.length > 256) {
+    return { success: false, error: "Enter the sticker ID printed below the QR." };
+  }
+
+  if (typeof params.vehicleId !== "string" || !params.vehicleId || params.vehicleId.length > 100) {
     return { success: false, error: "Please select a vehicle to link this QR sticker to." };
   }
 

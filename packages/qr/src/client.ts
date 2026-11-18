@@ -10,3 +10,7 @@ export * from "./resolver/types";
 export * from "./resolver/states";
 export * from "./rendering/qr-encoder";
 
+
+export { isActivationProofInput, normalizeActivationProofInput, MAX_ACTIVATION_PROOF_INPUT_LENGTH } from "./secrets/activation-proof-input";
+
+export { activationQrLookup, normalizePublicId } from "./identity/activation-qr-id";
